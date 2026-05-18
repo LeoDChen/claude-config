@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "plugins": {
+    "planning-with-files@planning-with-files": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\Administrator\\.claude\\plugins\\cache\\planning-with-files\\planning-with-files\\2.35.0",
+        "version": "2.35.0",
+        "installedAt": "2026-04-25T03:34:28.319Z",
+        "lastUpdated": "2026-04-25T03:34:28.319Z"
+      }
+    ],
+    "claude-mem@thedotmack": [
+      {
+        "scope": "user",
+        "installPath": "C:\\Users\\Administrator\\.claude\\plugins\\cache\\thedotmack\\claude-mem\\12.5.1",
+        "version": "12.5.1",
+        "installedAt": "2026-05-04T05:36:20.637Z",
+        "lastUpdated": "2026-05-04T05:36:20.637Z",
+        "gitCommitSha": "d384d3c5954c85fcdaf3d42e2aa800b7d4784844"
+      }
+    ]
+  }
+}

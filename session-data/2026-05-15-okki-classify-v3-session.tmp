@@ -1,0 +1,101 @@
+# Session: 2026-05-15
+
+**Started:** ~09:50
+**Last Updated:** ~11:30
+**Project:** d:\ClaudeWorkspace (小星星母婴纺织品工厂 B2B)
+**Topic:** OKKI 客户分析 — 发现旧分类复用问题，建 AI 分类引擎 v3，讨论脚本+AI 混合方案
+
+---
+
+## What We Are Building
+
+重构 OKKI 客户分类流程。核心发现：上次 /okki 复用了 5 月 14 日的旧 s3_ai_judgments.json，没有重新做 AI 判定，导致分类和昨天一模一样。
+
+新方案：**脚本做 80% 基线 + AI 做 20% 边缘修正**。
+
+1. 写 ai_classify.js 纯规则引擎，从 s2_ai_input.json 做全量 465 人基线判定
+2. AI 只审查边缘案例（~50 人）——阅读对话 snippet 原文，修正脚本判定不了的语义边界
+3. 建立学习闭环：aiConfirmed 标记 + 修正日志 + 同类错误 ≥3 次修脚本规则
+
+---
+
+## What WORKED (with evidence)
+
+- **sync 脚本三步全跑通** — confirmed by: sync_okki.js (466 会话, 0 变化), sync_orders.js (38 订单), enhanced_classify.js (465 客户, s1+s2 产出)
+- **ai_classify.js v3 产出 10 阶段分布** — confirmed by: 自检 10 阶段 ≥ 6 PASS, 脚本运行无错误
+- **幽灵账号识别** — Leon Scott Kennedy, Anne Shen, User name, (未知) → D 级
+- **`0 || 999` falsy bug 修复** — `lastCustomerMsgDays` 为 0 时被 `|| 999` 误判为深度静默，改为 `!= null ? ... : 999`
+- **`No problem` 误判投诉修复** — `hasComplaint` 正则太宽，`problem` 匹配了 "No problem"
+- **边缘案例筛选四层过滤逻辑** — confirmed by: 从 465 → 78 → 42 人，聚焦到 AI 能真正改变判定的案例
+
+---
+
+## What Did NOT Work (and why)
+
+- **旧 s3 直接复用** — failed because: 用户明确指出分类和昨天一模一样，不准确。根本原因是 /okki 流程设计允许跳过 AI 判定步骤。
+- **`computeDirection()` 永远返回 to_them** — enhanced_classify.js:190 硬编码 `return 'to_them'`，注释说主循环会覆盖但实际没有。3 个 to_us 客户（2 个幽灵 + Bianka）都是因为 `lastOurMsgDays=undefined` 导致方向计算错误。
+- **纯规则引擎 idle% 降不下来** — 78.7% idle 因为 70% 客户确实 >30d 未回复。规则用固定阈值 >30d=搁置，面对 "I'll discuss with my partner" vs "I'm gone" 无法区分。这正是需要 AI 修正的边界。
+- **消息量 ≥30 门槛用错指标** — 用户指出：15 条有深度的消息比 50 条 "OK" 更有价值。应该用 snippet 总字符数 ≥500。
+
+---
+
+## What Has NOT Been Tried Yet
+
+- **AI 边缘修正执行** — 计划中但未执行。42 个边缘案例待 AI 审查 snippet 并修正 stage/priority。
+- **修正后看板和行动清单重生成** — 依赖 AI 修正完成。
+- **computeDirection() 修复** — 计划修但未动手。需要基于真实日期比较，处理 bucket 1 无 snippet 的情况。
+- **学习闭环机制** — aiConfirmed 标记 + 修正日志 + 同类错误检测，全部在设计阶段。
+- **SKILL.md 硬约束** — 加 s3 时间戳检查，非今天的不复用。
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `08_客户跟进/Okki/scripts/ai_classify.js` | PASS: Complete | 分类引擎 v3，10 阶段产出，含幽灵过滤/等级修正 |
+| `08_客户跟进/Okki/data/s3_ai_judgments.json` | Baseline Ready | 465 条基线判定，待 AI 边缘修正 |
+| `08_客户跟进/Okki/output/dashboard_2026-05-15.html` | Generated | 基于当前 s3，AI 修正后需重生成 |
+| `08_客户跟进/Okki/output/actions_2026-05-15.md` | Generated | 基于当前 s3（5 NOW + 94 SOON） |
+| `08_客户跟进/Okki/STATE.md` | Updated | 同步指标+阶段分布已更新 |
+| `08_客户跟进/Okki/scripts/enhanced_classify.js` | Needs Fix | computeDirection() 硬编码 to_them |
+| `.claude/skills/okki/SKILL.md` | Needs Fix | 缺 s3 时间戳强制检查 |
+| `C:\Users\Administrator\.claude\plans\valiant-percolating-lagoon.md` | Pending Approval | 完整执行计划 |
+
+---
+
+## Decisions Made
+
+- **脚本+AI 混合方案** — reason: 脚本保证一致性和 80% 基线，AI 处理语义边界。用户明确确认这个方向。
+- **AI 审查条件用字符数不用消息数** — reason: 用户指出消息条数不代表信息密度，≥500 字符更合理。
+- **to_us 不进 AI 审核** — reason: 是 computeDirection() 的 bug，应该修函数不是让人工审。3 个 to_us 全是幽灵或沉睡客户。
+- **14-30d 搁置 B 级加审批信号词白名单** — reason: "wait/check/discuss/商量/确认" 等词表明客户在内部审批，不应直接搁置。
+- **两者都要：aiConfirmed + 修正日志** — reason: 用户选择。aiConfirmed 防下次覆盖，修正日志驱动规则进化。
+- **幽灵名单加在 ai_classify.js correctGrade()** — reason: 源头过滤比后期修补干净。
+
+---
+
+## Blockers & Open Questions
+
+- **执行需要用户批准** — 计划文件已写，等用户确认后在新对话执行。
+- **同步 0 变化是否真实** — sync 输出"找不到合适的滚动容器"，可能 OKKI 平台有新会话没被抓到。需要用户登录 OKKI 确认。
+- **14-30d 审批信号词列表可能不完整** — 目前是 wait/check with/discuss with/商量/确认/审批/partner/team/manager，实际可能需补充。
+- **computeDirection 修复后对全量数据的影响** — 修完可能不止 3 个 to_us，会改变部分客户的方向标注和优先级。
+
+---
+
+## Exact Next Step
+
+在新对话中：
+1. 说"执行计划"或"打开计划 valiant-percolating-lagoon"
+2. 按 Step 0 → Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6 顺序执行
+3. 先从修 computeDirection() 和加幽灵名单开始（Step 0），再跑基线确认 s3 干净，然后筛选边缘案例给 AI 审
+
+---
+
+## Environment & Setup Notes
+
+- OKKI Chrome Profile 4，脚本运行后浏览器保持打开供后续使用
+- Node.js v24.15.0
+- 工作目录：d:\ClaudeWorkspace\08_客户跟进\Okki
+- 中文路径注意用正斜杠 `d:/ClaudeWorkspace/08_客户跟进/Okki`

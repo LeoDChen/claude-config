@@ -1,0 +1,26 @@
+{
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\claude-plugins-official",
+    "lastUpdated": "2026-05-18T11:13:19.393Z"
+  },
+  "planning-with-files": {
+    "source": {
+      "source": "directory",
+      "path": "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\OthmanAdi-planning-with-files-41a8b15"
+    },
+    "installLocation": "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\OthmanAdi-planning-with-files-41a8b15",
+    "lastUpdated": "2026-04-25T03:34:05.482Z"
+  },
+  "thedotmack": {
+    "source": {
+      "source": "github",
+      "repo": "thedotmack/claude-mem"
+    },
+    "installLocation": "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\thedotmack",
+    "lastUpdated": "2026-05-04T05:36:20.198Z"
+  }
+}

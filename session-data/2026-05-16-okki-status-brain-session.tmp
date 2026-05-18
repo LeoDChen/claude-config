@@ -1,0 +1,99 @@
+# Session: 2026-05-16
+
+**Started:** ~10:00
+**Last Updated:** 15:30
+**Project:** D:\ClaudeWorkspace\08_客户跟进\Okki
+**Topic:** OKKI客户状态外脑方案实施（步骤1-8）+ 看板设计brainstorming（驱动因子/双轴矩阵/弹窗）
+
+---
+
+## What We Are Building
+
+OKKI客户状态外脑系统——AI作为用户的"外部记忆+初筛助手"。核心产出：
+1. 客户状态卡（`data/briefs/{cid}_{name}.md`）——记录每个客户现状、驱动因子、关键数字、下一步
+2. 看板（双轴矩阵：横轴=生命周期阶段，纵轴=紧急度）——全局视图
+3. 辅助脚本链路——sync→scan→dashboard→status card→reply→validate
+
+**关键设计转向**：在brainstorming中从"NOW/SOON/COLD热度"转向"驱动因子"模型。原因是：
+- 一个客户可能同时有多个待办（急的+不急的），热度标签只能标一个颜色
+- 驱动因子直接回答"该做什么"而不是"有多急"
+- 看板按阶段排（客观事实），驱动因子标紧急度（行动信号）
+
+---
+
+## What WORKED (with evidence)
+
+- **chat_retrieve.js** (pointer/search模式) — 测试通过，正确过滤系统消息、标记发送方、定位消息+上下文
+- **validate_output.js** (5条扫描规则) — 测试通过，修复2个bug（消息倒序、emoji语言检测），金额/日期/MOQ/语言/延迟致歉检测均正常
+- **scan_updates.js** (3类检测) — 测试通过，NOW 7天/ SOON 30天阈值验证正确，支持JSON输出
+- **batch_classify_heat.js** (热度初筛) — 运行通过，323活跃客户中筛出38 NOW候选
+- **batch_gen_briefs.js** (批量生成状态卡) — 运行通过，生成37张草稿卡+3张手工卡=40张总计
+- **gen_dashboard.js** (Markdown/HTML输出) — 测试通过，分组排序正确
+- **SKILL.md** (新/okki流程) — 已更新，skill系统已加载"OKKI客户状态外脑"
+- **Inderpreet深度分析核查清单** — 三阶段流程走通（读资料→输出清单→停等确认→产出话术）
+
+## What Did NOT Work (and why)
+
+- **batch_gen_briefs.js的阶段判定** — 失败原因：关键词正则匹配无法区分"讨论过shipping"和"货已发出"。审计4张样本卡，3张阶段判错（jonathan:待发货实为报价已发, Clara:报价已发实为需求探索, WELE:待付款实为已签收）。结论：阶段判定必须AI读上下文，脚本只做关键词标记。
+- **NOW/SOON热度分类** — 失败原因：一个客户可能既有🔴（承诺未兑现）又有🟡（到港提醒），单标签会丢信息。已确认废弃NOW/SOON/COLD，转向驱动因子模型。
+- **dashboard-modal.html点击弹窗** — 失败原因：visual companion的辅助脚本可能与inline onclick冲突，也可能是JS错误。测试页`test-modal.html`待用户验证。完整mockup已复制到`output/dashboard-mockup-modal.html`等待排查。
+
+## What Has NOT Been Tried Yet
+
+- 独立HTML文件直接浏览器打开（绕过visual companion）— 已复制到output/，待用户打开验证
+- 驱动因子清单的脚本检测实现（哪些因子可自动检测，哪些需AI）— 已讨论分析框架，未写代码
+- SOON层80人状态卡生成 — 因驱动因子模型转向，暂停
+- COLD冷冻清单生成 — 未开始
+- 全/okki端到端实测 — 因SKILL.md刚更新，未实际跑过
+- validate_output.js的完整测试（含致歉语检测的修正）— 已测基础场景，边界未全测
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `08_客户跟进/Okki/scripts/chat_retrieve.js` | PASS | pointer+search，过滤系统消息，消息倒序处理正确 |
+| `08_客户跟进/Okki/scripts/validate_output.js` | PASS | 5规则+CID上下文，修复倒序/emoji语言检测bug |
+| `08_客户跟进/Okki/scripts/scan_updates.js` | PASS | 新消息/过期/陈旧检测，JSON输出 |
+| `08_客户跟进/Okki/scripts/batch_classify_heat.js` | PASS | 活跃来回检测改进版，输出heat_classification.json |
+| `08_客户跟进/Okki/scripts/batch_gen_briefs.js` | PASS | 但阶段判定~75%错误率，需AI替换正则 |
+| `08_客户跟进/Okki/scripts/gen_dashboard.js` | PASS | Markdown+HTML双输出 |
+| `08_客户跟进/Okki/data/briefs/` | 40张卡 | 38张[初稿]+2张手工(arshavin/MENTZEKO)，阶段字段不可靠 |
+| `08_客户跟进/Okki/output/dashboard_2026-05-16.html` | PASS | HTML看板 |
+| `08_客户跟进/Okki/output/dashboard-mockup-modal.html` | BROKEN | 点击弹窗不工作，待排查JS |
+| `08_客户跟进/Okki/output/test-modal.html` | ? | 最小测试页，待用户验证弹窗机制 |
+| `.claude/skills/okki/SKILL.md` | PASS | 已更新为新/okki流程（sync→scan→dashboard→pick→reply） |
+
+## Decisions Made
+
+- **驱动因子取代热度** — 原因：一个客户可同时有多个待办，NOW/SOON单标签会丢失信息。驱动因子直接回答"该做什么"（未回复/承诺未兑现/该追问/该更新进度/该回访/到港提醒/客户承诺超期）
+- **双轴矩阵看板** — 横轴=生命周期阶段（客观事实），纵轴=紧急度（行动信号），卡片落在交叉格
+- **弹窗详情** — 点卡片→中间弹窗展示完整状态卡（frontmatter+驱动因子+聊天摘要+关键数字+下一步+操作按钮）
+- **脚本vs AI分工** — 脚本管"肯定对的"（R1:最后发言=客→必须回），AI管"需读上下文的"（R2-R10:承诺未兑现/答非所问等）
+- **阶段主轴** — 看板按客户生命周期从上往下排（需求探索→报价已发→样品→谈判中→待付款→待发货→在途→已签收→已成交→冷冻）
+- **MVP优先** — 先串通链路让用户能用，再逐步优化质量。38张草稿卡标[初稿]是设计意图，不是bug
+
+## Blockers & Open Questions
+
+- **dashboard-modal.html点击不工作** — 需排查JS原因（visual companion冲突 vs JS语法错误 vs 浏览器问题）。test-modal.html先确认基础机制
+- **驱动因子清单需定稿** — NOW场景(R1-R10)和SOON场景(全生命周期提醒)的完整清单已讨论但未写入方案文件
+- **阶段判定的AI替代方案** — 正则不行，确认AI读上下文判阶段。但批量38人AI判阶段如何执行（分批？独立对话？）
+- **各阶段时间阈值** — 用户说"先拉完框架再定"，待定：已付款几天该催？签收几天该回访？已完成多久回访一次？
+
+## Exact Next Step
+
+这是brainstorming暂停点。下次`/resume-session`后：
+
+1. **优先**：完成看板设计讨论——用户验证test-modal.html后，修复dashboard-modal.html的点击bug，或者接受mockup现状直接讨论展示效果→确认最终看板方案
+2. 驱动因子清单定稿：确认NOW全部情景(R1-R10)和SOON全部情景(生命周期各阶段提醒)，写入方案文件
+3. 决定是否回退到方案文件更新（将驱动因子/双轴矩阵/弹窗写回`2026-05-15-okki-snoopy-backus.md`）
+4. 继续步骤9（SOON层）或先修复38张草稿卡的阶段字段
+
+## Environment & Setup Notes
+
+- 项目目录：`D:\ClaudeWorkspace\08_客户跟进\Okki`
+- 工厂档案：`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+- 方案文件：`C:\Users\Administrator\.claude\plans\2026-05-15-okki-snoopy-backus.md`
+- 记忆目录：`C:\Users\Administrator\.claude\projects\d--ClaudeWorkspace\memory\`
+- Visual companion URL: http://localhost:58343（brainstorming服务器，不知道是否还在运行）
+- Mockup文件：`D:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard-mockup-modal.html`（独立HTML，可直接浏览器打开）
+- 最小测试文件：`D:\ClaudeWorkspace\08_客户跟进\Okki\output\test-modal.html`
