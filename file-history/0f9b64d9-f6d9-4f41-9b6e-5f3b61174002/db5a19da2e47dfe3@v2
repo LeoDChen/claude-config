@@ -1,0 +1,108 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  const expr = `
+    (async function() {
+      var results = {};
+      var convs = window.__conversationListFullData__;
+      var c = convs[0];
+      var base = 'https://onetalk.alibaba.com';
+
+      // Try GET imhistory
+      try {
+        var r = await fetch(base + '/message/imhistory.htm?conversationCode=' + encodeURIComponent(c.cid) + '&count=20', {
+          credentials: 'include'
+        });
+        results.imhistory_get = { status: r.status, preview: (await r.text()).substring(0, 300) };
+      } catch(e) {
+        results.imhistory_get = { err: e.message };
+      }
+
+      // Try POST imhistory with form data
+      try {
+        var fd = new URLSearchParams();
+        fd.append('conversationCode', c.cid);
+        fd.append('count', '20');
+        var r = await fetch(base + '/message/imhistory.htm', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: fd.toString()
+        });
+        results.imhistory_post = { status: r.status, preview: (await r.text()).substring(0, 300) };
+      } catch(e) {
+        results.imhistory_post = { err: e.message };
+      }
+
+      // Try GET madetail
+      try {
+        var r = await fetch(base + '/message/madetail.htm?conversationCode=' + encodeURIComponent(c.cid), {
+          credentials: 'include'
+        });
+        results.madetail_get = { status: r.status, preview: (await r.text()).substring(0, 300) };
+      } catch(e) {
+        results.madetail_get = { err: e.message };
+      }
+
+      // Try POST madetail
+      try {
+        var fd = new URLSearchParams();
+        fd.append('conversationCode', c.cid);
+        var r = await fetch(base + '/message/madetail.htm', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: fd.toString()
+        });
+        results.madetail_post = { status: r.status, preview: (await r.text()).substring(0, 300) };
+      } catch(e) {
+        results.madetail_post = { err: e.message };
+      }
+
+      // Try GET messagemanager
+      try {
+        var r = await fetch(base + '/message/messagemanager.htm', { credentials: 'include' });
+        results.messagemanager = { status: r.status, preview: (await r.text()).substring(0, 300) };
+      } catch(e) {
+        results.messagemanager = { err: e.message };
+      }
+
+      results.cid = c.cid;
+      return JSON.stringify(results);
+    })()
+  `;
+
+  console.log('Testing message endpoints...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr, awaitPromise: true }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 15000));
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

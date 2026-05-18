@@ -1,0 +1,35 @@
+// PostToolUse hook: 配置文件修改后自动同步到 OB
+const fs = require('fs');
+const path = require('path');
+
+const OB_BASE = 'E:/道友的宝贝/道友的宝贝/对话归档/CC/CC配置备份';
+
+// 路径映射: 源文件特征 → OB 子目录
+const RULES = [
+  {
+    match: (p) => p.includes('/Administrator/.claude/') && !p.includes('/projects/'),
+    dest: '全局',
+    files: ['CLAUDE.md', 'settings.json', 'settings.local.json']
+  },
+  {
+    match: (p) => p.includes('/ClaudeWorkspace/.claude/'),
+    dest: '项目',
+    files: ['CLAUDE.md', 'settings.json', 'settings.local.json', 'operations-rules.md']
+  }
+];
+
+const filePath = process.env.FILE_PATH || '';
+if (!filePath) process.exit(0);
+
+const fileName = path.basename(filePath);
+
+for (const rule of RULES) {
+  if (rule.match(filePath) && rule.files.includes(fileName)) {
+    const destDir = path.join(OB_BASE, rule.dest);
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+    const destPath = path.join(destDir, fileName);
+    fs.copyFileSync(filePath, destPath);
+    process.stderr.write(`[SyncHook] ${fileName} → ${rule.dest}/`);
+    break;
+  }
+}

@@ -1,0 +1,132 @@
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, HeadingLevel, WidthType, AlignmentType } from 'docx';
+import { readFileSync, writeFileSync } from 'fs';
+
+// Load batch data
+const batch = JSON.parse(readFileSync('../data/batch1_input.json', 'utf-8'));
+
+function cell(text, opts = {}) {
+  return new TableCell({
+    width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+    children: [new Paragraph({ children: [new TextRun({ text, bold: opts.bold || false, size: 18 })], spacing: { before: 20, after: 20 } })]
+  });
+}
+
+function h1(text) { return new Paragraph({ text, heading: HeadingLevel.HEADING_1, spacing: { after: 150 } }); }
+function h2(text) { return new Paragraph({ text, heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 80 } }); }
+function h3(text) { return new Paragraph({ text, heading: HeadingLevel.HEADING_3, spacing: { before: 150, after: 60 } }); }
+function p(text, opts = {}) { return new Paragraph({ children: [new TextRun({ text, size: 18, ...opts })], spacing: { after: opts.after || 60 } }); }
+function boldP(text) { return new Paragraph({ children: [new TextRun({ text, bold: true, size: 19 })], spacing: { after: 80 } }); }
+
+const children = [h1('小星星外贸跟进方案 — 2026年4月30日'), p('数据源：小满CRM快照 10:47 + deep_scrape_merged_v2 | 引擎：V3 四层渐进模型 | 分析模式：S/A/B自动分流', { color: '888888', after: 200 })];
+
+// Summary
+children.push(h2('总览'));
+children.push(p('P0 紧急：12人（10人有对话数据，2人需手动核查）| P1 高优：27人 | 快照覆盖：39人'));
+children.push(p('输出深度：A级→卡点+话术 | B级→一行+一句话 | 数据不足→标注不硬编'));
+
+// Process each customer
+let count = 0;
+for (const c of batch) {
+  count++;
+  const msgs = c.messages || [];
+  const allText = msgs.map(m => m.content || '').join(' ').toLowerCase();
+  const lastClientMsg = [...msgs].reverse().find(m => m.side === 'received');
+  const lastOurMsg = [...msgs].reverse().find(m => m.side === 'sent');
+  const clientMsgs = msgs.filter(m => m.side === 'received');
+  const ourMsgs = msgs.filter(m => m.side === 'sent');
+
+  // Stage
+  let stage = 1;
+  if (clientMsgs.some(m => (m.content || '').toLowerCase().includes('how much'))) {
+    stage = ourMsgs.some(m => (m.content || '').includes('$') || m.content.includes('yuan')) ? 3 : 2;
+  }
+  if (msgs.length <= 3 && clientMsgs.length <= 1) stage = 1;
+
+  // Grade (A vs B)
+  const isA = msgs.length >= 10 || allText.includes('200 piece') || allText.includes('container') || clientMsgs.length >= 3;
+  const grade = isA ? 'A' : 'B';
+
+  // Country guess
+  let lang = '英语';
+  if (/[؀-ۿ]/.test(allText)) lang = '阿拉伯语';
+  else if (/\b(vous|pour|dans|avec|comment|quelle|votre|bonjour)\b/i.test(allText)) lang = '法语';
+
+  const stageLabel = stage === 1 ? '初次接触' : stage === 2 ? '询价中' : '已报价待回复';
+  children.push(h3(count + '. ' + c.name + ' | ' + lang + ' | ' + stageLabel + ' | ' + grade + '级 | ' + msgs.length + '条'));
+
+  // Last client message
+  if (lastClientMsg) {
+    children.push(p('最后客户消息：' + (lastClientMsg.content || '').substring(0, 120), { color: '555555', size: 16 }));
+  }
+
+  // Card diagnosis
+  let cardPoint = '';
+  const hasManagerDelay = ourMsgs.some(m => (m.content || '').toLowerCase().includes('manager'));
+  const clientLast = msgs[msgs.length - 1]?.side === 'received';
+  const infoThin = msgs.length <= 3;
+
+  if (hasManagerDelay) cardPoint = '沟通失误：我方用了"问经理"延迟回复，客户信任受损';
+  else if (clientLast && stage >= 2) cardPoint = '客户最后发言，我方未回复——需立即回应';
+  else if (infoThin) cardPoint = '信息不足（仅' + msgs.length + '条消息），建议轻量激活';
+  else if (stage === 3) cardPoint = '已报价后沉默，可能在比价或等运费';
+  else cardPoint = '信息不足以深度诊断';
+
+  children.push(boldP('卡点：' + cardPoint));
+
+  // Talk generation based on grade
+  if (grade === 'B') {
+    let resp = '';
+    const lastQ = (lastClientMsg?.content || '').toLowerCase();
+    if (lastQ.includes('how much') || lastQ.includes('price')) {
+      resp = '确认件数和发货国家后报价格区间。最终价格老板确认。';
+    } else if (lastQ.includes('sample') || lastQ.includes('catalog')) {
+      resp = '你要哪个品类？我发实拍图和价格区间给你。';
+    } else {
+      resp = '我们是帮宝适奥运联名款工厂，主营母婴OEM/ODM。你在看哪个品类？';
+    }
+    children.push(p('B级话术（' + lang + '）：' + resp, { color: '0066CC' }));
+  } else {
+    let talk = '';
+    if (lang === '阿拉伯语') {
+      talk = '关于你问的这款——我们是帮宝适2024奥运联名款工厂，同一条产线品质。FOB预估$3.50-3.80/pc（最终老板确认），100%预洗精梳棉，洗烘两次不缩水。确认下发货国家？帮你算运费。';
+    } else if (lang === '法语') {
+      talk = '关于你要的款式——现货面料可直接生产。FOB预估$3.20-3.60/pc（最终老板确认）。发货到哪个国家？如在中国有货代，FOB比DAP运费划算。';
+    } else {
+      talk = '关于你问的这款——100%预洗精梳棉，ISO9001认证工厂。FOB预估$3.50-3.80/pc（最终老板确认）。帮宝适2024奥运联名款就是这条产线做的。确认数量和发货国家，我算总价。';
+    }
+    children.push(p('A级话术（发时翻译成' + lang + '）：\n' + talk, { color: '0066CC' }));
+    children.push(p('钩子：✅hook_pampers_olympic（帮宝适实拍图，可用）', { size: 16, color: '888888' }));
+  }
+
+  children.push(p('—'));
+}
+
+// Batch 2 pending
+children.push(h2('P0 第二批（待处理，5人）'));
+children.push(p('Eulalia Julio Chiau（7msgs）| Lisa Ketelsen（5msgs）| Euzito Carlos（5msgs）| Vanilla Balite（3msgs）| Nanthini Rss（3msgs）'));
+
+// Missing
+children.push(h2('P0 无对话数据（需手动核查）'));
+children.push(p('ShudeshB Thapa | Vanessa Arroyomejias — deep_scrape 无记录'));
+
+// P1
+children.push(h2('P1 高优（27人）'));
+children.push(p('全部标记为 await_quote。建议分两群处理：'));
+children.push(p('群A（有对话数据~15人）：轻量激活——自我介绍+帮宝适背书+跟进一个问题'));
+children.push(p('群B（仅产品卡片~12人）：单条模板——\"我们是帮宝适奥运联名款工厂，主营母婴OEM。你在看哪个品类？\"'));
+children.push(p('⚠️ Josh Martinez 标记为售后，需独立核查'));
+
+// P2/P3 note
+children.push(h2('P2/P3 客户'));
+children.push(p('本次快照仅覆盖 39 个 DOM 可见客户。完整 415 客户清单需运行 extract-all-v2.mjs。'));
+
+// Footer
+children.push(new Paragraph({
+  alignment: AlignmentType.CENTER, spacing: { before: 400 },
+  children: [new TextRun({ text: 'AI外贸顾问系统 V3 | 四层渐进模型 | S/A/B自动分流 | 2026-04-30', size: 16, color: '888888' })]
+}));
+
+const doc = new Document({ sections: [{ children }] });
+const buf = await Packer.toBuffer(doc);
+writeFileSync('C:/Users/Administrator/Desktop/外贸跟进方案_2026-04-30.docx', buf);
+console.log('Done: 外贸跟进方案_2026-04-30.docx (' + (buf.length / 1024).toFixed(0) + ' KB)');

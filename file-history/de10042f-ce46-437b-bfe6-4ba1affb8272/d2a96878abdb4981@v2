@@ -1,0 +1,118 @@
+# RFQ 专业报价工具链 — 方案设计
+
+## 背景
+
+阿里国际站 RFQ 市场报价目前依赖人工完成：看图→查档案→写回复→选附件→手工P图。每个 RFQ 重复同样步骤，效率低且格式不稳定。本方案建立一套自动化报价工具链——输入客户需求，输出完整报价包（文字+图片+附件清单）。
+
+## 核心原则
+
+- 所有 RFQ 客户均按优质客户对待，不分级
+- 价格和物流由用户自己填写，工具负责框架和素材
+- 报价格式对标国际站 RFQ 市场回复格式
+- 工厂信息统一引用全息档案
+
+## 产出物
+
+每份 RFQ 报价输出三个部分：
+1. **文字报价** — 英文回复话术，含产品规格/MOQ/交期/工厂优势
+2. **报价摘要图** — 自动合成（产品图+规格+品牌背书）
+3. **推荐附件清单** — 根据客户需求匹配该附哪些已有文件
+
+## 实施方案
+
+### 1. 扩充 inquiry-analysis 技能 → RFQ 报价专用
+
+**文件**：`.claude/skills/inquiry-analysis/SKILL.md`
+
+增加 RFQ 报价章节：
+- 输入参数模板（产品、数量、国家、定制类型、特殊要求）
+- 报价输出格式（国际站 RFQ 标准回复结构）
+- 附件匹配规则表
+- 图片生成触发指令
+
+### 2. 建附件匹配规则表
+
+**文件**：`.claude/skills/inquiry-analysis/attachment-matching.md`
+
+根据客户需求自动推荐附件组合：
+
+| 场景关键词 | 推荐附件 |
+|-----------|---------|
+| 尿裤/diaper/nappy | 布尿裤实拍(28张) + ISO9001 + 5A抗菌舱说明 |
+| 连体衣/romper/bodysuit | Chloe定制款图+定制流程图(10张)+工厂视频 |
+| 吸汗巾/sweat | 帮宝适奥运款实拍 + ISO9001 + 面料对比图 |
+| 睡袋/sleeping bag | 5A抗菌说明 + 绗缝工艺图 + 面料花型 |
+| 隔尿垫/changing pad | 产品图 + ISO9001 + 工厂照片 |
+| 围兜/bib | 产品图 + 面料对比图 |
+| 礼盒/gift set | 婴儿礼盒实拍(12张) + 工厂照片 |
+| 定制/OEM/ODM | 定制流程图(10张) + 面料库花型 + ISO9001 |
+| 所有询盘默认附 | ISO9001证书 + 工厂照(选2-3张) |
+
+### 3. 改造 compose.cjs 为通用报价图 MCP 工具
+
+**源文件**：`.claude/mcp-servers/grsai/compose.cjs`
+
+改造点：
+- 参数化：产品图路径、规格文字、报价信息、输出路径
+- 暴露为 MCP tool，Claude Code 可直接调用
+- 报价图结构：
+  - 顶部：产品图（用户提供或从素材库选）
+  - 中部：规格文字（材质/尺寸/MOQ/交期）
+  - 底部：工厂信息尾款（Yiyang Xiaoxingxing Garment + BSCI/ISO9001）
+
+**注意**：这一步需要写代码，另行规划。当前阶段先用 GrsAI 文生图生成概念图 + 手动标注的过渡方案。
+
+### 4. 报价输出模板
+
+RFQ 回复格式（英文）：
+```
+Subject: Quotation for [Product] - Yiyang Xiaoxingxing Garments
+
+Dear [Name],
+
+Thank you for your inquiry.
+
+Product: [品名]
+Material: [材质]
+Size Range: [尺码]
+MOQ: 500 pcs per design (OEM/ODM)
+Sample: Available, 5-10 days
+Lead Time: 30-45 days after deposit
+Payment: 40% deposit, balance against B/L copy
+
+Our factory:
+- 6,000㎡ workshop, 200+ skilled workers
+- BSCI & ISO9001 certified since 2015
+- Partnered with Pampers (Paris 2024 gift box) & Disney
+
+Please find attached quotation image and certificates for your reference.
+Looking forward to working with you.
+
+Best regards,
+[Name]
+Yiyang Xiaoxingxing Garments Co., Ltd.
+WhatsApp: [号码]
+```
+
+## 涉及文件
+
+| 文件 | 动作 |
+|------|------|
+| `.claude/skills/inquiry-analysis/SKILL.md` | 扩充 RFQ 报价流程 + 输出模板 |
+| `.claude/skills/inquiry-analysis/attachment-matching.md` | 新建附件匹配规则 |
+| `.claude/mcp-servers/grsai/compose.cjs` | 后续改造为通用报价图工具 |
+| `08_客户跟进/knowledge/hooks-library.md` | 引用（已有，不改） |
+| `06_知识库/小星星工厂全息背景档案_V10.txt` | 引用（已有，不改） |
+
+## 当前阶段交付
+
+1. 扩充后的 inquiry-analysis 技能（含 RFQ 报价流程 + 输出模板 + 附件匹配规则）
+2. 用户拿来 RFQ 截图 → 按模板输出文字报价 + 推荐附件清单
+3. 报价图部分先给 GrsAI 生成提示词（过渡方案），后续改造 compose.cjs
+
+## 验证方式
+
+用一张真实 RFQ 截图测试：
+1. 用户提供 RFQ 信息
+2. 输出文字报价 + 报价图提示词 + 推荐附件清单
+3. 检查：格式是否对齐国际站 RFQ 回复规范、附件匹配是否准确、工厂信息是否正确引用

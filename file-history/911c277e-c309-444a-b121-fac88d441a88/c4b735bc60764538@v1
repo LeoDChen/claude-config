@@ -1,0 +1,55 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-04 16:30
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**阶段0-1-2已完成（21人CDP数据版）。下一步：用全量432人数据重跑阶段2。**
+
+## 重要发现（5/4）
+
+### 数据链路根因
+CDP侧边栏提取（extract_cdp.js）只能抓到onetalk侧边栏渲染的近期联系人（20-40人），不是全量客户。全量432人文件来自safe_extract.js（Playwright API截获），与CDP是完全不同的两条数据线。当前流水线一直吃的是前者。
+
+### 下次会话的正确做法
+1. 用全量文件 `data/2026-05-03T01-19-12_全量客户分类.json`（432人）跑阶段2 AI分类
+2. `classify_ai.js` 需适配全量文件的字段名：
+   - CDP文件用 `_silenceDays` / `_flags` / `_messageDirection`
+   - 全量文件用 `lastContactTime` / `unreadCount` / `latestMessageType` / `countryCode` / `buyerLevel`
+3. 改完脚本后跑全部432人的两遍分类，输出置信度三层分级
+
+## 已完成
+
+- `scripts/preprocess_cdp.js` — 阶段0 ✅
+- `scripts/classify_rules.js` — 阶段1 ✅
+- `scripts/classify_ai.js` — 阶段2 ✅（已修复字段映射，5/4运行通过21人版）
+- `scripts/generate_report.js` — 阶段5 ✅
+
+### 最新运行结果 (2026-05-04 16:18)
+- 阶段2 AI分类（21人CDP数据）：`classified_ai_2026-05-04T08-18-45-528Z.json`
+  - P0:7 / P1:8 / P2:6 / P3:0 / P4:0
+  - 差异9（5个确定性分类被修正，4个升级/降级调整）
+  - 低置信度6（数据残缺导致）
+
+## 待完成
+
+1. **阶段2（新会话·全量版）**：用全量432人文件跑AI分类
+   - 输入：`data/2026-05-03T01-19-12_全量客户分类.json`
+   - 先改 `classify_ai.js` 适配全量文件字段名
+   - 输出：432人全量分类 + 三层置信度分级
+
+2. **阶段3**：P0+P1深度分析
+
+3. **阶段4**：全量生命周期监控
+
+## 下次启动指令
+
+> 继续OKKI CRM客户分析。先读STATE.md和knowledge/下四个文件。上次发现CDP侧边栏只有21人，这次用全量432人文件 `data/2026-05-03T01-19-12_全量客户分类.json` 跑阶段2 AI分类。classify_ai.js需适配全量文件的字段名（lastContactTime/unreadCount/countryCode等），改完再跑。
+
+## 关键数据文件
+
+- 设计文档：`DESIGN.md`
+- 全量432人（5/3快照）：`data/2026-05-03T01-19-12_全量客户分类.json`
+- AI分类脚本（需适配）：`scripts/classify_ai.js`
+- AI输出（21人版，参考用）：`data/classified_ai_2026-05-04T08-18-45-528Z.json`

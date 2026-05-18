@@ -1,0 +1,304 @@
+// Phase 1 v2: TM 聊天 API 自动侦察
+// 直接操作 onetalk.alibaba.com 独立页面
+
+const { chromium } = require('playwright');
+const fs = require('fs');
+
+const CAPTURED = [];
+
+function log(msg) { console.log(msg); }
+
+(async () => {
+    const browser = await chromium.connectOverCDP('http://localhost:9222');
+    log('✅ 已连接 Chrome CDP\n');
+
+    const contexts = browser.contexts();
+    let targetPage = null;
+
+    // 优先找独立的 onetalk 页面（不是 iframe）
+    for (const ctx of contexts) {
+        for (const page of ctx.pages()) {
+            const url = page.url();
+            // 只要纯 onetalk 页面，不要 OKKI 包装页
+            if (url.startsWith('https://onetalk.alibaba.com')) {
+                targetPage = page;
+                log('📍 找到独立 onetalk 页面:', url.substring(0, 100));
+                break;
+            }
+        }
+    }
+
+    if (!targetPage) {
+        // 没独立页面，在 OKKI 包装页里找真正的 onetalk iframe
+        log('⚠️ 没有独立 onetalk 页面，在 OKKI 包装页里找 iframe...');
+        for (const ctx of contexts) {
+            for (const page of ctx.pages()) {
+                if (page.url().includes('crm.xiaoman.cn/talk/hub/tm')) {
+                    const frames = page.frames();
+                    log(`  找到 ${frames.length} 个 frame:`);
+                    for (const frame of frames) {
+                        log(`    ${frame.url().substring(0, 120)}`);
+                    }
+                    // 找 URL 以 onetalk 开头（不是作为参数出现）
+                    for (const frame of frames) {
+                        const fu = frame.url();
+                        if (fu.startsWith('https://onetalk.alibaba.com')) {
+                            targetPage = frame;
+                            log('   ✅ 找到真正的 onetalk iframe');
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!targetPage) {
+        log('❌ 找不到 onetalk 页面');
+        await browser.close();
+        process.exit(1);
+    }
+
+    // === CDP Network 监听 ===
+    // 对于 frame，需要通过父页面的 CDP session
+    let cdpPage = targetPage;
+    if (targetPage.constructor.name === 'Frame') {
+        cdpPage = targetPage.page();
+    }
+
+    const cdpSession = await cdpPage.context().newCDPSession(cdpPage);
+
+    cdpSession.on('Network.requestWillBeSent', (params) => {
+        const url = params.request.url;
+        // 捕获所有非静态资源的请求
+        if (url.includes('mtop') || url.includes('alibaba.com') || url.includes('acs.')) {
+            if (!url.match(/\.(js|css|png|jpg|gif|svg|woff|ico|ttf)(\?|$)/)) {
+                CAPTURED.push({
+                    url: url,
+                    method: params.request.method,
+                    postData: params.request.postData,
+                    headers: params.request.headers,
+                    timestamp: Date.now()
+                });
+                log(`📡 ${params.request.method} ${url.substring(0, 150)}`);
+                if (params.request.postData) {
+                    log(`   Payload: ${params.request.postData.substring(0, 250)}`);
+                }
+            }
+        }
+    });
+
+    cdpSession.on('Network.responseReceived', (params) => {
+        const url = params.response.url;
+        if (CAPTURED.some(c => c.url === url) && params.response.mimeType === 'application/json') {
+            log(`📥 Response: ${params.response.status} ${url.substring(0, 120)}`);
+        }
+    });
+
+    await cdpSession.send('Network.enable');
+    log('🔍 CDP 网络监听已开启\n');
+
+    // === 探测 onetalk 页面结构 ===
+    log('=== 页面结构探测 ===');
+    const structure = await targetPage.evaluate(() => {
+        const info = {
+            url: location.href,
+            title: document.title,
+        };
+
+        // 列出所有有意义的容器元素
+        const allEls = document.querySelectorAll('*');
+        const containers = [];
+        const seen = new Set();
+
+        for (const el of allEls) {
+            if (el.children.length >= 3) {
+                const cls = (el.className && typeof el.className === 'string') ? el.className : '';
+                const key = `${el.tagName}.${cls}`;
+                if (!seen.has(key) && el.children.length <= 100) {
+                    seen.add(key);
+                    const firstText = el.children[0]?.textContent?.trim().substring(0, 60) || '';
+                    containers.push({
+                        tag: el.tagName,
+                        class: cls.substring(0, 80),
+                        children: el.children.length,
+                        firstText,
+                    });
+                }
+            }
+        }
+        info.containers = containers.slice(0, 20);
+        return info;
+    });
+
+    log(`URL: ${structure.url}`);
+    log(`Title: ${structure.title}`);
+    log('有意义的容器元素 (children>=3):');
+    for (const c of structure.containers) {
+        log(`  <${c.tag} class="${c.class}"> ${c.children} children, first: "${c.firstText}"`);
+    }
+
+    // === 尝试在 onetalk 里找聊天联系人并点击 ===
+    log('\n=== 查找并点击联系人 ===');
+
+    const clickAttempt = await targetPage.evaluate(() => {
+        // 尝试各种选择器找联系人列表
+        const strategies = [
+            // vue-recycle-scroller item
+            '.vue-recycle-scroller__item-view',
+            '[class*="recycle"][class*="item"]',
+            // 列表项
+            '[class*="contact-item"]',
+            '[class*="chat-item"]',
+            '[class*="session-item"]',
+            '[class*="conversation-item"]',
+            // 通用 li
+            'li[class*="item"]',
+            // 任何包含名字文本的可点击元素
+        ];
+
+        for (const sel of strategies) {
+            const items = document.querySelectorAll(sel);
+            if (items.length > 0) {
+                const first = items[0];
+                const text = first.textContent?.trim().substring(0, 100) || '';
+                // 跳过非联系人（如 tab header）
+                if (text && !text.includes('网站聊天') && !text.includes('WhatsApp') && !text.includes('使用指南')) {
+                    first.click();
+                    return { success: true, selector: sel, count: items.length, firstText: text };
+                }
+            }
+        }
+
+        // 最后手段：找所有 ul > li
+        const uls = document.querySelectorAll('ul');
+        for (const ul of uls) {
+            const items = ul.querySelectorAll(':scope > li');
+            if (items.length >= 3) {
+                const texts = [];
+                for (let i = 0; i < Math.min(5, items.length); i++) {
+                    texts.push(items[i].textContent?.trim().substring(0, 40) || '');
+                }
+                // 检查是不是联系人列表
+                const nonEmpty = texts.filter(t => t.length > 1);
+                if (nonEmpty.length >= 3) {
+                    items[0].click();
+                    return {
+                        success: true,
+                        selector: 'ul > li',
+                        count: items.length,
+                        sampleTexts: texts
+                    };
+                }
+            }
+        }
+
+        return { success: false, reason: '找不到联系人列表' };
+    });
+
+    log('点击结果:', JSON.stringify(clickAttempt, null, 2));
+
+    // 等待网络请求
+    log('\n⏳ 等待 6 秒...');
+    await new Promise(r => setTimeout(r, 6000));
+
+    // === 同时在页面内注入 JS 拦截器 ===
+    log('\n=== JS 拦截补充 ===');
+    await targetPage.evaluate(() => {
+        const origFetch = window.fetch;
+        window.__phase1_captured = [];
+        window.fetch = function(...args) {
+            const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+            window.__phase1_captured.push({ type: 'fetch', url, method: args[1]?.method || 'GET', time: Date.now() });
+            return origFetch.apply(this, args);
+        };
+        const origOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+            this.__p1_url = url;
+            this.__p1_method = method;
+            return origOpen.apply(this, arguments);
+        };
+        const origSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function(body) {
+            if (this.__p1_url) {
+                window.__phase1_captured.push({ type: 'xhr', url: this.__p1_url, method: this.__p1_method, body: body, time: Date.now() });
+            }
+            return origSend.apply(this, arguments);
+        };
+    });
+
+    log('JS 拦截器已注入，再次点击...');
+
+    // 再次点击
+    await targetPage.evaluate(() => {
+        const items = document.querySelectorAll('.vue-recycle-scroller__item-view, [class*="contact"][class*="item"], [class*="chat"][class*="item"], li');
+        for (const item of items) {
+            const t = item.textContent?.trim() || '';
+            if (t.length > 2 && !t.includes('网站') && !t.includes('WhatsApp') && !t.includes('指南')) {
+                item.click();
+                break;
+            }
+        }
+    });
+
+    await new Promise(r => setTimeout(r, 5000));
+
+    // === 汇总结果 ===
+    const jsCaptured = await targetPage.evaluate(() => window.__phase1_captured || []);
+
+    log('\n' + '='.repeat(70));
+    log('📊 最终结果汇总');
+    log('='.repeat(70));
+
+    const cdpUrls = CAPTURED.map(c => c.url);
+    const jsUrls = jsCaptured.map(c => c.url);
+    const allUrls = [...new Set([...cdpUrls, ...jsUrls])];
+
+    log(`\nCDP 捕获: ${CAPTURED.length} 个请求`);
+    log(`JS 拦截: ${jsCaptured.length} 个请求`);
+
+    if (allUrls.length > 0) {
+        log('\n所有捕获到的 API 请求:');
+        for (const url of allUrls) {
+            log(`  ${url.substring(0, 150)}`);
+        }
+
+        // 重点：找 MTOP 或聊天消息 API
+        const chatApis = allUrls.filter(u =>
+            u.includes('mtop') || u.includes('message') || u.includes('chat') ||
+            u.includes('history') || u.includes('query') || u.includes('contact')
+        );
+
+        if (chatApis.length > 0) {
+            log('\n🎯 可能是聊天 API 的请求:');
+            for (const url of chatApis) {
+                const details = CAPTURED.find(c => c.url === url) || jsCaptured.find(c => c.url === url);
+                log(`  ${url}`);
+                if (details?.postData) log(`    Payload: ${details.postData}`);
+                if (details?.body) log(`    Body: ${details.body}`);
+            }
+        }
+    } else {
+        log('\n❌ 完全没捕获到请求');
+        log('可能原因:');
+        log('  1. TM 聊天用的是 WebSocket');
+        log('  2. 联系人没被点中（页面结构探测结果见上）');
+        log('  3. 需要你在浏览器里手动点击一个联系人');
+
+        // 保存页面 HTML 片段供分析
+        const html = await targetPage.evaluate(() => document.body.innerHTML.substring(0, 3000));
+        log('\n📄 页面 HTML 前 3000 字符:');
+        log(html);
+    }
+
+    // 保存完整捕获数据
+    fs.writeFileSync(
+        'd:/ClaudeWorkspace/08_客户跟进/Okki/data/phase1_captured.json',
+        JSON.stringify({ cdp: CAPTURED, js: jsCaptured }, null, 2)
+    );
+    log('\n💾 已保存到 data/phase1_captured.json');
+
+    await browser.close();
+    log('✅ 完成');
+})();

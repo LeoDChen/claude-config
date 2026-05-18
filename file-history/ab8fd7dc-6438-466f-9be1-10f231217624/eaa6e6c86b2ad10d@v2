@@ -1,0 +1,109 @@
+# CC+OB V3 — 步骤 2/3/7 执行计划
+
+> 2026-05-11 | 基于审核文档 V3 + 实际探查结果
+
+## Context
+
+V3 瘦身计划剩余步骤：2（Skills清理）、3（Commands核查）、7（项目同步）。步骤 2 是核心风险点。
+
+---
+
+## 步骤 2 风险评估：`.agents/skills/` 清理
+
+### 实际情况（与执行进度文档的差异）
+
+| 文档假设 | 实际情况 |
+|----------|----------|
+| 删 `.agents/skills/` 34 个软件技能 | 全局 + 项目各 35 个，共 70 个目录 |
+| 认为是普通文件 | 实际由 ECC `agents-core` 模块管理（`ownership: "managed"`） |
+
+### ECC 关键发现
+
+- **安装来源**: `ecc-universal@1.10.0`（npm 全局包）
+- **当前 profile**: `full`（20 模块），包括 `framework-language`、`devops-infra`、`swift-apple` 等软件模块
+- **`.agents/skills/`** 来自 `agents-core` 模块，由 `install-state.json` 逐文件追踪
+- **手动删除风险**: `ecc repair` 会从 `node_modules/ecc-universal/` 源目录恢复所有被删文件
+- **hooks.json 风险**: 需确认是否有自动 repair 钩子
+
+### 推荐方案：ECC 重装为 lean profile
+
+不用手动删文件，而是用 ECC 自己的机制控制模块范围：
+
+1. `ecc uninstall --target claude` 卸载当前 full profile（备份先行）
+2. `ecc install --profile core --target claude` 只装 6 个核心模块
+
+**core profile 只含 6 模块**：`rules-core`、`agents-core`、`commands-core`、`hooks-runtime`、`platform-configs`、`workflow-quality`
+
+**风险**：`agents-core` 仍会安装 `.agents/skills/`（35 个软件技能）。core profile 不含 `framework-language` 等，但 `agents-core` 本身就会带 `.agents/`。
+
+### 次选方案：手动清理 + 禁用 repair
+
+如果 ECC 重装仍无法消除 `.agents/skills/`：
+1. 备份 `C:\Users\Administrator\.claude\.agents\` → `backups/20260511/`
+2. 删除 `.agents/skills/` 下软件技能目录（保留 `plugins/marketplace.json`）
+3. 同步删除 `d:\ClaudeWorkspace\.claude\.agents\` 下的对应内容
+4. 检查 hooks.json 中是否有自动 repair 钩子，有则禁用
+5. 验证：重启 CC 后确认不再出现在 system-reminder
+
+### 保留判断标准
+
+`.agents/skills/` 中保留：无。35 个全是软件/开发技能（api-design、frontend-patterns、bun-runtime 等），与 B2B 业务零关联。
+
+---
+
+## 步骤 3：Commands 核查
+
+当前 commands/ 目录（全局 + 项目各 15 个，完全重复）：
+
+| Command | 对应 Skill | 保留？ |
+|---------|-----------|--------|
+| checkpoint.md | save-session | ✅ 跨对话长任务 |
+| context-budget.md | token-budget-advisor | ✅ OKKI 核心 |
+| copy.md | copywriting | ✅ 业务 |
+| design.md | b2b-visual-design | ✅ 业务 |
+| docs.md | knowledge-ops | ✅ 知识库 |
+| inquiry.md | inquiry-analysis | ✅ 业务 |
+| logistics.md | logistics | ✅ 业务 |
+| order.md | order-followup | ✅ 业务 |
+| p4p.md | p4p-optimization | ✅ 业务 |
+| pitch.md | customer-pitch | ✅ 业务 |
+| plan.md | writing-plans | ✅ 规划 |
+| product.md | product-listing | ✅ 业务 |
+| prompt-optimize.md | prompt-optimizer | ✅ OKKI 核心 |
+| resume-session.md | session | ✅ 长任务 |
+| save-session.md | session | ✅ 长任务 |
+
+**结论**：15 个 commands 全部有用，无需删除。只需消除全局/项目重复。
+
+---
+
+## 步骤 7：项目同步
+
+全局和项目的 skills/commands/agents 高度重复，V3 原则是 **项目归项目、全局归全局**：
+
+- **全局**保留：通用工具（deep-research、search-first、knowledge-ops、token-budget-advisor、prompt-optimizer 等手动层 + 通用辅助）
+- **项目**保留：9 个业务技能 + 7 个手动层工具 + 2 个 OKKI 驱动
+- **Commands**：项目保留业务命令，全局保留通用命令
+- **Agents**：项目保留 7 个，全局不再需要（或保留通用 agent）
+
+### 同步操作
+
+1. 对比全局和项目 skills/ 目录，确认哪些是真正重复的
+2. 全局只留通用工具层，业务技能只放项目
+3. Commands 同上
+4. 清理后验证 `/p4p`、`/inquiry` 等命令仍可用
+
+---
+
+## 执行顺序
+
+1. **步骤 2**：ECC 处理（先查 hooks.json 确认无 auto-repair）→ 手动清理 `.agents/skills/` → 备份
+2. **步骤 3**：Commands 去重（全局 vs 项目）
+3. **步骤 7**：skills/agents 全局/项目同步去重
+4. **步骤 9**：OB 笔记记录
+
+## 验证方法
+
+- 重启 CC 后检查 system-reminder 中技能列表是否减少
+- 逐个执行 `/p4p`、`/inquiry`、`/pitch`、`/design`、`/copy`、`/product`、`/order`、`/logistics` 确认可用
+- `ecc doctor` 确认无 broken 状态

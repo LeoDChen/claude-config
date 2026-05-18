@@ -1,0 +1,216 @@
+# OKKI 质量判定优化 — 最终设计规格
+
+## 一、Context
+
+**核心问题**：`enhanced_classify.js` 的 `determineQuality()` 只扫描最新3条消息检测质量信号，导致 81.1% B 级（378/466）。
+
+**核心原则**：**宁可误升不可漏杀**。高等级客户由人跟进纠正，低等级漏判永远丢失。
+
+**并行问题**（本轮一并修复）：
+- `hasPI` 中 `/pi/` 无词边界，匹配 pink/piece/picture → 197 人误判 PI 已发
+- `fullText` 中 `latestOurMsg` 重复拼接两次
+- `determineLifecycle()` 也只用最新消息做关键词检测
+- `hasAddress`、`hasQuantity` 检测过宽
+- `isQuestion()` 覆盖过宽（陈述句被当提问）
+- A 级专属信号检测完全缺失
+
+---
+
+## 二、设计原则
+
+| # | 原则 | 说明 |
+|---|------|------|
+| 1 | 宁可误升不漏杀 | 信号暧昧 → 往上报。高等级误判由人纠正，低等级漏了丢永久 |
+| 2 | 全量消息扫描 | 所有消息检测质量信号，不只看最新3条 |
+| 3 | 最新值覆盖 | 数量信号以最新提及值为准（矛盾时信最新的） |
+| 4 | 试探/确认分级 | 试探句式记"潜在信号"不参与升级；确认句式正常参与 |
+| 5 | 谓语方向过滤 | `your logo/catalog` → 过滤；`my/our logo/brand` → 认可 |
+| 6 | 身份信号不衰减 | 品牌/渠道/公司资料说一次就认，不区分新旧 |
+
+---
+
+## 三、信号检测体系
+
+### 3.1 数据结构
+
+```javascript
+let qualitySignals = {
+  // S 级
+  brandOem:     [],  // 品牌/ODM/label/logo/定制/贴牌/吊牌/条码 (my/our 方向)
+  channel:      [],  // Amazon/Walmart/Shopify/连锁零售/分销网络
+  bulk500plus:  [],  // 数量 >= 500
+  repeatOrder:  [],  // 复购信号
+  companyInfo:  [],  // 官网/店铺链接/公司资料
+  largeCompany: [],  // 客户自述公司规模大
+  
+  // A 级
+  wholesaleRetail: [], // 批发商/零售商/分销商/进口商身份
+  bulk200to500:    [], // 数量 200-500
+  customOem:       [], // 定制/OEM 需求（确认句式）
+  sampleSent:      [], // 样品已寄出/收到
+  moqConfirmed:    [], // 已接受MOQ/谈价格
+  professional:    [], // 沟通专业（单条消息>200字符 或 多轮技术细节）
+  
+  // C 级
+  personalUse:    [],  // 个人自用/送人
+  smallQty:       [],  // <= 30 件
+  oneTime:        [],  // 一次性采购标记
+  
+  // 潜在信号（试探句式，不参与升级）
+  potentialBrand: [],  // "do you do OEM?"
+  potentialChannel:[],
+  potentialBulk:  [],
+  
+  // 数量追踪
+  latestQty: null,     // 最新提及的数量值
+  allQtyMentions: [],  // 所有数量提及 [值, 消息序号]
+};
+```
+
+### 3.2 试探 vs 确认 判断规则
+
+```javascript
+function isProbe(text) {
+  return /^(do you|can you|could you|would you|is it possible|are you able|do u)/i.test(text.trim())
+      || /^(你们|请问|是否|可以做|能不能).*[吗呢吧？?]/i.test(text.trim());
+}
+```
+
+试探命中 → 记入 `potential*` 数组，不记入主信号数组。
+
+### 3.3 谓语方向过滤
+
+```javascript
+function isClientOwnership(text) {
+  // 过滤掉指向我方的内容
+  if (/your\s+(logo|catalog|design|brand|product|factory|company)/i.test(text)) return false;
+  // 确认指向客户自身
+  if (/my\s+|our\s+|we\s+(have|own|use|sell|need.*logo|need.*brand)/i.test(text)) return true;
+  // 中性：默认认为客户在说自己
+  return true;
+}
+```
+
+### 3.4 数量提取（最新值）
+
+```javascript
+// 在每条客户消息中提取数量提及
+const qtyMatch = text.match(/(\d+)\s*(?:pcs|pieces|units|件|sets)/i);
+if (qtyMatch) {
+  const qty = parseInt(qtyMatch[1]);
+  qualitySignals.allQtyMentions.push({ qty, msgIdx: msgIndex, date });
+  qualitySignals.latestQty = qty; // 最后一条覆盖前面的
+  if (qty >= 500) qualitySignals.bulk500plus.push({ msgIdx: msgIndex, qty, snippet });
+  else if (qty >= 200) qualitySignals.bulk200to500.push({ msgIdx: msgIndex, qty, snippet });
+  else if (qty <= 30) qualitySignals.smallQty.push({ msgIdx: msgIndex, qty, snippet });
+}
+```
+
+---
+
+## 四、五级判定逻辑
+
+### 4.1 S 级（任意一条触发）
+
+| # | 条件 | 检测逻辑 |
+|---|------|---------|
+| 1 | 品牌商/ODM + 首单>=500 | `brandOem.length>0 && bulk500plus.length>0` |
+| 2 | 明确分销渠道 | `channel.length > 0` |
+| 3 | 复购>=1000件或>=$3000 | `repeatOrder.length>0 || orderHistory` |
+| 4 | 公司规模大 | `largeCompany.length > 0`（加分项，非硬线） |
+| 5 | 客户主动提供官网/店铺链接 | `companyInfo.length > 0` |
+| 6 | **【新增】明确大批量>=500件** | `bulk500plus.length > 0 && latestQty >= 500` |
+
+### 4.2 A 级（任意一条触发）
+
+| # | 条件 | 检测逻辑 |
+|---|------|---------|
+| 1 | 批发商/零售商 + 批量>=200 | `wholesaleRetail>0 && (bulk200to500>0 || bulk500plus>0)` |
+| 2 | 批发商 + 沟通专业 | `wholesaleRetail>0 && professional>0` |
+| 3 | 定制/OEM + 态度认真反复沟通 | `customOem>0 && professional>0` |
+| 4 | 已成交 首单200-500 | `orderHistory` 中有 200-500 量级 |
+| 5 | 样品已寄出等反馈 | `sampleSent.length > 0` |
+| 6 | 已接受MOQ在谈价格 | `moqConfirmed>0 && hasPrice` |
+| 7 | 单信号升级（品牌/渠道/大批量 任一） | `brandOem>0 || channel>0 || bulk500plus>0` |
+
+> 第7条是兜底：任何S级信号单独出现但不够S门槛，自动升A，标注【待验证】。
+
+### 4.3 C 级
+
+| # | 条件 |
+|---|------|
+| 1 | 个人自用 + <=30件 |
+| 2 | 一次性采购（仅此一次，无后续） |
+| 3 | 行为散漫（<=4条对话 + 客户<=2条 + 超过30天无互动 + 无报价/样品） |
+
+### 4.4 D 级
+
+| # | 条件 |
+|---|------|
+| 1 | 品类不匹配 + 低互动（<=5条 且 客户<=2条） |
+| 2 | 仅系统消息 无真实对话 |
+| 3 | 非采购意图（转让/加盟/找工作） |
+| 4 | 垃圾询盘 |
+
+### 4.5 B 级（默认兜底）
+
+信息不足以触发 S/A/C/D → B 级，附带所有检测到的潜在信号标注。
+
+### 4.6 判定优先级
+
+```
+D 先排除（品类不对/纯系统消息/非采购）→ 
+S 硬标准（6条任1）→ 
+A 硬标准（7条任1）→ 
+C 硬标准（3条）→ 
+B 默认（附带潜在信号标注）
+```
+
+---
+
+## 五、并行修复项
+
+### 5.1 `hasPI` 误判
+- `pi` → `\bpi\b` 加词边界
+- 或改为 `/proforma\s*invoice|pi\s*(sent|issued|attached|enclosed)|付款.*确认|deposit.*paid/`
+
+### 5.2 `fullText` 重复拼接
+- `determineLifecycle()` 和 `determineQuality()` 都去掉重复的 `latestOurMsg`
+
+### 5.3 `determineLifecycle()` 全量化
+- 售后/执行中/签收的关键词检测也应扫描全量消息，不只看最新
+
+### 5.4 `isQuestion()` 收紧
+- 加否定语境排除：`just (want|need|wonder)` → 不是提问
+- 过短的 `< 5 字符` 不判定为提问
+
+### 5.5 `hasAddress`、`hasQuantity` 收紧
+- `city`/`country` 不作为 address 信号
+- `hasQuantity` 只在伴随具体数字时触发
+
+---
+
+## 六、需修改文件
+
+| 文件 | 操作 |
+|------|------|
+| `08_客户跟进/Okki/scripts/enhanced_classify.js` | 核心重写 |
+| `08_客户跟进/Okki/STATE.md` | 更新版本记录 |
+| `08_客户跟进/Okki/knowledge/classification-rules.md` | 新增 S 级第 6 条（大批量单条） |
+
+---
+
+## 七、验证方式
+
+1. 运行：`node scripts/enhanced_classify.js`
+2. 预期变化：
+   - B 级：81.1% → 40-55%
+   - S 级：0 → 2-5 人
+   - A 级：11 → 30-50 人
+   - C 级：1 → 15-25 人
+3. 重点核查：
+   - Keinjol Tata → S 或 A（品牌ODM+Amazon）
+   - Ernestina Afriyie → 不再为 D（卡通睡衣=母婴正品）
+   - PI 已发数：197 → 实际值（预期 20-40）
+4. 抽查 5 个等级变化客户，读 chat_history 原文验信号
+5. 打开 dashboard HTML 确认双轴矩阵分布合理

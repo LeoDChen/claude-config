@@ -1,0 +1,112 @@
+/**
+ * 小满CRM — 每日巡检调度器
+ *
+ * 运行: node daily-check.mjs [mode]
+ *   mode=full   → 完整采集（先snapshot，再diff，再对P0客户做deep scrape）
+ *   mode=light  → 仅snapshot+diff，不深挖（默认）
+ *   mode=diff   → 仅diff（假设snapshot刚跑过）
+ *
+ * 输出: 终端摘要 + diff JSON + P0客户标记
+ */
+
+import { execSync } from 'child_process';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const SCRIPTS_DIR = __dirname;
+const DATA_DIR = join(__dirname, '..', 'data');
+const DAILY_DIR = join(DATA_DIR, 'daily-reports');
+if (!existsSync(DAILY_DIR)) mkdirSync(DAILY_DIR, { recursive: true });
+
+const mode = process.argv[2] || 'light';
+
+function run(cmd) {
+  console.log(`  → ${cmd}`);
+  try {
+    execSync(cmd, { cwd: SCRIPTS_DIR, stdio: 'inherit', timeout: 300000 });
+    return true;
+  } catch (err) {
+    console.error(`  ✗ 失败: ${err.message}`);
+    return false;
+  }
+}
+
+console.log(`\n🔍 小满客户巡检 — ${new Date().toLocaleString('zh-CN')}`);
+console.log(`模式: ${mode}\n`);
+
+// Step 1: Snapshot (if not diff-only)
+if (mode !== 'diff') {
+  console.log('[1/3] 索引快照...');
+  if (!run('node snapshot.mjs')) {
+    console.error('快照失败，终止');
+    process.exit(1);
+  }
+}
+
+// Step 2: Diff
+console.log('[2/3] 快照对比...');
+const snapshotDir = join(DATA_DIR, 'snapshots');
+const files = readdirSync(snapshotDir)
+  .filter(f => f.startsWith('snapshot_') && f.endsWith('.json'))
+  .sort()
+  .reverse();
+
+if (files.length < 2) {
+  console.log('快照不足，对比需要至少2个快照。已生成首次快照，下次运行即可对比。');
+  process.exit(0);
+}
+
+const diffResult = run('node diff.mjs');
+if (!diffResult) {
+  console.error('对比失败，终止');
+  process.exit(1);
+}
+
+// Step 3: 生成每日报告摘要（供CC读取）
+const diffDir = join(DATA_DIR, 'diffs');
+const diffFiles = readdirSync(diffDir)
+  .filter(f => f.startsWith('diff_') && f.endsWith('.json'))
+  .sort()
+  .reverse();
+
+if (diffFiles.length > 0) {
+  const diffData = JSON.parse(readFileSync(join(diffDir, diffFiles[0]), 'utf-8'));
+
+  const dailyReport = {
+    generatedAt: new Date().toISOString(),
+    status: 'ok',
+    summary: diffData.summary,
+    P0: diffData.urgency.P0.map(c => ({
+      name: c.name,
+      categoryId: c.classification.categoryId,
+      tier: c.classification.tier,
+      reason: c.classification.reason,
+      lastMessage: c.lastMessageSnippet?.substring(0, 100),
+      isUnread: c.isUnread
+    })),
+    P1: diffData.urgency.P1.map(c => ({
+      name: c.name,
+      categoryId: c.classification.categoryId,
+      reason: c.classification.reason
+    }))
+  };
+
+  const now = new Date();
+  const dateStr = now.toISOString().substring(0, 10);
+  const reportPath = join(DAILY_DIR, `daily_${dateStr}.json`);
+  writeFileSync(reportPath, JSON.stringify(dailyReport, null, 2));
+
+  console.log(`\n📊 每日报告已生成: daily_${dateStr}.json`);
+  console.log(`   P0待处理: ${dailyReport.P0.length}人`);
+  console.log(`   P1待处理: ${dailyReport.P1.length}人`);
+
+  // 输出P0客户名称列表，方便CC直接读取
+  if (dailyReport.P0.length > 0) {
+    console.log('\n🚨 P0紧急客户:');
+    dailyReport.P0.forEach(c => console.log(`   - ${c.name} [${c.categoryId}] ${c.reason}`));
+  }
+}
+
+console.log('\n✅ 巡检完成');

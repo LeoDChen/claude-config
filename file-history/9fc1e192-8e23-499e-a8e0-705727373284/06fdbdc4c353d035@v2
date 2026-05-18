@@ -1,0 +1,274 @@
+#!/usr/bin/env node
+
+/**
+ * 小满CRM — 完整看板报告（TM + 邮件）
+ *
+ * 基于整合数据生成 Word 报告
+ * 包含：TM 聊天记录、邮件记录、图片清单
+ *
+ * 用法: node final-report.mjs
+ * 前置: 先运行 integrate.mjs 生成客户档案 JSON
+ */
+
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  HeadingLevel, AlignmentType, WidthType, BorderStyle,
+  ShadingType, TableLayoutType, PageBreak,
+} from 'docx';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+
+// ============================================================
+// 颜色
+// ============================================================
+const C = {
+  header: '1A237E', sub: '283593', gray: '666666', light: '888888',
+  border: 'E0E0E0', green: '2E7D32', blue: '1565C0', emailBg: 'F3E5F5',
+};
+
+// ============================================================
+// 工具
+// ============================================================
+function fmt(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function cell(text, opts = {}, bg, w) {
+  const runs = typeof text === 'string' ? [new TextRun({ text, ...opts })] : text;
+  return new TableCell({
+    children: [new Paragraph({ children: runs, alignment: opts.align || AlignmentType.LEFT })],
+    width: w ? { size: w, type: WidthType.DXA } : undefined,
+    shading: bg ? { fill: bg, type: ShadingType.CLEAR } : undefined,
+    verticalAlign: 'center',
+  });
+}
+
+function h(text, size = 28, color = C.header) {
+  return new Paragraph({
+    children: [new TextRun({ text, size, bold: true, color })],
+    spacing: { before: 400, after: 200 },
+  });
+}
+
+function p(text, size = 20, color = '333333', bold = false) {
+  return new Paragraph({
+    children: [new TextRun({ text, size, color, bold })],
+    spacing: { after: 80 },
+  });
+}
+
+function spacer() {
+  return new Paragraph({
+    children: [new TextRun({ text: '', size: 6 })],
+    border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: C.border } },
+    spacing: { after: 120 },
+  });
+}
+
+// ============================================================
+// 加载数据
+// ============================================================
+function loadData() {
+  const files = readdirSync(DATA_DIR)
+    .filter(f => f.startsWith('客户档案_') && f.endsWith('.json'))
+    .sort().reverse();
+  if (!files.length) throw new Error('未找到客户档案 JSON，请先运行 integrate.mjs');
+  return JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf-8'));
+}
+
+// ============================================================
+// 构建文档
+// ============================================================
+async function generate(data) {
+  const { customers, stats, generatedAt } = data;
+  const children = [];
+
+  // ========== 封面 ==========
+  children.push(
+    new Paragraph({ children: [new TextRun({ text: '小满CRM 客户完整档案', size: 36, bold: true, color: C.header })], alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
+    new Paragraph({ children: [new TextRun({ text: `生成时间: ${fmt(new Date(generatedAt))}  |  客户: ${customers.length} 个`, size: 20, color: C.gray })], alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+  );
+
+  // ========== 一、数据概览 ==========
+  children.push(h('一、数据概览', 28, C.header));
+
+  const totalTmMsg = stats.totalTmMessages;
+  const totalTmImg = stats.totalTmImages;
+  const totalEmail = stats.totalEmails;
+  const totalEmailImg = stats.totalEmailImages;
+
+  const overviewRows = [
+    new TableRow({ tableHeader: true, children: [
+      cell('指标', { bold: true, color: 'FFFFFF', size: 20 }, C.header, 3000),
+      cell('数量', { bold: true, color: 'FFFFFF', size: 20, align: AlignmentType.CENTER }, C.header, 2000),
+    ]}),
+    new TableRow({ children: [cell('TM 会话', { size: 20 }, 'F5F5F5', 3000), cell(String(customers.length), { size: 20, align: AlignmentType.CENTER }, 'F5F5F5', 2000)] }),
+    new TableRow({ children: [cell('TM 消息', { size: 20 }, undefined, 3000), cell(String(totalTmMsg), { size: 20, align: AlignmentType.CENTER }, undefined, 2000)] }),
+    new TableRow({ children: [cell('TM 图片', { size: 20 }, 'F5F5F5', 3000), cell(String(totalTmImg), { size: 20, align: AlignmentType.CENTER }, 'F5F5F5', 2000)] }),
+    new TableRow({ children: [cell('关联邮件', { size: 20 }, undefined, 3000), cell(String(totalEmail), { size: 20, align: AlignmentType.CENTER }, undefined, 2000)] }),
+    new TableRow({ children: [cell('邮件图片', { size: 20 }, 'F5F5F5', 3000), cell(String(totalEmailImg), { size: 20, align: AlignmentType.CENTER }, 'F5F5F5', 2000)] }),
+  ];
+
+  children.push(
+    new Table({ rows: overviewRows, width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED }),
+    new Paragraph({ spacing: { after: 300 } }),
+  );
+
+  // ========== 二、客户详细档案 ==========
+  children.push(h('二、客户详细档案'));
+
+  for (let i = 0; i < customers.length; i++) {
+    const c = customers[i];
+    const cat = c.classification?.categoryId || '—';
+
+    // 客户标题
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: `${i + 1}. ${c.name}`, size: 24, bold: true, color: C.sub }),
+          new TextRun({ text: `  [${cat}]`, size: 20, color: C.gray }),
+        ],
+        spacing: { before: 300, after: 100 },
+        shading: { fill: 'EDE7F6', type: ShadingType.CLEAR },
+      }),
+    );
+
+    // TM 消息摘要
+    if (c.tm.messages.length > 0) {
+      children.push(p('📩 TM 聊天记录:', 20, C.blue, true));
+
+      // Show last 5 messages
+      const recentMsgs = c.tm.messages.slice(-5);
+      for (const msg of recentMsgs) {
+        const prefix = msg.side === 'received' ? '客户: ' : '我方: ';
+        const color = msg.side === 'received' ? '#1565C0' : '#2E7D32';
+        const snippet = msg.content.substring(0, 300);
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: prefix, size: 18, bold: true, color }),
+              new TextRun({ text: snippet, size: 18, color: '444444' }),
+            ],
+            indent: { left: 400 },
+            spacing: { after: 40 },
+          }),
+        );
+      }
+      if (c.tm.messages.length > 5) {
+        children.push(p(`  ... 共 ${c.tm.messages.length} 条消息`, 16, C.light));
+      }
+    }
+
+    // TM 图片
+    if (c.tm.images.length > 0) {
+      children.push(p(`📷 TM 图片: ${c.tm.images.length} 张`, 18, C.gray));
+    }
+
+    // 邮件记录
+    if (c.emails.inbox.length > 0 || c.emails.sent.length > 0) {
+      children.push(p('\n📧 邮件记录:', 20, '#7B1FA2', true));
+
+      for (const mail of c.emails.inbox) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: '📥 收件 ', size: 18, color: '#7B1FA2' }),
+              new TextRun({ text: mail.subject, size: 18, bold: true, color: '333333' }),
+              new TextRun({ text: `  (${mail.time})`, size: 16, color: C.light }),
+            ],
+            indent: { left: 400 },
+            spacing: { after: 20 },
+          }),
+        );
+        if (mail.body) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: mail.body.substring(0, 500), size: 17, color: '555555' })],
+              indent: { left: 600 },
+              spacing: { after: 20 },
+            }),
+          );
+        }
+        if (mail.images?.length > 0) {
+          children.push(p(`  🖼️ 图片: ${mail.images.length} 张`, 16, C.light));
+        }
+      }
+
+      for (const mail of c.emails.sent) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: '📤 发件 ', size: 18, color: '#2E7D32' }),
+              new TextRun({ text: mail.subject, size: 18, bold: true, color: '333333' }),
+              new TextRun({ text: `  → ${mail.to} (${mail.time})`, size: 16, color: C.light }),
+            ],
+            indent: { left: 400 },
+            spacing: { after: 20 },
+          }),
+        );
+        if (mail.body) {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: mail.body.substring(0, 500), size: 17, color: '555555' })],
+              indent: { left: 600 },
+              spacing: { after: 20 },
+            }),
+          );
+        }
+        if (mail.images?.length > 0) {
+          children.push(p(`  🖼️ 图片: ${mail.images.length} 张`, 16, C.light));
+        }
+      }
+    } else {
+      children.push(p('  无关联邮件', 16, C.light));
+    }
+
+    children.push(spacer());
+  }
+
+  // ========== 页脚 ==========
+  children.push(
+    new Paragraph({ spacing: { before: 400 } }),
+    new Paragraph({
+      children: [new TextRun({ text: `小星星服饰 · 小满CRM自动生成 · ${fmt(new Date(generatedAt))}`, size: 16, color: '999999' })],
+      alignment: AlignmentType.CENTER,
+    }),
+  );
+
+  return new Document({
+    creator: '小满CRM助手',
+    title: '小满CRM客户完整档案',
+    description: `客户完整档案 - ${fmt(new Date(generatedAt))}`,
+    styles: { default: { document: { run: { size: 20, font: '微软雅黑' } } } },
+    sections: [{ children }],
+  });
+}
+
+// ============================================================
+// 主流程
+// ============================================================
+async function main() {
+  console.log('📂 加载整合数据...');
+  const data = loadData();
+  console.log(`   客户: ${data.customers.length} 个`);
+
+  console.log('📝 生成完整看板报告...');
+  const doc = await generate(data);
+  const timestamp = new Date().toISOString().replace(/[:]/g, '-').substring(0, 19);
+  const reportPath = join(DATA_DIR, `完整档案_${timestamp}.docx`);
+  const buffer = await Packer.toBuffer(doc);
+  writeFileSync(reportPath, buffer);
+
+  console.log(`   已保存: ${reportPath}\n`);
+  console.log('✅ 完成！');
+}
+
+main().catch(err => {
+  console.error(`\n❌ 错误: ${err.message}`);
+  process.exit(1);
+});

@@ -1,0 +1,38 @@
+param(
+    [string]$sound = "Windows Ding"
+)
+
+$configPath = "$env:USERPROFILE\.claude\sound_config.json"
+
+if (-not (Test-Path $configPath)) {
+    $default = @{ enabled = $true; volume = 80 }
+    $default | ConvertTo-Json | Set-Content $configPath
+}
+
+$config = Get-Content $configPath | ConvertFrom-Json
+
+if (-not $config.enabled) {
+    exit 0
+}
+
+$vol = [int]$config.volume
+$soundFile = "C:\Windows\Media\$sound.wav"
+
+if (-not (Test-Path $soundFile)) {
+    Write-Warning "Sound file not found: $soundFile"
+    exit 1
+}
+
+# Play sound via Windows MediaPlayer COM (respects system volume)
+$player = New-Object -ComObject WMPlayer.OCX
+$player.settings.volume = $vol
+$player.URL = $soundFile
+
+# Wait for playback to finish (max 5 seconds)
+$timeout = 0
+while ($player.playState -ne 1 -and $timeout -lt 50) {
+    Start-Sleep -Milliseconds 100
+    $timeout++
+}
+
+$player.close()

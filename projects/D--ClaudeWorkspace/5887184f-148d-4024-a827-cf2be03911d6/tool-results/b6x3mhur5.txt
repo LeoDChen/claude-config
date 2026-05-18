@@ -1,0 +1,738 @@
+无法找到“C:\Users\Administrator\Desktop\灏忔槦鏄熸湇楗版姤浠疯〃20260505--01.xlsx”。请检查文件名的拼写，并检查文件位置是
+否正确。
+如果你正试图从“文件”菜单上最近使用的文件列表中打开文件，请确认文件未被重命名、移动或删除。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:8 字符: 1
++ $wb = $excel.Workbooks.Open($inputPath)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (:) [], COMException
+    + FullyQualifiedErrorId : System.Runtime.InteropServices.COMException
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:9 字符: 1
++ $ws = $wb.Sheets.Item(1)
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:13 字符: 1
++ $ws.Cells.Item(1, 1).Value2 = "XiaoXingXing Garments Co., Ltd. - Quot ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:16 字符: 1
++ $ws.Cells.Item(2, 1).Value2 = "Product Name"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:17 字符: 1
++ $ws.Cells.Item(2, 2).Value2 = "Fabric"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:18 字符: 1
++ $ws.Cells.Item(2, 3).Value2 = "Image"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:19 字符: 1
++ $ws.Cells.Item(2, 4).Value2 = "Size"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:20 字符: 1
++ $ws.Cells.Item(2, 5).Value2 = "Unit Price"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:21 字符: 1
++ $ws.Cells.Item(2, 6).Value2 = "Qty (pcs)"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:22 字符: 1
++ $ws.Cells.Item(2, 7).Value2 = "Total (USD)"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:25 字符: 1
++ $ws.Cells.Item(3, 1).Value2 = "Ice Silk Cloth Diaper"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:26 字符: 1
++ $ws.Cells.Item(3, 2).Value2 = "Ice silk style: Surface ice silk mesh  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:27 字符: 1
++ $ws.Cells.Item(3, 4).Value2 = "S (4-9kg)`nM (9-14kg)`nL (14-19kg)"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:28 字符: 1
++ $ws.Cells.Item(3, 5).Value2 = "$1.20/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:31 字符: 1
++ $ws.Cells.Item(4, 1).Value2 = "Waterproof Pad"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:32 字符: 1
++ $ws.Cells.Item(4, 2).Value2 = "Surface: 100% Cotton`nBottom: 100% Pol ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:33 字符: 1
++ $ws.Cells.Item(4, 4).Value2 = "80*100cm"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:34 字符: 1
++ $ws.Cells.Item(4, 5).Value2 = "$3.95/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:37 字符: 1
++ $ws.Cells.Item(6, 1).Value2 = "U-Shape Bib"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:38 字符: 1
++ $ws.Cells.Item(6, 2).Value2 = "Surface: 100% Polyester`nBottom: 100%  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:39 字符: 1
++ $ws.Cells.Item(6, 4).Value2 = "23*30cm"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:40 字符: 1
++ $ws.Cells.Item(6, 5).Value2 = "$0.50/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:43 字符: 1
++ $ws.Cells.Item(7, 1).Value2 = "Romper"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:44 字符: 1
++ $ws.Cells.Item(7, 2).Value2 = "100% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:45 字符: 1
++ $ws.Cells.Item(7, 4).Value2 = "59cm`n66cm`n73cm`n80cm`n90cm"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:46 字符: 1
++ $ws.Cells.Item(7, 5).Value2 = "$4.65/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:49 字符: 1
++ $ws.Cells.Item(8, 1).Value2 = "Kids' Set"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:50 字符: 1
++ $ws.Cells.Item(8, 2).Value2 = "100% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:51 字符: 1
++ $ws.Cells.Item(8, 4).Value2 = "73cm`n80cm`n90cm`n100cm`n110cm`n120cm` ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:52 字符: 1
++ $ws.Cells.Item(8, 5).Value2 = "$4.35/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:55 字符: 1
++ $ws.Cells.Item(9, 1).Value2 = "Kids' Set"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:56 字符: 1
++ $ws.Cells.Item(9, 2).Value2 = "100% Polyester"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:57 字符: 1
++ $ws.Cells.Item(9, 4).Value2 = "80cm`n90cm`n100cm`n110cm`n120cm`n130cm ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:58 字符: 1
++ $ws.Cells.Item(9, 5).Value2 = "$2.65/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:61 字符: 1
++ $ws.Cells.Item(10, 1).Value2 = "Kids' Set"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:62 字符: 1
++ $ws.Cells.Item(10, 2).Value2 = "95% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:63 字符: 1
++ $ws.Cells.Item(10, 4).Value2 = "3-6M`n6-12M`n12-18M`n18-24M`n2T`n3T`n ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:64 字符: 1
++ $ws.Cells.Item(10, 5).Value2 = "$9.20/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:67 字符: 1
++ $ws.Cells.Item(11, 1).Value2 = "Muslim Swaddle Wrap"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:68 字符: 1
++ $ws.Cells.Item(11, 2).Value2 = "100% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:69 字符: 1
++ $ws.Cells.Item(11, 4).Value2 = "100*100cm"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:70 字符: 1
++ $ws.Cells.Item(11, 5).Value2 = "$2.20/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:73 字符: 1
++ $ws.Cells.Item(12, 1).Value2 = "Kids' Set"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:74 字符: 1
++ $ws.Cells.Item(12, 2).Value2 = "100% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:75 字符: 1
++ $ws.Cells.Item(12, 4).Value2 = "90cm`n100cm`n110cm`n120cm`n130cm`n140 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:76 字符: 1
++ $ws.Cells.Item(12, 5).Value2 = "$4.50/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:79 字符: 1
++ $ws.Cells.Item(13, 1).Value2 = "Kids' Set"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:80 字符: 1
++ $ws.Cells.Item(13, 2).Value2 = "100% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:81 字符: 1
++ $ws.Cells.Item(13, 4).Value2 = "73cm`n80cm`n90cm`n100cm`n110cm`n120cm ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:82 字符: 1
++ $ws.Cells.Item(13, 5).Value2 = "$2.99/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:85 字符: 1
++ $ws.Cells.Item(14, 1).Value2 = "Kids' Set"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:86 字符: 1
++ $ws.Cells.Item(14, 2).Value2 = "100% Cotton"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:87 字符: 1
++ $ws.Cells.Item(14, 4).Value2 = "One size (~3 yrs)"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:88 字符: 1
++ $ws.Cells.Item(14, 5).Value2 = "$3.18/pc"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:91 字符: 1
++ $ws.Cells.Item(15, 1).Value2 = "Shipping Cost"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:92 字符: 1
++ $ws.Cells.Item(15, 7).Value2 = "$541.20"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:95 字符: 1
++ $ws.Cells.Item(16, 1).Value2 = "Total"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:96 字符: 1
++ $ws.Cells.Item(16, 6).Value2 = "220 pcs"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:97 字符: 1
++ $ws.Cells.Item(16, 7).Value2 = "$1,328.60"
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:101 字符: 1
++ $ws.Columns.Item(1).ColumnWidth = 22   # Product Name
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:102 字符: 1
++ $ws.Columns.Item(2).ColumnWidth = 32   # Fabric (longer English text)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:103 字符: 1
++ $ws.Columns.Item(3).ColumnWidth = 14   # Image
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:104 字符: 1
++ $ws.Columns.Item(4).ColumnWidth = 16   # Size
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:105 字符: 1
++ $ws.Columns.Item(5).ColumnWidth = 14   # Unit Price
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:106 字符: 1
++ $ws.Columns.Item(6).ColumnWidth = 12   # Qty
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:107 字符: 1
++ $ws.Columns.Item(7).ColumnWidth = 16   # Total
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:111 字符: 5
++     $ws.Rows.Item($r).RowHeight = 75
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:115 字符: 1
++ $ws.Range("A1:G1").Font.Bold = $true
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:116 字符: 1
++ $ws.Range("A1:G1").Font.Size = 14
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:117 字符: 1
++ $ws.Range("A1:G1").HorizontalAlignment = -4108  # xlCenter
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:118 字符: 1
++ $ws.Range("A1:G1").Merge()
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:120 字符: 1
++ $ws.Range("A2:G2").Font.Bold = $true
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:121 字符: 1
++ $ws.Range("A2:G2").Interior.Color = 12632256  # Light gray background
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:122 字符: 1
++ $ws.Range("A2:G2").HorizontalAlignment = -4108  # xlCenter
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:125 字符: 1
++ $ws.Range("A3:G14").HorizontalAlignment = -4108  # xlCenter
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:126 字符: 1
++ $ws.Range("A3:G14").VerticalAlignment = -4108    # xlCenter
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:129 字符: 1
++ $ws.Range("B3:B14").WrapText = $true
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:130 字符: 1
++ $ws.Range("D3:D14").WrapText = $true
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:133 字符: 1
++ $ws.Range("A15:G15").Font.Bold = $true
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:134 字符: 1
++ $ws.Range("A16:G16").Font.Bold = $true
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:135 字符: 1
++ $ws.Range("A16:G16").Font.Size = 12
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:138 字符: 1
++ $ws.Range("A2:G16").Borders.LineStyle = 1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+在此对象上找不到属性“Orientation”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:141 字符: 1
++ $ws.PageSetup.Orientation = 2  # xlLandscape
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“PaperSize”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:142 字符: 1
++ $ws.PageSetup.PaperSize = 9    # xlPaperA4
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“FitToPagesWide”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:143 字符: 1
++ $ws.PageSetup.FitToPagesWide = 1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“FitToPagesTall”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:144 字符: 1
++ $ws.PageSetup.FitToPagesTall = 1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“LeftMargin”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:145 字符: 1
++ $ws.PageSetup.LeftMargin = 36
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“RightMargin”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:146 字符: 1
++ $ws.PageSetup.RightMargin = 36
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“TopMargin”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:147 字符: 1
++ $ws.PageSetup.TopMargin = 36
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+在此对象上找不到属性“BottomMargin”。请确认该属性存在并且可设置。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:148 字符: 1
++ $ws.PageSetup.BottomMargin = 36
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : PropertyNotFound
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:151 字符: 1
++ $wb.ExportAsFixedFormat(0, $outputPdf)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+不能对 Null 值表达式调用方法。
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:153 字符: 1
++ $wb.Close($false)
++ ~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) []，RuntimeException
+    + FullyQualifiedErrorId : InvokeMethodOnNull
+ 
+使用“1”个参数调用“ReleaseComObject”时发生异常:“未将对象引用设置到对象的实例。”
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:156 字符: 1
++ [System.Runtime.Interopservices.Marshal]::ReleaseComObject($ws) | Out ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : NullReferenceException
+ 
+使用“1”个参数调用“ReleaseComObject”时发生异常:“未将对象引用设置到对象的实例。”
+所在位置 D:\ClaudeWorkspace\translate_and_export.ps1:157 字符: 1
++ [System.Runtime.Interopservices.Marshal]::ReleaseComObject($wb) | Out ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : NullReferenceException
+ 
+Done: C:\Users\Administrator\Desktop\XiaoXingXing_Quotation_20260505.pdf

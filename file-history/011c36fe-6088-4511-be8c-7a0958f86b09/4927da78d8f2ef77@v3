@@ -1,0 +1,1 @@
+alias sound='bash "$HOME/.claude/scripts/sound_control.sh"'

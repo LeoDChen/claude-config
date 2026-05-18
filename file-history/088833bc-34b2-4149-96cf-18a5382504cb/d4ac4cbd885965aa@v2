@@ -1,0 +1,21 @@
+const fs = require('fs');
+const path = require('path');
+const f = path.join(__dirname, 'enhanced_classify.js');
+let c = fs.readFileSync(f, 'utf8');
+
+// Find and fix the gradeTag function definition
+const oldFunc = "'  return \\'<span style=\"background:\" + (colors[g]||\"#636366\") + \";color:\" + (g===\"S\"?\"#1d1d1f\":\"#fff\") + \";padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;\">\" + esc(g) + \"</span>\\';\\n' +";
+
+const newFunc = "'  return \\'<span style=\"background:\\' + (colors[g]||\\\"#636366\\\") + \\';color:\\' + (g===\\\"S\\\"?\\\"#1d1d1f\\\":\\\"#fff\\\") + \\';padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;\\\">\\' + esc(g) + \\'</span>\\';\\n' +";
+
+if (c.indexOf(oldFunc) < 0) {
+  console.log('OLD FUNC NOT FOUND');
+  // Show surrounding area
+  const idx = c.indexOf('function gradeTag(g)');
+  if (idx >= 0) console.log('Found gradeTag at', idx, ':', c.substring(idx-30, idx+300));
+  process.exit(1);
+}
+
+c = c.replace(oldFunc, newFunc);
+fs.writeFileSync(f, c, 'utf8');
+console.log('OK');

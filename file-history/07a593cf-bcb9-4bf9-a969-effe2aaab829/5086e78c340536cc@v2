@@ -1,0 +1,54 @@
+# Claude Code 接国产模型 — 1M 上下文配置
+
+**日期**：2026-04-29
+
+## 背景
+
+使用 cc-Switch 接入 DeepSeek V4 Pro 模型，默认 Claude Code 只认 200K 上下文，无法利用 DeepSeek 原生 1M 上下文能力。
+
+## 尝试过但无效的方法
+
+1. **`[1m]` 后缀** — 在 cc-Switch GUI 中将模型名改为 `DeepSeek-v4-pro[1m]`，cc-Switch 没有把上下文信息正确传递给 Claude Code，`/context` 仍显示 200K
+2. **`ANTHROPIC_MODEL` 环境变量加 `[1m]`** — 同样无效
+3. **`CLAUDE_CODE_MAX_CONTEXT_TOKENS` 单独设置** — 不生效
+
+## 最终有效方案
+
+在 `~/.claude/settings.json` 和项目 `.claude/settings.json` 的 `env` 块中添加：
+
+```json
+"CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000"
+```
+
+完整 env 配置：
+```json
+"env": {
+  "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+  "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+  "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000"
+}
+```
+
+## 验证方法
+
+终端输入 `/context`，确认显示：
+- 模型：`claude-sonnet-4-6[1m]`
+- 窗口：`1m tokens`
+- 上限从 200K 变为 1M
+
+## 关键结论
+
+- 视频博主说的 `[1m]` 后缀在 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 参数起作用后，Claude Code 自动追加了 `[1m]` 标识
+- 核心是 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 环境变量，不是模型名后缀
+- 两个 settings.json 都要改（用户全局 + 项目级）
+
+## 上下文预算（配置后）
+
+| 类别 | 占用 |
+|------|------|
+| System prompt | ~6k |
+| Custom agents | ~5k |
+| Memory files | ~25k |
+| Skills | ~22k |
+| Messages | ~47k |
+| 剩余空间 | ~860k |

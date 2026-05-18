@@ -1,0 +1,244 @@
+// Phase 1: 直接调用 onetalk HTTP API
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 找 Object(f.b) 的实现 ===
+    console.log('=== 找底层 HTTP 请求函数 f.b ===\n');
+
+    const fbFunc = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 搜索所有 webpack 模块中的函数
+                // f.b 是 webpack 的模块引用
+                // 我们直接在页面中通过全局变量来找
+                var result = {};
+
+                // 尝试从 __webpack_require__ 找
+                if (window.webpackChunkim_cloud_drive_cdn) {
+                    result.pushType = 'webpackChunk';
+                }
+
+                // 直接测试 - 用 XHR 调用已知 API
+                return JSON.stringify(result);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(fbFunc.result?.value || '(无)');
+
+    // === 2. 直接 XHR 调用 /message/listRecentConversation.htm ===
+    console.log('\n=== 调用 listRecentConversation.htm ===\n');
+
+    const convResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'https://onetalk.alibaba.com/message/listRecentConversation.htm', true);
+                    xhr.withCredentials = true;
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    var ts = new Date().setFullYear(new Date().getFullYear() - 2);
+                    var params = 'params=' + encodeURIComponent(JSON.stringify({
+                        count: 50,
+                        pointTimeStamp: ts
+                    }));
+
+                    xhr.onload = function() {
+                        var body = xhr.responseText;
+                        var preview = body.substring(0, 2000);
+                        try {
+                            var json = JSON.parse(body);
+                            preview = JSON.stringify({
+                                status: xhr.status,
+                                keys: Object.keys(json),
+                                convCount: json.conversationList ? json.conversationList.length : 0,
+                                firstConv: json.conversationList && json.conversationList[0] ?
+                                    JSON.stringify(json.conversationList[0]).substring(0, 500) : null
+                            });
+                        } catch(e) {
+                            preview = 'PARSE_ERROR: ' + body.substring(0, 300);
+                        }
+                        resolve(preview);
+                    };
+                    xhr.onerror = function() {
+                        resolve('ERROR: XHR failed, status=' + xhr.status);
+                    };
+                    xhr.send(params);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(convResult.result?.value || '(无)');
+
+    // === 3. 尝试调用获取消息历史的 API ===
+    console.log('\n=== 猜测消息 API: /message/listPrevMessage.htm ===\n');
+
+    const msgResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var conv = window.__conversationListFullData__[0];
+                    var cid = conv.cid;
+
+                    var xhr = new XMLHttpRequest();
+                    // 尝试几种可能的 API
+                    var url = 'https://onetalk.alibaba.com/message/listPrevMessage.htm';
+                    xhr.open('POST', url, true);
+                    xhr.withCredentials = true;
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    var params = 'params=' + encodeURIComponent(JSON.stringify({
+                        conversationCode: cid,
+                        sendTime: Date.now(),
+                        count: 5
+                    }));
+
+                    xhr.onload = function() {
+                        resolve(JSON.stringify({
+                            status: xhr.status,
+                            body: xhr.responseText.substring(0, 1000)
+                        }));
+                    };
+                    xhr.onerror = function() {
+                        resolve(JSON.stringify({ error: true, status: xhr.status }));
+                    };
+                    xhr.send(params);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msgResult.result?.value || '(无)');
+
+    // === 4. 尝试另一种消息 API: /message/queryMessage.htm ===
+    console.log('\n=== 猜测消息 API: /message/queryMessageHistory.htm ===\n');
+
+    const msg2Result = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var conv = window.__conversationListFullData__[0];
+                    var cid = conv.cid;
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'https://onetalk.alibaba.com/message/queryMessageHistory.htm', true);
+                    xhr.withCredentials = true;
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    var params = 'params=' + encodeURIComponent(JSON.stringify({
+                        conversationId: cid,
+                        pageSize: 5,
+                        pageNum: 1
+                    }));
+
+                    xhr.onload = function() {
+                        resolve(JSON.stringify({
+                            status: xhr.status,
+                            body: xhr.responseText.substring(0, 1000)
+                        }));
+                    };
+                    xhr.onerror = function() {
+                        resolve(JSON.stringify({ error: true, status: xhr.status }));
+                    };
+                    xhr.send(params);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msg2Result.result?.value || '(无)');
+
+    // === 5. 尝试 /message/listMessage.htm ===
+    console.log('\n=== 猜测消息 API: /message/listMessage.htm ===\n');
+
+    const msg3Result = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var conv = window.__conversationListFullData__[0];
+                    var cid = conv.cid;
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'https://onetalk.alibaba.com/message/listMessage.htm', true);
+                    xhr.withCredentials = true;
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    var params = 'params=' + encodeURIComponent(JSON.stringify({
+                        conversationCode: cid,
+                        sendTime: Date.now(),
+                        count: 5
+                    }));
+
+                    xhr.onload = function() {
+                        resolve(JSON.stringify({
+                            status: xhr.status,
+                            body: xhr.responseText.substring(0, 1500)
+                        }));
+                    };
+                    xhr.onerror = function() {
+                        resolve(JSON.stringify({ error: true, status: xhr.status }));
+                    };
+                    xhr.send(params);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msg3Result.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

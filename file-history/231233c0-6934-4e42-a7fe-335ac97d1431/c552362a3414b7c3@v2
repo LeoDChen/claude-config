@@ -1,0 +1,39 @@
+<h2>OKKI 输出可视化 — 三种架构方案</h2>
+<p class="subtitle">目标：客户分类 + 行动清单，一次看完，不再翻其他文件</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>单文件超详细报告（.docx）</h3>
+      <p>所有信息合并到一个 Word 文档，按章节展开。分类详情 + 行动清单 + 单人分析全在里面。<br><br>
+      <strong>结构：</strong>封面 → 全局仪表板 → 双轴分类矩阵（含名单+依据）→ 静默风险全景 → 分级行动清单（含话术+卡点）→ 变化趋势 → 附录（市场分布）<br><br>
+      <strong>优点：</strong>一个文件搞定，适合打印/分享/归档<br>
+      <strong>缺点：</strong>文件大，不能快速筛选/排序；每次重新生成覆盖</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>三层分层输出（Excel + MD + 深度分析）</h3>
+      <p>保持多文件体系，但每层承担不同功能，互相交叉引用。<br><br>
+      <strong>一层 Excel 仪表板：</strong>双轴矩阵 + 客户名单 + 静默天数 + 变化趋势（可筛选排序）<br>
+      <strong>二层 MD 行动清单：</strong>带卡点诊断 + 话术 + 时间窗口理由 + 跳转链接到深度分析<br>
+      <strong>三层单人深度分析：</strong>按需生成，被二层交叉引用<br><br>
+      <strong>优点：</strong>各取所需，Excel 可筛选操作，MD 可快速浏览<br>
+      <strong>缺点：</strong>三个文件需配合打开，维护一致性成本高</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>HTML 交互式单页看板</h3>
+      <p>生成一个 HTML 文件，浏览器打开后全部信息在一个页面，折叠/展开/筛选/排序。<br><br>
+      <strong>结构：</strong>顶部全局指标卡 → 可点击的双轴矩阵（点击格子展开客户名单）→ 折叠式行动清单（按级别分组，展开看话术和卡点）→ 静默风险时间轴 → 市场分布饼图<br><br>
+      <strong>优点：</strong>交互性强，信息密度高但不拥挤，筛选排序灵活<br>
+      <strong>缺点：</strong>开发成本最高，需要写 HTML/JS 模板；不能像 Excel 一样二次编辑</p>
+    </div>
+  </div>
+</div>

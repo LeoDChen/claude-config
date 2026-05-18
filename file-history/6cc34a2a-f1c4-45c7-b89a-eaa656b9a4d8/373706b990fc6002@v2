@@ -1,0 +1,240 @@
+// Phase 1: TM 聊天 API 自动侦察
+// 连接到已有 Chrome CDP → 在 onetalk 页面监听网络请求 → 点击联系人 → 捕获 API
+
+const { chromium } = require('playwright');
+
+const CAPTURED = []; // 捕获的所有相关请求
+const TARGET_URLS = ['mtop', 'message', 'chat', 'contact', 'history', 'query'];
+
+function isRelevant(url) {
+    url = url.toLowerCase();
+    return TARGET_URLS.some(k => url.includes(k));
+}
+
+(async () => {
+    const browser = await chromium.connectOverCDP('http://localhost:9222');
+    console.log('✅ 已连接 Chrome CDP\n');
+
+    // 找 onetalk 页面
+    const contexts = browser.contexts();
+    let targetPage = null;
+    for (const ctx of contexts) {
+        for (const page of ctx.pages()) {
+            if (page.url().includes('onetalk.alibaba.com')) {
+                targetPage = page;
+                break;
+            }
+        }
+    }
+
+    if (!targetPage) {
+        // 找 OKKI 包装页（因为 TM 在 iframe 里）
+        for (const ctx of contexts) {
+            for (const page of ctx.pages()) {
+                if (page.url().includes('crm.xiaoman.cn/talk/hub/tm')) {
+                    targetPage = page;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!targetPage) {
+        console.log('❌ 没找到 TM 聊天页面. 当前打开的页面:');
+        for (const ctx of contexts) {
+            for (const page of ctx.pages()) {
+                console.log('  ', page.url().substring(0, 100));
+            }
+        }
+        await browser.close();
+        process.exit(1);
+    }
+
+    console.log('📍 目标页面:', targetPage.url().substring(0, 120));
+
+    // === 方案A: 用 CDP Session 直接监听 Network 事件 ===
+    const cdpSession = await targetPage.context().newCDPSession(targetPage);
+
+    // 监听请求前
+    cdpSession.on('Network.requestWillBeSent', (params) => {
+        const url = params.request.url;
+        if (isRelevant(url)) {
+            CAPTURED.push({
+                type: 'request',
+                url: url,
+                method: params.request.method,
+                postData: params.request.postData,
+                timestamp: Date.now(),
+                requestId: params.requestId
+            });
+        }
+    });
+
+    await cdpSession.send('Network.enable');
+
+    console.log('🔍 网络监听已开启，过滤关键词:', TARGET_URLS.join(', '));
+    console.log('⏳ 现在尝试在页面内查找联系人列表...\n');
+
+    // === 方案B: 页面内 JS 查找和点击联系人 ===
+    // onetalk 是 iframe/PWA，需要找到实际页面
+    let evalPage = targetPage;
+
+    // 如果当前是 OKKI 页面，尝试在 iframe 里操作
+    if (targetPage.url().includes('crm.xiaoman.cn')) {
+        const frames = targetPage.frames();
+        console.log(`📋 找到 ${frames.length} 个 frame`);
+        for (const frame of frames) {
+            const fu = frame.url();
+            console.log(`   frame: ${fu.substring(0, 100)}`);
+            if (fu.includes('onetalk.alibaba.com')) {
+                evalPage = frame;
+                console.log('   ✅ 使用 onetalk iframe\n');
+                break;
+            }
+        }
+    }
+
+    // 先探测页面结构
+    const structure = await evalPage.evaluate(() => {
+        const result = {
+            url: location.href,
+            title: document.title,
+            bodyClasses: document.body?.className || '',
+        };
+
+        // 找所有可能的联系人列表容器
+        const containers = [];
+        const selectors = [
+            '.contact-list', '.chat-list', '.conversation-list',
+            '[class*="contact"]', '[class*="chat"]', '[class*="conversation"]',
+            '[class*="session"]', '[class*="recent"]',
+            'ul', '.list', '.recycle-scroller', '[class*="scroll"]'
+        ];
+
+        for (const sel of selectors) {
+            const el = document.querySelector(sel);
+            if (el && el.children.length > 0) {
+                containers.push({
+                    selector: sel,
+                    childCount: el.children.length,
+                    firstChildTag: el.children[0].tagName,
+                    firstChildText: el.children[0].textContent?.substring(0, 80)
+                });
+            }
+        }
+
+        result.containers = containers;
+
+        // 找所有可点击的联系人条目
+        const clickables = document.querySelectorAll('[class*="contact"] [class*="item"], [class*="chat"] [class*="item"], [class*="session"] [class*="item"], [class*="conversation"] [class*="item"]');
+        result.clickableItems = clickables.length;
+
+        return result;
+    });
+
+    console.log('📊 页面结构探测:');
+    console.log('   URL:', structure.url.substring(0, 80));
+    console.log('   Title:', structure.title);
+    if (structure.containers.length > 0) {
+        console.log('   可能的联系人容器:');
+        for (const c of structure.containers) {
+            console.log(`     "${c.selector}" → ${c.childCount} 个子元素, 第一个: "${c.firstChildText}"`);
+        }
+    } else {
+        console.log('   ⚠️ 没找到明显的联系人容器');
+    }
+    console.log(`   可点击条目数: ${structure.clickableItems}\n`);
+
+    // === 尝试点击第一个联系人 ===
+    if (structure.containers.length > 0) {
+        const firstContainer = structure.containers[0];
+        console.log(`🖱️ 尝试点击 "${firstContainer.selector}" 的第一个子元素...`);
+
+        const clickResult = await evalPage.evaluate((sel) => {
+            const container = document.querySelector(sel);
+            if (!container) return { error: '容器不存在' };
+            const firstChild = container.children[0];
+            if (!firstChild) return { error: '容器无子元素' };
+            const text = firstChild.textContent?.substring(0, 50);
+            firstChild.click();
+            return { clicked: true, text: text, tag: firstChild.tagName };
+        }, firstContainer.selector);
+
+        console.log('   结果:', JSON.stringify(clickResult));
+    }
+
+    // 等待 8 秒让网络请求回来
+    console.log('\n⏳ 等待 8 秒收集网络请求...');
+    await new Promise(r => setTimeout(r, 8000));
+
+    // === 输出结果 ===
+    console.log('\n' + '='.repeat(60));
+    console.log('📡 捕获到的相关网络请求:');
+    console.log('='.repeat(60));
+
+    if (CAPTURED.length === 0) {
+        console.log('❌ 没有捕获到任何匹配的请求.');
+        console.log('   可能原因:');
+        console.log('   1. 页面用了 WebSocket（不走 HTTP）');
+        console.log('   2. 需要特殊操作才能触发请求');
+        console.log('   3. 联系人没点中');
+
+        // 兜底：显示所有捕获到的请求（不限过滤）
+        console.log('\n🔍 扩大搜索范围，看所有非静态资源的 XHR/Fetch...');
+    } else {
+        for (const c of CAPTURED) {
+            console.log(`\n--- ${c.method} ---`);
+            console.log('URL:', c.url.substring(0, 200));
+            if (c.postData) {
+                console.log('Payload:', c.postData.substring(0, 300));
+            }
+        }
+    }
+
+    // 同时用 page.evaluate 拦截未来的请求
+    console.log('\n📋 用 JS 拦截器做二次确认（再等 5 秒）...');
+
+    await evalPage.evaluate(() => {
+        const origFetch = window.fetch;
+        window.__captured = [];
+        window.fetch = function(...args) {
+            const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+            if (url.includes('mtop') || url.includes('message') || url.includes('chat')) {
+                window.__captured.push({ url, method: args[1]?.method || 'GET', body: args[1]?.body, time: Date.now() });
+            }
+            return origFetch.apply(this, args);
+        };
+
+        const origXHR = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function(body) {
+            this._captureBody = body;
+            return origXHR.apply(this, arguments);
+        };
+        const origOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+            this._captureUrl = url;
+            this._captureMethod = method;
+            if (url.includes('mtop') || url.includes('message') || url.includes('chat')) {
+                window.__captured = window.__captured || [];
+                window.__captured.push({ url, method, time: Date.now() });
+            }
+            return origOpen.apply(this, arguments);
+        };
+    });
+
+    await new Promise(r => setTimeout(r, 5000));
+
+    const jsCaptured = await evalPage.evaluate(() => window.__captured || []);
+    if (jsCaptured.length > 0) {
+        console.log(`   JS 拦截到 ${jsCaptured.length} 个请求:`);
+        for (const c of jsCaptured) {
+            console.log(`   ${c.method} ${c.url}`);
+            if (c.body) console.log(`     body: ${typeof c.body === 'string' ? c.body.substring(0, 200) : c.body}`);
+        }
+    } else {
+        console.log('   JS 也没拦截到任何匹配请求');
+    }
+
+    await browser.close();
+    console.log('\n✅ 侦察完成');
+})();

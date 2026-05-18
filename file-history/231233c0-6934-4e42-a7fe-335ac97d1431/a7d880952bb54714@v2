@@ -1,0 +1,147 @@
+/**
+ * 测试：抓取 OKKI 交易 → 销售订单 数据
+ * 用法：node scripts/test_order_fetch.js
+ */
+const { chromium } = require('playwright');
+const path = require('path');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+
+async function main() {
+  console.log('启动 Chrome...');
+  const browser = await chromium.launchPersistentContext(PROFILE, {
+    channel: 'chrome',
+    headless: false,
+    viewport: { width: 1440, height: 900 },
+  });
+  const page = await browser.newPage();
+
+  // 导航到 OKKI
+  await page.goto('https://crm.xiaoman.cn/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  console.log('当前 URL:', page.url());
+
+  // 等登录
+  if (page.url().includes('login')) {
+    console.log('');
+    console.log('========================================');
+    console.log('  请在浏览器中登录 OKKI (小满)');
+    console.log('  登录后脚本自动继续...');
+    console.log('========================================');
+    console.log('');
+    const startTime = Date.now();
+    while (Date.now() - startTime < 5 * 60 * 1000) {
+      await new Promise(r => setTimeout(r, 2000));
+      const url = page.url();
+      if (!url.includes('login')) break;
+    }
+    if (page.url().includes('login')) {
+      console.log('超时退出');
+      await browser.close();
+      return;
+    }
+    console.log('登录成功');
+  }
+
+  // 尝试找到交易/订单入口
+  // 先截图当前页面的导航结构
+  const navText = await page.evaluate(() => {
+    const navs = document.querySelectorAll('nav a, .nav a, .sidebar a, .menu a, [class*="nav"] a, [class*="menu"] a, [class*="side"] a');
+    const result = [];
+    navs.forEach(a => {
+      const text = a.textContent?.trim();
+      const href = a.getAttribute('href') || '';
+      if (text) result.push({ text, href });
+    });
+    return result;
+  });
+  console.log('\n导航链接:');
+  console.log(JSON.stringify(navText, null, 2));
+
+  // 尝试几个可能的订单 URL
+  console.log('\n尝试订单相关 URL...');
+  const tryUrls = [
+    'https://crm.xiaoman.cn/order/',
+    'https://crm.xiaoman.cn/trade/',
+    'https://crm.xiaoman.cn/trade/order/',
+    'https://crm.xiaoman.cn/sales/order/',
+    'https://crm.xiaoman.cn/transaction/',
+  ];
+
+  for (const url of tryUrls) {
+    const p = await browser.newPage();
+    await p.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 2000));
+    const title = await p.title().catch(() => '');
+    const bodyText = await p.evaluate(() => document.body.innerText?.slice(0, 300)).catch(() => '');
+    console.log(`\n${url}`);
+    console.log(`  title: ${title}`);
+    console.log(`  body: ${bodyText}`);
+    await p.close();
+  }
+
+  console.log('\n请在浏览器中手动点击：左侧边栏 → 交易 → 销售订单');
+  console.log('到达页面后，回到终端按回车...');
+
+  // 等用户
+  await new Promise((resolve) => {
+    process.stdin.once('data', resolve);
+  });
+
+  // 读取当前活动页面的 URL 和数据
+  const pages = browser.contexts()[0].pages();
+  let orderPage = null;
+  for (const p of pages) {
+    const url = p.url();
+    if (url.includes('order') || url.includes('trade') || url.includes('sales') || url.includes('transaction')) {
+      orderPage = p;
+      console.log('找到订单页:', url);
+    }
+  }
+
+  if (orderPage) {
+    console.log('\n尝试提取数据...');
+    // 尝试找表格/列表数据
+    const data = await orderPage.evaluate(() => {
+      // 找所有表格
+      const tables = document.querySelectorAll('table');
+      const result = { tableCount: tables.length, tables: [] };
+      tables.forEach((t, i) => {
+        const headers = [];
+        t.querySelectorAll('th').forEach(th => headers.push(th.textContent?.trim()));
+        const rows = [];
+        t.querySelectorAll('tbody tr').forEach(tr => {
+          const cells = [];
+          tr.querySelectorAll('td').forEach(td => cells.push(td.textContent?.trim()));
+          if (cells.length > 0) rows.push(cells);
+        });
+        if (rows.length > 0) result.tables.push({ index: i, headers, rowCount: rows.length, sample: rows.slice(0, 3) });
+      });
+
+      // 找全局 JS 变量
+      const keys = Object.keys(window).filter(k =>
+        k.includes('order') || k.includes('Order') || k.includes('trade') || k.includes('__')
+      );
+      result.suspiciousKeys = keys.slice(0, 20);
+
+      return result;
+    });
+    console.log(JSON.stringify(data, null, 2));
+  } else {
+    console.log('未自动找到订单页。所有页面:');
+    for (const p of pages) {
+      console.log(' ', p.url());
+    }
+  }
+
+  console.log('\n测试完成。浏览器保持打开，可手动查看。');
+  console.log('按回车关闭浏览器...');
+  await new Promise((resolve) => {
+    process.stdin.once('data', resolve);
+  });
+  await browser.close();
+}
+
+main().catch(e => {
+  console.error('错误:', e.message);
+  process.exit(1);
+});

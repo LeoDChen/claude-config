@@ -1,0 +1,351 @@
+/**
+ * P0/P1客户全量深抓 — 点击每个P0/P1客户，加载全部聊天记录，提取完整消息
+ * 用法: node deep-scrape-p0p1.mjs
+ * 前置: Chrome 9222已开，小满TM页面已登录
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+async function getConversationList(frame) {
+  return frame.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map((el, idx) => {
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+      return { index: idx, name };
+    });
+  });
+}
+
+async function clickConversation(frame, index) {
+  await frame.evaluate((idx) => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    const target = containers[idx];
+    if (target) {
+      target.scrollIntoView({ block: 'center' });
+      target.click();
+    }
+  }, index);
+  // Dynamic wait: poll until conversation header updates
+  // No more fixed 1500ms timeout — the root cause of DOM串位
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 300));
+    const loaded = await frame.evaluate(() => {
+      const header = document.querySelector('.im-header-title, .session-header-title, .chat-header-title');
+      return header ? (header.textContent || '').trim() : '';
+    });
+    if (loaded.length > 0) break;
+  }
+}
+
+// ============================================================
+// Identity verification — prevent DOM串位
+// After clicking a customer, verify the loaded conversation
+// actually belongs to them before reading messages.
+// ============================================================
+async function verifyConversationIdentity(frame, expectedName) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const actualName = await frame.evaluate(() => {
+      const header = document.querySelector('.im-header-title, .session-header-title, .chat-header-title');
+      if (header) return (header.textContent || '').trim();
+      // Fallback: check sidebar selection
+      const selected = document.querySelector('.contact-item-container.selected .contact-right');
+      if (selected) return (selected.textContent || '').trim().substring(0, 30);
+      return '';
+    });
+
+    // Fuzzy match: the header may contain extra info (company, country)
+    if (actualName && (
+      actualName.includes(expectedName) ||
+      expectedName.includes(actualName) ||
+      actualName.toLowerCase() === expectedName.toLowerCase()
+    )) {
+      return true;
+    }
+
+    // If no name detected yet, wait and retry
+    if (!actualName || actualName.length === 0) {
+      await new Promise(r => setTimeout(r, 500));
+      continue;
+    }
+
+    // Name mismatch! Previous conversation still showing.
+    // Wait longer for iframe to actually switch.
+    console.log(` [⏳等待切换: 期望${expectedName}, 实际${actualName}]`);
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  return false;
+}
+
+async function waitForMessages(frame, targetName) {
+  for (let i = 0; i < 15; i++) {
+    const hasContent = await frame.evaluate(() =>
+      document.querySelectorAll('.session-rich-content.text, .session-rich-content.card').length > 0
+    );
+    if (hasContent) {
+      // Verify identity before returning
+      if (targetName) {
+        const verified = await verifyConversationIdentity(frame, targetName);
+        if (verified) return true;
+        // Not verified — keep waiting
+        await new Promise(r => setTimeout(r, 500));
+        continue;
+      }
+      return true;
+    }
+    await new Promise(r => setTimeout(r, 500));
+  }
+  return false;
+}
+
+async function scrollChatToLoadAll(frame, { maxScrolls = 40, stableThreshold = 3 } = {}) {
+  const containerInfo = await frame.evaluate(() => {
+    const selectors = [
+      '.message-list-container', '.chat-list', '.im-chat-list',
+      '.message-list', '[class*="message-list"]', '[class*="chat-list"]',
+      '[class*="chat-content"]', '.session-message-list-wrapper',
+    ];
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el && el.scrollHeight > el.clientHeight) {
+        return { selector: sel, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
+      }
+    }
+    return null;
+  });
+
+  if (!containerInfo) return 0;
+
+  let prevCount = 0;
+  let stableCount = 0;
+  let totalScrolled = 0;
+
+  for (let i = 0; i < maxScrolls; i++) {
+    const { count, scrolled } = await frame.evaluate((sel) => {
+      const container = document.querySelector(sel);
+      if (!container) return { count: 0, scrolled: false };
+      const old = container.scrollTop;
+      container.scrollTop = 0;
+      return {
+        count: document.querySelectorAll('.message-item-wrapper.messenger').length,
+        scrolled: old > 0,
+      };
+    }, containerInfo.selector);
+
+    totalScrolled++;
+    if (scrolled) await new Promise(r => setTimeout(r, 600));
+
+    const newCount = await frame.evaluate(() =>
+      document.querySelectorAll('.message-item-wrapper.messenger').length
+    );
+
+    if (newCount === prevCount) {
+      stableCount++;
+      if (stableCount >= stableThreshold) break;
+    } else {
+      stableCount = 0;
+    }
+    prevCount = newCount;
+    if (!scrolled) break;
+  }
+
+  return prevCount;
+}
+
+async function getRenderedMessages(frame) {
+  return frame.evaluate(() => {
+    const messages = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(wrapper => {
+      const isLeft = wrapper.classList.contains('item-left');
+      const isRight = wrapper.classList.contains('item-right');
+      const securityEl = wrapper.querySelector('.session-security');
+      if (securityEl) return;
+
+      const textEl = wrapper.querySelector('.session-rich-content.text');
+      const cardEl = wrapper.querySelector('.session-rich-content.card');
+
+      let content = '';
+      let isCard = false;
+      let cardData = null;
+
+      if (textEl) {
+        content = textEl.textContent.trim()
+          .replace(/翻译中…反馈$/, '')
+          .replace(/由阿里翻译提供反馈$/, '')
+          .replace(/阿里国际Marco大模型翻译反馈$/, '')
+          .replace(/由阿里翻译提供$/, '')
+          .trim();
+      } else if (cardEl) {
+        content = cardEl.textContent.trim();
+        isCard = true;
+        const expinfo = cardEl.getAttribute('data-expinfo');
+        if (expinfo) {
+          try { cardData = JSON.parse(expinfo); } catch (e) {}
+        }
+      } else {
+        return;
+      }
+
+      const timeEl = wrapper.querySelector('p.item-base-info span:last-child');
+      const timestamp = timeEl ? (timeEl.textContent || '').trim() : null;
+
+      const contentImgs = wrapper.querySelectorAll('img');
+      const hasImages = Array.from(contentImgs).some(img => {
+        if (img.classList.contains('emotion')) return false;
+        const s = img.src || '';
+        if (!s.startsWith('http')) return false;
+        if (s.includes('atmgateway-client.alibaba.com/smily')) return false;
+        if (s.includes('clouddisk.alibaba.com')) return false;
+        return true;
+      });
+
+      messages.push({
+        side: isLeft ? 'received' : isRight ? 'sent' : 'system',
+        content: content.substring(0, 2000),
+        timestamp,
+        isCard,
+        cardData,
+        hasImages,
+      });
+    });
+
+    return messages;
+  });
+}
+
+async function findCustomerIndex(frame, targetName) {
+  const list = await getConversationList(frame);
+  const match = list.find(c => c.name === targetName);
+  return match ? match.index : -1;
+}
+
+async function main() {
+  // 读取P0/P1清单
+  const files = (await import('fs')).readdirSync(DATA_DIR).filter(f => f.includes('P0P1深抓清单'));
+  if (files.length === 0) {
+    console.log('❌ 未找到P0P1深抓清单，先运行 extract-all-v2.mjs');
+    return;
+  }
+  const listFile = files.sort().reverse()[0];
+  const p0p1List = JSON.parse(readFileSync(join(DATA_DIR, listFile), 'utf8'));
+
+  console.log(`[deep-scrape] 准备深抓 ${p0p1List.length} 个P0/P1客户`);
+  console.log(`  P0: ${p0p1List.filter(c => c.priority === 'P0').length}人`);
+  console.log(`  P1: ${p0p1List.filter(c => c.priority === 'P1').length}人\n`);
+
+  const { browser, talkFrame } = await connect();
+  console.log('✅ 已连接\n');
+
+  const results = [];
+  const skipped = [];
+  let successCount = 0;
+
+  try {
+    // 先获取会话列表
+    const convList = await getConversationList(talkFrame);
+    console.log(`当前DOM会话列表: ${convList.length}个\n`);
+
+    // 创建名字→索引映射
+    const nameToIndex = {};
+    convList.forEach(c => { nameToIndex[c.name] = c.index; });
+
+    // 只处理P0客户（优先级最高）
+    const p0Customers = p0p1List.filter(c => c.priority === 'P0');
+    const p1Customers = p0p1List.filter(c => c.priority === 'P1');
+
+    const toScrape = [...p0Customers, ...p1Customers];
+
+    for (let i = 0; i < toScrape.length; i++) {
+      const target = toScrape[i];
+      const idx = nameToIndex[target.name];
+
+      if (idx === undefined) {
+        skipped.push(target.name);
+        continue;
+      }
+
+      process.stdout.write(`[${i + 1}/${toScrape.length}] ${target.priority} ${target.name}...`);
+
+      try {
+        await clickConversation(talkFrame, idx);
+        const hasMsgs = await waitForMessages(talkFrame, target.name);
+
+        if (!hasMsgs) {
+          console.log(' ⚠️ 无消息或身份验证失败');
+          continue;
+        }
+
+        // Identity confirmed — now safe to scroll and read
+        const msgCount = await scrollChatToLoadAll(talkFrame);
+        const messages = await getRenderedMessages(talkFrame);
+
+        results.push({
+          name: target.name,
+          priority: target.priority,
+          tier: target.tier,
+          countryCode: target.countryCode,
+          reasons: target.reasons,
+          messageCount: messages.length,
+          messages,
+          scrapedAt: new Date().toISOString(),
+        });
+
+        successCount++;
+        console.log(` ✅ ${messages.length}条`);
+      } catch (e) {
+        console.log(` ❌ ${e.message.substring(0, 50)}`);
+      }
+
+      // Refresh index more frequently (every 5) to avoid stale positions
+      if ((i + 1) % 5 === 0) {
+        const refreshed = await getConversationList(talkFrame);
+        refreshed.forEach(c => { nameToIndex[c.name] = c.index; });
+      }
+    }
+
+    // 保存
+    const now = new Date();
+    const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    const outputPath = join(DATA_DIR, `deep_scrape_${dateStr}.json`);
+
+    writeFileSync(outputPath, JSON.stringify({
+      scrapedAt: now.toISOString(),
+      totalTargeted: toScrape.length,
+      successCount,
+      skippedCount: skipped.length,
+      skipped,
+      results,
+    }, null, 2));
+
+    console.log(`\n✅ 深抓完成: ${successCount}/${toScrape.length} 成功, ${skipped.length} 跳过`);
+    console.log(`   已保存: ${outputPath}`);
+  } finally {
+    // Don't close browser - it's shared
+  }
+}
+
+main().catch(err => {
+  console.error('[deep-scrape] 错误:', err.message);
+  process.exit(1);
+});

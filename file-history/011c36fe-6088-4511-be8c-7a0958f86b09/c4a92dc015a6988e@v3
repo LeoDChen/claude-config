@@ -1,0 +1,103 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED"
+  },
+  "effortLevel": "high",
+  "includeCoAuthoredBy": false,
+  "preferredNotifChannel": "terminal_bell",
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Agent",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(npm *)",
+      "Bash(ls *)",
+      "Bash(cd *)",
+      "Bash(dir *)",
+      "Bash(echo *)",
+      "Bash(cat *)",
+      "Bash(wc *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(sort *)",
+      "Bash(which *)",
+      "Bash(whoami *)",
+      "Bash(date *)",
+      "Bash(uname *)",
+      "Bash(pwd *)",
+      "Bash(powershell *)",
+      "Bash(cmd /c *)",
+      "Bash(cmd /k *)",
+      "Bash(sleep *)",
+      "Bash(npx *)",
+      "Bash(pnpx *)",
+      "Bash(pnpm *)",
+      "Bash(yarn *)",
+      "Bash(find *)",
+      "Bash(where *)",
+      "Bash(whereis *)",
+      "Bash(netstat *)",
+      "Bash(tasklist *)",
+      "Bash(taskkill *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(openssl *)",
+      "Bash(ssh *)",
+      "Bash(scp *)"
+    ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\Windows Ding.wav').PlaySync()\""
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\Windows Notify System Generic.wav').PlaySync()\""
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\Windows Ding.wav').PlaySync()\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\tada.wav').PlaySync()\""
+          }
+        ]
+      }
+    ]
+  }
+}

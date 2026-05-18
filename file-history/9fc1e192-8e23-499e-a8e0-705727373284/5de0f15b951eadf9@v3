@@ -1,0 +1,339 @@
+/**
+ * 小满CRM — Word 看板报告生成器
+ *
+ * 生成格式美观的 .docx 报告
+ */
+
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  HeadingLevel, AlignmentType, WidthType, BorderStyle,
+  ShadingType, TableLayoutType, PageBreak,
+} from 'docx';
+import { writeFileSync } from 'fs';
+import { getCategoryInfo, CATEGORIES } from './classifier.mjs';
+
+// ============================================================
+// 颜色定义
+// ============================================================
+const COLORS = {
+  P0: { bg: 'FCE4EC', text: 'C62828', border: 'EF9A9A' },
+  P1: { bg: 'FFF3E0', text: 'E65100', border: 'FFCC80' },
+  P2: { bg: 'FFF8E1', text: 'F57F17', border: 'FFE082' },
+  P3: { bg: 'F3E5F5', text: '7B1FA2', border: 'CE93D8' },
+  header: { bg: '1A237E', text: 'FFFFFF' },
+  white: { bg: 'FFFFFF', text: '333333' },
+  lightGray: { bg: 'F5F5F5', text: '333333' },
+  subtitle: { bg: 'E8EAF6', text: '283593' },
+};
+
+const CATEGORY_COLORS = {
+  awaiting_reply: 'FF1744',
+  awaiting_quote: 'FF9100',
+  negotiating: '00BCD4',
+  after_sales: 'FF5722',
+  sample_request: 'FF6F00',
+  sample_followup: '00BFA5',
+  awaiting_payment: 'FFD600',
+  awaiting_delivery: '00C853',
+  followup: '2979FF',
+  keep_warm: 'D500F9',
+  activate: '9E9E9E',
+};
+
+const TIER_COLORS = { S: 'D50000', A: 'FF6D00', B: 'FFD600', C: '9E9E9E' };
+const TIER_BG = { S: 'FFEBEE', A: 'FFF3E0', B: 'FFFDE7', C: 'F5F5F5' };
+const PRIO_ORDER = ['P0', 'P1', 'P2', 'P3'];
+const PRIO_LABELS = { P0: '🔥 紧急处理', P1: '⚡ 优先处理', P2: '📋 计划安排', P3: '🗂️ 常规处理' };
+
+// ============================================================
+// 辅助函数
+// ============================================================
+
+function fmtDate(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+// ============================================================
+// 文档构建
+// ============================================================
+
+export async function generateReportDocx(classifiedConversations, options = {}) {
+  const now = options.generatedAt || new Date();
+  const children = [];
+
+  // ==================== 封面标题 ====================
+  children.push(
+    new Paragraph({
+      children: [new TextRun({ text: '小满CRM客户跟进看板', size: 36, bold: true, color: COLORS.header.bg })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: `生成时间: ${fmtDate(now)}   |   总会话: ${classifiedConversations.length}`, size: 20, color: '666666' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 400 },
+    }),
+  );
+
+  // ==================== 一、概览 ====================
+  children.push(
+    new Paragraph({
+      children: [new TextRun({ text: '一、概览', size: 28, bold: true, color: COLORS.header.bg })],
+      spacing: { before: 400, after: 200 },
+    }),
+  );
+
+  for (const pri of PRIO_ORDER) {
+    const priCats = CATEGORIES.filter(c => c.priority === pri);
+    let hasAny = false;
+    for (const cat of priCats) {
+      if (classifiedConversations.some(c => (c.classification?.categoryId || 'other') === cat.id)) {
+        hasAny = true;
+        break;
+      }
+    }
+    if (!hasAny) continue;
+
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: PRIO_LABELS[pri], size: 24, bold: true, color: COLORS[pri].text })],
+        spacing: { before: 200, after: 100 },
+      }),
+    );
+
+    // 构建概览表
+    const tableRows = [
+      new TableRow({
+        tableHeader: true,
+        children: [
+          mkCell('状态', { bold: true, color: COLORS.white.text, sz: 20 }, COLORS.header.bg, 2000),
+          mkCell('数量', { bold: true, color: COLORS.white.text, sz: 20, align: AlignmentType.CENTER }, COLORS.header.bg, 1000),
+          mkCell('客户列表', { bold: true, color: COLORS.white.text, sz: 20 }, COLORS.header.bg, 5000),
+        ],
+      }),
+    ];
+
+    for (const cat of priCats) {
+      const convs = classifiedConversations.filter(c => (c.classification?.categoryId || 'other') === cat.id);
+      if (convs.length === 0) continue;
+
+      const names = convs.map(c => {
+        const tier = c.classification?.tier || 'C';
+        return `[${tier}] ${c.name}`;
+      }).join('、');
+
+      const catColor = CATEGORY_COLORS[cat.id] || '333333';
+      tableRows.push(
+        new TableRow({
+          children: [
+            mkCell(`${cat.emoji} ${cat.label}`, { color: catColor, sz: 20, bold: true }, undefined, 2000),
+            mkCell(String(convs.length), { sz: 20, align: AlignmentType.CENTER }, undefined, 1000),
+            mkCell(names, { sz: 18 }, undefined, 5000),
+          ],
+        }),
+      );
+    }
+
+    children.push(
+      new Table({
+        rows: tableRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        layout: TableLayoutType.FIXED,
+      }),
+      new Paragraph({ spacing: { after: 200 } }),
+    );
+  }
+
+  // ==================== 分隔线 ====================
+  children.push(
+    new Paragraph({
+      children: [new TextRun({ text: '───────────────────────────────────────────', size: 16, color: 'CCCCCC' })],
+      spacing: { before: 400, after: 200 },
+    }),
+  );
+
+  // ==================== 二、详细列表 ====================
+  children.push(
+    new Paragraph({
+      children: [new TextRun({ text: '二、详细列表', size: 28, bold: true, color: COLORS.header.bg })],
+      spacing: { before: 200, after: 200 },
+    }),
+  );
+
+  // 排序：P0 > P1 > P2 > P3，同优先级内 S > A > B > C
+  const priorityRank = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
+  const tierRank = { S: 0, A: 1, B: 2, C: 3 };
+  const sorted = [...classifiedConversations].sort((a, b) => {
+    const aCat = getCategoryInfo(a.classification?.categoryId);
+    const bCat = getCategoryInfo(b.classification?.categoryId);
+    const aPri = aCat ? priorityRank[aCat.priority] ?? 99 : 99;
+    const bPri = bCat ? priorityRank[bCat.priority] ?? 99 : 99;
+    if (aPri !== bPri) return aPri - bPri;
+    return (tierRank[a.classification?.tier] ?? 99) - (tierRank[b.classification?.tier] ?? 99);
+  });
+
+  for (let i = 0; i < sorted.length; i++) {
+    const conv = sorted[i];
+    const cls = conv.classification || {};
+    const catInfo = getCategoryInfo(cls.categoryId) || { emoji: '❓', label: '未分类', priority: 'P4' };
+    const tier = cls.tier || 'C';
+    const tierColor = TIER_COLORS[tier] || '999999';
+    const tierBg = TIER_BG[tier] || 'FFFFFF';
+    const catColor = CATEGORY_COLORS[cls.categoryId] || '333333';
+
+    // 标题行（带颜色标记）
+    const isP0 = catInfo.priority === 'P0';
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: `${catInfo.emoji}  `, size: 22 }),
+          new TextRun({ text: `${i + 1}. ${conv.name}`, size: 24, bold: true }),
+        ],
+        spacing: { before: 300, after: 80 },
+        border: isP0 ? { left: { style: BorderStyle.SINGLE, size: 12, color: 'FF1744' } } : undefined,
+        indent: isP0 ? { left: 200 } : undefined,
+      }),
+    );
+
+    // 元信息行
+    children.push(
+      new Paragraph({
+        children: [
+          mkRun(`分类: ${catInfo.label}`, catColor, 20),
+          mkRun(`  |  优先级: `, '666666', 20),
+          mkRun(`[${tier}]`, tierColor, 20, true),
+          mkRun(`  |  消息: ${conv.messages?.length || 0}条`, '666666', 20),
+        ],
+        spacing: { after: 60 },
+      }),
+    );
+
+    // 判断依据
+    if (cls.reasons?.length) {
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: `依据: ${cls.reasons.join('；')}`, size: 18, color: '888888', italics: true })],
+          spacing: { after: 60 },
+        }),
+      );
+    }
+
+    // 最新消息预览
+    const lastMsg = conv.messages?.[conv.messages.length - 1];
+    if (lastMsg) {
+      const prefix = lastMsg.side === 'received' ? '📩 客户: ' : '📤 我方: ';
+      const snippet = lastMsg.content.substring(0, 200);
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: prefix, size: 18, bold: true, color: lastMsg.side === 'received' ? '1565C0' : '2E7D32' }),
+            new TextRun({ text: `"${snippet}${lastMsg.content.length > 200 ? '...' : ''}"`, size: 18, color: '555555' }),
+          ],
+          spacing: { after: 100 },
+        }),
+      );
+    }
+
+    // 分隔
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: '', size: 6 })],
+        spacing: { after: 60 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: 'E0E0E0' } },
+      }),
+    );
+  }
+
+  // ==================== 附录 ====================
+  children.push(
+    new Paragraph({ children: [new PageBreak()] }),
+    new Paragraph({
+      children: [new TextRun({ text: '附录：分类说明', size: 28, bold: true, color: COLORS.header.bg })],
+      spacing: { before: 200, after: 200 },
+    }),
+  );
+
+  const appendixRows = [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        mkCell('分类', { bold: true, color: COLORS.white.text, sz: 20 }, COLORS.header.bg, 2000),
+        mkCell('优先级', { bold: true, color: COLORS.white.text, sz: 20, align: AlignmentType.CENTER }, COLORS.header.bg, 1200),
+        mkCell('定义', { bold: true, color: COLORS.white.text, sz: 20 }, COLORS.header.bg, 3500),
+        mkCell('建议操作', { bold: true, color: COLORS.white.text, sz: 20 }, COLORS.header.bg, 1800),
+      ],
+    }),
+  ];
+
+  const catActions = {
+    awaiting_reply: '即时回复', awaiting_quote: '尽快报价', negotiating: '保持沟通',
+    after_sales: '优先处理', sample_request: '安排寄样', sample_followup: '跟进反馈',
+    awaiting_payment: '催款跟进', awaiting_delivery: '安排发货', followup: '安排回访',
+    keep_warm: '定期联系', activate: '批量激活',
+  };
+
+  for (const cat of CATEGORIES) {
+    const action = catActions[cat.id] || '—';
+    const catColor = CATEGORY_COLORS[cat.id] || '333333';
+    appendixRows.push(
+      new TableRow({
+        children: [
+          mkCell(`${cat.emoji} ${cat.label}`, { color: catColor, sz: 20, bold: true }, undefined, 2000),
+          mkCell(cat.priority, { sz: 20, align: AlignmentType.CENTER }, undefined, 1200),
+          mkCell(cat.desc, { sz: 18 }, undefined, 3500),
+          mkCell(action, { sz: 18 }, undefined, 1800),
+        ],
+      }),
+    );
+  }
+
+  children.push(
+    new Table({
+      rows: appendixRows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  // ==================== 页脚信息 ====================
+  children.push(
+    new Paragraph({ spacing: { before: 600 } }),
+    new Paragraph({
+      children: [new TextRun({ text: `小星星服饰 · 小满CRM自动生成 · ${fmtDate(now)}`, size: 16, color: '999999' })],
+      alignment: AlignmentType.CENTER,
+    }),
+  );
+
+  // ==================== 构建文档 ====================
+  return new Document({
+    creator: '小满CRM助手',
+    title: '小满CRM客户跟进看板',
+    description: `客户跟进看板 - ${fmtDate(now)}`,
+    styles: { default: { document: { run: { size: 20, font: '微软雅黑' } } } },
+    sections: [{ children }],
+  });
+}
+
+// ============================================================
+// 单元格/文本辅助
+// ============================================================
+
+function mkCell(text, runOpts = {}, shadeColor, width) {
+  const runs = typeof text === 'string'
+    ? [new TextRun({ text, ...runOpts })]
+    : text;
+
+  const shading = shadeColor ? { fill: shadeColor, type: ShadingType.CLEAR } : undefined;
+
+  return new TableCell({
+    children: [new Paragraph({ children: runs, alignment: runOpts.align || AlignmentType.LEFT })],
+    width: width ? { size: width, type: WidthType.DXA } : undefined,
+    shading,
+    verticalAlign: 'center',
+  });
+}
+
+function mkRun(text, color, size, bold = false) {
+  return new TextRun({ text, color, size, bold });
+}

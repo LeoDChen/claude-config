@@ -1,0 +1,258 @@
+const fs = require('fs');
+const path = require('path');
+
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const metaPath = path.join(__dirname, '..', 'data', 'tm_conversations_latest.json');
+
+const SELF_UID = '2500000853693@icbu';
+
+// System message patterns
+const sysPatterns = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+];
+
+function isSystemMsg(content) {
+  if (!content) return true;
+  for (const p of sysPatterns) {
+    if (content.includes(p)) return true;
+  }
+  return false;
+}
+
+function isSelf(msg) {
+  return msg?.message?.sender?.uid === SELF_UID;
+}
+
+function isEmojiOnly(content) {
+  if (!content) return false;
+  const cleaned = content.replace(/\/:[\w]+\.?/g, '').trim();
+  // Also handle basic emojis
+  const emojiOnly = content.match(/^(\/:[\w]+\.?\s*)+$/);
+  if (emojiOnly) return true;
+  // Single word replies
+  const singleWord = ['OK', 'ok', 'Okay', 'okay', 'Yes', 'yes', 'No', 'no', '好的', '👌'];
+  if (singleWord.includes(cleaned)) return true;
+  return false;
+}
+
+// Signal detection
+function detectSignals(content) {
+  const signals = [];
+  const lower = (content || '').toLowerCase();
+
+  // Price/quote signals
+  if (lower.match(/price|报价|quote|سعر|prix|precio|preço|стоимость|السعر/)) signals.push('PRICE');
+  if (lower.match(/\$\d+|\d+\s*usd|\d+\s*dollar/)) signals.push('SPECIFIC_PRICE');
+
+  // Order signals
+  if (lower.match(/order|make order|place order|下单|заказ|pedido|commande/)) signals.push('ORDER');
+  if (lower.match(/pi\b|proforma invoice|proforma|发票/)) signals.push('PI');
+
+  // Address/delivery
+  if (lower.match(/address|delivery|ship|freight|shipping|物流|地址|livraison|envío|الشحن|عنوان/)) signals.push('SHIPPING');
+  if (lower.match(/dap|ddp|fob|exw|cif|door to door/)) signals.push('INCOTERMS');
+
+  // Payment
+  if (lower.match(/payment|paid|deposit|预付|定金|проплата|depósito|acompte/)) signals.push('PAYMENT');
+  if (lower.match(/40%|30%|50%|tt\b|bank transfer|alibaba trade/)) signals.push('PAYMENT_TERMS');
+
+  // Product selection
+  if (lower.match(/style|pattern|design|color|size|material|cotton|款|色|码|面料|talla|taille/)) signals.push('PRODUCT');
+
+  // Sample
+  if (lower.match(/sample|样品|muestra|echantillon|عينة/)) signals.push('SAMPLE');
+
+  // Quantity
+  if (lower.match(/quantity|qty|数量|quantité|cantidad|количество|كمية/)) signals.push('QTY');
+  if (lower.match(/\d+\s*(pcs|pieces|件|pièces)/)) signals.push('SPECIFIC_QTY');
+
+  // Decision maker
+  if (lower.match(/partner|brother|husband|wife|boss|manager|商量|discuss|consult|partenaire/)) signals.push('DECISION_CHAIN');
+
+  // Urgency
+  if (lower.match(/urgent|asap|尽快|urgente/)) signals.push('URGENT');
+
+  return signals;
+}
+
+function toDaysAgo(ts) {
+  return Math.round((Date.now() - ts) / 86400000);
+}
+
+function analyzeConversation(cid, name, country, metaInfo) {
+  const fileName = cid.replace(/#/g, '_').replace(/@/g, '_') + '.json';
+  const filePath = path.join(chatDir, fileName);
+
+  if (!fs.existsSync(filePath)) {
+    return { name, country, error: 'FILE_NOT_FOUND', msgCount: 0 };
+  }
+
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const messages = data.messages || [];
+
+  // Filter out system messages and auto-replies
+  const realMessages = messages.filter(m => {
+    const ext = m?.message?.extension?.basicMessageInfo;
+    if (ext) {
+      try {
+        const info = JSON.parse(ext);
+        if (info.systemMessage === true || info.autoReply === true) return false;
+      } catch(e) {}
+    }
+    const content = m?.message?.content?.text?.content || '';
+    return !isSystemMsg(content);
+  });
+
+  const selfMsgs = realMessages.filter(m => isSelf(m));
+  const clientMsgs = realMessages.filter(m => !isSelf(m));
+
+  // Timeline
+  const allTimestamps = realMessages.map(m => m?.message?.createAt || 0).filter(Boolean);
+  const firstContact = allTimestamps.length > 0 ? toDaysAgo(Math.min(...allTimestamps)) : null;
+  const lastContact = allTimestamps.length > 0 ? toDaysAgo(Math.max(...allTimestamps)) : null;
+  const lastSelfTs = selfMsgs.length > 0 ? Math.max(...selfMsgs.map(m => m?.message?.createAt || 0)) : null;
+  const lastClientTs = clientMsgs.length > 0 ? Math.max(...clientMsgs.map(m => m?.message?.createAt || 0)) : null;
+
+  // Last non-system, non-emoji message
+  let lastEffectiveMsg = null;
+  for (let i = realMessages.length - 1; i >= 0; i--) {
+    const m = realMessages[i];
+    const content = m?.message?.content?.text?.content || '';
+    if (!isEmojiOnly(content)) {
+      lastEffectiveMsg = {
+        content: content.substring(0, 200),
+        isSelf: isSelf(m),
+        daysAgo: toDaysAgo(m?.message?.createAt || 0),
+        ts: m?.message?.createAt || 0,
+      };
+      break;
+    }
+  }
+
+  // Client's last message
+  let lastClientMsg = null;
+  for (let i = realMessages.length - 1; i >= 0; i--) {
+    const m = realMessages[i];
+    if (!isSelf(m)) {
+      lastClientMsg = {
+        content: (m?.message?.content?.text?.content || '').substring(0, 200),
+        daysAgo: toDaysAgo(m?.message?.createAt || 0),
+      };
+      break;
+    }
+  }
+
+  // Aggregate all signals from all messages
+  const allSignals = new Set();
+  const recentMsgs = realMessages.slice(-20); // Last 20 messages
+  recentMsgs.forEach(m => {
+    const content = m?.message?.content?.text?.content || '';
+    detectSignals(content).forEach(s => allSignals.add(s));
+  });
+
+  // Determine conversation stage
+  let stage = 'UNKNOWN';
+  const signalArr = Array.from(allSignals);
+  if (signalArr.includes('PI') || (signalArr.includes('SPECIFIC_PRICE') && signalArr.includes('SHIPPING'))) {
+    stage = 'PI_SENT_WAITING_PAYMENT';
+  } else if (signalArr.includes('SPECIFIC_PRICE') && signalArr.includes('PRODUCT')) {
+    stage = 'NEGOTIATING';
+  } else if (signalArr.includes('PRICE') || signalArr.includes('SPECIFIC_PRICE')) {
+    stage = 'QUOTE_SENT';
+  } else if (signalArr.includes('PRODUCT') && realMessages.length >= 5) {
+    stage = 'PRODUCT_DISCUSSION';
+  } else if (realMessages.length >= 3) {
+    stage = 'INITIAL_INQUIRY';
+  } else {
+    stage = 'LOW_ENGAGEMENT';
+  }
+
+  // Priority reassessment
+  let revisedPriority = null;
+  if (signalArr.includes('PI') && lastContact <= 3) revisedPriority = 0;
+  if (signalArr.includes('SPECIFIC_PRICE') && signalArr.includes('QTY') && lastContact <= 2) revisedPriority = 0;
+  if (clientMsgs.length >= 5 && lastContact <= 2) revisedPriority = Math.min(revisedPriority || 9, 0);
+
+  // Client reply in last 24h
+  if (lastClientTs && toDaysAgo(lastClientTs) <= 1) revisedPriority = Math.min(revisedPriority || 9, 0);
+
+  return {
+    name,
+    country,
+    totalMsgs: messages.length,
+    realMsgs: realMessages.length,
+    selfMsgs: selfMsgs.length,
+    clientMsgs: clientMsgs.length,
+    firstContactDaysAgo: firstContact,
+    lastContactDaysAgo: lastContact,
+    lastSelfDaysAgo: lastSelfTs ? toDaysAgo(lastSelfTs) : null,
+    lastClientDaysAgo: lastClientTs ? toDaysAgo(lastClientTs) : null,
+    signals: signalArr,
+    stage,
+    lastEffectiveMsg,
+    lastClientMsg,
+    revisedPriority,
+    cid,
+  };
+}
+
+// P0/P1 candidates from S1 + the 14 active customers
+const p0p1Names = [
+  'Mona almuharraqy', 'ali Amjid', 'diego vargas', 'Christabel Kanunsha',
+  'jonathan aston', 'Aloh Voma', 'Mezna Alawfi', 'Clara ElAssaad',
+  'Inderpreet kaur', 'WELE Mounia', 'Rosette Ngoy', 'Aboulaye Rabiatou',
+  'Esther Chola', 'Bamba Ami', 'Hakim Ezat', 'Abdulrhman alal',
+  'Aula Alsaad', 'amer ly', 'Sara Dibes', 'Christine Muwela',
+  'ayh khyry', 'Marcos Kuyu', 'adriano.1989 NA', 'Christelle ITwite',
+  'Alina Svinchuk', 'Keinjol Tata', 'Begimai Akymbekova', 'Celeste Albarracin',
+  'Brian Robert Ocholi', 'Asma Noor', 'arshavin amoah', 'rehema kiseyu',
+  'Mumtaz Aziz', 'Sifa Vano', 'LISKEY RIVERO', 'yoselyn Rodriguez',
+];
+
+const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+
+const results = [];
+for (const name of p0p1Names) {
+  const conv = meta.conversations.find(c => c.name === name);
+  if (!conv) { console.log(`SKIP ${name}: not in metadata`); continue; }
+  const r = analyzeConversation(conv.cid, name, conv.complianceCountryCode, conv);
+  results.push(r);
+}
+
+// Sort: P0 first (revised), then by lastContact
+results.sort((a, b) => {
+  const pa = a.revisedPriority ?? 9;
+  const pb = b.revisedPriority ?? 9;
+  if (pa !== pb) return pa - pb;
+  return (a.lastContactDaysAgo || 999) - (b.lastContactDaysAgo || 999);
+});
+
+console.log('=== S2 DEEP ANALYSIS RESULTS ===\n');
+
+for (const r of results) {
+  console.log(`--- ${r.name} | ${r.country} ---`);
+  console.log(`  消息: total=${r.totalMsgs} real=${r.realMsgs} 我方=${r.selfMsgs} 客户=${r.clientMsgs}`);
+  console.log(`  时间: 首次=${r.firstContactDaysAgo}d前 最后=${r.lastContactDaysAgo}d前 客户最后=${r.lastClientDaysAgo}d前`);
+  console.log(`  阶段: ${r.stage} | 修正优先级: P${r.revisedPriority ?? 'N/A'}`);
+  console.log(`  信号: ${r.signals.join(', ') || '(无)'}`);
+  if (r.lastEffectiveMsg) {
+    console.log(`  有效最后消息[${r.lastEffectiveMsg.isSelf ? '我方' : '客户'} ${r.lastEffectiveMsg.daysAgo}d前]: ${r.lastEffectiveMsg.content.substring(0, 100)}`);
+  }
+  if (r.lastClientMsg) {
+    console.log(`  客户最后消息[${r.lastClientMsg.daysAgo}d前]: ${r.lastClientMsg.content.substring(0, 100)}`);
+  }
+  if (r.error) console.log(`  错误: ${r.error}`);
+  console.log('');
+}
+
+// Export
+fs.writeFileSync(
+  path.join(__dirname, '..', 'data', 's2_analysis.json'),
+  JSON.stringify(results, null, 2)
+);
+console.log('Exported to data/s2_analysis.json');

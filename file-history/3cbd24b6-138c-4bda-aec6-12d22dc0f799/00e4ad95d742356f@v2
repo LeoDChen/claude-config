@@ -1,0 +1,16 @@
+---
+name: 公司及个人信息输出规则
+description: 公司名/人名/地址/邮箱/电话等必须输出英文原文，禁止翻译
+type: feedback
+originSessionId: cc328e39-91ad-4fbd-8de9-70120d91c775
+---
+话术中涉及以下信息时，必须用英文原文输出，禁止翻译（翻译可能导致客户沟通出错）：
+- 公司全称：Yiyang Xiaoxingxing Garments Co., Ltd.
+- 公司地址：Room 208, Building 4, Wanli Market, Yiyang High-Tech Zone, Hunan Province, China
+- 英文名：Leo D. Chen
+- 邮箱：leod.chen@yiyangxiaoxingxing.com
+- 电话：188163746616
+
+**Why:** 翻译公司名/人名/地址会导致客户无法正确识别发件方，甚至可能被平台判定为信息不一致。
+
+**How to apply:** 所有客户沟通话术中，签名区、公司介绍部分的公司名/人名/地址/联系方式一律用英文原文。正文分析说明部分可以用中文。

@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# 声音控制: sound_control on|off|toggle|vol <0-100>|status
+# 用法: bash ~/.claude/scripts/sound_control.sh [on|off|toggle|vol <n>|status]
+
+SCRIPT_DIR="$HOME/.claude/scripts"
+
+show_status() {
+    powershell -ExecutionPolicy Bypass -Command "
+        \$configPath = \"\$env:USERPROFILE\\.claude\\sound_config.json\"
+        if (Test-Path \$configPath) {
+            \$c = Get-Content \$configPath | ConvertFrom-Json
+            if (\$c.enabled) { \$status = '开启' } else { \$status = '关闭' }
+            Write-Host (\"声音: \" + \$status + \"  音量: \" + \$c.volume + \"%\")
+        } else {
+            Write-Host '声音: 开启  音量: 80% (默认)'
+        }
+    "
+}
+
+case "${1:-}" in
+    on)
+        powershell -ExecutionPolicy Bypass -Command "
+            \$p = \"\$env:USERPROFILE\\.claude\\sound_config.json\"
+            \$c = Get-Content \$p | ConvertFrom-Json
+            \$c.enabled = \$true
+            \$c | ConvertTo-Json | Set-Content \$p
+            Write-Host '声音已开启'
+        "
+        ;;
+    off)
+        powershell -ExecutionPolicy Bypass -Command "
+            \$p = \"\$env:USERPROFILE\\.claude\\sound_config.json\"
+            \$c = Get-Content \$p | ConvertFrom-Json
+            \$c.enabled = \$false
+            \$c | ConvertTo-Json | Set-Content \$p
+            Write-Host '声音已关闭'
+        "
+        ;;
+    toggle)
+        powershell -ExecutionPolicy Bypass -Command "
+            \$p = \"\$env:USERPROFILE\\.claude\\sound_config.json\"
+            \$c = Get-Content \$p | ConvertFrom-Json
+            \$c.enabled = -not \$c.enabled
+            if (\$c.enabled) { \$msg = '声音已开启' } else { \$msg = '声音已关闭' }
+            \$c | ConvertTo-Json | Set-Content \$p
+            Write-Host \$msg
+        "
+        ;;
+    vol|volume)
+        if [ -z "${2:-}" ] || ! [[ "$2" =~ ^[0-9]+$ ]]; then
+            echo "用法: sound_control vol <0-100>"
+            exit 1
+        fi
+        powershell -ExecutionPolicy Bypass -Command "
+            \$p = \"\$env:USERPROFILE\\.claude\\sound_config.json\"
+            \$c = Get-Content \$p | ConvertFrom-Json
+            \$c.enabled = \$true
+            \$c.volume = $2
+            \$c | ConvertTo-Json | Set-Content \$p
+            Write-Host \"音量已设置为 $2%\"
+        "
+        powershell -ExecutionPolicy Bypass -File "$(cygpath -w "$SCRIPT_DIR/play_sound.ps1")" -sound "Windows Notify System Generic"
+        ;;
+    status|"")
+        show_status
+        ;;
+    *)
+        echo "用法: sound_control {on|off|toggle|vol <0-100>|status}"
+        exit 1
+        ;;
+esac

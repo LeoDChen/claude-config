@@ -1,0 +1,144 @@
+const fs = require("fs");
+const {
+  Document, Packer, Paragraph, TextRun, HeadingLevel,
+  Table, TableRow, TableCell, WidthType, BorderStyle,
+  AlignmentType, ShadingType
+} = require("docx");
+
+const md = fs.readFileSync("D:\\ClaudeWorkspace\\10_工具脚本\\Claude_Code_Windows安装指南_小白版.md", "utf-8");
+
+const lines = md.split("\n");
+const children = [];
+let i = 0;
+
+function addPara(text, opts = {}) {
+  children.push(new Paragraph({
+    spacing: { after: 120 },
+    ...opts,
+    children: [new TextRun({ text, ...opts.run })]
+  }));
+}
+
+function addHeading(text, level) {
+  children.push(new Paragraph({
+    heading: HeadingLevel["HEADING_" + level],
+    spacing: { before: level === 1 ? 400 : 280, after: 160 },
+    children: [new TextRun({ text, bold: true, size: level === 1 ? 36 : level === 2 ? 28 : 24 })]
+  }));
+}
+
+function addCode(text) {
+  children.push(new Paragraph({
+    spacing: { after: 80, before: 80 },
+    indent: { left: 360 },
+    shading: { type: ShadingType.SOLID, color: "F0F0F0" },
+    children: [new TextRun({ text, font: "Consolas", size: 18 })]
+  }));
+}
+
+function addBullet(text, boldPrefix) {
+  const runs = [];
+  if (boldPrefix) {
+    runs.push(new TextRun({ text: boldPrefix, bold: true }));
+  }
+  runs.push(new TextRun({ text }));
+  children.push(new Paragraph({
+    spacing: { after: 80 },
+    indent: { left: 360 },
+    bullet: { level: 0 },
+    children: runs
+  }));
+}
+
+while (i < lines.length) {
+  const line = lines[i];
+
+  if (line.startsWith("# ") && !line.startsWith("## ")) {
+    addHeading(line.slice(2), 1);
+  } else if (line.startsWith("## ")) {
+    addHeading(line.slice(3), 2);
+  } else if (line.startsWith("### ")) {
+    addHeading(line.slice(4), 3);
+  } else if (line.startsWith("---")) {
+    children.push(new Paragraph({ spacing: { after: 80 }, children: [] }));
+  } else if (line.startsWith("```")) {
+    let codeLines = [];
+    i++;
+    while (i < lines.length && !lines[i].startsWith("```")) {
+      codeLines.push(lines[i]);
+      i++;
+    }
+    addCode(codeLines.join("\n"));
+  } else if (line.startsWith("|")) {
+    // Table
+    const tableRows = [];
+    let headerCells = line.split("|").filter(c => c.trim()).map(c => new TextRun({ text: c.trim(), bold: true }));
+    tableRows.push(new TableRow({ children: headerCells.map(t => new TableCell({
+      children: [new Paragraph({ children: [t] })],
+      shading: { type: ShadingType.SOLID, color: "E0E0E0" }
+    })) }));
+    i += 2; // skip separator line
+    while (i < lines.length && lines[i].startsWith("|")) {
+      const cells = lines[i].split("|").filter(c => c.trim()).map(c => new TextRun({ text: c.trim() }));
+      tableRows.push(new TableRow({ children: cells.map(t => new TableCell({
+        children: [new Paragraph({ children: [t] })]
+      })) }));
+      i++;
+    }
+    i--;
+    children.push(new Table({
+      rows: tableRows,
+      width: { size: 100, type: WidthType.PERCENTAGE }
+    }));
+  } else if (line.startsWith("- **") || line.startsWith("- **")) {
+    const match = line.match(/^- \*\*(.+?)\*\*[：:]\s*(.*)/);
+    if (match) {
+      addBullet(match[2], match[1] + "：");
+    } else {
+      addBullet(line.replace(/^- /, ""));
+    }
+  } else if (line.match(/^\d+\.\s/)) {
+    const text = line.replace(/^\d+\.\s/, "");
+    if (text.startsWith("**")) {
+      const match = text.match(/^\*\*(.+?)\*\*[：:]\s*(.*)/);
+      if (match) {
+        addBullet(match[2], match[1] + "：");
+      }
+    } else {
+      addBullet(text);
+    }
+  } else if (line.trim()) {
+    // Bold handling
+    const parts = [];
+    let remaining = line;
+    while (remaining.length > 0) {
+      const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+      if (boldMatch) {
+        if (boldMatch.index > 0) parts.push(new TextRun({ text: remaining.slice(0, boldMatch.index) }));
+        parts.push(new TextRun({ text: boldMatch[1], bold: true }));
+        remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+      } else {
+        parts.push(new TextRun({ text: remaining }));
+        break;
+      }
+    }
+    children.push(new Paragraph({
+      spacing: { after: 100 },
+      children: parts.length > 0 ? parts : [new TextRun({ text: line })]
+    }));
+  }
+  i++;
+}
+
+const doc = new Document({
+  sections: [{
+    properties: {},
+    children
+  }]
+});
+
+const outPath = "C:\\Users\\Administrator\\Desktop\\Claude_Code_Windows安装指南.docx";
+Packer.toBuffer(doc).then(buf => {
+  fs.writeFileSync(outPath, buf);
+  console.log("已生成: " + outPath);
+});

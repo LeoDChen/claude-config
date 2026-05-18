@@ -1,0 +1,855 @@
+const PptxGenJS = require("pptxgenjs");
+const path = require("path");
+
+const pptx = new PptxGenJS();
+pptx.layout = "LAYOUT_WIDE"; // 16:9
+
+// ── Color Palette ──
+const C = {
+  navy:   "1B3A5C",
+  blue:   "2B6CB0",
+  accent: "3182CE",
+  light:  "EBF4FF",
+  gray:   "718096",
+  dark:   "1A202C",
+  white:  "FFFFFF",
+  red:    "C53030",
+  green:  "2F855A",
+  orange: "DD6B20",
+  bg:     "F7FAFC",
+};
+
+// ── Helpers ──
+function slideBase(slide, title, subtitle) {
+  slide.background = { fill: C.bg };
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 0, y: 0, w: "100%", h: 0.85,
+    fill: { color: C.navy },
+  });
+  slide.addText(title, {
+    x: 0.6, y: 0.1, w: "90%", h: 0.6,
+    fontSize: 22, fontFace: "Microsoft YaHei", color: C.white, bold: true,
+  });
+  if (subtitle) {
+    slide.addText(subtitle, {
+      x: 0.6, y: 1.0, w: "90%", h: 0.4,
+      fontSize: 12, fontFace: "Microsoft YaHei", color: C.gray,
+    });
+  }
+}
+
+function placeholderBox(slide, x, y, w, h, label) {
+  slide.addShape(pptx.ShapeType.rect, {
+    x, y, w, h,
+    fill: { color: "EDF2F7" },
+    line: { color: C.accent, width: 1.5, dashType: "dash" },
+  });
+  slide.addText(label, {
+    x, y, w, h,
+    fontSize: 11, fontFace: "Microsoft YaHei", color: C.gray,
+    align: "center", valign: "middle",
+  });
+}
+
+function keyMetric(slide, x, y, value, label, color) {
+  slide.addText(value, {
+    x, y, w: 2.2, h: 0.6,
+    fontSize: 28, fontFace: "Microsoft YaHei", color: color || C.blue,
+    bold: true, align: "center",
+  });
+  slide.addText(label, {
+    x, y: y + 0.55, w: 2.2, h: 0.4,
+    fontSize: 11, fontFace: "Microsoft YaHei", color: C.gray, align: "center",
+  });
+}
+
+// ==========================================================================
+// SLIDE 1: 封面
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  s.background = { fill: C.navy };
+  // Decorative top bar
+  s.addShape(pptx.ShapeType.rect, {
+    x: 0, y: 0, w: "100%", h: 0.15, fill: { color: C.accent },
+  });
+  // Main title
+  s.addText("医疗治疗仪行业", {
+    x: 1.0, y: 1.5, w: "80%", h: 1.0,
+    fontSize: 40, fontFace: "Microsoft YaHei", color: C.white, bold: true,
+  });
+  s.addText("阿里巴巴国际站 · 市场分析报告", {
+    x: 1.0, y: 2.4, w: "80%", h: 0.7,
+    fontSize: 26, fontFace: "Microsoft YaHei", color: C.light,
+  });
+  // Divider
+  s.addShape(pptx.ShapeType.rect, {
+    x: 1.0, y: 3.3, w: 3.2, h: 0.06, fill: { color: C.accent },
+  });
+  // Subtitle
+  s.addText(
+    "激光治疗仪 · 红蓝光治疗仪 · 经颅磁电治疗仪 · 检测仪及配件\n" +
+    "全球市场机遇 | 竞争格局分析 | 平台趋势洞察",
+    {
+      x: 1.0, y: 3.6, w: "80%", h: 0.9,
+      fontSize: 14, fontFace: "Microsoft YaHei", color: "A0C4E8",
+      lineSpacingMultiple: 1.6,
+    }
+  );
+  // Date
+  s.addText("2026年5月", {
+    x: 1.0, y: 4.8, w: 4, h: 0.4,
+    fontSize: 11, fontFace: "Microsoft YaHei", color: C.gray,
+  });
+}
+
+// ==========================================================================
+// SLIDE 2: 核心摘要
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "核心发现摘要", "数据来源：海关总署、ITC Trade Map、行业研究报告");
+
+  keyMetric(s, 0.6, 1.2, "$43-60B", "全球医疗激光市场规模（2025）", C.blue);
+  keyMetric(s, 3.2, 1.2, "10-12%", "年复合增长率（2026-2033）", C.green);
+  keyMetric(s, 5.8, 1.2, "$500B+", "中国医疗器械出口额（2024）", C.blue);
+  keyMetric(s, 8.4, 1.2, "15.2%", "红光治疗品类增速", C.orange);
+
+  keyMetric(s, 0.6, 2.5, "190+", "中国医械出口覆盖国家", C.blue);
+  keyMetric(s, 3.2, 2.5, "¥3,612亿", "2024年中国医械出口总额", C.blue);
+  keyMetric(s, 5.8, 2.5, "+13.35%", "一带一路市场出口增速", C.green);
+  keyMetric(s, 8.4, 2.5, "$1,809亿", "全球HS9018总进口额", C.orange);
+
+  // Key insight box
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.6, y: 3.6, w: "90%", h: 1.0,
+    fill: { color: C.light },
+    rectRadius: 0.1,
+  });
+  s.addText(
+    "市场判断：全球医疗激光与物理治疗设备市场正处于高速增长期。亚太（尤其是东南亚）是增速最快的区域，" +
+    "中国作为全球最大医疗器械制造国，出口连续增长，\"一带一路\"国家需求尤为旺盛。" +
+    "阿里国际站医疗健康类目已成为平台重点增长赛道，治疗仪品类供应商数量适中，尚未进入红海竞争。",
+    {
+      x: 0.9, y: 3.75, w: "83%", h: 0.7,
+      fontSize: 12, fontFace: "Microsoft YaHei", color: C.dark, lineSpacingMultiple: 1.4,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 3: 品类机会分析
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "产品品类机会分析", "基于阿里巴巴国际站搜索结果及行业公开数据");
+
+  const rows = [
+    [
+      { text: "产品品类", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "全球市场规模", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "年增长率", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "供应商数量", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "竞争程度", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "机会判断", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+    ],
+    [
+      { text: "激光治疗仪", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+      { text: "$43-60B（含医疗激光系统）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "10-12%", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.green } },
+      { text: "中等（约300-500家）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "中高", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.orange } },
+      { text: "★★★★ 核心赛道", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true, color: C.blue } },
+    ],
+    [
+      { text: "红蓝光治疗仪", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+      { text: "$9.6B+（仅红光面板）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "15.2%", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.green } },
+      { text: "较多（500+家）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "高", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.red } },
+      { text: "★★★ 差异化切入", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true, color: C.orange } },
+    ],
+    [
+      { text: "经颅磁治疗仪（TMS）", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+      { text: "$13-17B", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "9.6%", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.green } },
+      { text: "较少（<100家真正合规）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "低", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.green } },
+      { text: "★★★★★ 蓝海机会", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true, color: C.green } },
+    ],
+    [
+      { text: "检测仪及配件", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+      { text: "全球康复设备$195-258B", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "6.1%", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+      { text: "多（产品差异大）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "中", options: { fontSize: 11, fontFace: "Microsoft YaHei", color: C.orange } },
+      { text: "★★★ 长尾品类", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true, color: C.orange } },
+    ],
+  ];
+
+  s.addTable(rows, {
+    x: 0.5, y: 1.5, w: "90%",
+    colW: [2.0, 2.8, 1.5, 2.5, 1.2, 2.5],
+    rowH: [0.5, 0.6, 0.6, 0.6, 0.6],
+    border: { type: "solid", pt: 0.5, color: "CBD5E0" },
+    autoPage: false,
+  });
+
+  // TMS note
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.5, y: 4.6, w: "90%", h: 0.7,
+    fill: { color: "FFF5F5" },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "注意：TMS品类在阿里国际站真正持有FDA/CE认证的供应商极少（<20家），多数产品为LED光疗设备借用TMS关键词。合规的临床级TMS是显著的蓝海。",
+    {
+      x: 0.8, y: 4.7, w: "83%", h: 0.5,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.red,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 4: 全球买家地域分析
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "全球买家地域分布", "数据来源：ITC Trade Map (UN COMTRADE)、中国海关总署");
+
+  const rows = [
+    [
+      { text: "排名", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "国家/地区", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "2024进口额（HS 9018）", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "市场特征", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+    ],
+    [{ text: "1", options: { fontSize: 14, fontFace: "Microsoft YaHei", bold: true, align: "center" } },
+     { text: "美国", options: { fontSize: 12, fontFace: "Microsoft YaHei", bold: true } },
+     { text: "$414.7亿", options: { fontSize: 12, fontFace: "Microsoft YaHei", bold: true, color: C.blue } },
+     { text: "全球最大医械进口市场，FDA准入门槛高但利润丰厚", options: { fontSize: 10, fontFace: "Microsoft YaHei" } }],
+    [{ text: "2", options: { fontSize: 14, fontFace: "Microsoft YaHei", bold: true, align: "center" } },
+     { text: "荷兰", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "$142.4亿", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "欧洲门户，鹿特丹港分销至全欧", options: { fontSize: 10, fontFace: "Microsoft YaHei" } }],
+    [{ text: "3", options: { fontSize: 14, fontFace: "Microsoft YaHei", bold: true, align: "center" } },
+     { text: "德国", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "$140.2亿", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "欧洲最大医疗器械市场，CE认证刚需", options: { fontSize: 10, fontFace: "Microsoft YaHei" } }],
+    [{ text: "4", options: { fontSize: 14, fontFace: "Microsoft YaHei", bold: true, align: "center" } },
+     { text: "中国", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "$112.2亿", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "进口替代空间大，高端设备需求增长", options: { fontSize: 10, fontFace: "Microsoft YaHei" } }],
+    [{ text: "5", options: { fontSize: 14, fontFace: "Microsoft YaHei", bold: true, align: "center" } },
+     { text: "日本", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "$69.8亿", options: { fontSize: 12, fontFace: "Microsoft YaHei" } },
+     { text: "老龄化驱动，康复设备需求旺盛", options: { fontSize: 10, fontFace: "Microsoft YaHei" } }],
+    [{ text: "6-10", options: { fontSize: 11, fontFace: "Microsoft YaHei", align: "center" } },
+     { text: "法/比/英/墨/意", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+     { text: "合计$288.4亿", options: { fontSize: 11, fontFace: "Microsoft YaHei" } },
+     { text: "欧洲为主的成熟市场", options: { fontSize: 10, fontFace: "Microsoft YaHei" } }],
+  ];
+
+  s.addTable(rows, {
+    x: 0.4, y: 1.5, w: "92%",
+    colW: [0.7, 1.2, 2.5, 5.0],
+    rowH: [0.45, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+    border: { type: "solid", pt: 0.5, color: "CBD5E0" },
+    autoPage: false,
+  });
+
+  // Growth markets note
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.4, y: 4.85, w: "92%", h: 0.65,
+    fill: { color: C.light },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "高增长新兴市场：东南亚（+12.5%）、\"一带一路\"沿线（中国对其出口+13.35%）、中东GCC（沙特Vision 2030医疗投入加大）、东盟（+26.2%）",
+    {
+      x: 0.7, y: 4.92, w: "88%", h: 0.5,
+      fontSize: 11, fontFace: "Microsoft YaHei", color: C.dark,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 5: 竞品总览
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "竞品格局总览", "阿里国际站治疗仪类目四大品类竞品概况");
+
+  const rows = [
+    [
+      { text: "品类", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 10, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "代表店铺数量", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 10, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "头部GMV区间", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 10, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "最高评分", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 10, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "核心产业集群", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 10, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "竞争格局", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 10, fontFace: "Microsoft YaHei", align: "center" } },
+    ],
+    [
+      { text: "激光治疗仪", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "4家重点 + 更多", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "$110万-$150万", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.blue } },
+      { text: "4.8/5.0", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "武汉、广州", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "中高竞争，头部集中", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.orange } },
+    ],
+    [
+      { text: "红蓝光治疗仪", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "5家重点 + 更多", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "数据较少公开", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "4.8/5.0", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "深圳、郑州", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "竞争激烈，需差异化", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.red } },
+    ],
+    [
+      { text: "经颅磁（TMS）", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "7家（真正合规<5家）", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "单品$8,500-$9,100", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.blue } },
+      { text: "5.0/5.0", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "深圳、宁波、河南", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "蓝海，合规入局机会大", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.green, bold: true } },
+    ],
+    [
+      { text: "物理治疗综合设备", options: { fontSize: 11, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "7家重点 + 更多", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "$29万-$56万", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.blue } },
+      { text: "5.0/5.0", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "深圳、广州", options: { fontSize: 10, fontFace: "Microsoft YaHei" } },
+      { text: "中等竞争，品类广机会多", options: { fontSize: 10, fontFace: "Microsoft YaHei", color: C.orange } },
+    ],
+  ];
+
+  s.addTable(rows, {
+    x: 0.35, y: 1.5, w: "93%",
+    colW: [2.0, 2.5, 2.2, 1.5, 2.0, 2.5],
+    rowH: [0.45, 0.55, 0.55, 0.55, 0.55],
+    border: { type: "solid", pt: 0.5, color: "CBD5E0" },
+    autoPage: false,
+  });
+
+  // Competition tiers
+  s.addText("竞争梯队", {
+    x: 0.4, y: 4.2, w: 4, h: 0.4,
+    fontSize: 14, fontFace: "Microsoft YaHei", color: C.navy, bold: true,
+  });
+
+  const tiers = [
+    { tier: "第一梯队", desc: "Konmed(5.0,12年)、Roundwhale(5.0,复购42%)、Rhein Laser(GMV$1.1M)", color: "2B6CB0" },
+    { tier: "第二梯队", desc: "Azure(ISO13485+FDA)、XFT(21年企业)、Sunnyou(17年阿里)", color: "3182CE" },
+    { tier: "第三梯队", desc: "Genwave(99.2%好评)、Huangkai(14年)、HS Medical(100%交货)", color: "63B3ED" },
+    { tier: "第四梯队", desc: "性价比型：AmywellMED($428起)、Deen($440起)", color: "90CDF4" },
+  ];
+
+  tiers.forEach((t, i) => {
+    const y = 4.6 + i * 0.32;
+    s.addShape(pptx.ShapeType.rect, {
+      x: 0.4, y, w: 0.08, h: 0.26, fill: { color: t.color },
+    });
+    s.addText(t.tier, {
+      x: 0.6, y, w: 1.3, h: 0.26,
+      fontSize: 9, fontFace: "Microsoft YaHei", color: t.color, bold: true,
+    });
+    s.addText(t.desc, {
+      x: 1.9, y, w: 8.5, h: 0.26,
+      fontSize: 9, fontFace: "Microsoft YaHei", color: C.dark,
+    });
+  });
+}
+
+// ==========================================================================
+// SLIDE 6: 对标店铺分析① - 激光治疗仪
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "对标店铺分析 · 激光治疗仪", "Rhein Laser Technologies — Class 4 高功率二极管激光");
+
+  // Left: placeholder
+  placeholderBox(s, 0.4, 1.4, 4.6, 2.8, "请插入 Rhein Laser 店铺名片截图\n（鼠标悬停于公司名称获取店铺卡片）");
+
+  // Right: data cards
+  const metrics = [
+    { label: "在线GMV", value: "US$1,100,000+", color: C.blue },
+    { label: "经营年限", value: "4 YRS", color: C.navy },
+    { label: "评分", value: "4.8 / 5.0", color: C.green },
+    { label: "响应时间", value: "≤ 3小时", color: C.blue },
+    { label: "准时发货率", value: "91.9%", color: C.orange },
+    { label: "复购率", value: "20%", color: C.navy },
+  ];
+
+  metrics.forEach((m, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = 5.4 + col * 2.7;
+    const y = 1.5 + row * 1.0;
+    s.addShape(pptx.ShapeType.roundRect, {
+      x, y, w: 2.4, h: 0.8,
+      fill: { color: C.white },
+      shadow: { type: "outer", blur: 4, offset: 1, color: "CBD5E0", opacity: 0.3 },
+      rectRadius: 0.06,
+    });
+    s.addText(m.value, {
+      x, y: y + 0.05, w: 2.4, h: 0.4,
+      fontSize: 18, fontFace: "Microsoft YaHei", color: m.color, bold: true, align: "center",
+    });
+    s.addText(m.label, {
+      x, y: y + 0.45, w: 2.4, h: 0.25,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.gray, align: "center",
+    });
+  });
+
+  // Analysis
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.4, y: 4.5, w: "92%", h: 1.0,
+    fill: { color: C.light },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "分析：Rhein Laser 主营 Class 4 高功率二极管激光（10/20/30W, 980nm/810nm），CE认证，武汉产业集群。在线GMV超过$110万，在同品类中属头部水平。" +
+    "主营产品为专业医疗级设备，客户以医院、诊所以及分销商为主。响应时间≤3h显示其团队运营效率较高，但91.9%的准时发货率和20%的复购率存在提升空间。",
+    {
+      x: 0.7, y: 4.6, w: "86%", h: 0.8,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.dark, lineSpacingMultiple: 1.4,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 7: 对标店铺分析② - 红蓝光治疗仪
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "对标店铺分析 · 红蓝光治疗仪", "Shenzhen Azure Technology — ISO13485+FDA双重认证");
+
+  placeholderBox(s, 0.4, 1.4, 4.6, 2.8, "请插入 Shenzhen Azure 店铺名片截图\n（鼠标悬停于公司名称获取店铺卡片）");
+
+  const metrics = [
+    { label: "经营年限", value: "6 YRS", color: C.navy },
+    { label: "评分", value: "4.8 / 5.0", color: C.green },
+    { label: "响应时间", value: "≤ 1小时", color: C.blue },
+    { label: "准时发货率", value: "≥ 95%", color: C.blue },
+    { label: "累计评价", value: "390条", color: C.navy },
+    { label: "复购率", value: "26%", color: C.orange },
+  ];
+
+  metrics.forEach((m, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = 5.4 + col * 2.7;
+    const y = 1.5 + row * 1.0;
+    s.addShape(pptx.ShapeType.roundRect, {
+      x, y, w: 2.4, h: 0.8,
+      fill: { color: C.white },
+      shadow: { type: "outer", blur: 4, offset: 1, color: "CBD5E0", opacity: 0.3 },
+      rectRadius: 0.06,
+    });
+    s.addText(m.value, {
+      x, y: y + 0.05, w: 2.4, h: 0.4,
+      fontSize: 18, fontFace: "Microsoft YaHei", color: m.color, bold: true, align: "center",
+    });
+    s.addText(m.label, {
+      x, y: y + 0.45, w: 2.4, h: 0.25,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.gray, align: "center",
+    });
+  });
+
+  // Cert badge
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 5.4, y: 3.6, w: 5.0, h: 0.55,
+    fill: { color: "FFF8F0" },
+    rectRadius: 0.06,
+  });
+  s.addText(
+    "认证：ISO13485 | FDA 510(k) | CE | UKCA | ETL | FCC — 品类内认证最全",
+    {
+      x: 5.6, y: 3.65, w: 4.6, h: 0.45,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.orange, bold: true,
+    }
+  );
+
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.4, y: 4.5, w: "92%", h: 1.0,
+    fill: { color: C.light },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "分析：Azure（蔚蓝之光）是红蓝光治疗仪品类中认证体系最完善的供应商之一，拥有ISO13485医疗体系认证和FDA 510(k)注册。主营LED红光治疗面板（RHPro系列300-3600W），" +
+    "覆盖480nm蓝光到940nm近红外全波段。≤1h的超快响应时间和390条评价表明其店铺运营非常成熟。该品类竞争激烈，但Azure差异化在合规认证和产品线深度。",
+    {
+      x: 0.7, y: 4.6, w: "86%", h: 0.8,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.dark, lineSpacingMultiple: 1.4,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 8: 对标店铺分析③ - 物理治疗综合
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "对标店铺分析 · 物理治疗综合设备", "Guangzhou Genwave — 最高客户满意度");
+
+  placeholderBox(s, 0.4, 1.4, 4.6, 2.8, "请插入 Guangzhou Genwave 店铺名片截图\n（鼠标悬停于公司名称获取店铺卡片）");
+
+  const metrics = [
+    { label: "在线GMV", value: "US$500,000-560,000+", color: C.blue },
+    { label: "经营年限", value: "4 YRS", color: C.navy },
+    { label: "评分", value: "4.9 / 5.0", color: C.green },
+    { label: "响应时间", value: "≤ 1小时", color: C.blue },
+    { label: "好评率", value: "99.2%", color: C.green },
+    { label: "准时发货率", value: "97.5%", color: C.blue },
+  ];
+
+  metrics.forEach((m, i) => {
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const x = 5.4 + col * 2.7;
+    const y = 1.5 + row * 1.0;
+    s.addShape(pptx.ShapeType.roundRect, {
+      x, y, w: 2.4, h: 0.8,
+      fill: { color: C.white },
+      shadow: { type: "outer", blur: 4, offset: 1, color: "CBD5E0", opacity: 0.3 },
+      rectRadius: 0.06,
+    });
+    s.addText(m.value, {
+      x, y: y + 0.05, w: 2.4, h: 0.4,
+      fontSize: 18, fontFace: "Microsoft YaHei", color: m.color, bold: true, align: "center",
+    });
+    s.addText(m.label, {
+      x, y: y + 0.45, w: 2.4, h: 0.25,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.gray, align: "center",
+    });
+  });
+
+  // Repurchase highlight
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 5.4, y: 3.6, w: 5.0, h: 0.55,
+    fill: { color: "F0FFF4" },
+    rectRadius: 0.06,
+  });
+  s.addText(
+    "复购率 27-29% | 认证：TUV Rheinland + CE | 主营：PEMF磁疗、Tecar治疗仪、冲击波",
+    {
+      x: 5.6, y: 3.65, w: 4.6, h: 0.45,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.green, bold: true,
+    }
+  );
+
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.4, y: 4.5, w: "92%", h: 1.0,
+    fill: { color: C.light },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "分析：Genwave 是物理治疗综合设备品类的标杆店铺，99.2%的客户好评率和97.5%的准时发货率为品类最高。仅4年时间达到$50万+在线GMV，增速极快。" +
+    "产品线覆盖PEMF磁疗、Tecar治疗仪、冲击波、PMST LOOP/MAX系列等，产品矩阵完整。≤1h超快响应和TUV莱茵认证建立了其在买家心中的专业形象。",
+    {
+      x: 0.7, y: 4.6, w: "86%", h: 0.8,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.dark, lineSpacingMultiple: 1.4,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 9: 竞品汇总对比表
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "竞品汇总对比", "8家重点对标店铺关键指标横向对比");
+
+  const rows = [
+    [
+      { text: "店铺名称", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "品类", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "年限", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "评分", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "在线GMV", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "响应时间", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "准时发货", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "复购率", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "核心认证", options: { bold: true, color: C.white, fill: { color: C.navy }, fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+    ],
+    [
+      { text: "Rhein Laser", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "激光", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "4年", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "4.8", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "$1,100,000+", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.blue, align: "center" } },
+      { text: "≤3h", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "91.9%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "20%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "CE", options: { fontSize: 8, fontFace: "Microsoft YaHei" } },
+    ],
+    [
+      { text: "Azure", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "红蓝光", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "6年", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "4.8", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "≤1h", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, align: "center" } },
+      { text: "≥95%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "26%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "ISO13485+FDA", options: { fontSize: 8, fontFace: "Microsoft YaHei", color: C.green } },
+    ],
+    [
+      { text: "Sunnyou", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "激光", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "17年", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.navy, bold: true, align: "center" } },
+      { text: "4.7", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "SGS", options: { fontSize: 8, fontFace: "Microsoft YaHei" } },
+    ],
+    [
+      { text: "Konmed", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "物治综合", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "12年", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.navy, bold: true, align: "center" } },
+      { text: "5.0", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, bold: true, align: "center" } },
+      { text: "$290,000+", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "≤2h", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "100%", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, align: "center" } },
+      { text: "21-23%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "FDA+CE", options: { fontSize: 8, fontFace: "Microsoft YaHei", color: C.green } },
+    ],
+    [
+      { text: "Roundwhale", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "物治综合", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "8年", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "5.0", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, bold: true, align: "center" } },
+      { text: "$130,000-320,000+", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "≤4h", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "100%", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, align: "center" } },
+      { text: "40-42%", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, bold: true, align: "center" } },
+      { text: "Class II", options: { fontSize: 8, fontFace: "Microsoft YaHei" } },
+    ],
+    [
+      { text: "Genwave", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "物治综合", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "4年", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "4.9", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "$500,000-560,000+", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.blue, bold: true, align: "center" } },
+      { text: "≤1h", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, align: "center" } },
+      { text: "97.5%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "27-29%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "TUV+CE", options: { fontSize: 8, fontFace: "Microsoft YaHei" } },
+    ],
+    [
+      { text: "XFT Medical", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "TMS", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "21年(企业)", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.navy, bold: true, align: "center" } },
+      { text: "4.9", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "$44,000-54,000+", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "≤3-4h", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "100%", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.green, align: "center" } },
+      { text: "7-15%", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "ISO13485+FDA", options: { fontSize: 8, fontFace: "Microsoft YaHei", color: C.green } },
+    ],
+    [
+      { text: "LEDEAST", options: { fontSize: 9, fontFace: "Microsoft YaHei", bold: true } },
+      { text: "红蓝光", options: { fontSize: 9, fontFace: "Microsoft YaHei" } },
+      { text: "12年", options: { fontSize: 9, fontFace: "Microsoft YaHei", color: C.navy, bold: true, align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 9, fontFace: "Microsoft YaHei", align: "center" } },
+      { text: "—", options: { fontSize: 8, fontFace: "Microsoft YaHei" } },
+    ],
+  ];
+
+  s.addTable(rows, {
+    x: 0.25, y: 1.4, w: "96%",
+    colW: [1.4, 1.0, 1.0, 0.7, 1.9, 0.9, 1.0, 1.0, 1.8],
+    rowH: [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
+    border: { type: "solid", pt: 0.5, color: "CBD5E0" },
+    autoPage: false,
+  });
+
+  // Key insight
+  s.addText(
+    "数据说明：GMV数据来自店铺名片卡片公开显示值（截图中获取），\"—\" 表示该店铺未公开此数据。年限为企业/店铺在阿里国际站的注册年数。",
+    {
+      x: 0.3, y: 5.15, w: "90%", h: 0.35,
+      fontSize: 8, fontFace: "Microsoft YaHei", color: C.gray,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 10: 国际站医疗行业趋势
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  slideBase(s, "国际站医疗行业趋势与平台方向", "数据来源：阿里国际站公开信息、中国海关总署、行业报告");
+
+  // Left column: Platform data
+  s.addText("平台增长数据", {
+    x: 0.5, y: 1.2, w: 5, h: 0.4,
+    fontSize: 16, fontFace: "Microsoft YaHei", color: C.navy, bold: true,
+  });
+
+  const platformPoints = [
+    { icon: "01", text: "阿里健康FY2025营收 ¥306亿，同比增长13.2%，平台业务收入+54%" },
+    { icon: "02", text: "全球B2B医疗电商市场规模 $5,000亿+，CAGR 17-18%" },
+    { icon: "03", text: "阿里国际站医疗健康类目买家覆盖190+国家和地区" },
+    { icon: "04", text: "平台四大趋势品类：智能诊疗、康复养老、家庭监测、专业一站式采购" },
+    { icon: "05", text: "RTS（Ready-to-Ship）模式火热，小批量医疗器械需求激增" },
+  ];
+
+  platformPoints.forEach((p, i) => {
+    const y = 1.7 + i * 0.5;
+    s.addShape(pptx.ShapeType.roundRect, {
+      x: 0.5, y, w: 0.35, h: 0.35,
+      fill: { color: C.accent },
+      rectRadius: 0.06,
+    });
+    s.addText(p.icon, {
+      x: 0.5, y, w: 0.35, h: 0.35,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.white, bold: true, align: "center", valign: "middle",
+    });
+    s.addText(p.text, {
+      x: 1.0, y, w: 4.5, h: 0.4,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.dark, valign: "middle",
+    });
+  });
+
+  // Right column: China export data
+  s.addText("中国医疗器械出口趋势", {
+    x: 5.8, y: 1.2, w: 5, h: 0.4,
+    fontSize: 16, fontFace: "Microsoft YaHei", color: C.navy, bold: true,
+  });
+
+  const exportPoints = [
+    { icon: "→", text: "2024全年出口 ¥3,612亿（约$500亿），同比增长7.05%" },
+    { icon: "→", text: "2025年1-8月出口同比再增6.84%，贸易顺差翻倍" },
+    { icon: "→", text: "\"一带一路\"出口增速+13.35%，占出口总额38.9%" },
+    { icon: "→", text: "东盟市场增速+26.2%，为增长最快单一市场" },
+    { icon: "→", text: "内窥镜等中高端品类出口增长+33.13%，高端化转型加速" },
+    { icon: "→", text: "中国医疗器械全球份额从5.2%（2020）提升至7.8%（2024）" },
+  ];
+
+  exportPoints.forEach((p, i) => {
+    const y = 1.7 + i * 0.5;
+    s.addText(p.icon, {
+      x: 5.8, y, w: 0.3, h: 0.4,
+      fontSize: 12, fontFace: "Microsoft YaHei", color: C.blue, bold: true, valign: "middle",
+    });
+    s.addText(p.text, {
+      x: 6.1, y, w: 4.4, h: 0.4,
+      fontSize: 10, fontFace: "Microsoft YaHei", color: C.dark, valign: "middle",
+    });
+  });
+
+  // Bottom insight box
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.5, y: 4.8, w: "92%", h: 0.7,
+    fill: { color: C.light },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "结论：中国医疗器械出口正处于上升通道，B2B电商（尤其是阿里国际站）是增长最快的出口渠道之一。" +
+    "治疗仪类目兼具\"高客单价\"与\"高复购\"的双重优势，平台对该品类的认证体系和买家匹配机制日趋完善，是现阶段入局的黄金窗口。",
+    {
+      x: 0.8, y: 4.88, w: "86%", h: 0.55,
+      fontSize: 11, fontFace: "Microsoft YaHei", color: C.dark, bold: true, lineSpacingMultiple: 1.3,
+    }
+  );
+}
+
+// ==========================================================================
+// SLIDE 11: 市场机遇总结
+// ==========================================================================
+{
+  const s = pptx.addSlide();
+  s.background = { fill: C.navy };
+
+  s.addShape(pptx.ShapeType.rect, {
+    x: 0, y: 0, w: "100%", h: 0.12, fill: { color: C.accent },
+  });
+
+  s.addText("市场机遇总结", {
+    x: 0.8, y: 0.5, w: "85%", h: 0.7,
+    fontSize: 30, fontFace: "Microsoft YaHei", color: C.white, bold: true,
+  });
+
+  // 4 opportunity cards
+  const cards = [
+    {
+      title: "市场空间广阔",
+      body: "全球医疗激光+物理治疗设备市场规模超$200B，年增速6-15%。TMS品类竞争极小，是最大的蓝海机会。",
+      color: C.accent,
+    },
+    {
+      title: "中国制造优势",
+      body: "中国为全球医疗器械第一大制造国，出口覆盖190+国家。\"一带一路\"和东盟市场增速远超全球平均。",
+      color: C.green,
+    },
+    {
+      title: "平台红利期",
+      body: "阿里国际站医疗健康类目正处于快速增长期，B2B医疗电商CAGR达17-18%。合规供应商可获得显著流量优势。",
+      color: C.blue,
+    },
+    {
+      title: "认证即壁垒",
+      body: "ISO13485 + FDA/CE认证是品类核心护城河。头部竞品中真正双认证的不超过10家，先入优势明显。",
+      color: C.orange,
+    },
+  ];
+
+  cards.forEach((card, i) => {
+    const x = 0.5 + i * 2.55;
+    const y = 1.6;
+    s.addShape(pptx.ShapeType.roundRect, {
+      x, y, w: 2.3, h: 2.5,
+      fill: { color: "1E4A7A" },
+      rectRadius: 0.1,
+    });
+    // Color top bar
+    s.addShape(pptx.ShapeType.rect, {
+      x, y, w: 2.3, h: 0.08, fill: { color: card.color },
+    });
+    s.addText(card.title, {
+      x: x + 0.15, y: y + 0.2, w: 2.0, h: 0.45,
+      fontSize: 16, fontFace: "Microsoft YaHei", color: C.white, bold: true,
+    });
+    s.addText(card.body, {
+      x: x + 0.15, y: y + 0.7, w: 2.0, h: 1.6,
+      fontSize: 11, fontFace: "Microsoft YaHei", color: "B8D4F0", lineSpacingMultiple: 1.5,
+    });
+  });
+
+  // Bottom conclusion
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: 0.5, y: 4.4, w: "93%", h: 0.9,
+    fill: { color: "1E4A7A" },
+    line: { color: C.accent, width: 1 },
+    rectRadius: 0.08,
+  });
+  s.addText(
+    "医疗治疗仪行业在阿里巴巴国际站正处于 \"需求增长 + 供给不足 + 平台扶持\" 的三重红利叠加期。" +
+    "品类高客单价、高专业壁垒的特性，决定了先入者的竞争优势将随时间持续放大。",
+    {
+      x: 0.8, y: 4.55, w: "86%", h: 0.6,
+      fontSize: 13, fontFace: "Microsoft YaHei", color: C.white, bold: true, align: "center",
+      lineSpacingMultiple: 1.4,
+    }
+  );
+
+  s.addText("报告制作：2026年5月 | 数据来源：阿里巴巴国际站公开数据、ITC Trade Map、行业研究报告", {
+    x: 0.5, y: 5.5, w: "90%", h: 0.3,
+    fontSize: 8, fontFace: "Microsoft YaHei", color: "7A9CC0",
+  });
+}
+
+// ==========================================================================
+// SAVE
+// ==========================================================================
+const outputPath = path.join(__dirname, "医疗治疗仪_国际站市场分析.pptx");
+pptx.writeFile({ fileName: outputPath })
+  .then(() => console.log("PPT generated:", outputPath))
+  .catch(err => console.error("Error:", err));

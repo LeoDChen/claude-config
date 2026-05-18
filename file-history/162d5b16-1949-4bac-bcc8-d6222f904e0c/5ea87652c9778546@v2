@@ -1,0 +1,262 @@
+/**
+ * AI外贸顾问 — 每日智能巡检（增量版）
+ *
+ * 只抓今天状态有变化的 P0 客户，避免每天重复抓取全量对话。
+ *
+ * 用法: node daily-smart.mjs
+ * 前置: Chrome --remote-debugging-port=9222 已开，小满已登录
+ *
+ * 流程:
+ *   1. extract-all-v2 → 今日全量分类
+ *   2. diff 对比昨天 → 找出变化的 P0
+ *   3. deep-scrape-api → 只抓变化的 P0 对话
+ *   4. 输出 delta 报告 → 喂给 CC 做分析
+ */
+import { execSync } from 'child_process';
+import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SCRIPTS_DIR = __dirname;
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+function ts() {
+  return new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+}
+
+// ============================================================
+// Phase 1: 今日全量提取（60s，必须做）
+// ============================================================
+function phase1_extract() {
+  console.log('── Phase 1: 今日全量提取 ──');
+  try {
+    execSync(`node "${join(SCRIPTS_DIR, 'extract-all-v2.mjs')}"`, {
+      stdio: 'inherit',
+      timeout: 120000,
+    });
+    // 找到最新输出
+    const files = readdirSync(DATA_DIR)
+      .filter(f => f.includes('全量客户分类'))
+      .sort().reverse();
+    const latest = files[0];
+    console.log(`   ✅ 今日分类: ${latest}\n`);
+    return join(DATA_DIR, latest);
+  } catch (e) {
+    console.error('   ❌ 提取失败:', e.message);
+    process.exit(1);
+  }
+}
+
+// ============================================================
+// Phase 2: 对比昨天，找变化的 P0
+// ============================================================
+function phase2_diff(todayPath) {
+  console.log('── Phase 2: 增量对比 ──');
+
+  const today = JSON.parse(readFileSync(todayPath, 'utf-8'));
+  const todayMap = new Map(today.customers.map(c => [c.name, c]));
+
+  // 找昨天的分类文件
+  const allClassified = readdirSync(DATA_DIR)
+    .filter(f => f.includes('全量客户分类'))
+    .sort().reverse();
+
+  if (allClassified.length < 2) {
+    console.log('   ⚠️ 只有1份分类数据，无法对比。今天所有P0都视为新变化。');
+    const p0Today = today.customers.filter(c => c.priority === 'P0');
+    console.log(`   P0: ${p0Today.length}人（全部标记为变化）\n`);
+    return { changedP0: p0Today, summary: { newP0: p0Today.length, changedP0: 0, resolvedP0: 0 } };
+  }
+
+  const yesterday = JSON.parse(readFileSync(join(DATA_DIR, allClassified[1]), 'utf-8'));
+  const yesterdayMap = new Map(yesterday.customers.map(c => [c.name, c]));
+
+  const changedP0 = [];
+  const resolvedP0 = [];  // 昨天是P0，今天不是了
+  const newP0 = [];        // 昨天不是P0，今天是
+
+  // 遍历今天的客户
+  for (const [name, curr] of todayMap) {
+    const prev = yesterdayMap.get(name);
+    const isP0Today = curr.priority === 'P0';
+    const wasP0Yesterday = prev && prev.priority === 'P0';
+    const lastMsgChanged = prev && curr.lastContactTime !== prev.lastContactTime;
+    const priorityChanged = !prev || curr.priority !== prev.priority;
+
+    if (!isP0Today) continue;
+
+    // 新 P0（昨天没有，或者昨天不是 P0）
+    if (!wasP0Yesterday) {
+      newP0.push(curr);
+      changedP0.push({ ...curr, changeReason: 'new_p0' });
+      continue;
+    }
+
+    // 消息有变化的 P0
+    if (lastMsgChanged) {
+      changedP0.push({ ...curr, changeReason: 'msg_updated' });
+      continue;
+    }
+
+    // 优先级变化的 P0（同是P0但tier变了之类）
+    if (priorityChanged) {
+      changedP0.push({ ...curr, changeReason: 'priority_changed' });
+      continue;
+    }
+  }
+
+  // 昨天是 P0，今天不是了（已解决/降级）
+  for (const [name, prev] of yesterdayMap) {
+    const curr = todayMap.get(name);
+    if (prev.priority === 'P0' && (!curr || curr.priority !== 'P0')) {
+      resolvedP0.push({ name, prevPriority: prev.priority, currPriority: curr?.priority || 'gone' });
+    }
+  }
+
+  const summary = {
+    todayP0Total: today.customers.filter(c => c.priority === 'P0').length,
+    yesterdayP0Total: yesterday.customers.filter(c => c.priority === 'P0').length,
+    newP0: newP0.length,
+    changedP0: changedP0.filter(c => c.changeReason === 'msg_updated').length,
+    resolvedP0: resolvedP0.length,
+    needDeepScrape: changedP0.length,
+  };
+
+  console.log(`   今日P0: ${summary.todayP0Total} | 昨日P0: ${summary.yesterdayP0Total}`);
+  console.log(`   新增P0: ${summary.newP0} | 消息变化: ${summary.changedP0} | 已解决: ${summary.resolvedP0}`);
+  console.log(`   需深抓: ${summary.needDeepScrape}人\n`);
+
+  if (changedP0.length > 0) {
+    console.log('   变化的 P0:');
+    changedP0.forEach(c => {
+      const days = Math.round((Date.now() - c.lastContactTime) / 86400000);
+      const msg = (c.latestMessageContent || '').substring(0, 60);
+      console.log(`     ${c.changeReason === 'new_p0' ? '🆕' : '📝'} ${c.name} | ${c.countryCode} | ${days}d前 | "${msg}"`);
+    });
+    console.log('');
+  }
+
+  if (resolvedP0.length > 0) {
+    console.log('   已解决的 P0:');
+    resolvedP0.forEach(c => console.log(`     ✅ ${c.name} → ${c.currPriority}`));
+    console.log('');
+  }
+
+  return { changedP0, resolvedP0, summary };
+}
+
+// ============================================================
+// Phase 3: 只深抓变化的 P0
+// ============================================================
+function phase3_deepScrape(changedP0) {
+  console.log('── Phase 3: 深抓变化P0对话 ──');
+
+  if (changedP0.length === 0) {
+    console.log('   ✅ 无变化的P0，跳过深抓\n');
+    return [];
+  }
+
+  // 将变化的 P0 写入临时文件，deep-scrape-api 可以读取
+  const tempList = changedP0.map(c => c.name);
+  console.log(`   目标: ${tempList.length}人: ${tempList.join(', ')}`);
+
+  // 直接跑 deep-scrape-api，它会读最新全量分类，这里我们只需要确保P0变化的人在里面
+  // 生成一个优先级列表文件
+  const priorityFile = join(DATA_DIR, '_delta_p0_list.json');
+  writeFileSync(priorityFile, JSON.stringify(tempList, null, 2));
+  console.log(`   Delta P0 名单已保存: _delta_p0_list.json`);
+
+  try {
+    execSync(`node "${join(SCRIPTS_DIR, 'deep-scrape-dom.mjs')}"`, {
+      stdio: 'inherit',
+      timeout: 600000,  // 10 min max
+    });
+    console.log('');
+
+    // 找到最新的深抓结果
+    const deepFiles = readdirSync(DATA_DIR)
+      .filter(f => f.startsWith('deep_scrape') && f.endsWith('.json'))
+      .sort().reverse();
+    return deepFiles.length > 0 ? join(DATA_DIR, deepFiles[0]) : null;
+  } catch (e) {
+    console.error('   ⚠️ 深抓部分失败:', e.message);
+    return null;
+  }
+}
+
+// ============================================================
+// 汇总输出
+// ============================================================
+function outputReport(todayPath, deepPath, diffResult) {
+  const { summary, changedP0, resolvedP0 } = diffResult;
+  const now = new Date();
+  const dateStr = ts();
+
+  const report = {
+    generatedAt: now.toISOString(),
+    dateStr,
+    todayClassification: todayPath,
+    deepScrape: deepPath,
+    summary,
+    changedP0: changedP0.map(c => ({
+      name: c.name,
+      countryCode: c.countryCode,
+      priority: c.priority,
+      tier: c.tier,
+      changeReason: c.changeReason,
+      latestMessage: (c.latestMessageContent || '').substring(0, 200),
+      lastContactDays: Math.round((Date.now() - c.lastContactTime) / 86400000),
+    })),
+    resolvedP0,
+  };
+
+  const reportPath = join(DATA_DIR, `delta_report_${dateStr}.json`);
+  writeFileSync(reportPath, JSON.stringify(report, null, 2));
+
+  console.log('╔══════════════════════════════════════╗');
+  console.log('║  AI外贸顾问 — 每日巡检完成              ║');
+  console.log(`║  ${now.toLocaleString('zh-CN')}       ║`);
+  console.log('╠══════════════════════════════════════╣');
+  console.log(`║  P0 今日: ${summary.todayP0Total} | 新增: ${summary.newP0} | 变化: ${summary.changedP0} | 已解决: ${summary.resolvedP0}`);
+  console.log(`║  需分析: ${summary.needDeepScrape}人`);
+  console.log('╚══════════════════════════════════════╝');
+  console.log(`\n📋 Delta报告: delta_report_${dateStr}.json`);
+  console.log('📋 下一步: 将报告+深抓JSON喂给CC做分析');
+}
+
+// ============================================================
+// Main
+// ============================================================
+function main() {
+  console.log('╔══════════════════════════════════════╗');
+  console.log('║  AI外贸顾问 — 智能每日巡检            ║');
+  console.log(`║  ${new Date().toISOString()}              ║`);
+  console.log('╚══════════════════════════════════════╝\n');
+
+  const startTime = Date.now();
+
+  // Phase 1
+  const todayPath = phase1_extract();
+
+  // Phase 2
+  const diffResult = phase2_diff(todayPath);
+
+  // Phase 3
+  let deepPath = null;
+  if (diffResult.changedP0.length > 0) {
+    deepPath = phase3_deepScrape(diffResult.changedP0);
+  } else {
+    console.log('── Phase 3: 跳过（无变化P0）──\n');
+  }
+
+  // Report
+  outputReport(todayPath, deepPath, diffResult);
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+  console.log(`⏱ 总耗时: ${elapsed}s`);
+}
+
+main();

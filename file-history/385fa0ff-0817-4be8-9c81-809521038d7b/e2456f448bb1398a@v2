@@ -1,0 +1,305 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const USER_DATA = path.join(__dirname, '..', '.playwright_profile');
+
+(async () => {
+  const context = await chromium.launchPersistentContext(USER_DATA, {
+    headless: false,
+    viewport: { width: 1440, height: 900 }
+  });
+
+  const page = context.pages()[0] || await context.newPage();
+
+  // Collect ALL API responses
+  const apiData = [];
+  page.on('response', async (response) => {
+    try {
+      const ct = response.headers()['content-type'] || '';
+      if (ct.includes('json')) {
+        const body = await response.json();
+        const url = response.url();
+        if (url.includes('xiaoman.cn') || url.includes('onetalk') || url.includes('alibaba.com')) {
+          apiData.push({
+            url: url.substring(0, 250),
+            status: response.status(),
+            data: body
+          });
+        }
+      }
+    } catch (e) {}
+  });
+
+  console.log('=== OKKI 安全数据抓取 ===');
+
+  // Step 1: Navigate to OKKI
+  await page.goto('https://crm.xiaoman.cn', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(2000);
+
+  let currentUrl = page.url();
+  console.log('当前URL:', currentUrl.substring(0, 120));
+
+  // Step 2: Handle login if needed
+  if (currentUrl.includes('login.xiaoman.cn') || currentUrl.includes('login.alibaba')) {
+    console.log('\n🔐 OKKI 未登录，请在弹出的浏览器窗口中输入子账号密码');
+    console.log('⚠️  这是隔离的Playwright浏览器，不会读你本地Chrome数据');
+    console.log('⚠️  子账号登录OKKI理论上不影响主账号的阿里卖家');
+    console.log('⏳  等待登录完成（自动检测，无需按键）...\n');
+
+    // Auto-detect login: wait for URL to leave login page
+    const startTime = Date.now();
+    const timeout = 180000; // 3 minutes
+    let loggedIn = false;
+
+    while (Date.now() - startTime < timeout) {
+      await page.waitForTimeout(2000);
+      currentUrl = page.url();
+      if (!currentUrl.includes('login.xiaoman.cn') && !currentUrl.includes('login.alibaba')) {
+        loggedIn = true;
+        console.log('✅ 检测到登录成功！');
+        break;
+      }
+      // Progress indicator
+      if (Math.floor((Date.now() - startTime) / 10000) % 3 === 0) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        console.log(`  等待中... (${elapsed}s)`);
+      }
+    }
+
+    if (!loggedIn) {
+      console.log('❌ 登录超时（3分钟），请重新运行');
+      await context.close();
+      process.exit(1);
+    }
+
+    // Navigate to CRM home
+    await page.goto('https://crm.xiaoman.cn', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+  } else {
+    console.log('✅ 已有有效登录会话，零风险直接抓取');
+  }
+
+  // ===== EXTRACTION PHASE =====
+  console.log('\n=== 开始提取数据 ===\n');
+
+  // Step 3: Go to Inbox/Messages to trigger customer list API calls
+  // Try multiple paths to the conversation list
+  const navTargets = [
+    'https://crm.xiaoman.cn/inbox',
+    'https://crm.xiaoman.cn/im',
+    'https://crm.xiaoman.cn/message',
+    'https://crm.xiaoman.cn/customer'
+  ];
+
+  for (const target of navTargets) {
+    try {
+      await page.goto(target, { waitUntil: 'networkidle', timeout: 10000 });
+      await page.waitForTimeout(2000);
+      console.log(`导航到 ${target}: ${page.url().substring(0, 100)}`);
+    } catch (e) {
+      console.log(`  ${target} 无法访问`);
+    }
+  }
+
+  // Step 4: Try to click into customer/conversation list
+  console.log('\n查找客户列表入口...');
+
+  // Explore what's on the page
+  const pageStructure = await page.evaluate(() => {
+    const result = { url: location.href, title: document.title, bodyText: document.body.innerText.substring(0, 2000) };
+    // Find all navigation elements
+    const navs = [];
+    document.querySelectorAll('a, [class*="nav"], [class*="menu"], [class*="sidebar"], [class*="tab"]').forEach(el => {
+      const text = (el.textContent || '').trim().substring(0, 40);
+      if (text) navs.push(text);
+    });
+    result.navs = [...new Set(navs)].slice(0, 30);
+    return result;
+  });
+
+  console.log('页面标题:', pageStructure.title);
+  console.log('导航项:', pageStructure.navs);
+  console.log('页面文本前500字:', pageStructure.bodyText.substring(0, 500));
+
+  // Step 5: Look for the "消息" or "会话" or "Inbox" section and click
+  let foundChatList = false;
+
+  // Try clicking navigation items
+  const clickTargets = ['消息', '会话', 'Inbox', '客户', 'Customer', 'Message', 'Chat'];
+  for (const target of clickTargets) {
+    if (foundChatList) break;
+    try {
+      const clicked = await page.evaluate((t) => {
+        const els = document.querySelectorAll('div, span, a, li, button');
+        for (const el of els) {
+          if ((el.textContent || '').trim() === t) {
+            el.click();
+            return `clicked: ${t}`;
+          }
+        }
+        return null;
+      }, target);
+      if (clicked) {
+        console.log(`  ${clicked}`);
+        await page.waitForTimeout(2000);
+        foundChatList = true;
+      }
+    } catch (e) {}
+  }
+
+  // If no luck with exact match, try partial match
+  if (!foundChatList) {
+    try {
+      const clicked = await page.evaluate(() => {
+        const all = document.querySelectorAll('div, span, a, li');
+        for (const el of all) {
+          const t = (el.textContent || '').trim();
+          if (t.includes('消息') || t.includes('会话') || t.includes('Inbox') || t.includes('询盘')) {
+            el.click();
+            return `clicked: ${t}`;
+          }
+        }
+        return null;
+      });
+      if (clicked) console.log(`  ${clicked}`);
+    } catch (e) {}
+  }
+  await page.waitForTimeout(3000);
+
+  // Step 6: Check for chat iframe (onetalk.alibaba.com)
+  const frames = page.frames();
+  console.log(`\n当前 ${frames.length} 个frames:`);
+  frames.forEach((f, i) => {
+    try {
+      console.log(`  [${i}] ${f.url().substring(0, 120)}`);
+    } catch(e) {}
+  });
+
+  const chatFrame = frames.find(f => f.url().includes('onetalk') || f.url().includes('talk'));
+  if (chatFrame) {
+    console.log('\n✅ 找到聊天frame，提取对话列表...');
+
+    // Extract conversation list from the chat frame
+    const conversations = await chatFrame.evaluate(() => {
+      const items = [];
+      // Common selectors for conversation items in IM interfaces
+      const selectors = [
+        '[class*="conversation"]', '[class*="chat-item"]', '[class*="session"]',
+        '[class*="contact-item"]', 'li[class]', '[class*="list-item"]',
+        '[class*="message-item"]', '[class*="recent"]'
+      ];
+
+      const seen = new Set();
+      for (const sel of selectors) {
+        document.querySelectorAll(sel).forEach(el => {
+          const rect = el.getBoundingClientRect();
+          if (rect.width > 100 && rect.height > 20) {
+            const text = (el.textContent || '').trim();
+            if (text.length > 10 && !seen.has(text.substring(0, 50))) {
+              seen.add(text.substring(0, 50));
+              items.push({
+                text: text.substring(0, 500),
+                class: (typeof el.className === 'string' ? el.className : '').substring(0, 100)
+              });
+            }
+          }
+        });
+      }
+      return items;
+    });
+
+    console.log(`  找到 ${conversations.length} 个会话条目`);
+    conversations.slice(0, 30).forEach((c, i) => {
+      console.log(`  [${i+1}] ${c.text.substring(0, 150)}`);
+    });
+  }
+
+  // Step 7: Save all captured data
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+
+  // Save API responses
+  if (apiData.length > 0) {
+    const apiPath = path.join(DATA_DIR, `api_dump_${ts}.json`);
+    fs.writeFileSync(apiPath, JSON.stringify(apiData.map(d => ({
+      url: d.url,
+      status: d.status,
+      data: d.data
+    })), null, 2));
+    console.log(`\nAPI数据: ${apiData.length}个响应 → ${apiPath}`);
+  }
+
+  // Save page content
+  const fullText = await page.evaluate(() => document.body.innerText);
+  const textPath = path.join(DATA_DIR, `page_dump_${ts}.txt`);
+  fs.writeFileSync(textPath, fullText);
+  console.log(`页面文本: ${fullText.length}字符 → ${textPath}`);
+
+  // Take screenshot
+  const ssPath = path.join(DATA_DIR, `screenshot_${ts}.png`);
+  await page.screenshot({ path: ssPath, fullPage: true });
+  console.log(`截图 → ${ssPath}`);
+
+  // Step 8: Try to find structured customer data in API responses
+  let extractedCustomers = null;
+  for (const resp of apiData) {
+    const d = resp.data;
+    // Try various data shapes
+    const candidates = [
+      d?.data?.list, d?.data?.records, d?.list, d?.records,
+      d?.data?.data?.list, d?.result?.list, d?.result?.data,
+      d?.data?.conversations, d?.data?.contacts,
+    ];
+    for (const candidate of candidates) {
+      if (Array.isArray(candidate) && candidate.length > 5) {
+        extractedCustomers = candidate;
+        console.log(`\n✅ 从API提取到 ${extractedCustomers.length} 个客户记录`);
+        console.log(`   来源: ${resp.url.substring(0, 120)}`);
+        break;
+      }
+    }
+    if (extractedCustomers) break;
+  }
+
+  if (!extractedCustomers) {
+    // Check if any API response is an array
+    for (const resp of apiData) {
+      if (Array.isArray(resp.data) && resp.data.length > 5) {
+        extractedCustomers = resp.data;
+        console.log(`\n✅ 从API数组提取到 ${extractedCustomers.length} 条记录`);
+        break;
+      }
+    }
+  }
+
+  // Final save
+  const finalData = {
+    capturedAt: new Date().toISOString(),
+    loginMethod: 'persistent_context',
+    totalApiResponses: apiData.length,
+    extractedCustomers: extractedCustomers ? extractedCustomers.length : 0,
+    customers: extractedCustomers,
+    apiSummary: apiData.map(d => ({
+      url: d.url.substring(0, 150),
+      status: d.status
+    }))
+  };
+
+  const finalPath = path.join(DATA_DIR, `extracted_${ts}.json`);
+  fs.writeFileSync(finalPath, JSON.stringify(finalData, null, 2));
+  console.log(`\n最终数据 → ${finalPath}`);
+
+  console.log('\n=== 抓取完成 ===');
+  console.log(`时间戳: ${ts}`);
+  console.log(`提取客户数: ${extractedCustomers ? extractedCustomers.length : '(需从API响应中解析)'}`);
+
+  // Keep open briefly then close
+  await page.waitForTimeout(3000);
+  await context.close();
+  console.log('浏览器已关闭');
+
+})().catch(err => {
+  console.error('脚本错误:', err.message);
+  process.exit(1);
+});

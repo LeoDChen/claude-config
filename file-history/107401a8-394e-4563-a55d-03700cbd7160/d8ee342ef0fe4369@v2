@@ -1,0 +1,88 @@
+/**
+ * 测试：网络拦截方案
+ * 监听小满加载聊天时的 API 请求，捕获响应 JSON
+ */
+import { chromium } from 'playwright';
+
+const CDP_URL = 'http://127.0.0.1:9222';
+
+async function main() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) { console.log('未找到小满页面'); return; }
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) { console.log('未找到聊天 iframe'); return; }
+
+  const captured = [];
+
+  // 监听主页面和 iframe 的所有网络请求
+  for (const targetPage of [page, ...page.frames()]) {
+    try {
+      await targetPage.route('**/*', async (route) => {
+        const url = route.request().url();
+        // 只关注 API 请求
+        if (url.includes('api') || url.includes('message') || url.includes('chat') ||
+            url.includes('im') || url.includes('conversation') || url.includes('talk') ||
+            url.includes('history') || url.includes('detail') || url.includes('list')) {
+          captured.push({
+            url: url.substring(0, 200),
+            method: route.request().method(),
+            postData: route.request().postData()?.substring(0, 300),
+          });
+        }
+        await route.continue();
+      });
+    } catch(e) {}
+  }
+
+  // 点击侧边栏第一个客户
+  console.log('点击第一个客户...');
+  await talkFrame.evaluate(() => {
+    const items = document.querySelectorAll('.contact-item-container');
+    if (items[0]) items[0].click();
+  });
+
+  // 等加载
+  await new Promise(r => setTimeout(r, 4000));
+
+  // 再看 iframe 内部的 fetch/XHR
+  const iframeApis = await talkFrame.evaluate(() => {
+    // 尝试从 performance API 获取最近的请求
+    const entries = performance.getEntriesByType('resource');
+    return entries.filter(e => {
+      const url = e.name || '';
+      return url.includes('api') || url.includes('message') || url.includes('chat') ||
+             url.includes('conversation') || url.includes('detail');
+    }).map(e => ({ url: e.name.substring(0, 200), type: e.initiatorType }));
+  });
+
+  console.log('\n--- 主页面拦截到的 API 请求 ---');
+  captured.forEach(c => console.log(c.method, c.url, c.postData || ''));
+  console.log('\n--- iframe Performance API ---');
+  iframeApis.forEach(a => console.log(a.type, a.url));
+
+  // 也检查 window 变量里有没有消息数据
+  const windowKeys = await talkFrame.evaluate(() => {
+    const keys = [];
+    for (const k of Object.keys(window)) {
+      const v = window[k];
+      if (v && typeof v === 'object' && !k.startsWith('on') && k.length < 50) {
+        try {
+          if (Array.isArray(v) && v.length > 0) keys.push(k + '(array:' + v.length + ')');
+          else if (typeof v === 'object' && Object.keys(v).length > 0 && Object.keys(v).length < 100)
+            keys.push(k + '(obj:' + Object.keys(v).length + ')');
+        } catch(e) {}
+      }
+    }
+    return keys.filter(k =>
+      k.includes('message') || k.includes('chat') || k.includes('conversation') ||
+      k.includes('im') || k.includes('talk') || k.includes('history') || k.includes('data') ||
+      k.includes('store') || k.includes('state') || k.includes('redux') || k.includes('vue')
+    );
+  });
+  console.log('\n--- iframe window 变量（可能含消息数据）---');
+  windowKeys.forEach(k => console.log(k));
+}
+
+main().catch(e => console.error(e.message));

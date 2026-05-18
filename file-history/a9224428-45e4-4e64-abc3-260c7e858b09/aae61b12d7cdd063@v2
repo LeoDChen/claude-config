@@ -1,0 +1,17 @@
+---
+date: 2026-05-14
+tags: [API密钥, Gemini, Google]
+type: 账号凭证
+---
+
+# Gemini API Key
+
+| 项目 | 值 |
+|------|-----|
+| **API Key** | `AlzaSyACQAmg-VvDa868BiBVca7wZ1CKCPj7jSA` |
+| **名称** | Gemini API Key |
+| **项目名称** | projects/73542194865 |
+| **项目编号** | 73542194865 |
+| **用途** | Claude Code vision-reader MCP 图片识别 |
+| **获取地址** | https://aistudio.google.com/apikey |
+| **费用** | 免费层 |

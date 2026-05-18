@@ -1,0 +1,27 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({ headless: false });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  await page.goto('https://login.xiaoman.cn/login?system_id=v5client&return_url=https%3A%2F%2Fcrm.xiaoman.cn%2F');
+  console.log('=== 浏览器已启动，请手动登录小满 ===');
+  console.log('=== 登录完成后，在此终端按 Enter 继续... ===');
+
+  // Wait for user to press Enter after login
+  await new Promise(resolve => process.stdin.once('data', resolve));
+
+  console.log('=== 登录完成，跳转到 CRM 首页 ===');
+  await page.goto('https://crm.xiaoman.cn');
+
+  // Keep the browser open
+  console.log('=== 浏览器保持运行，可继续操作 ===');
+  console.log('Browser PID:', browser.process().pid);
+
+  // Keep alive
+  await new Promise(() => {});
+})().catch(err => {
+  console.error('Error:', err);
+  process.exit(1);
+});

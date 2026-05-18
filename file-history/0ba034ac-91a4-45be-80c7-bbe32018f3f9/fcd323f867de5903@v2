@@ -1,0 +1,166 @@
+/**
+ * 小满CRM — 全量索引快照（处理虚拟滚动）
+ *
+ * 逐步滚动+增量捕获+去重，确保300+客户全部覆盖。
+ * 用法: node snapshot-full.mjs
+ * 前置条件: Chrome 端口9222已开启，小满已登录并在TM消息页
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SNAPSHOT_DIR = join(DATA_DIR, 'snapshots');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(SNAPSHOT_DIR)) mkdirSync(SNAPSHOT_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+/**
+ * 从当前渲染的DOM中提取客户信息（增量去重）
+ */
+async function extractVisibleCustomers(frame, seenNames) {
+  return frame.evaluate((knownNames) => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    const newCustomers = [];
+
+    containers.forEach(el => {
+      const text = el.textContent || '';
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+
+      // 跳过已见过的和系统账号
+      if (knownNames.includes(name)) return;
+      if (name === 'Assistant Eva官方') return;
+
+      const isUnread = text.includes('[未读]');
+      const timeMatch = nameText.match(/(\d{2,4}[-:\/]\d{1,2}[-:\/]?\d{0,2})/);
+      const lastTime = timeMatch ? timeMatch[1] : '';
+
+      // 提取最后一条消息（去掉名字和时间前缀）
+      let lastMsg = nameText
+        .replace(/^.+?\d{2,4}[-:\/]\d{1,2}[-:\/]?\d{0,2}\s*/, '')
+        .replace(/\[(未读|已读)\]\s*/, '')
+        .trim()
+        .substring(0, 200);
+
+      // 判断消息方向
+      const isFromUs = lastMsg.includes('以上内容') ||
+        lastMsg.includes('发送了') ||
+        lastMsg.includes('[文件]');
+
+      newCustomers.push({
+        name,
+        isUnread,
+        lastTime,
+        lastMessageSnippet: lastMsg,
+        lastMsgDirection: isFromUs ? 'sent' : 'received',
+      });
+    });
+
+    return newCustomers;
+  }, [...seenNames]);
+}
+
+/**
+ * 分步滚动并增量捕获所有客户
+ */
+async function scrollAndCaptureAll(frame) {
+  const allCustomers = [];
+  const seenNames = new Set();
+  let consecutiveNoNew = 0;
+  const MAX_NO_NEW = 8; // 连续8次无新数据则停止
+
+  console.log('[snapshot-full] 开始分步滚动捕获...');
+
+  // 先滚到底部确保初始加载
+  await frame.evaluate(() => {
+    const container = document.querySelector('.seller-conversation-list') ||
+      document.querySelector('.conversation-list-content') ||
+      document.querySelector('.im-conversation-list-container');
+    if (container) container.scrollTop = container.scrollHeight;
+  });
+  await new Promise(r => setTimeout(r, 500));
+
+  for (let i = 0; i < 80; i++) {
+    // 提取当前可见客户
+    const newCustomers = await extractVisibleCustomers(frame, seenNames);
+
+    if (newCustomers.length > 0) {
+      for (const c of newCustomers) {
+        seenNames.add(c.name);
+        allCustomers.push(c);
+      }
+      consecutiveNoNew = 0;
+      process.stdout.write(`\r   第${i+1}步: +${newCustomers.length}人, 累计${allCustomers.length}人`);
+    } else {
+      consecutiveNoNew++;
+      process.stdout.write(`\r   第${i+1}步: 无新增(${consecutiveNoNew}/${MAX_NO_NEW}), 累计${allCustomers.length}人`);
+    }
+
+    if (consecutiveNoNew >= MAX_NO_NEW) {
+      console.log('\n   列表已穷尽，停止滚动');
+      break;
+    }
+
+    // 向上滚动加载更早的对话（虚拟滚动方向：顶部=旧，底部=新）
+    await frame.evaluate(() => {
+      const container = document.querySelector('.seller-conversation-list') ||
+        document.querySelector('.conversation-list-content') ||
+        document.querySelector('.im-conversation-list-container');
+      if (container) {
+        container.scrollTop -= 500;
+      }
+    });
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  console.log('');
+  return allCustomers;
+}
+
+async function main() {
+  console.log('[snapshot-full] 连接小满...');
+  const { talkFrame } = await connect();
+
+  const startTime = Date.now();
+
+  // 分步滚动 + 增量捕获
+  const customers = await scrollAndCaptureAll(talkFrame);
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const filename = `snapshot_full_${dateStr}.json`;
+
+  const snapshot = {
+    capturedAt: now.toISOString(),
+    totalCustomers: customers.length,
+    unreadCount: customers.filter(c => c.isUnread).length,
+    elapsedSeconds: parseFloat(elapsed),
+    customers,
+  };
+
+  writeFileSync(join(SNAPSHOT_DIR, filename), JSON.stringify(snapshot, null, 2));
+  console.log(`[snapshot-full] 完成: ${customers.length}个客户, ${elapsed}s → ${filename}`);
+}
+
+main().catch(err => {
+  console.error('[snapshot-full] 错误:', err.message);
+  process.exit(1);
+});

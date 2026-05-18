@@ -1,0 +1,1045 @@
+Total edge cases: 184
+
+Categories: {"高价值搁置":60,"活跃待确认":11,"付款卡住":1,"负面信号":4,"审批信号":13,"高价值复核":78,"其他边缘":17}
+
+1. [高价值搁置] Chloé St-Germain | US | S | 搁置 | sil=31d | chars=1422
+   Reason: 静默31天（从报价已发掉出）
+   Snippet: [我方] 2026-04-12 | Je dois vous dire honnêtement la différence entre les deux types d'authentification : 
+ 
+ 1. Certification SOR (Certification de sécurité canadienne) : Oui, elle peut être incluse à 6,83 $ US/pièce. I [客户] 2026-04-12 | We would be ready to order like this 6,83$/pcs including SOR an
+
+2. [高价值搁置] SKYHIGH COMPANY | IN | A | 搁置 | sil=33d | chars=482 | 审批信号
+   Reason: 静默33天（从需求探索掉出）
+   Snippet: [我方] 2026-04-11 | Yes, I think so too Are you in China? [客户] 2026-04-11 | Wait a min.  [我方] 2026-04-11 | OK [客户] 2026-04-11 | BindiyaMalhotraUC [客户] 2026-04-11 | this is my we chat ID  [我方] 2026-04-11 | Yes, I have sent the request [我方] 2026-04-11 | Are you busy? If you have time, please get in touc
+
+3. [高价值搁置] Karl brown | US | A | 搁置 | sil=42d | chars=855
+   Reason: 静默42天（从谈判中掉出）
+   Snippet: [客户] 2026-04-03 | Hi,I’m considering placing an order for this product soon.Hello,
+
+I would like to develop a custom baby diaper similar to the attached reference image, but with my own branding.
+
+Here are the specific [客户] 2026-04-03 | Your business product has not been quoted, you can quickly open
+
+4. [高价值搁置] Abdou Salam Kane | SN | A | 搁置 | sil=40d | chars=778
+   Reason: 静默40天（从需求探索掉出）
+   Snippet: [我方] 2026-03-06 | [产品卡片] [我方] 2026-03-06 | Here are some cloth diaper products you might be interested in [我方] 2026-03-12 | https://fb.alibaba.com/review/postReview.htm?orderId=286234735001029957&reviewEntity=TAOrder&isModify=false&tracelog=review_fb_order_detail&sellerAliId=2500000853693&buyerAliId
+
+5. [高价值搁置] Mbam Oluchi | NG | A | 搁置 | sil=61d | chars=846 | 审批信号
+   Reason: 静默61天（从报价已发掉出）
+   Snippet: [我方] 2026-03-12 | The size of this product ranges from 73cm to 130cm, and it is in stock [我方] 2026-03-12 | [产品卡片] [我方] 2026-03-12 | These are the prices corresponding to different sizes [我方] 2026-03-12 | Please let me know which sizes and quantities you need, and I will create an order for you. [客户]
+
+6. [高价值搁置] OUSMANHANGATA HALIMA | CM | A | 搁置 | sil=63d | chars=910
+   Reason: 订单完成超60天，自然搁置
+   Snippet: [我方] 2026-03-11 | Cher client, le colis a été expédié via SF Express aujourd'hui, et il devrait arriver normalement demain. [我方] 2026-03-11 | Je viens de finir mon travail, je suis en train de manger, désolé(e). [客户] 2026-03-11 | si demain mon transitaire ne reçoit pas le colis je ne veux plus de ce
+
+7. [高价值搁置] Laura McGlade. | UK | A | 搁置 | sil=74d | chars=1164 | 审批信号
+   Reason: 静默74天（从报价已发掉出）
+   Snippet: [我方] 2026-03-02 | [产品卡片] [我方] 2026-03-02 | This is white with a border [我方] 2026-03-02 | [产品卡片] [我方] 2026-03-02 | This is the white, smooth version [客户] 2026-03-02 | Does foot fold to cover feet? [我方] 2026-03-02 | Yes, the hands and feet of both models can be folded [我方] 2026-03-02 | I'm glad the fe
+
+8. [高价值搁置] Taylah Wolff | AU | A | 搁置 | sil=69d | chars=1118
+   Reason: 静默69天（从谈判中掉出）
+   Snippet: [客户] 2026-03-06 | I’m still having a think about the swaddle. What is our next step on getting a sample for the zip romper [我方] 2026-03-06 | Okay, let's deal with the zipper jumpsuit first [我方] 2026-03-06 | I will reply to you right away [客户] 2026-03-06 | Sounds good, we will deal with the zipper ju
+
+9. [高价值搁置] Anabel Gevorgyan | GE | A | 搁置 | sil=76d | chars=1191
+   Reason: 静默76天（从已发货/在途掉出）
+   Snippet: [客户] 2026-02-24 | sens me other models [我方] 2026-02-24 | Sorry, there was something that came up just now, I will recommend it to you right away [我方] 2026-02-24 | [产品卡片] [客户] 2026-02-27 | send me the tracking number [我方] 2026-02-28 | 435051056113880, this is the tracking number for Yunda Express. [我
+
+10. [高价值搁置] JeanRomain Ouffouet | CI | A | 搁置 | sil=32d | chars=860
+   Reason: 静默32天（从报价已发掉出）
+   Snippet: [我方] 2026-04-12 | Hello [我方] 2026-04-12 | Thank you for your interest in our children's sets. In order to give you a more accurate quote, could you answer the following 3 questions? I just need you to respond with 3 letters: 
+   The approxima [客户] 2026-04-12 | je suis commerçant [客户] 2026-04-12 | en
+
+11. [高价值搁置] Flora Phisso | MW | A | 搁置 | sil=31d | chars=1025 | 审批信号
+   Reason: 静默31天（从报价已发掉出）
+   Snippet: [我方] 2026-04-13 | Hello, I'll check the inventory and get back to you right away [我方] 2026-04-13 | This item is currently in stock How many pieces do you need? I'll check if we have enough in stock. 
+ 
+ If the item is in stock, it can be shipped within a week. If the inventory is insufficient, we c 
+
+12. [高价值搁置] martin wamundila | ZM | A | 搁置 | sil=37d | chars=1037 | 审批信号
+   Reason: 静默37天（从报价已发掉出）
+   Snippet: [客户] 2026-04-07 | Hello,I’d like to discuss this item. What is the best price you can offer? What is the shipping cost? What is the shipping cost? What is the shipping cost? What is the shipping cost? What is the shipp [我方] 2026-04-07 | Could you please let me know the quantity and destination? That
+
+13. [高价值搁置] Consolate Kasongo | US | A | 搁置 | sil=35d | chars=1172
+   Reason: 静默35天（从报价已发掉出）
+   Snippet: [我方] 2026-04-09 | Okay, the unit price of the product is $3.50, and the total product cost is $28. Of that, $5 is for shipping, so the total order cost is $33 [客户] 2026-04-09 | je prend alors 4pcs
+envoie moi le lien de paiement [我方] 2026-04-09 | I will create an order for you after 10 minutes of dri
+
+14. [高价值搁置] Vanessa Arroyomejias | CL | A | 搁置 | sil=33d | chars=1233
+   Reason: 静默33天（从谈判中掉出）
+   Snippet: [客户] 2026-04-11 | Quiero hacer más preguntas relacionadas con el producto. [我方] 2026-04-11 | ¡Perfecto! Para poder ayudarte mejor, ¿podrías decirme cuál es la cantidad que te gustaría comprar?  [客户] 2026-04-11 | Quiero hacer más preguntas relacionadas con los precios. [我方] 2026-04-11 | Consultaré el
+
+15. [高价值搁置] Josh Martinez | US | A | 搁置 | sil=32d | chars=1141 | 审批信号
+   Reason: 静默32天（从报价已发掉出）
+   Snippet: [客户] 2026-04-11 | If you update invoice I can go ahead and order [我方] 2026-04-11 | Okay, I'll get ready right away [客户] 2026-04-11 | Okay thank you [客户] 2026-04-12 | ? [我方] 2026-04-12 | Sorry, I was unexpectedly delayed today, but I am now making the pi [我方] 2026-04-12 | [产品卡片] [客户] 2026-04-12 | Nev
+
+16. [高价值搁置] Lisa Ketelsen | DE | A | 搁置 | sil=32d | chars=879
+   Reason: 静默32天（从需求探索掉出）
+   Snippet: [客户] 2026-04-12 | You mean GOTS? [我方] 2026-04-12 | 不是，是SOR [客户] 2026-04-12 | Yes [客户] 2026-04-12 | Hm i am Not aware of SOR [我方] 2026-04-12 | SOR is the "Statement of Reasons" officially recognized by the U.S. CPSC, a professional technical document that certifies that the product has undergone rigo
+
+17. [高价值搁置] Euzito Carlos | MZ | A | 搁置 | sil=32d | chars=425
+   Reason: 静默32天（从需求探索掉出）
+   Snippet: [客户] 2026-04-12 | Masculino [我方] 2026-04-12 | [产品卡片] [我方] 2026-04-12 | Ok 👌, você pode fornecer mais informações, não sei que tipo de modelo recomendar para você. [我方] 2026-04-12 | [产品卡片] [我方] 2026-04-12 | [产品卡片] [我方] 2026-04-12 | [产品卡片] [我方] 2026-04-12 | [产品卡片] [我方] 2026-04-12 | [产品卡片] [我方] 2026-0
+
+18. [高价值搁置] mavie Mbouele | CG | A | 搁置 | sil=36d | chars=538
+   Reason: 静默36天（从需求探索掉出）
+   Snippet: [我方] 2026-04-08 | [产品卡片] [客户] 2026-04-08 | ok [客户] 2026-04-08 | les images svp [我方] 2026-04-08 | D'accord, je vous l'envoie maintenant. [我方] 2026-04-08 | [产品卡片] [我方] 2026-04-08 | [产品卡片] [我方] 2026-04-08 | Voici quelques ensembles pour enfants, et je vous recommande quelques produits phares. [客户] 2026
+
+19. [高价值搁置] denewade khady | ZR | A | 搁置 | sil=36d | chars=1100 | 审批信号
+   Reason: 静默36天（从报价已发掉出）
+   Snippet: [我方] 2026-04-03 | Good morning! I hope everything is going well for you. Do you have time to check the order details? If you have any questions or need further assistance, please let me know. Looking forward to your co [客户] 2026-04-07 | 1.0000
+$12.60
+1601661882179
+$3
+297204342001023507
+100%
+confirme
+
+20. [高价值搁置] Christy Malemba | CD | A | 搁置 | sil=37d | chars=803
+   Reason: 静默37天（从报价已发掉出）
+   Snippet: [我方] 2026-04-07 | Je vais regarder ton message. [我方] 2026-04-07 | Je vais créer un document et vous l'envoyer pour confirmation. [我方] 2026-04-07 | [产品卡片] [我方] 2026-04-07 | Seul ce produit est en taille 1 an, les autres sont en taille 3 ans, c'est bien ça ? [客户] 2026-04-07 | Oui [客户] 2026-04-07 | J’a
+
+21. [高价值搁置] Justina Sosa | GH | A | 搁置 | sil=37d | chars=542
+   Reason: 静默37天（从谈判中掉出）
+   Snippet: [客户] 2026-04-07 | 1601689932807
+$1.75-3.40
+Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days
+10.0
+1601689932807
+US$1.75-3.40
+定制男童服装套装 精纺涤纶面料 印花 ODM 服务 库存充足 快速出样 5-7 天
+ [客户] 2026-04-07 | Hello [客户] 2026-04-07 | am interested in your products [我方] 202
+
+22. [高价值搁置] Firmino Nunes | US | A | 搁置 | sil=38d | chars=517
+   Reason: 静默38天（从谈判中掉出）
+   Snippet: [客户] 2026-04-07 | Hai, saya tertarik dengan produk ini.
+[{"quantity":"null Buah","id":1601689932807,"title":"Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days","sku":[ [我方] 2026-04-07 | Hai! Set pakaian anak laki-laki kami bergaya kasual, cocok untu
+
+23. [高价值搁置] Mamanje Jean | CD | A | 搁置 | sil=39d | chars=920
+   Reason: 静默39天（从谈判中掉出）
+   Snippet: [客户] 2026-04-05 | 10000039414903
+$2.70-2.99
+Cotton Worsted Children Set Sleeveless Vest Shorts Print Durable Fashion Summer Outfit
+5
+10000039414903
+US$2.70-2.99
+棉质精纺儿童套装无袖背心短裤印花耐用时尚夏季服装
+5 [我方] 2026-04-05 | Bonjour [客户] 2026-04-05 | /:Blowkiss./:Blowkiss. [我方] 2026-04-05 | Ik ben Leo, leuk je te ontm
+
+24. [高价值搁置] NACOULMA CALEB | CI | A | 搁置 | sil=39d | chars=306
+   Reason: 静默39天（从谈判中掉出）
+   Snippet: [客户] 2026-04-05 | 1601637404027
+$2.63-3.50
+OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton Print Short Sleeve Shirt Shorts Outfit for 0-4 Years Summer
+3
+1601637404027
+US$2.63-3.50
+OEM 定制新生儿至幼儿男孩服装套装 100% 棉 [我方] 2026-04-05 | Bonjour [我方] 2026-04-05 | Je suis Léo, comment dois-je vous app
+
+25. [高价值搁置] Khanh Bui Thi Ngoc | VN | A | 搁置 | sil=41d | chars=843
+   Reason: 静默41天（从需求探索掉出）
+   Snippet: [我方] 2026-04-03 | Xem thử đúng ý chưa nhé? [客户] 2026-04-03 | Chưa thấy [我方] 2026-04-03 | Bạn vẫn cần ảnh thực tế chứ? [客户] 2026-04-03 | Vâng [我方] 2026-04-03 | Bạn có thể tìm hiểu thêm từ video trong liên kết sản phẩm. [我方] 2026-04-03 | Hiện tại tôi không có ảnh nào trên điện thoại, nhưng tôi có thể 
+
+26. [高价值搁置] Temur Hasanov | RU | A | 搁置 | sil=41d | chars=1403 | 审批信号
+   Reason: 静默41天（从谈判中掉出）
+   Snippet: [客户] 2026-04-03 | nech kunda keladi [我方] 2026-04-03 | Yetkazib berish odatda standart buyurtmalar uchun 15-20 kun, maxsus buyurtmalar uchun 20-30 kun davom etadi. Qashqadaryo Qamashi uchun logistika tafsilotlari aniqlanmoqda. Standartmi yoki maxsus buyur [客户] 2026-04-03 | razmer [客户] 2026-04-03 | ma
+
+27. [高价值搁置] Dorothy Bosea | GH | A | 搁置 | sil=41d | chars=597
+   Reason: 静默41天（从谈判中掉出）
+   Snippet: [客户] 2026-04-03 | Hi,I’m sourcing this product and would like to know more.
+[{"quantity":"3.000 piece","id":1601637404027,"title":"OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton Print Short Sleeve Shirt S [我方] 2026-04-03 | This 100% cotton boys' summer set is breathable and casual. MOQ
+
+28. [高价值搁置] Chipo Kamuriwo | ZW | A | 搁置 | sil=42d | chars=767
+   Reason: 静默42天（从谈判中掉出）
+   Snippet: [客户] 2026-04-02 | Hello,I'm looking for a reliable supplier for this item. What is the shipping cost?
+[{"quantity":"3.000 piece","id":1601637404027,"title":"OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton  [我方] 2026-04-02 | Please confirm your shipping country to check shipping cost. [我
+
+29. [高价值搁置] Sharmaine Jalgalado | PH | A | 搁置 | sil=42d | chars=525 | 审批信号
+   Reason: 静默42天（从谈判中掉出）
+   Snippet: [客户] 2026-04-02 | Hello,I’d like to discuss this item. What is the best price you can offer?
+[{"quantity":"3.000 piece","id":1601690883451,"title":"Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print ODM Service in S [我方] 2026-04-02 | I'll confirm the pricing with my senior manager. [我方] 2026-04-0
+
+30. [高价值搁置] Aziz Zaripov | UZ | A | 搁置 | sil=42d | chars=460
+   Reason: 静默42天（从谈判中掉出）
+   Snippet: [客户] 2026-04-02 | Здравствуйте,давайте обсудим этот товар. Могу ли я получить образец?
+[{"quantity":"2.000 шт.","id":1601690639342,"title":"Custom Kids Short Sleeve Set 100 Cotton Animal Stripe Cartoon ODM Service Spot [我方] 2026-04-02 | Здравствуйте! Образцы доступны, минимальный заказ — 2 шт. Напиш
+
+31. [高价值搁置] Maria  Evans | UK | A | 搁置 | sil=43d | chars=1143
+   Reason: 静默43天（从谈判中掉出）
+   Snippet: [我方] 2026-03-20 | The products you inquired about are currently unavailable [我方] 2026-03-20 | But for customization, we can purchase certified organic cotton fabric [我方] 2026-03-20 | What do you think? [客户] 2026-03-20 | what does that look like for price and moq for me?  [我方] 2026-03-20 | Certified 
+
+32. [高价值搁置] Lilian John | FR | A | 搁置 | sil=43d | chars=564 | 审批信号
+   Reason: 静默43天（从谈判中掉出）
+   Snippet: [我方] 2026-04-01 | [产品卡片] [我方] 2026-04-01 | Do you need the four-season version? [客户] 2026-04-01 | can each come in different colors? [我方] 2026-04-01 | OK [我方] 2026-04-01 | For in-stock items, you can choose different colors and sizes [客户] 2026-04-01 | ok [我方] 2026-04-01 | [产品卡片] [我方] 2026-04-01 | I 
+
+33. [高价值搁置] Mbankwene Mbankwene | CM | A | 搁置 | sil=46d | chars=650
+   Reason: 静默46天（从报价已发掉出）
+   Snippet: [客户] 2026-03-23 | oh ok
+going to check [客户] 2026-03-23 | would revert [我方] 2026-03-23 | Okay, remember to reply to me after you receive it [客户] 2026-03-23 | ok would do [我方] 2026-03-23 | [产品卡片] [我方] 2026-03-23 | Did you go to the front desk to confirm? [客户] 2026-03-23 | thank you well received [我方] 
+
+34. [高价值搁置] Lu Julie | AU | A | 搁置 | sil=47d | chars=537
+   Reason: 静默47天（从需求探索掉出）
+   Snippet: [客户] 2026-03-28 | OK [客户] 2026-03-28 | Please check it [客户] 2026-03-28 | I need it asap [客户] 2026-03-28 | If you have something simalar please send it to me [客户] 2026-03-28 | I will order [我方] 2026-03-28 | No problem [我方] 2026-03-28 | Regarding children's sets, I recommend some products for you [客户]
+
+35. [高价值搁置] Annabel Olarte | SA | A | 搁置 | sil=47d | chars=891 | 负面信号
+   Reason: 静默47天（从报价已发掉出）
+   Snippet: [我方] 2026-03-28 | Please tell me this information, and I will create an order for you shortly [客户] 2026-03-28 | Will check styles thank you so much [我方] 2026-03-28 | [产品卡片] [客户] 2026-03-28 | Hello,I’d like to discuss this item.
+[{"quantity":"null piece","id":10000039414903,"title":"Cotton Worsted Ch
+
+36. [高价值搁置] Zani Sheikh | PK | A | 搁置 | sil=50d | chars=965 | 审批信号
+   Reason: 静默50天（从谈判中掉出）
+   Snippet: [我方] 2026-03-25 | For 5-6 sets to Pakistan, I'll check the shipping cost with my team. Do you want any customization? [客户] 2026-03-25 | no [我方] 2026-03-25 | I'll check the shipping cost and get back to you. The price for 6 sets is ready. Ready to place the order? [客户] 2026-03-25 | first of all cnfrm
+
+37. [高价值搁置] Youssif Mohammed | IQ | A | 搁置 | sil=50d | chars=566 | 审批信号
+   Reason: 静默50天（从谈判中掉出）
+   Snippet: [我方] 2026-03-26 | Let me see [客户] 2026-03-26 | [产品卡片] [我方] 2026-03-26 | Please wait a moment [客户] 2026-03-26 | Ok [我方] 2026-03-26 | /:handshake. [我方] 2026-03-26 | Hello, if you want to purchase in-stock samples, the minimum quantity is 10 pieces [客户] 2026-03-26 | Could you please tell me the price p
+
+38. [高价值搁置] Mbali Sibiya | ZA | A | 搁置 | sil=51d | chars=803
+   Reason: 静默51天（从谈判中掉出）
+   Snippet: [客户] 2026-03-24 | Hi,can you share more details about this item? What is the shipping cost? What is the best price you can offer?
+[{"quantity":"10.000 piece","id":1601689932807,"title":"Custom Boys Clothing Set Worsted [客户] 2026-03-24 | Your business product has not been quoted, you can quickly open
+
+39. [高价值搁置] Rizwan ALi | UK | A | 搁置 | sil=59d | chars=895
+   Reason: 静默59天（从报价已发掉出）
+   Snippet: [我方] 2026-03-16 | [产品卡片] [我方] 2026-03-16 | These are the prices for the different sizes of this product [客户] 2026-03-16 | thank you. how much shipping [我方] 2026-03-16 | Shipped to the UK, right? [客户] 2026-03-16 | ya [我方] 2026-03-16 | [产品卡片] [我方] 2026-03-16 | It will take a little time to ensure the 
+
+40. [高价值搁置] Ronak Patel | IN | A | 搁置 | sil=53d | chars=763
+   Reason: 静默53天（从谈判中掉出）
+   Snippet: [客户] 2026-03-21 | 1601609793147
+$3.10-3.90
+Baby Toilet Training Pants Microfiber Washable Printed Cotton Summer Diaper 3D Leak Prevention Dry Surface Customizable 0-3
+100
+1601609793147
+US$3.10-3.90
+婴儿如厕训练裤超细纤维可水洗印花棉质夏季 [我方] 2026-03-22 | Thank you for your interest! Could you please confirm the quant
+
+41. [高价值搁置] Loyal Queen | KE | A | 搁置 | sil=68d | chars=1097 | 审批信号
+   Reason: 静默68天（从谈判中掉出）
+   Snippet: [客户] 2026-03-07 | 1601637404027
+$2.63-3.50
+OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton Print Short Sleeve Shirt Shorts Outfit for 0-4 Years Summer
+3
+1601637404027
+US$2.63-3.50
+OEM 定制新生儿至幼儿男孩服装套装 100% 棉 [我方] 2026-03-07 | Got your new product card. 100% cotton boys' summer set, high q
+
+42. [高价值搁置] Dian Novitasari | ID | A | 搁置 | sil=56d | chars=795
+   Reason: 静默56天（从谈判中掉出）
+   Snippet: [我方] 2026-03-19 | Tentu saja, kami dapat menyediakan sampel untuk Anda. [我方] 2026-03-19 | Apakah Anda sudah memeriksa pesan-pesan saya? [我方] 2026-03-19 | Apakah kamu di sana? [客户] 2026-03-19 | 1601670237440
+$1.45-2.50
+Custom Cartoon Two Piece Thermal Kids Pajama Set 100% Cotton Short Sleeve Breathab
+
+43. [高价值搁置] Fatima Suarez | US | A | 搁置 | sil=57d | chars=767 | 审批信号
+   Reason: 静默57天（从需求探索掉出）
+   Snippet: [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | [产品卡片] [我方] 2026-03-19 | These are our company's BSCI certification, Disney authorization, and other company certifications and stan
+
+44. [高价值搁置] Mariacaselyn Aninion | PH | A | 搁置 | sil=60d | chars=729
+   Reason: 静默60天（从谈判中掉出）
+   Snippet: [客户] 2026-03-15 | I also need [我方] 2026-03-15 | Sure, can you tell me how many of each product are needed? [客户] 2026-03-15 | For sample? [我方] 2026-03-15 | Yes [客户] 2026-03-15 | One per stlye and size [我方] 2026-03-15 | Does every style require all sizes? [客户] 2026-03-15 | Yes [我方] 2026-03-15 | Okay, 
+
+45. [高价值搁置] Jo Ki | US | A | 搁置 | sil=61d | chars=1070
+   Reason: 静默61天（从谈判中掉出）
+   Snippet: [我方] 2026-03-14 | I will check for you [客户] 2026-03-14 | [产品卡片] [我方] 2026-03-14 | Thank you for your reply, I will check right away [我方] 2026-03-14 | Do you have experience with customs clearance? [客户] 2026-03-14 | No not at all [我方] 2026-03-14 | Okay, then I will look for DDP shipping [我方] 2026-03-
+
+46. [高价值搁置] Tiffany tay | SG | A | 搁置 | sil=66d | chars=552
+   Reason: 静默66天（从谈判中掉出）
+   Snippet: [我方] 2026-03-09 | This should be fine. Do you have the specific dimensions of the product? [客户] 2026-03-09 | [产品卡片] [客户] 2026-03-09 | [产品卡片] [我方] 2026-03-09 | Okay, if possible, could you send over a sample? That would make customization better [客户] 2026-03-09 | I don’t have a sample [客户] 2026-03-09
+
+47. [高价值搁置] Kiana Talbot | AU | A | 搁置 | sil=69d | chars=867
+   Reason: 静默69天（从谈判中掉出）
+   Snippet: [我方] 2026-03-06 | [产品卡片] [我方] 2026-03-06 | [产品卡片] [我方] 2026-03-06 | This is the jumpsuit we had custom-made not long ago [我方] 2026-03-06 | However, the customer later requested to replace the YKK zipper, and I am sending you the pictures [我方] 2026-03-06 | [产品卡片] [我方] 2026-03-06 | [产品卡片] [我方] 2026-03
+
+48. [高价值搁置] musitekie masanga | US | A | 搁置 | sil=69d | chars=718
+   Reason: 静默69天（从报价已发掉出）
+   Snippet: [我方] 2026-03-06 | Bonjour ! Pour un bébé de 10 à 12 mois, notre taille 80 (12M) est la plus appropriée, et convient aux bébés mesurant environ 73 à 80 cm. 
+ 
+ Cependant, chaque bébé progresse à son rythme, il est donc  [我方] 2026-03-06 | [产品卡片] [我方] 2026-03-06 | Votre langue maternelle est-elle le fr
+
+49. [高价值搁置] norma  aguilar | US | A | 搁置 | sil=70d | chars=864 | 审批信号
+   Reason: 静默70天（从谈判中掉出）
+   Snippet: [客户] 2026-03-04 | Hi, I'm interested in this product. What is the shipping cost?
+[{"quantity":"3.000 piece","id":1601637404027,"title":"OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton Print Short Sleeve Sh [我方] 2026-03-04 | Thanks for your interest! Could you let me know where to ship t
+
+50. [高价值搁置] Latifa Abdullaeva | RU | A | 搁置 | sil=70d | chars=1223
+   Reason: 静默70天（从需求探索掉出）
+   Snippet: [我方] 2026-03-05 | Здравствуйте! Да, мы можем снять наши этикетки и добавить ваши логотипы. Минимальный заказ при таком оформлении — 100 штук. Образец тоже можем предоставить, обычно на его изготовление уходит около 7 д [我方] 2026-03-05 | Добрый день, я получил ваш запрос и готовлю ответ. [我方] 2026-03
+
+51. [高价值搁置] Yvonne Mbithe | US | A | 搁置 | sil=71d | chars=545
+   Reason: 静默71天（从需求探索掉出）
+   Snippet: [客户] 2026-03-04 | Do you have other clothes for girls so I can continue shopping? [我方] 2026-03-04 | Of course, I'll recommend it to you right away [客户] 2026-03-04 | Ok [我方] 2026-03-04 | [产品卡片] [我方] 2026-03-04 | You can choose the products you like, and I am always available [我方] 2026-03-04 | [产品卡片] 
+
+52. [高价值搁置] Ananthu Anilkumar | AE | A | 搁置 | sil=76d | chars=1060
+   Reason: 静默76天（从谈判中掉出）
+   Snippet: [我方] 2026-01-24 | [产品卡片] [客户] 2026-02-27 | 1601612304839
+$4.30-4.60
+Infant & Toddler Unisex Pajamas Set Autumn Velvet Cartoon Pattern Breathable Two-Piece Polyester/Cotton Model 323
+10
+1601612304839
+US$4.30-4.60
+婴幼儿男女通用睡衣套装秋季天鹅绒卡通图案透气两件套涤纶/棉模特 [我方] 2026-02-27 | I am here [客户] 2026-02-27 | Hi, I'm in
+
+53. [高价值搁置] Rashidatu Issahaku | GH | A | 搁置 | sil=78d | chars=903 | 审批信号
+   Reason: 静默78天（从报价已发掉出）
+   Snippet: [客户] 2026-02-25 | I will like to order some products to add to it [我方] 2026-02-25 | Do you prefer lower shipping costs or faster delivery times? [客户] 2026-02-25 | no please, myself [我方] 2026-02-25 | No problem [客户] 2026-02-25 | if it lower shipping costs, I have no problem because my time is not up 
+
+54. [高价值搁置] Bel Nas | GH | A | 搁置 | sil=78d | chars=714 | 审批信号
+   Reason: 静默78天（从谈判中掉出）
+   Snippet: [我方] 2026-02-25 | Around 1.5 to 8 years old [客户] 2026-02-25 | Oka [客户] 2026-02-25 | I want 7 years 5 years 3years 6 yes [我方] 2026-02-25 | No problem, the product comes in four styles. Which style do you need? [客户] 2026-02-25 | Let me see the style [我方] 2026-02-25 | OK [我方] 2026-02-27 | Good morning,
+
+55. [高价值搁置] Zahraa Pharmacist | IQ | A | 搁置 | sil=81d | chars=891 | 审批信号
+   Reason: 静默81天（从谈判中掉出）
+   Snippet: [我方] 2026-02-28 | The product comes in four styles, as follows: [我方] 2026-02-28 | [产品卡片] [我方] 2026-02-28 | [产品卡片] [我方] 2026-02-28 | [产品卡片] [我方] 2026-02-28 | [产品卡片] [我方] 2026-02-28 | The size information is as follows: [我方] 2026-02-28 | [产品卡片] [我方] 2026-02-28 | Price: 
+ MOQ (50-100): $4.29 
+ MOQ (100
+
+56. [高价值搁置] Kinana Zahraa | US | A | 搁置 | sil=73d | chars=839
+   Reason: 订单完成超60天，自然搁置
+   Snippet: [客户] 2026-03-02 | صباح النور [客户] 2026-03-02 | كلا 
+يوجد حرب في بلدي 
+لقد تهجرنا والوضع لايسمح لي [我方] 2026-03-02 | /:smile./:smile./:smile. [我方] 2026-03-02 | أنا آسف لسماع ما حدث لك. يرجى الانتباه لسلامتك، ونحن هنا لدعمك في أي وقت. [客户] 2026-03-02 | شكرا لك [我方] 2026-03-02 | أعلم أيضًا أن الوضع في 
+
+57. [高价值搁置] surbhi jain | IN | A | 搁置 | sil=79d | chars=531 | 审批信号
+   Reason: 静默79天（从已发货/在途掉出）
+   Snippet: [我方] 2026-02-23 | Sorry [客户] 2026-02-23 | okay [我方] 2026-02-23 | /:smile. [客户] 2026-02-23 | I am waiting. [我方] 2026-02-23 | This is your email address, right? [客户] 2026-02-23 | Yes [我方] 2026-02-23 | Okay, I will send you a message [客户] 2026-02-23 | Okay! [我方] 2026-02-23 | OK [我方] 2026-02-24 | I've g
+
+58. [高价值搁置] ammhmd mhmd | YE | A | 搁置 | sil=81d | chars=614
+   Reason: 静默81天（从谈判中掉出）
+   Snippet: [客户] 2026-02-22 | 1601637404027
+$2.63-3.50
+OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton Print Short Sleeve Shirt Shorts Outfit for 0-4 Years Summer
+3
+1601637404027
+US$2.63-3.50
+OEM 定制新生儿至幼儿男孩服装套装 100% 棉 [客户] 2026-02-22 | بكم سعره [我方] 2026-02-22 | Good afternoon [客户] 2026-02-22 | بكم
+
+59. [高价值搁置] Aurelie Manitu | US | A | 搁置 | sil=84d | chars=842
+   Reason: 静默84天（从谈判中掉出）
+   Snippet: [客户] 2026-01-31 | 1601637404027
+$2.63-3.50
+OEM Custom Newborn to Toddler Boys Clothing Sets 100% Cotton Print Short Sleeve Shirt Shorts Outfit for 0-4 Years Summer
+3
+1601637404027
+US$2.63-3.50
+OEM 定制新生儿至幼儿男孩服装套装 100% 棉 [我方] 2026-01-31 | Thanks for the new product card! Our boys' summer sets are 100%
+
+60. [高价值搁置] safia bacha | IT | A | 搁置 | sil=90d | chars=1094
+   Reason: 静默90天（从谈判中掉出）
+   Snippet: [客户] 2026-02-13 | Bonjour , je suis intéressé.e par ces produits.
+[{"quantity":"2.000 pièce","id":1601639181770,"title":"Soft 100% Cotton Printed European-American Style Kids Clothing Set for Boys Girls 3-8 Years Breat [我方] 2026-02-13 | Bonjour ! Vous voulez 2 pièces, c'est noté. Avez-vous des préfé
+
+61. [活跃待确认] Asselya Marina | US | S | 待付款 | sil=69d | chars=980 | 审批信号
+   Reason: 有订单待收款但静默69天
+   Snippet: [客户] 2026-03-06 | Ок [我方] 2026-03-06 | /:smile. [我方] 2026-03-06 | Hello, I am free now [我方] 2026-03-06 | Are you saying that you need recommendations for cheaper onesies? [客户] 2026-03-06 | Leo, i want to sell this products in amazon. Amazon requires 16 CFR Part 1615 for kids products. If u have CPC 
+
+62. [活跃待确认] Rocio L | US | A | 已签收 | sil=30d | chars=1029 | 审批信号
+   Reason: 订单交易成功已签收，静默30天
+   Snippet: [我方] 2026-04-10 | 训练裤产品订单说明_1_20260410191045.docx [我方] 2026-04-10 | 新款定制整理-001.xls [我方] 2026-04-10 | 数码单面-001-2025.xls [我方] 2026-04-10 | 爆款现货花型下单表-001.xls [我方] 2026-04-10 | 新款定制整理 -002.xls [客户] 2026-04-10 | Thank you so much. I’ll review throughout the weekend. [我方] 2026-04-11 | Hi, Rosio, I hope yo
+
+63. [活跃待确认] Soujeeta reetoo | MU | A | 已签收 | sil=49d | chars=735 | 审批信号
+   Reason: 订单交易成功已签收，静默49天
+   Snippet: [我方] 2026-03-11 | Good morning, my goods have arrived at the warehouse [我方] 2026-03-11 | [产品卡片] [我方] 2026-03-11 | However, Ella explained that they cannot ship on March 12th, tomorrow. The container for tomorrow is already full [客户] 2026-03-26 | hello. how many pieces were included in mu parcel in a
+
+64. [活跃待确认] Sarah nell roly Othayi MAMALHY | GA | A | 已签收 | sil=64d | chars=624
+   Reason: 已签收，静默64天
+   Snippet: [客户] 2026-03-05 | Merci [我方] 2026-03-05 | Bonjour, I hope you're having a great day! [客户] 2026-03-05 | Oui merci 🙏 [我方] 2026-03-05 | [产品卡片] [我方] 2026-03-08 | [产品卡片] [我方] 2026-03-08 | Le produit a été expédié, voici une photo du colis. [我方] 2026-03-08 | Prévue pour arriver dans environ 3 jours. [客户]
+
+65. [活跃待确认] Amah Doumbia | CI | A | 谈判中 | sil=30d | chars=576 | 审批信号
+   Reason: 谈判中中，长期沉默30天
+   Snippet: [客户] 2026-04-14 | 1601690883451
+$1.38-2.38
+Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print ODM Service in Stock Fast Sample
+3.0
+1601690883451
+US$1.38-2.38
+定制儿童套装 2 件套 100% 棉帆布卡通印花 ODM 服务 库存充足 快速出样
+3.0 [我方] 2026-04-14 | Hi! Noticed you're interested in our Custom Kids Set. Let me know if you wa
+
+66. [活跃待确认] Laroussi Ilhame | MA | A | 谈判中 | sil=30d | chars=656
+   Reason: 谈判中中，长期沉默30天
+   Snippet: [客户] 2026-04-14 | Bonjour,j'envisage d'acheter ce produit.
+[{"quantity":"null pièce","id":1601670237440,"title":"Custom Cartoon Two Piece Thermal Kids Pajama Set 100% Cotton Short Sleeve Breathable ODM/OEM Custom Packa [我方] 2026-04-14 | Notre produit est un pyjama pour enfants en coton 100 % respira
+
+67. [活跃待确认] SUSAN MPUNGA | US | A | 已签收 | sil=36d | chars=753
+   Reason: 已签收，静默36天
+   Snippet: [我方] 2026-04-05 | We will update you on the shipping status when it is dispatched [我方] 2026-04-06 | Hello, are you selling in the United States? [我方] 2026-04-06 | [产品卡片] [我方] 2026-04-06 | This product is made of pure polyester fabric, and I need to make sure you understand this to avoid any misunder
+
+68. [活跃待确认] ABDELMOULA LEKRET | MA | A | 待付款 | sil=38d | chars=914 | 审批信号
+   Reason: 有订单待收款但静默38天
+   Snippet: [客户] 2026-04-04 | waiting 60 days its to much [客户] 2026-04-04 | shipping by airplane please ? [我方] 2026-04-05 | Okay, I am checking the most economical option, and I will now check the air freight prices [我方] 2026-04-05 | If there is no air transport available, but express delivery is possible, [我方]
+
+69. [活跃待确认] Becky Nams | ZM | A | 已发货/在途 | sil=42d | chars=723
+   Reason: 在途，静默42天需跟踪到港
+   Snippet: [我方] 2026-04-02 | [产品卡片] [客户] 2026-04-02 | 🤗 [我方] 2026-04-02 | How long does it take for the shipment to be sent from the freight forwarder to your country? [客户] 2026-04-02 | depends with the transport,by Air it's within 10 to 14 days, Sea takes time, 30 to 45 days [我方] 2026-04-02 | You haven't dec
+
+70. [活跃待确认] Salome Ambali | CG | B | 待付款 | sil=83d | chars=1172
+   Reason: 有订单待收款但静默83天
+   Snippet: [客户] 2026-02-20 | Oui [客户] 2026-02-20 | C’est un bébé garçon [我方] 2026-02-20 | D'accord, vous avez besoin de la taille pour quelques mois. [我方] 2026-02-20 | Est-ce que je peux vous fournir toutes les tailles pour les enfants de moins d'un an ? [客户] 2026-02-20 | Normalement je suis entrain de faire d
+
+71. [活跃待确认] Vie Merveilleux | CI | B | 已签收 | sil=34d | chars=1284
+   Reason: 已签收，静默34天
+   Snippet: [我方] 2026-04-10 | Est-ce pour un usage personnel ou pour la vente ? [客户] 2026-04-10 | pour la vente [我方] 2026-04-10 | Voulez-vous envoyer la marchandise en Côte d'Ivoire ? Avez-vous un transitaire chinois ? Si vous avez des clients, pourriez-vous m'envoyer l'adresse du transitaire ? [我方] 2026-04-10 
+
+72. [付款卡住] Umm Aysha | KE | A | 待付款 | sil=27d | chars=930
+   Reason: 有订单待收款，静默27天需催款
+   Snippet: [我方] 2026-04-16 | Hello, I am checking your message now and will reply to you shortly [我方] 2026-04-16 | 1. Is this the recipient information or the shipping mark? 
+ 2. Specific shipping information: The 26-piece set you selected has a quantity of one piece. The unit price of the product is $20.5, th
+
+73. [负面信号] Assia Assia | DZ | S | 售后 | sil=24d | chars=923 | 负面信号
+   Reason: 售后中，长期沉默24天
+   Snippet: [客户] 2026-04-20 | Bonjour
+
+Votre produit m’intéresse et j’aimerais en savoir plus. J’J'attends votre réponse avec impatience.
+
+Merci.
+[{"quantity":"2.000 Piece/s","id":1601690639342,"title":"Ensemble personnalisé pour  [我方] 2026-04-20 | Bonjour, notre set court manches courtes en coton 100% convient
+
+74. [负面信号] ali Amjid | ZA | A | 待付款 | sil=2d | chars=737 | 负面信号
+   Reason: 有订单待收款，客户2天前活跃
+   Snippet: [客户] 2026-05-11 | It’s ok [我方] 2026-05-11 | Okay, I'll notify you of any updates [客户] 2026-05-12 | Good day [客户] 2026-05-12 | How r u [我方] 2026-05-12 | Hello [我方] 2026-05-12 | Regarding the shipping issue with the order, I have already communicated with the warehouse. There have been a lot of orders
+
+75. [负面信号] azaan ss | OM | A | 报价已发 | sil=18d | chars=842 | 负面信号
+   Reason: 报价已发中，长期沉默18天
+   Snippet: [我方] 2026-04-25 | It's 100% combed cotton, soft and breathable. [我方] 2026-04-26 | For children's clothing, we primarily use 100% cotton fabric [客户] 2026-04-26 | How much [我方] 2026-04-26 | Is it in stock? [我方] 2026-04-26 | [产品卡片] [我方] 2026-04-26 | 0–100 pieces, unit price: $3.8 [我方] 2026-04-26 | [产品卡
+
+76. [负面信号] Ijaz Ahmad | US | A | 搁置 | sil=117d | chars=1146 | 审批信号 | 负面信号
+   Reason: 深度静默117天（从谈判中掉出）
+   Snippet: [客户] 2026-01-17 | sure i need ready made [我方] 2026-01-17 | Customization means making product details according to your requirements, such as customizing your logo, craftsmanship, etc [客户] 2026-01-17 | no no i just need ready made garments [客户] 2026-01-17 | can you guide me how i will be able to tak
+
+77. [审批信号] fernande Pochette | US | A | 谈判中 | sil=24d | chars=1063 | 审批信号
+   Reason: 谈判中中，长期沉默24天
+   Snippet: [我方] 2026-04-20 | Could you provide your city or zip code? [客户] 2026-04-20 | 07083 [我方] 2026-04-20 | I'll confirm the pricing with my senior manager. [客户] 2026-04-20 | Ok [我方] 2026-04-20 | I'll update you as soon as I have the details. [客户] 2026-04-20 | Ok [我方] 2026-04-20 | Thank you for your patien
+
+78. [审批信号] Krisgel Igros | BN | A | 谈判中 | sil=19d | chars=1301 | 审批信号
+   Reason: 谈判中中，长期沉默19天
+   Snippet: [我方] 2026-04-26 | Ordering 10 pieces is totally doable with mixed designs. I'll find the best price and shipping options for you. Anything else you'd like to add? [客户] 2026-04-26 | lets estimate that first then ill.post the items on my.page [客户] 2026-04-26 | Your business product has not been quoted
+
+79. [审批信号] Emad Jumah | LY | A | 谈判中 | sil=22d | chars=395 | 审批信号
+   Reason: 谈判中中，长期沉默22天
+   Snippet: [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | [产品卡片] [我方] 2026-04-22 | You can
+
+80. [审批信号] Patience Mensah Agyeman Prempeh | GH | A | 报价已发 | sil=23d | chars=1298 | 审批信号
+   Reason: 报价已发中，长期沉默23天
+   Snippet: [我方] 2026-04-20 | What is your delivery address? [客户] 2026-04-20 | shipping to Ghana [我方] 2026-04-20 | I'll check and send it to you shortly [客户] 2026-04-20 | okay [我方] 2026-04-20 | /:handshake./:handshake. [我方] 2026-04-21 | The shipping cost details are as follows: 
+ 
+ Amount: $66 
+ 
+ Trade terms: 
+
+81. [审批信号] Loza Bondok | EG | A | 报价已发 | sil=28d | chars=1405 | 审批信号
+   Reason: 报价已发中，长期沉默28天
+   Snippet: [客户] 2026-04-16 | Egypt, Cairo, Khalifa in Sayyida Aisha [客户] 2026-04-16 | The address is available [我方] 2026-04-16 | The freight forwarders are currently off duty, so I can only give you an approximate shipping cost [我方] 2026-04-16 | Shipping Details: 
+ 1. Amount: $48 
+ 2. Trade terms: DDP 
+ 3. Shi
+
+82. [审批信号] arshavin amoah | GH | B | 报价已发 | sil=25d | chars=1468 | 审批信号
+   Reason: 报价已发中，长期沉默25天
+   Snippet: [客户] 2026-03-23 | 1601639056552
+$2.90-4
+Adorable Cartoon Rabbit 8-Piece Soft Summer Baby Clothing Set Newborn Gift Set for 0-3 Month Baby Boy & Girl High Value Package
+2
+1601639056552
+US$2.90-4
+可爱卡通兔子 8 件套柔软夏季婴儿服装套装新生儿 [客户] 2026-03-23 | hi [我方] 2026-03-23 | Hi there! 😊 What can I help you with toda
+
+83. [审批信号] Sifa Vano | US | B | 需求探索 | sil=14d | chars=685 | 审批信号
+   Reason: 需求探索中，中期沉默14天
+   Snippet: [我方] 2026-04-25 | Thank you for confirming! Could you please share the specific product types and quantities you need? This will help us provide tailored options for you. 😊 [客户] 2026-05-01 | Can you send me the ones you have so I can choose? [我方] 2026-05-01 | You need to know what styles of product
+
+84. [审批信号] Conteza Elias | SA | B | 谈判中 | sil=22d | chars=645 | 审批信号
+   Reason: 谈判中中，长期沉默22天
+   Snippet: [客户] 2026-04-22 | Hello, my name is Teza.
+
+I am thinking to start launching baby products and I am interested in your baby products. 
+
+I want to know the following:
+
+1. What is the minimum quantity?
+2. Please send me y [客户] 2026-04-22 | 1601719645304
+Double-sided Petal Bib 360-Degree Rotation Waterp
+
+85. [审批信号] bester chandah | ZM | B | 谈判中 | sil=23d | chars=888 | 审批信号
+   Reason: 谈判中中，长期沉默23天
+   Snippet: [客户] 2026-04-21 | how much for 10 pieces? [客户] 2026-04-21 | [产品卡片] [我方] 2026-04-21 | Price for 10 pcs depends on specs, fabric, customization. Any special requests? [客户] 2026-04-21 | just ordinary but good quality [我方] 2026-04-21 | 10 pcs ordinary good quality ok [我方] 2026-04-21 | pls confirm size, 
+
+86. [审批信号] Fairness Sikani | ZM | B | 谈判中 | sil=28d | chars=1106 | 审批信号
+   Reason: 谈判中中，长期沉默28天
+   Snippet: [客户] 2026-04-16 | 1601600287717
+$1.30-2
+Korean Style Fashion Short-Sleeved 100% Cotton Breathable O-Neck T-Shirt Shorts 2-Piece Set Kids Boys Girls Summer Sports Wear
+2
+1601600287717
+US$1.30-2
+韩版时尚短袖100%棉透气O领T恤短裤2件套儿童男 [我方] 2026-04-16 | This Korean-style 2-piece kids' set is 100% cotton, breathable,
+
+87. [审批信号] Kings Sikaz | US | B | 报价已发 | sil=24d | chars=579 | 审批信号
+   Reason: 报价已发中，长期沉默24天
+   Snippet: [客户] 2026-04-20 | [产品卡片] [我方] 2026-04-20 | Could you please let me know your expected purchasing quantity? This will help me provide you with the best options  [客户] 2026-04-20 | how much [我方] 2026-04-20 | To provide you with an accurate price, could you please tell me your receiving location? This w
+
+88. [审批信号] rayan shafi | KE | B | 报价已发 | sil=27d | chars=1154 | 审批信号
+   Reason: 报价已发中，长期沉默27天
+   Snippet: [客户] 2026-04-14 | Hi,I’m looking for a business partner.
+[{"quantity":"null piece","id":1601700182554,"title":"Girls' Summer Homewear Set Baby Western Style Children's Personalized Trendy Korean-Style Ruffle Trim Flora [我方] 2026-04-14 | Hi! We do cloth diapers, baby pajamas, and more. Looking forwar
+
+89. [审批信号] Peggy Hamungala | ZM | B | 谈判中 | sil=29d | chars=966 | 审批信号
+   Reason: 谈判中中，长期沉默29天
+   Snippet: [客户] 2026-04-15 | Hi,I’d like to begin discussions about this item. What is the shipping cost? What is the shipping cost?
+[{"quantity":"100.000 piece","id":1601595270616,"title":"Washable Reusable Summer Training Cloth [我方] 2026-04-15 | Thanks for your interest! Could you let me know the delivery co
+
+90. [高价值复核] Keinjol Tata | IN | S | 谈判中 | sil=4d | chars=1236 | 审批信号
+   Reason: 谈判中中，短期沉默4天
+   Snippet: [客户] 2026-05-04 | TQ so much dear [我方] 2026-05-05 | Please wait a moment, I will reply to you/:handshake. [客户] 2026-05-05 | Sure, I’ll wait for your reply. 🤝 [我方] 2026-05-05 | Haha, okay, your response needs to be taken seriously and cannot be done half-heartedly/:smile. [客户] 2026-05-05 | Hello, th
+
+91. [高价值复核] Ryan Luke | AE | S | 搁置 | sil=108d | chars=1031 | 审批信号
+   Reason: 深度静默108天（从谈判中掉出）
+   Snippet: [客户] 2026-01-26 | hi [客户] 2026-01-26 | 1601638452923
+OEM Wholesale Plus Size Bamboo Cotton Baby Sleep Sack 100% Cotton Lined 2 Layers for Winter Super Soft Zipper Temperature
+1601638452923
+OEM批发大码竹棉婴儿睡袋100%棉内衬2层冬季超柔软拉链保暖 [我方] 2026-01-26 | Hello [客户] 2026-01-26 | do you connect with shopify store for
+
+92. [高价值复核] dila cakir | TR | S | 搁置 | sil=136d | chars=837 | 审批信号
+   Reason: 深度静默136天（从需求探索掉出）
+   Snippet: [客户] 2025-12-29 | Thank you so much! [客户] 2025-12-29 | Have a great day. [我方] 2025-12-29 | We are a manufacturer authorized by Disney and believe we can meet your needs [我方] 2025-12-29 | /:handshake./:handshake./:handshake. [我方] 2025-12-29 | [产品卡片] [我方] 2025-12-29 | [产品卡片] [我方] 2025-12-29 | [产品卡片] [
+
+93. [高价值复核] Alyona Panfilova | RU | S | 搁置 | sil=141d | chars=879
+   Reason: 深度静默141天（从需求探索掉出）
+   Snippet: [我方] 2025-11-17 | /:handshake./:handshake./:handshake. [我方] 2025-12-03 | [产品卡片] [我方] 2025-12-03 | Hey! While organizing files, I saw this video - the texture of bamboo fiber looks very comfortable It is these small details that make baby clothing unique. 
+ Its highlights include: 
+    Bamboo fiber [
+
+94. [高价值复核] Mona almuharraqy | BH | A | 需求探索 | sil=8d | chars=648
+   Reason: 需求探索中，中期沉默8天
+   Snippet: [我方] 2026-05-06 | نحن نتفهم تفضيلك للأقمشة القطنية. لا تقلق، يمكننا توفير منتجات مصنوعة بالكامل من القطن لتلبية احتياجاتك. 😊 [客户] 2026-05-06 | كلمت شركة الشحن قال قريب بتوصل [我方] 2026-05-06 | هذا رائع، لكن مدة الشحن هذه طويلة بعض الشيء. [客户] 2026-05-06 | اي [客户] 2026-05-06 | اول تجربة معهم [我方] 202
+
+95. [高价值复核] WELE Mounia | TG | A | 已签收 | sil=8d | chars=607
+   Reason: 订单交易成功已签收，静默8天
+   Snippet: [客户] 2026-05-06 | [产品卡片] [我方] 2026-05-06 | Je vérifie le stock, un instant. [客户] 2026-05-06 | a part sa vous Avez quoi encore ? [我方] 2026-05-06 | Je te recommande quelques produits. [我方] 2026-05-06 | [产品卡片] [我方] 2026-05-06 | [产品卡片] [我方] 2026-05-06 | [产品卡片] [我方] 2026-05-06 | [产品卡片] [我方] 2026-05-06 | 
+
+96. [高价值复核] yoselyn Rodriguez | US | A | 已签收 | sil=13d | chars=841
+   Reason: 订单交易成功已签收，静默13天
+   Snippet: [客户] 2026-04-28 | hola [我方] 2026-04-29 | /:smile. [我方] 2026-04-29 | Hola, ¿lo has recibido? [客户] 2026-04-29 | aun no [我方] 2026-04-29 | ¿Hay algo en lo que pueda ayudarte en particular? [客户] 2026-04-30 | hola 👋 [客户] 2026-04-30 | me encantaron los conjuntos todos preciosos sin duda volvería a pedirlo
+
+97. [高价值复核] SONIYA PAUL | IN | A | 搁置 | sil=92d | chars=700
+   Reason: 深度静默92天（从需求探索掉出）
+   Snippet: [客户] 2026-02-11 | 9 yuan belongs to which style ? [客户] 2026-02-11 | [产品卡片] [客户] 2026-02-11 | this ?? [客户] 2026-02-11 | [产品卡片] [客户] 2026-02-11 | or this ? [我方] 2026-02-11 | The first style [客户] 2026-02-11 | ok thats what i said.. i received ordered product only 5 ps .. 14 ps are another model [客户] 20
+
+98. [高价值复核] Oliver Rivera | CL | A | 搁置 | sil=99d | chars=1357 | 审批信号
+   Reason: 深度静默99天（从报价已发掉出）
+   Snippet: [客户] 2026-02-04 | cuando vuelven de sus vacaciones? [客户] 2026-02-04 | rut : 15.783.611-0
+nombre : Oliver andres rivera solis 
+dirección: José mieguel carrera 439, Santiago centro 
+pais chile 
+mail: Oliver.rivera23082626@gmail.com 
+número de celular es + 569   42596904 [客户] 2026-02-04 | codigo postal
+
+99. [高价值复核] Linda Vaage | NO | A | 搁置 | sil=103d | chars=1871 | 审批信号
+   Reason: 深度静默103天（从谈判中掉出）
+   Snippet: [我方] 2026-01-30 | The MOQ is 500 pieces. Since we're a factory, this helps us ensure the best production quality and price for your custom muslin and towel layers. Does that quantity work for your current plans? 😊 [我方] 2026-01-31 | Good morning! I hope you had a pleasant weekend. Have you had a cha
+
+100. [高价值复核] Inderpreet kaur | US | A | 谈判中 | sil=1d | chars=825
+   Reason: 谈判中中，活跃1天
+   Snippet: [客户] 2026-05-14 | Send me the fabric patterns available ? [我方] 2026-05-14 | Okay, I'll send it to you, you can choose [客户] 2026-05-14 | Just to make sure  I need to get the samples tested here . If the samples will be approved then we will proceed [客户] 2026-05-14 | Can you make this style  . [我方] 20
+
+101. [高价值复核] Aloh Voma | US | A | 待发货 | sil=7d | chars=794
+   Reason: 订单待发货，静默7天
+   Snippet: [客户] 2026-05-06 | No problem [我方] 2026-05-06 | OK [我方] 2026-05-06 | Hello, I checked, and out of the styles 2, 6, 7, 8, 11, 13, 14, 16, 17, and 18, only style 16 is out of stock [我方] 2026-05-06 | Do you think the 16 needs to be replaced with another style? [客户] 2026-05-06 | It can be replaced with 1
+
+102. [高价值复核] Aboulaye Rabiatou | CI | A | 谈判中 | sil=8d | chars=1734
+   Reason: 谈判中中，中期沉默8天
+   Snippet: [客户] 2026-05-06 | 1601600287717
+$1.30-2
+Korean Style Fashion Short-Sleeved 100% Cotton Breathable O-Neck T-Shirt Shorts 2-Piece Set Kids Boys Girls Summer Sports Wear
+2
+1601600287717
+US$1.30-2
+韩版时尚短袖100%棉透气O领T恤短裤2件套儿童男 [客户] 2026-05-06 | 1601699647629
+$3.10-3.30
+Kids Clothing Set Solid Color Waffle F
+
+103. [高价值复核] Bamba Ami | CI | A | 谈判中 | sil=8d | chars=437
+   Reason: 谈判中中，中期沉默8天
+   Snippet: [客户] 2026-05-06 | Bonjour,je cherche à établir un partenariat au sujet de ce produit. Quel est le meilleur prix que vous pouvez offrir ?
+[{"quantity":"100.000 pièce","id":1601637404027,"title":"OEM Custom Wholesale Bab [我方] 2026-05-06 | Merci pour votre demande de prix. Le prix de ce produit dépend 
+
+104. [高价值复核] Tahar benmohamed | CA | A | 谈判中 | sil=8d | chars=514
+   Reason: 谈判中中，中期沉默8天
+   Snippet: [客户] 2026-05-06 | Hi,I’d like to learn more about this product.more models
+[{"quantity":"100.000 piece","id":1601637404027,"title":"OEM Custom Wholesale Baby Clothing Set Bulk Infant Pajamas 100% Cotton Children Homewe [我方] 2026-05-06 | This baby clothing set is made of 100% cotton and comes in a ca
+
+105. [高价值复核] Aula Alsaad | IQ | A | 谈判中 | sil=10d | chars=1129
+   Reason: 谈判中中，中期沉默10天
+   Snippet: [客户] 2026-04-25 | 1601690883451
+$1.38-2.38
+Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print ODM Service in Stock Fast Sample
+3.0
+1601690883451
+US$1.38-2.38
+定制儿童套装 2 件套 100% 棉帆布卡通印花 ODM 服务 库存充足 快速出样
+3.0 [客户] 2026-04-25 | 1601670237440
+$1.45-2.50
+Custom Cartoon Two Piece Thermal Kids Pajama Set 1
+
+106. [高价值复核] Christine Muwela | ZM | A | 需求探索 | sil=10d | chars=888 | 审批信号
+   Reason: 需求探索中，中期沉默10天
+   Snippet: [我方] 2026-05-01 | We are currently on vacation, and once our vacation ends, I can have the factory directly take videos or photos of the products on-site for you, which might better meet your requirements [客户] 2026-05-01 | okay [我方] 2026-05-01 | Okay, thank you for your understanding. [我方] 2026-05-0
+
+107. [高价值复核] Brian Robert Ocholi | KE | A | 报价已发 | sil=10d | chars=870
+   Reason: 报价已发中，中期沉默10天
+   Snippet: [客户] 2026-05-03 | what ages do you have? [我方] 2026-05-03 | 0 to 8 years old [我方] 2026-05-04 | This is a real photo of the product, take a look [我方] 2026-05-04 | [产品卡片] [我方] 2026-05-04 | [产品卡片] [我方] 2026-05-04 | [产品卡片] [客户] 2026-05-04 | how much for 20 pieces? [我方] 2026-05-04 | The cost for 20 items 
+
+108. [高价值复核] Asma Noor | PK | A | 谈判中 | sil=13d | chars=1132
+   Reason: 谈判中中，中期沉默13天
+   Snippet: [我方] 2026-05-01 | OK [客户] 2026-05-01 | Hi,can we talk about this item?
+[{"quantity":"null piece","id":1601690639342,"title":"Custom Kids Short Sleeve Set 100 Cotton Animal Stripe Cartoon ODM Service Spot Stock Fast Sample","sku":[{"Color": [客户] 2026-05-01 | I need these items [我方] 2026-05-01 | [产品卡片
+
+109. [高价值复核] Gabriela Torrealba | US | A | 需求探索 | sil=11d | chars=852
+   Reason: 需求探索中，中期沉默11天
+   Snippet: [我方] 2026-05-03 | Puedes pedir 100 unidades, que es la cantidad mínima de pedido para personalización. ¿Quieres colores o materiales personalizados? Cuéntame tus preferencias para ayudarte mejor. [我方] 2026-05-03 | Hola, soy Leo. [客户] 2026-05-03 | Eses es su precio que tallas vienen ? [我方] 2026-05-03
+
+110. [高价值复核] rehema kiseyu | TZ | A | 谈判中 | sil=11d | chars=2075 | 审批信号
+   Reason: 谈判中中，中期沉默11天
+   Snippet: [我方] 2026-04-27 | Hi! Our new kids' sleeveless sport set is breathable, quick-dry, and super comfy—just right for summer. Could you let me know your order quantity, delivery address, and how you plan to use it? [客户] 2026-04-27 | Hi,I’m sourcing this product and would like to know more.
+[{"quantity":
+
+111. [高价值复核] Sara Dibes | LB | A | 待付款 | sil=12d | chars=1127 | 审批信号
+   Reason: 有订单待收款，静默12天需催款
+   Snippet: [我方] 2026-05-02 | [产品卡片] [我方] 2026-05-02 | [产品卡片] [我方] 2026-05-02 | [产品卡片] [我方] 2026-05-02 | [产品卡片] [我方] 2026-05-02 | These are the actual images and detailed displays of the product [我方] 2026-05-02 | How many pieces do you need? I can send them to your office address in China [客户] 2026-05-02 | yes 
+
+112. [高价值复核] LISKEY RIVERO | US | A | 谈判中 | sil=13d | chars=943
+   Reason: 谈判中中，中期沉默13天
+   Snippet: [客户] 2026-05-01 | 1601670237440
+$1.45-2.50
+Custom Cartoon Two Piece Thermal Kids Pajama Set 100% Cotton Short Sleeve Breathable ODM/OEM Custom Packaging Soft Comfortable
+2.0
+1601670237440
+US$1.45-2.50
+定制卡通两件套保暖儿童睡衣套装 1 [客户] 2026-05-01 | saludos tendrán disponible catálogo de estos conjuntos [客户] 202
+
+113. [高价值复核] Claudia Mersilus | US | A | 谈判中 | sil=14d | chars=455
+   Reason: 谈判中中，中期沉默14天
+   Snippet: [客户] 2026-04-30 | Hi,I’m checking if this suits my needs. Can I get a sample first? Can I get a sample first?
+[{"quantity":"3.000 piece","id":1601690883451,"title":"Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print [我方] 2026-04-30 | Yes, we support customized samples in 5-7 days. [我方] 2026-04-30
+
+114. [高价值复核] Aldane Elister | US | A | 谈判中 | sil=14d | chars=451
+   Reason: 谈判中中，中期沉默14天
+   Snippet: [客户] 2026-04-30 | How much 4 set [客户] 2026-04-30 | [产品卡片] [客户] 2026-04-30 | 1601689932807
+$1.75-3.40
+Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days
+10.0
+1601689932807
+US$1.75-3.40
+定制男童服装套装 精纺涤纶面料 印花 ODM 服务 库存充足 快速出样 5-7 天
+ [我方] 2026-04-30 | For 4
+
+115. [高价值复核] Mel Paccot | AR | A | 谈判中 | sil=14d | chars=1368
+   Reason: 谈判中中，中期沉默14天
+   Snippet: [我方] 2026-03-16 | 2 dólares es el precio del sombrero. [我方] 2026-03-16 | [产品卡片] [我方] 2026-03-16 | [产品卡片] [客户] 2026-04-30 | Hola! me interesa este articulo, cuantas unidades de baberos de poliester vienen en el kit? gracias. [客户] 2026-04-30 | 1601639245865
+Eco-Friendly Reusable Baby Bibs Set Recycled
+
+116. [高价值复核] Wigdan Gasim | SA | A | 谈判中 | sil=14d | chars=304
+   Reason: 谈判中中，中期沉默14天
+   Snippet: [客户] 2026-04-30 | 1601670237440
+$1.45-2.50
+Custom Cartoon Two Piece Thermal Kids Pajama Set 100% Cotton Short Sleeve Breathable ODM/OEM Custom Packaging Soft Comfortable
+2.0
+1601670237440
+US$1.45-2.50
+定制卡通两件套保暖儿童睡衣套装 1 [我方] 2026-04-30 | هذا المنتج متوفر في المخزون. كم قطعة تريده؟ وإلى أي بلد سيتم ال
+
+117. [高价值复核] zainab Babesets | IQ | A | 报价已发 | sil=15d | chars=816
+   Reason: 报价已发中，长期沉默15天
+   Snippet: [我方] 2026-04-26 | [产品卡片] [我方] 2026-04-26 | سعر الوحدة لهذا المنتج هو 3.3 دولار أمريكي. [我方] 2026-04-26 | [产品卡片] [我方] 2026-04-26 | سعر الوحدة لهذا المنتج هو 3 دولارات. [客户] 2026-04-26 | لا اريد و احدة [客户] 2026-04-26 | اريد سعر الجملة [客户] 2026-04-26 | اريد ١٢ قطعة من كل تصميم [我方] 2026-04-26 | كم ال
+
+118. [高价值复核] raymond cramotte | FR | A | 谈判中 | sil=15d | chars=437
+   Reason: 谈判中中，长期沉默15天
+   Snippet: [客户] 2026-04-29 | Bonjour,j'aimerais en savoir plus sur ce produit. Quels sont les frais d’expédition ? Quels sont les frais d’expédition ?
+[{"quantity":"null pièce","id":1601670237440,"title":"Custom Cartoon Two Piece [我方] 2026-04-29 | Merci pour cette liste si détaillée, c'est très clair. Selon la
+
+119. [高价值复核] Doris Akpabio | US | A | 谈判中 | sil=15d | chars=253
+   Reason: 谈判中中，长期沉默15天
+   Snippet: [客户] 2026-04-29 | 1601595270616
+$0.78-0.93
+Custom Wholesale Washable Cloth Diaper Bulk OEM Reusable Baby Nappy for Newborn Factory
+100
+1601595270616
+US$0.78-0.93
+定制批发可水洗布尿布批量OEM可重复使用婴儿尿布适合新生儿工厂
+100 [我方] 2026-04-29 | Hello, I am Leo. Do you need samples?
+
+120. [高价值复核] TheodoraAdelaide Mahe | CI | A | 谈判中 | sil=16d | chars=504
+   Reason: 谈判中中，长期沉默16天
+   Snippet: [客户] 2026-04-28 | 1601694144696
+$1.39-1.93
+Wholesale Kids Summer Clothing Set OEM Custom Cotton/Polyester Children Outfits Bulk Toddler Boutique Wear Factory
+6.0
+1601694144696
+US$1.39-1.93
+批发儿童夏季服装套装 OEM 定制棉/涤儿童服装 批量幼儿 [我方] 2026-04-28 | Hello! I see you're interested in our kids' set. [我方] 2026-04-2
+
+121. [高价值复核] Cindy Nadal | FR | A | 谈判中 | sil=17d | chars=1234
+   Reason: 谈判中中，长期沉默17天
+   Snippet: [客户] 2026-04-27 | Bonjour,je recherche un fournisseur fiable pour cet article. Quels sont les frais d’expédition ?
+[{"quantity":"6.000 pièce","id":1601694144696,"title":"Wholesale Kids Summer Clothing Set OEM Custom Co [我方] 2026-04-27 | Bonjour, nous recherchons également des clients pour une collab
+
+122. [高价值复核] Jemima Piema | US | A | 谈判中 | sil=17d | chars=437
+   Reason: 谈判中中，长期沉默17天
+   Snippet: [客户] 2026-04-27 | 1601700526377
+$3.80-4.20
+Wholesale Boy Cotton Linen Suit Custom OEM Breathable Toddler Summer Clothing Bulk Infant Gentleman Outfits Factory
+3
+1601700526377
+US$3.80-4.20
+批发男童棉麻套装定制OEM透气幼儿夏季服装批量婴儿绅士服装工 [我方] 2026-04-27 | Merci de l'intérêt que vous portez à nos ensembles pour enfants
+
+123. [高价值复核] Sayfullaeva Shahnoza | UZ | A | 谈判中 | sil=21d | chars=502
+   Reason: 谈判中中，长期沉默21天
+   Snippet: [客户] 2026-04-23 | Hi,I’m interested in this item and would like more details
+[{"quantity":"null piece","id":1601700182554,"title":"OEM Custom Girls Summer Homewear Set Bulk Wholesale Cartoon Print Cotton Two-piece Set" [我方] 2026-04-23 | Nice choice! It's combed cotton. MOQ is 5 pcs. [我方] 2026-04-24 
+
+124. [高价值复核] AnneMarie Nsomp | US | A | 谈判中 | sil=21d | chars=597
+   Reason: 谈判中中，长期沉默21天
+   Snippet: [客户] 2026-04-23 | 1601700526377
+$3.80-4.20
+Wholesale Boy Cotton Linen Suit Custom OEM Breathable Toddler Summer Clothing Bulk Infant Gentleman Outfits Factory
+3
+1601700526377
+US$3.80-4.20
+批发男童棉麻套装定制OEM透气幼儿夏季服装批量婴儿绅士服装工 [我方] 2026-04-23 | Hello! Our breathable cotton suits are perfect for summer. We o
+
+125. [高价值复核] Amal Alamhrooqi | OM | A | 已发货/在途 | sil=21d | chars=966
+   Reason: 已发货/在途中，长期沉默21天
+   Snippet: [我方] 2026-04-23 | أهلاً آمال، لقد أرسلت لك معلومات عرض الأسعار التفصيلية، تفضلتِ بمراجعتها والتأكد من ملاءمتها، وإذا لم تكن هناك مشكلة، سأقوم بإنشاء الطلب الآن. [客户] 2026-04-23 | كم تكلفة التخليص الجمركي و الضرائب تقريبا [客户] 2026-04-23 | هل لديكم زبائن من سلطنة عمان؟ [我方] 2026-04-23 | هذا لست متأكد
+
+126. [高价值复核] maimouna cisse | ML | A | 谈判中 | sil=3d | chars=1383
+   Reason: 谈判中中，活跃3天
+   Snippet: [客户] 2026-05-10 | 1601712356043
+$2.20-2.80
+Children's Vest Set Korean Style Home Wear Summer Unisex Baby & Older Kids Boy Girl Sleeveless Shorts Pajamas Polyester Soft
+5
+1601712356043
+US$2.20-2.80
+儿童背心套装韩式家居服夏季男女通用婴儿及大 [客户] 2026-05-10 | c'est en coton? [客户] 2026-05-10 | 1601712356043
+$2.20-2.80
+Chil
+
+127. [高价值复核] Ruth mutambo | ZM | A | 谈判中 | sil=22d | chars=645
+   Reason: 谈判中中，长期沉默22天
+   Snippet: [客户] 2026-04-22 | Hi,can you share more details about this item? What is the best price you can offer?
+[{"quantity":"2.000 piece","id":1601690639342,"title":"Custom Kids Short Sleeve Set 100 Cotton Animal Stripe Cartoo [我方] 2026-04-22 | It's a 100% cotton kids' short sleeve set, perfect for summer a
+
+128. [高价值复核] fatma delicacies | KE | A | 谈判中 | sil=25d | chars=924
+   Reason: 谈判中中，长期沉默25天
+   Snippet: [客户] 2026-04-19 | 1601700182554
+$2.70-3.20
+OEM Custom Girls Summer Homewear Set Bulk Wholesale Cartoon Print Cotton Two-piece Set
+5
+1601700182554
+US$2.70-3.20
+OEM定制女童夏季家居服套装批量批发卡通印花棉质两件套
+5 [我方] 2026-04-19 | Hello [我方] 2026-04-19 | Thank you for your interest in our children's sets. In order to provi
+
+129. [高价值复核] nshwan altayy | IQ | A | 谈判中 | sil=25d | chars=620
+   Reason: 谈判中中，长期沉默25天
+   Snippet: [客户] 2026-04-19 | 1601690639342
+$1.20-2.39
+Custom Kids Short Sleeve Set 100 Cotton Animal Stripe Cartoon ODM Service Spot Stock Fast Sample
+2.0
+1601690639342
+US$1.20-2.39
+定制儿童短袖套装 100%棉 动物条纹卡通 ODM 服务 现货 快速出样
+2.0 [我方] 2026-04-19 | Our kids' short sleeve set is made of 100% cotton, perfect for ages 3-
+
+130. [高价值复核] Cryn Nyabadza | ZW | A | 谈判中 | sil=25d | chars=694
+   Reason: 谈判中中，长期沉默25天
+   Snippet: [客户] 2026-04-19 | 1601694144696
+$1.39-1.93
+Wholesale Kids Summer Clothing Set OEM Custom Cotton/Polyester Children Outfits Bulk Toddler Boutique Wear Factory
+6.0
+1601694144696
+US$1.39-1.93
+批发儿童夏季服装套装 OEM 定制棉/涤儿童服装 批量幼儿 [客户] 2026-04-19 | Do you only have black n white ? [我方] 2026-04-19 | We have colo
+
+131. [高价值复核] Gabriela Bajer | DE | A | 需求探索 | sil=26d | chars=876
+   Reason: 需求探索中，长期沉默26天
+   Snippet: [客户] 2026-04-18 | Hallo,ich möchte mehr über dieses Produkt erfahren. Kann ich ein Muster erhalten? Kann ich ein Muster erhalten? Kann ich ein Muster erhalten?
+[{"quantity":"null Stück","id":1601699567859,"title":"OEM  [我方] 2026-04-18 | Muster gibt's gegen Gebühr, die beim Kauf zurückerstattet wird.
+
+132. [高价值复核] Sonia Monjane | MZ | A | 谈判中 | sil=27d | chars=1041
+   Reason: 谈判中中，长期沉默27天
+   Snippet: [客户] 2026-04-17 | 1601695848480
+$1.40-1.50
+Unisex Baby Onesie Baby Clothes Baby Footless Jumpsuit Romper with Long Sleeve Spandex/Bamboo Fiber for Newborn Baby
+2
+1601695848480
+US$1.40-1.50
+男女通用婴儿连体衣 婴儿衣服 婴儿无脚连体衣 长袖氨纶/竹 [我方] 2026-04-17 | Our Unisex Baby Onesie is made from breathable spandex and bamb
+
+133. [高价值复核] syf khdr | US | A | 需求探索 | sil=28d | chars=824
+   Reason: 需求探索中，长期沉默28天
+   Snippet: [客户] 2026-04-17 | كم سعر القطعه [我方] 2026-04-17 | ما الكمية؟ منتجنا عالي الجودة، مريح للصيف. [客户] 2026-04-17 | 50 [客户] 2026-04-17 | هل يوجد توصيل إلى سوريه [我方] 2026-04-17 | هل ترسل العنوان التفصيلي؟ نتاكد من التوصيل لسوريا. [客户] 2026-04-17 | كم سعر القطعه [客户] 2026-04-17 | اريد الاستفسار فقط [我方] 2
+
+134. [高价值复核] Afiq Amrullah | ID | A | 谈判中 | sil=28d | chars=535
+   Reason: 谈判中中，长期沉默28天
+   Snippet: [我方] 2026-04-16 | Halo! Dengan pengalaman bertahun-tahun, kami siap membantu. Hubungi kami untuk informasi lebih lanjut! [客户] 2026-04-16 | 1601700231464
+$3.20-3.50
+Wholesale Soft Cotton/Polyester Baby Pajamas Set OEM Custom Infant Loungewear Bulk Kids Home Wear 2-Piece Outfits Factory
+5
+160170023146
+
+135. [高价值复核] Alina K | ES | A | 搁置 | sil=182d | chars=887
+   Reason: 深度静默182天（从需求探索掉出）
+   Snippet: [我方] 2025-11-17 | [产品卡片] [我方] 2025-11-17 | [产品卡片] [我方] 2025-11-17 | [产品卡片] [我方] 2025-11-17 | Hola! Noté que no has respondido. ¿Hay algo que no está claro sobre los detalles del producto o el precio? Nuestra fábrica se especializa en servicios OEM de Disney. Si necesitas más información o asi [我方] 2
+
+136. [高价值复核] Aseel Nassar | PS | A | 搁置 | sil=169d | chars=1286 | 审批信号
+   Reason: 深度静默169天（从谈判中掉出）
+   Snippet: [我方] 2025-11-26 | I'm currently on a business trip outside, so I might send it to you a bit later/:handshake. [客户] 2025-11-26 | okay thank you 
+enjoy your trip [我方] 2025-11-26 | Thank you for your concern, I will send it to you as soon as possible after it's done/:cute. [我方] 2025-11-27 | PI_Yiyang X
+
+137. [高价值复核] Tina Dinu | RO | A | 搁置 | sil=97d | chars=1271 | 审批信号
+   Reason: 深度静默97天（从谈判中掉出）
+   Snippet: [客户] 2026-02-06 | Nu am un catalog să mă pot orienta ce să comand ca să îmi faceți un preț [客户] 2026-02-06 | Vreau să deschid un magazin online în România [我方] 2026-02-06 | Îți trimit mai multe poze cu haine albe, 100% bumbac, pentru 0-3 luni, simple și moi. Spune-mi, te rog, ce stiluri preferi, cât
+
+138. [高价值复核] Tzivi Schreiber | US | A | 搁置 | sil=95d | chars=840 | 审批信号
+   Reason: 深度静默95天（从谈判中掉出）
+   Snippet: [我方] 2026-02-05 | An effect like this can be used to embroider your logo in the same position [我方] 2026-02-05 | Are you there? [客户] 2026-02-05 | You can’t do my design [我方] 2026-02-05 | Why? [客户] 2026-02-06 | Can you do the towel with the design I sent you? [我方] 2026-02-06 | I have already communica
+
+139. [高价值复核] Rapel Rapel | FR | A | 搁置 | sil=100d | chars=768
+   Reason: 深度静默100天（从谈判中掉出）
+   Snippet: [客户] 2026-01-31 | All I need is here [我方] 2026-01-31 | Okay, I will send it to you after I finish making it [客户] 2026-01-31 | Ok thank you very much [我方] 2026-01-31 | You're welcome, but it might take a little time [客户] 2026-02-03 | Hi dear, could you Check please if you have these product please ? 
+
+140. [高价值复核] Steeve Drapeau | CA | A | 搁置 | sil=106d | chars=1008
+   Reason: 深度静默106天（从谈判中掉出）
+   Snippet: [客户] 2026-01-28 | my friend i need to see example, i am exploring. Afrtwork not doen yiet. [我方] 2026-01-28 | [产品卡片] [我方] 2026-01-28 | Here are some examples of custom colors, patterns, fabrics, styles, processes, and packaging options to help you explore your options. [客户] 2026-01-28 | not what i as
+
+141. [高价值复核] Abibatu sidique Abibatu sidique | SL | A | 搁置 | sil=109d | chars=1081 | 审批信号
+   Reason: 深度静默109天（从谈判中掉出）
+   Snippet: [客户] 2026-01-25 | sierra Leone [我方] 2026-01-25 | For 2 pieces to Sierra Leone, I will confirm shipping cost and delivery time with the seller. Could you please confirm if you need sample or customization? [客户] 2026-01-25 | I need sample [客户] 2026-01-25 | that is customize [我方] 2026-01-25 | [产品卡片] [我
+
+142. [高价值复核] Anna Krzywicka | UK | A | 搁置 | sil=110d | chars=779 | 审批信号
+   Reason: 深度静默110天（从谈判中掉出）
+   Snippet: [客户] 2026-01-25 | United Kingdom [我方] 2026-01-25 | Got it—20 pieces to the UK without customization. I'll check the price and shipping details for you! [客户] 2026-01-25 | Thank you [我方] 2026-01-25 | You're welcome! Anything else you'd like to know or ready to order? [客户] 2026-01-25 | But how much for
+
+143. [高价值复核] Van Truong | VN | A | 搁置 | sil=112d | chars=495
+   Reason: 深度静默112天（从需求探索掉出）
+   Snippet: [客户] 2026-01-22 | Chào, tôi quan tâm đến sản phẩm này.
+[{"quantity":"null Cái","id":1601599295641,"title":"Autumn Winter Solid Knitted Newborn Pajamas Long Sleeve Zipper Climbing Jumpsuit with Bag Europe Style ODM Supp [我方] 2026-01-22 | Xin chào [我方] 2026-01-22 | Bạn có một nhà vận chuyển hàng hóa T
+
+144. [高价值复核] Halima Tahir | US | A | 搁置 | sil=114d | chars=485
+   Reason: 深度静默114天（从谈判中掉出）
+   Snippet: [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | [产品卡片] [我方] 2026-01-22 | Good morning, here are the detai
+
+145. [高价值复核] omari shabani | TZ | A | 搁置 | sil=121d | chars=1105
+   Reason: 深度静默121天（从谈判中掉出）
+   Snippet: [我方] 2026-01-09 | For example, what is your current opinion about local consumers? What styles of this type of product do they prefer? For instance, in the US, they prefer bamboo fiber fabrics and animal print patterns [客户] 2026-01-10 | am new to this, just few months running it, but mostly cotton a
+
+146. [高价值复核] Tom Mills | UK | A | 搁置 | sil=128d | chars=1016
+   Reason: 深度静默128天（从谈判中掉出）
+   Snippet: [客户] 2026-01-06 | just an image. We dont want to slow the process down [我方] 2026-01-06 | Tomorrow I will go to the factory to request the production of samples. As long as you confirm approval, producing 350 pieces can be completed in just a few days [我方] 2026-01-06 | I am now drafting a sample orde
+
+147. [高价值复核] Fazela Orya | AF | A | 搁置 | sil=129d | chars=1138
+   Reason: 深度静默129天（从谈判中掉出）
+   Snippet: [我方] 2026-01-04 | I don't know either; we just gave the information I asked you to provide to the specialized logistics personnel for calculation, and I'm not sure about it [客户] 2026-01-04 | "Could you make a logo for me with this name? I want to create an Instagram page. If it’s possible and you ha
+
+148. [高价值复核] SUSAN YANG | HK | A | 搁置 | sil=130d | chars=754
+   Reason: 深度静默130天（从谈判中掉出）
+   Snippet: [客户] 2026-01-05 | First pls sent your style  [我方] 2026-01-05 | Sorry, I was in a meeting just now and didn't notice the message [我方] 2026-01-05 | [产品卡片] [我方] 2026-01-05 | Many options available [我方] 2026-01-05 | Hello friend, is your company in Hong Kong? [我方] 2026-01-05 | Are you just starting to g
+
+149. [高价值复核] Jodi Norto | US | A | 搁置 | sil=130d | chars=1119
+   Reason: 深度静默130天（从谈判中掉出）
+   Snippet: [客户] 2026-01-04 | Hello, I like this one. Can you help me introduce it [我方] 2026-01-04 | Hello! I'd be happy to introduce the product to you  Could you please tell me how many units you are considering to purchase? [客户] 2026-01-04 | 1601600035307
+Autumn Winter ODM Solid Knitted Warm Coat with YKK Zi
+
+150. [高价值复核] Lea Kaja | US | A | 搁置 | sil=133d | chars=1462
+   Reason: 深度静默133天（从谈判中掉出）
+   Snippet: [客户] 2026-01-01 | Ok 
+Je prends un ensemble de 0-3 
+Et un ensemble de 3-6mois [我方] 2026-01-01 | Vous voulez dire prendre le lot de 5 pièces pour 0-3 mois et le lot de 5 pièces pour 3-6 mois, soit un total de 10 pièces, c'est bien ça ? [我方] 2026-01-01 | Notre MOQ garantit une qualité et une productio
+
+151. [高价值复核] Atheer Sadoon | IQ | A | 搁置 | sil=138d | chars=555
+   Reason: 深度静默138天（从需求探索掉出）
+   Snippet: [客户] 2025-12-27 | اقل كمية للطلب وهل هذا سعر نهائي؟
+[{"quantity":"12.000 Piece/s","id":1601599921992,"title":"معطف دافئ غير رسمي للخريف والشتاء، بدلة بغطاء للرأس وسحاب للأطفال الرضع، ملابس تسلق، تصميم ODM، محبوك بلون م [我方] 2025-12-27 | الحد الأدنى للطلب هو قطعتان. السعر ليس نهائيًا بعد. هل يمكنك مش
+
+152. [高价值复核] sharaf almuslim | IQ | A | 搁置 | sil=150d | chars=737
+   Reason: 深度静默150天（从需求探索掉出）
+   Snippet: [我方] 2025-12-15 | [产品卡片] [我方] 2025-12-15 | [产品卡片] [我方] 2025-12-15 | [产品卡片] [我方] 2025-12-15 | [产品卡片] [我方] 2025-12-15 | هذه ملابس الأطفال (بنين وبنات)، يرجى تحديد الأنماط التي تهمك أولاً، وسأقوم بإعداد معلومات مفصلة عنها لك. [客户] 2025-12-15 | جميعها مهمة لي ارسلي pdf كامل [我方] 2025-12-15 | تمام، سأرسل
+
+153. [高价值复核] Sanjida Akter | KR | A | 搁置 | sil=150d | chars=817
+   Reason: 深度静默150天（从谈判中掉出）
+   Snippet: [客户] 2025-12-15 | 1601599921992
+$7.85-9.86
+Autumn Winter Casual Warm Coat Jumpsuit Hood Zipper Infants Baby's Climbing Clothes Outfit ODM Solid Knitted Cute Unisex
+2.0
+1601599921992
+US$7.85-9.86
+秋冬休闲保暖外套连身衣兜帽拉链婴儿登山服套装O [我方] 2025-12-15 | This warm knitted jumpsuit with hood and zipper is ideal for in
+
+154. [高价值复核] sadiya sadiq | IN | A | 搁置 | sil=156d | chars=830
+   Reason: 深度静默156天（从已签收掉出）
+   Snippet: [我方] 2025-12-09 | If you’re satisfied with our collaboration, next time when ordering in large quantities, I’ll specifically find the most cost-effective shipping solution for you. [我方] 2025-12-09 | Because shipping costs really do add up to a significant expense. [客户] 2025-12-09 | hmm ok [我方] 2025-
+
+155. [高价值复核] yessica larios | US | A | 搁置 | sil=180d | chars=1205
+   Reason: 深度静默180天（从需求探索掉出）
+   Snippet: [客户] 2025-11-15 | Hola, estoy interesado en estos productos. ¿Cuál es el mejor precio que puedes ofrecer?
+[{"quantity":"null unidad","id":1601599921992,"title":"Autumn Winter Casual Warm Coat Jumpsuit Hood Zipper Infan [我方] 2025-11-15 | ¡Hola Yessica! Muchas gracias por tu interés. Para darte el mej
+
+156. [高价值复核] surbhidudeja NA | US | A | 搁置 | sil=178d | chars=1030
+   Reason: 深度静默178天（从谈判中掉出）
+   Snippet: [我方] 2025-11-17 | Good night [我方] 2025-11-25 | I'm glad to assist you! Could you please confirm the design and required quantity so we can provide a custom quote? We offer Disney-quality OEM services. [我方] 2025-11-27 | Thank you for your response! To provide a custom OEM vintage pajama quote, please
+
+157. [高价值复核] zaed maghdid | IQ | A | 搁置 | sil=188d | chars=936
+   Reason: 深度静默188天（从需求探索掉出）
+   Snippet: [我方] 2025-11-11 | [产品卡片] [我方] 2025-11-11 | This is a product that has collaborated with Disney and Pampers [我方] 2025-11-17 | Are you currently developing Ting'er jumpsuits, pajamas, and other products? I have some best-selling items that I can provide as references. If you're interested, I can send 
+
+158. [高价值复核] Aisha Nakibuuka | UG | A | 搁置 | sil=210d | chars=1066
+   Reason: 深度静默210天（从谈判中掉出）
+   Snippet: [我方] 2025-10-27 | Hi, it’s been a while since we last spoke. I wanted to check if you have any specific requirements or questions. We can customize products to meet your needs. Looking forward to your thoughts!
+ [我方] 2025-11-17 | We recently added some new products such as baby rompers, dresses, paj
+
+159. [高价值复核] Ayisha Heyderova | AZ | A | 搁置 | sil=170d | chars=1109
+   Reason: 深度静默170天（从谈判中掉出）
+   Snippet: [我方] 2025-11-25 | Merhaba! Bu tulum sıcak ve düz desenlidir, ayrıca boyut, renk ve malzemeyi özelleştirebilirsiniz. Minimum sipariş miktarı 100 adettir ve numuneler 3-7 gün sürer. Kaç tane sipariş etmeyi düşünüyorsunuz [我方] 2025-11-25 | Dear, how do you feel about this product? Customization options
+
+160. [高价值复核] Niwa limbu | NP | A | 搁置 | sil=164d | chars=1161 | 审批信号
+   Reason: 深度静默164天（从谈判中掉出）
+   Snippet: [客户] 2025-12-01 | 1601600035307
+$5.10-5.90
+Autumn Winter ODM Solid Knitted Warm Coat with YKK Zipper Hood Casual Infant Climbing Jumpsuit Outfit for Boys
+100
+1601600035307
+US$5.10-5.90
+秋冬ODM实心针织保暖外套，带YKK拉链兜帽休闲婴儿登山连身衣男童 [我方] 2025-12-01 | This infant jumpsuit is made of 100% polyester with a YKK zippe
+
+161. [高价值复核] Amirath Salassi | BJ | A | 搁置 | sil=169d | chars=1099
+   Reason: 深度静默169天（从谈判中掉出）
+   Snippet: [我方] 2025-11-27 | [产品卡片] [我方] 2025-11-27 | [产品卡片] [我方] 2025-11-27 | Nous vendons également des couches en tissu sur des plateformes nationales via la diffusion en direct ; nous sommes l'usine source. [我方] 2025-11-27 | Commencez-vous tout juste à vendre ce produit, ou l'avez-vous fait depuis longtemp
+
+162. [高价值复核] mixu yeemu | US | A | 搁置 | sil=197d | chars=835
+   Reason: 深度静默197天（从需求探索掉出）
+   Snippet: [客户] 2025-10-29 | Ok [我方] 2025-10-29 | I hope you can communicate your needs with me [客户] 2025-10-29 | We will [我方] 2025-10-29 | Okay, looking forward to hearing from you [我方] 2025-10-30 | Hi, I hope you’re doing well today! Have you had a chance to consider your specific needs or any feedback on ou
+
+163. [高价值复核] karin keren | IL | A | 搁置 | sil=199d | chars=1365 | 审批信号
+   Reason: 深度静默199天（从谈判中掉出）
+   Snippet: [我方] 2025-10-27 | I have already confirmed that it has a weight of 125g and is 100-count pima cotton. [我方] 2025-10-29 | Hi Karina, have you had a chance to review the images and information I sent? Please let me know your thoughts on the sample production requirements, especially regarding colors an
+
+164. [高价值复核] mirkul Arajlym | KZ | A | 搁置 | sil=206d | chars=1145
+   Reason: 深度静默206天（从需求探索掉出）
+   Snippet: [我方] 2025-10-20 | Хорошо, я скоро пришлю вам цену. [我方] 2025-10-20 | [产品卡片] [我方] 2025-10-20 | Если у вас есть какие-либо вопросы, не стесняйтесь обращаться ко мне в любое время. [我方] 2025-10-20 | Наша компания имеет более чем 15-летний опыт работы в отрасли и является производителем. Мы верим, что у
+
+165. [高价值复核] maurizio pierconti | IT | A | 搁置 | sil=141d | chars=850
+   Reason: 深度静默141天（从报价已发掉出）
+   Snippet: [我方] 2025-12-23 | The logistics cost for DDP air freight of 100 items is approximately $930 [我方] 2025-12-24 | [产品卡片] [我方] 2025-12-24 | Good morning, I wish you a pleasant day. If you are looking for cost-effective logistics services, I can help you with that [客户] 2025-12-24 | Grazie, tanti auguri an
+
+166. [高价值复核] Abdullah Khalid | PK | A | 搁置 | sil=143d | chars=926 | 审批信号
+   Reason: 深度静默143天（从已发货/在途掉出）
+   Snippet: [我方] 2025-12-22 | You're welcome! If you have any questions or need further assistance, feel free to let me know. 😊 [客户] 2025-12-22 | I am searching for a company 
+to bring goods in Pakistan [客户] 2025-12-22 | Good bless you. [我方] 2025-12-22 | Sorry, I was driving just now. I can definitely help you
+
+167. [高价值复核] fajer Aln | KW | A | 搁置 | sil=142d | chars=495
+   Reason: 深度静默142天（从需求探索掉出）
+   Snippet: [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | [产品卡片] [我方] 2025-12-23 | There are quite a variety of styles [我方] 2025-12-23 | Which styles do you like? Du
+
+168. [其他边缘] amer ly | IQ | B | 报价已发 | sil=16d | chars=1346
+   Reason: 报价已发中，长期沉默16天
+   Snippet: [客户] 2026-04-28 | 😂 [我方] 2026-04-28 | ههه، لن أطيل الحديث، سأذهب الآن لإعداد ملف عرض الأسعار. [客户] 2026-04-28 | حسناً 😂🫱🏼‍🫲🏻 [我方] 2026-04-28 | /:handshake. [客户] 2026-04-28 | هل أكملت ؟ [我方] 2026-04-28 | قريبًا، كنت أتحقق من تكلفة الشحن للتو. [我方] 2026-04-28 | PI_amer_ly_2026-04-28.pdf [我方] 202
+
+169. [其他边缘] Djany Konzi | CD | B | 报价已发 | sil=15d | chars=772
+   Reason: 报价已发中，长期沉默15天
+   Snippet: [客户] 2026-04-29 | Coucou [客户] 2026-04-29 | [产品卡片] [客户] 2026-04-29 | Besoin de sa [我方] 2026-04-29 | Got it. [我方] 2026-04-29 | Bonjour ! Merci de votre intérêt pour notre ensemble pyjama deux pièces en coton 100% pour enfants. Nous sommes un fabricant spécialisé dans les vêtements pour bébés et enfant
+
+170. [其他边缘] Charlotte Asibey | ZA | B | 谈判中 | sil=15d | chars=925
+   Reason: 谈判中中，长期沉默15天
+   Snippet: [客户] 2026-04-29 | I need to show my customers videos of  your stock. If possible you can send me any videos so that they can select styles [我方] 2026-04-29 | Okay, I understand. I will reply as soon as I confirm the information [我方] 2026-04-29 | Hi Charlotte, 
+ 
+ The factory has closed for the day. I
+
+171. [其他边缘] Katchenan Soro | CI | B | 报价已发 | sil=15d | chars=704
+   Reason: 报价已发中，长期沉默15天
+   Snippet: [客户] 2026-04-29 | 1601600287717
+$1.30-2
+Korean Style Fashion Short-Sleeved 100% Cotton Breathable O-Neck T-Shirt Shorts 2-Piece Set Kids Boys Girls Summer Sports Wear
+2
+1601600287717
+US$1.30-2
+韩版时尚短袖100%棉透气O领T恤短裤2件套儿童男 [我方] 2026-04-29 | Bonjour, je suis Leo, avez-vous besoin d'échantillons ? [客户] 20
+
+172. [其他边缘] Nasta Goncaruk | BY | B | 需求探索 | sil=15d | chars=820
+   Reason: 需求探索中，长期沉默15天
+   Snippet: [客户] 2026-04-29 | здравствуйте [客户] 2026-04-29 | [产品卡片] [客户] 2026-04-29 | можно 5 штук разных размеров [我方] 2026-04-29 | Здравствуйте. [我方] 2026-04-29 | Подождите, я сейчас уточню и сразу вам отвечу. [客户] 2026-04-29 | и вот этих тоже 5 штук разных размеров и цветов [我方] 2026-04-29 | Нет проблем, вы 
+
+173. [其他边缘] Susuanna ParkerAdentwi | GH | B | 报价已发 | sil=21d | chars=868
+   Reason: 报价已发中，长期沉默21天
+   Snippet: [客户] 2026-04-23 | 1601670179202
+$1.80-3.03
+Children's Thermal Long Sleeve Pajama Set 2PC Winter Warm Sleepwear Cartoon Print Unisex Cotton Breathable Pajamas Boys Girls
+2.0
+1601670179202
+US$1.80-3.03
+儿童保暖长袖睡衣套装 2 件套冬季保 [客户] 2026-04-23 | POG-ARABA PARKER
+广州市白云区大朗北路68号德臻68创意园B18 
+POG 18024547686/ 185 
+
+174. [其他边缘] Ahmed Darrat | LY | B | 谈判中 | sil=18d | chars=896
+   Reason: 谈判中中，长期沉默18天
+   Snippet: [客户] 2026-04-26 | hello frend [客户] 2026-04-26 | 1601704530616
+Children's Home Wear Boys' Girls' Double Layer Cotton Yarn Printed Short-Sleeve Set Baby Thin Summer Pajamas
+1601704530616
+儿童家居服男童女童双层棉纱印花短袖套装婴儿薄款夏季睡衣 [我方] 2026-04-26 | Hello friend! We make cloth diapers, baby pajamas, changing pads, bib
+
+175. [其他边缘] Assiatou Barry | GN | B | 报价已发 | sil=18d | chars=504
+   Reason: 报价已发中，长期沉默18天
+   Snippet: [客户] 2026-04-26 | 1601612303095
+$2.10-2.90
+Baby's Colored 100% Cotton Casual 2pcs Unisex V-neck Button Closure High Waist Belly Protectors Set Breathable Autumn Trousers
+5.0
+1601612303095
+US$2.10-2.90
+婴儿彩色 100% 棉休闲 2 件 [我方] 2026-04-26 | Hi! This 100% cotton set is soft and breathable. [我方] 2026-04-2
+
+176. [其他边缘] Melisapierina Apenaadvincula | US | B | 谈判中 | sil=21d | chars=1265
+   Reason: 谈判中中，长期沉默21天
+   Snippet: [客户] 2026-04-23 | Hola,encontré este producto y me gustaría investigar más.
+[{"quantity":"10.000 unidad","id":1601719645304,"title":"Double-sided Petal Bib 360-Degree Rotation Waterproof Dirt-Resistant Pure Cotton Gauz [我方] 2026-04-23 | Gracias por su interés en nuestros baberos para bebé. Para pode
+
+177. [其他边缘] irfan khan | AU | B | 谈判中 | sil=24d | chars=874
+   Reason: 谈判中中，长期沉默24天
+   Snippet: [客户] 2026-04-20 | I want to ask more MOQ-related questions. [客户] 2026-04-20 | I want to ask more sample-related questions. [客户] 2026-04-20 | I want to ask more price-related questions. [客户] 2026-04-20 | I want to ask more logistics-related questions. [客户] 2026-04-20 | I want to ask more product-rela
+
+178. [其他边缘] victorina Rosada | PT | B | 需求探索 | sil=23d | chars=778
+   Reason: 需求探索中，长期沉默23天
+   Snippet: [客户] 2026-04-21 | Oi,estou entrando em contato para explorar uma possível cooperação para este produto.
+[{"quantity":"null Peça","id":1601694178317,"title":"BABY Cotton Bibs for Boys Girls Adjustable Baby Bibs for Droo [我方] 2026-04-21 | Oi, somos Yiyang Xiaoxingxing, fabricante de roupas infantis. B
+
+179. [其他边缘] YULIA GOLUBTSOVA | RU | B | 需求探索 | sil=24d | chars=1019
+   Reason: 需求探索中，长期沉默24天
+   Snippet: [客户] 2026-04-18 | Добрый день! Вы являетесь поставщиком? [我方] 2026-04-19 | Здравствуйте, наша фабрика сотрудничает с Disney и является крупнейшим поставщиком детской одежды в Китае. У нас есть огромное производственное предприятие площадью более 30,000 квадратных метров, кот [我方] 2026-04-19 | [产品卡片]
+
+180. [其他边缘] Nelly Lupity | CD | B | 需求探索 | sil=25d | chars=744
+   Reason: 需求探索中，长期沉默25天
+   Snippet: [客户] 2026-04-19 | est ce que vous pouvez me proposer vos articles ? [我方] 2026-04-19 | Bien sûr. [我方] 2026-04-19 | Quel type de produit préférez-vous ? [客户] 2026-04-19 | pour enfant, habits et autres [我方] 2026-04-19 | D'accord 👌 [我方] 2026-04-19 | [产品卡片] [我方] 2026-04-19 | Voici un ensemble pour enfan
+
+181. [其他边缘] Lois Anokye | GH | B | 谈判中 | sil=27d | chars=1030
+   Reason: 谈判中中，长期沉默27天
+   Snippet: [我方] 2026-04-17 | [产品卡片] [我方] 2026-04-17 | [产品卡片] [我方] 2026-04-17 | I recommended our selection of baby bibs, cloth diapers, and baby onesies. You can choose and tell me the code, and I will provide you with a targeted introduction [客户] 2026-04-17 | 1601618629591
+$1.10-1.50
+Custom Children's Square 
+
+182. [其他边缘] BuyLi Now | LY | B | 需求探索 | sil=28d | chars=835
+   Reason: 需求探索中，长期沉默28天
+   Snippet: [我方] 2026-04-16 | حسناً [我方] 2026-04-16 | هل يمكنني إرسالها لك في صباح الغد؟ [客户] 2026-04-16 | لا [客户] 2026-04-16 | هل ضروري ان ادفع القيمه لكي يتاكد الحجز؟ [客户] 2026-04-16 | اين عزيزي فاتوره؟ [我方] 2026-04-16 | عادةً لا يلزم الحجز، نحن الآن في وقت متأخر من الليل، هل يمكنني إرسالها لك صباح الغد بتوقي
+
+183. [其他边缘] slwyahmd bas | LY | B | 报价已发 | sil=29d | chars=1056
+   Reason: 报价已发中，长期沉默29天
+   Snippet: [客户] 2026-04-15 | مرحبًا،أنا جاهز لبدء استفسار حول هذا المنتج. كم سيستغرق الشحن إلى بلدي؟
+[{"quantity":"5.000 قطعة","id":1601699567859,"title":"Summer Infant Cotton Clothing Short Sleeve Onesie Unisex Baby Newborn Supe [我方] 2026-04-15 | سأتحقق من السعر ووقت الشحن مع المدير. [客户] 2026-04-15 | مرحبًا،
+
+184. [其他边缘] Mercy Tambayi | ZW | B | 谈判中 | sil=29d | chars=552
+   Reason: 谈判中中，长期沉默29天
+   Snippet: [客户] 2026-04-15 | 1601591924247
+$1.90-3.50
+BABY Rompers  Unisex Baggy Hooded Coral Long Sleeve Solid Button Closure Winter Romper for Infants & Toddlers Cute Design
+5
+1601591924247
+US$1.90-3.50
+婴儿连裤男女通用宽松连帽珊瑚长袖实心纽扣闭合婴幼 [我方] 2026-04-15 | Thanks for the new product card. Could you share details like q
+
+Written to data/edge_cases_2026-05-15.json

@@ -1,0 +1,53 @@
+$nsPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace'
+$clsids = Get-ChildItem $nsPath | Where-Object { $_.PSChildName -ne 'DelegateFolders' } | ForEach-Object { $_.PSChildName }
+
+Write-Host "=== Identifying all This PC namespace extensions ==="
+foreach ($clsid in $clsids) {
+    Write-Host ""
+    Write-Host "--- $clsid ---"
+
+    # Check in HKLM
+    $path = "HKLM:\SOFTWARE\Classes\CLSID\$clsid"
+    if (Test-Path $path) {
+        $default = (Get-ItemProperty $path -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        Write-Host "  Name: $default"
+
+        # Check InprocServer32
+        $inproc = "$path\InprocServer32"
+        if (Test-Path $inproc) {
+            $dll = (Get-ItemProperty $inproc -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+            Write-Host "  DLL: $dll"
+            if ($dll -and (Test-Path $dll)) {
+                $ver = (Get-Item $dll).VersionInfo.FileVersion
+                Write-Host "  Version: $ver"
+                $info = (Get-Item $dll).VersionInfo.FileDescription
+                Write-Host "  Description: $info"
+            } elseif ($dll) {
+                Write-Host "  DLL NOT FOUND ON DISK!"
+            }
+        }
+
+        # Check LocalServer32
+        $localServer = "$path\LocalServer32"
+        if (Test-Path $localServer) {
+            $exe = (Get-ItemProperty $localServer -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+            Write-Host "  LocalServer: $exe"
+        }
+
+        # Check if ShellFolder exists (needed for namespace)
+        if (Test-Path "$path\ShellFolder") {
+            Write-Host "  ShellFolder: YES (active namespace)"
+        } else {
+            Write-Host "  ShellFolder: NO (may not fully initialize)"
+        }
+    } else {
+        # Try WOW6432Node
+        $wowPath = "HKLM:\SOFTWARE\WOW6432Node\Classes\CLSID\$clsid"
+        if (Test-Path $wowPath) {
+            $default = (Get-ItemProperty $wowPath -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+            Write-Host "  Name (WOW6432): $default"
+        } else {
+            Write-Host "  NOT FOUND in registry!"
+        }
+    }
+}

@@ -1,0 +1,29 @@
+import { chromium } from 'playwright';
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+const ctx = browser.contexts()[0];
+const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+const talkFrame = page.frames()[1];
+
+// Dump all DOM session names
+const list = await talkFrame.evaluate(() => {
+  return Array.from(document.querySelectorAll('.contact-item-container')).map((el, idx) => {
+    const nameEl = el.querySelector('.contact-right');
+    const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+    return { index: idx, name: nameText };
+  });
+});
+
+console.log('DOM会话列表(' + list.length + '):');
+list.forEach(c => {
+  const display = c.name.length > 100 ? c.name.substring(0, 100) + '...' : c.name;
+  console.log('  [' + c.index + '] ' + display);
+});
+
+console.log('');
+console.log('独立的name部分（提取第一段）:');
+list.forEach(c => {
+  const match = c.name.match(/^(.+?)(?:\d{4}|\d{2}[-:])/);
+  const name = match ? match[1].trim() : c.name.substring(0, 30);
+  console.log('  [' + c.index + '] => ' + name);
+});

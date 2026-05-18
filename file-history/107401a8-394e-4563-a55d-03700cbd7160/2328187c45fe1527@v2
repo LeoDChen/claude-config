@@ -1,0 +1,140 @@
+/**
+ * 小满CRM — 索引快照抓取器
+ *
+ * 只抓会话列表页的关键字段，不点进单个客户。
+ * 300个客户约60秒完成。
+ *
+ * 用法: node snapshot.mjs
+ * 前置条件: Chrome 端口9222已开启，小满已登录并在TM消息页
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SNAPSHOT_DIR = join(DATA_DIR, 'snapshots');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+// 确保目录存在
+if (!existsSync(SNAPSHOT_DIR)) mkdirSync(SNAPSHOT_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+async function scrollConversationList(frame) {
+  // 滚动到底部多次以确保所有300+联系人都加载到DOM中
+  const container = await frame.evaluateHandle(() => {
+    return document.querySelector('.seller-conversation-list') ||
+      document.querySelector('.conversation-list-content') ||
+      document.querySelector('.im-conversation-list-container');
+  });
+
+  if (!container) { await container.dispose(); return; }
+
+  let lastScrollTop = -1;
+  let sameCount = 0;
+  for (let i = 0; i < 40; i++) { // 最多滚动40次
+    const scrollTop = await container.evaluate(el => {
+      el.scrollTop += 600;
+      return el.scrollTop;
+    });
+    // 如果连续3次滚动位置不变，说明到底了
+    if (scrollTop === lastScrollTop) {
+      sameCount++;
+      if (sameCount >= 3) break;
+    } else {
+      sameCount = 0;
+      lastScrollTop = scrollTop;
+    }
+    await new Promise(r => setTimeout(r, 150));
+  }
+  await container.dispose();
+}
+
+async function getIndexSnapshot(frame) {
+  return frame.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map(el => {
+      const text = el.textContent || '';
+
+      // 提取名称
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+
+      // 提取未读状态
+      const isUnread = text.includes('[未读]');
+
+      // 提取时间戳
+      const timeMatch = nameText.match(/(\d{2,4}[-:\/]\d{1,2}[-:\/]?\d{0,2})/);
+      const lastTime = timeMatch ? timeMatch[1] : '';
+
+      // 提取最后一条消息内容
+      const lastMsg = nameText
+        .replace(/^.+?\d{2,4}[-:\/]\d{1,2}[-:\/]?\d{0,2}\s*/, '')
+        .replace(/\[(未读|已读)\]\s*/, '')
+        .trim()
+        .substring(0, 200);
+
+      // 判断最后一条消息方向
+      // 我方发出的消息在列表摘要中通常有特殊前缀或格式
+      const isFromUs = lastMsg.includes('以上内容') || // 我方卡片消息
+        lastMsg.includes('发送了') || // 我方发送了文件
+        lastMsg.includes('[文件]') ||
+        false;
+
+      return {
+        name,
+        isUnread,
+        lastTime,
+        lastMessageSnippet: lastMsg,
+        lastMsgDirection: isFromUs ? 'sent' : 'received' // 粗略判断
+      };
+    });
+  });
+}
+
+async function main() {
+  console.log('[snapshot] 连接小满...');
+  const { talkFrame } = await connect();
+
+  const startTime = Date.now();
+
+  console.log('[snapshot] 滚动会话列表加载全部联系人...');
+  await scrollConversationList(talkFrame);
+
+  console.log('[snapshot] 提取索引快照...');
+  const customers = await getIndexSnapshot(talkFrame);
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const filename = `snapshot_${dateStr}.json`;
+
+  const snapshot = {
+    capturedAt: now.toISOString(),
+    totalCustomers: customers.length,
+    unreadCount: customers.filter(c => c.isUnread).length,
+    elapsedSeconds: parseFloat(elapsed),
+    customers
+  };
+
+  writeFileSync(join(SNAPSHOT_DIR, filename), JSON.stringify(snapshot, null, 2));
+  console.log(`[snapshot] 完成: ${customers.length}个客户, ${elapsed}s → ${filename}`);
+}
+
+main().catch(err => {
+  console.error('[snapshot] 错误:', err.message);
+  process.exit(1);
+});

@@ -1,0 +1,255 @@
+#!/usr/bin/env node
+/**
+ * gen_dashboard.js — 从状态卡生成看板表格
+ *
+ * 读取 data/briefs/*.md，生成分组排序的客户看板。
+ *
+ * 用法:
+ *   node scripts/gen_dashboard.js              → Markdown 表格到 stdout
+ *   node scripts/gen_dashboard.js --html       → HTML 到 stdout
+ *   node scripts/gen_dashboard.js -o board.md  → 输出到文件
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const DATA_DIR = path.resolve(__dirname, "..", "data");
+const BRIEFS_DIR = path.join(DATA_DIR, "briefs");
+const LATEST_PATH = path.join(DATA_DIR, "tm_conversations_latest.json");
+
+const args = process.argv.slice(2);
+const htmlMode = args.includes("--html");
+const outFile = (() => {
+  const idx = args.indexOf("-o");
+  return idx >= 0 ? args[idx + 1] : null;
+})();
+
+// ── 解析 frontmatter ─────────────────────────────────────
+function parseFrontmatter(content) {
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const fm = {};
+  for (const line of match[1].split("\n")) {
+    const kv = line.match(/^(\w+):\s*(.+)$/);
+    if (kv) fm[kv[1]] = kv[2].trim();
+  }
+  return fm;
+}
+
+// ── 从状态卡正文提取字段 ─────────────────────────────────
+
+function extractSection(content, heading) {
+  const re = new RegExp(`## ${heading}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`, "i");
+  const match = content.match(re);
+  return match ? match[1].trim() : "";
+}
+
+function extractTalkSummary(content) {
+  // 从"最近动态"中提取最后一句话（→ 前面的摘要）
+  const section = extractSection(content, "最近动态");
+  // 取 → 前面的最后一行有意义文本
+  const lines = section.split("\n").filter((l) => l.trim() && !l.startsWith("[初稿]") && !l.startsWith("→"));
+  if (lines.length > 0) {
+    const last = lines[lines.length - 1];
+    // 清理日期前缀和 MsgID
+    const cleaned = last.replace(/^-\s*\d{4}-\d{2}-\d{2}\s*(我|客):\s*/, "").replace(/（MsgID:[\w.]+）$/, "");
+    return cleaned.substring(0, 80);
+  }
+  // fallback: return the → line content
+  const arrowLine = section.match(/→\s*(.+)/);
+  return arrowLine ? arrowLine[1].substring(0, 80) : "";
+}
+
+function extractNextStep(content) {
+  const section = extractSection(content, "下一步");
+  const arrowLine = section.match(/→(?:\s*\[初稿\]\s*)?(.+)/);
+  return arrowLine ? arrowLine[1].trim().substring(0, 60) : section.substring(0, 60);
+}
+
+function extractFirstContact(content) {
+  const section = extractSection(content, "画像");
+  const match = section.match(/(\d{4}-\d{2}-\d{2})\s*首次联系/);
+  return match ? match[1] : null;
+}
+
+// ── 获取最后联系时间（从 tm_conversations_latest.json） ──
+function loadContactTimes() {
+  if (!fs.existsSync(LATEST_PATH)) return {};
+  const data = JSON.parse(fs.readFileSync(LATEST_PATH, "utf-8"));
+  const map = {};
+  for (const conv of data.conversations || []) {
+    map[conv.cid] = {
+      lastContactTime: conv.lastContactTime,
+      daysSinceLastContact: conv.preComputed?.daysSinceLastContact ?? null,
+    };
+  }
+  return map;
+}
+
+// ── 主逻辑 ──────────────────────────────────────────────────
+
+function buildDashboard() {
+  if (!fs.existsSync(BRIEFS_DIR)) {
+    console.error("briefs 目录不存在");
+    return [];
+  }
+
+  const contactMap = loadContactTimes();
+  const files = fs.readdirSync(BRIEFS_DIR).filter((f) => f.endsWith(".md"));
+  const rows = [];
+
+  for (const file of files) {
+    const content = fs.readFileSync(path.join(BRIEFS_DIR, file), "utf-8");
+    const fm = parseFrontmatter(content);
+    if (!fm.cid) continue;
+
+    // 客户名：从 H1 或文件名提取
+    const h1Match = content.match(/^#\s+(.+)$/m);
+    const nameFromFile = file.replace(/^[\d-]+_/, "").replace(/\.md$/, "");
+    const name = h1Match ? h1Match[1].trim() : nameFromFile;
+
+    // 最后联系天数
+    const contact = contactMap[fm.cid];
+    const daysSinceLastContact = contact?.daysSinceLastContact ?? null;
+
+    // 最后联系显示
+    let lastContactDisplay = "?";
+    if (daysSinceLastContact !== null) {
+      if (daysSinceLastContact === 0) lastContactDisplay = "今天";
+      else if (daysSinceLastContact === 1) lastContactDisplay = "昨天";
+      else if (daysSinceLastContact < 30) lastContactDisplay = `${daysSinceLastContact}天前`;
+      else lastContactDisplay = `${Math.round(daysSinceLastContact / 30)}月前`;
+    }
+
+    const talkSummary = extractTalkSummary(content);
+    const nextStep = extractNextStep(content);
+
+    rows.push({
+      name,
+      country: fm.country || "?",
+      heat: fm.heat || "COLD",
+      stage: fm.stage || "未知",
+      lastContact: lastContactDisplay,
+      daysSinceLastContact: daysSinceLastContact ?? 999,
+      talkSummary,
+      nextStep,
+      cid: fm.cid,
+      file,
+      checked: fm.checked || "?",
+    });
+  }
+
+  // 排序：NOW → SOON → COLD，同热度内按最后联系时间升序
+  const heatOrder = { NOW: 0, SOON: 1, COLD: 2 };
+  rows.sort((a, b) => {
+    const ha = heatOrder[a.heat] ?? 9;
+    const hb = heatOrder[b.heat] ?? 9;
+    if (ha !== hb) return ha - hb;
+    return a.daysSinceLastContact - b.daysSinceLastContact;
+  });
+
+  return rows;
+}
+
+// ── 渲染 ──────────────────────────────────────────────────
+
+function renderMarkdown(rows) {
+  const now = new Date().toISOString().slice(0, 10);
+  let md = `# OKKI 客户看板\n\n`;
+  md += `> 生成时间: ${now} | NOW:${rows.filter((r) => r.heat === "NOW").length}人 SOON:${rows.filter((r) => r.heat === "SOON").length}人 COLD:${rows.filter((r) => r.heat === "COLD").length}人\n\n`;
+
+  // 表头
+  md += `| 客户 | 国家 | 热度 | 阶段 | 最后联系 | 聊到哪了 | 下一步 |\n`;
+  md += `|------|------|------|------|----------|----------|--------|\n`;
+
+  let lastHeat = "";
+  for (const r of rows) {
+    if (r.heat !== lastHeat) {
+      lastHeat = r.heat;
+      md += `| **── ${r.heat} ──** | | | | | | |\n`;
+    }
+    // 截断长文本
+    const summary = r.talkSummary.length > 50 ? r.talkSummary.substring(0, 48) + "…" : r.talkSummary;
+    const step = r.nextStep.length > 40 ? r.nextStep.substring(0, 38) + "…" : r.nextStep;
+    const heatIcon = r.heat === "NOW" ? "🔴" : r.heat === "SOON" ? "🟡" : "⚪";
+    md += `| ${r.name} | ${r.country} | ${heatIcon} ${r.heat} | ${r.stage} | ${r.lastContact} | ${summary} | ${step} |\n`;
+  }
+
+  return md;
+}
+
+function renderHTML(rows) {
+  const now = new Date().toISOString().slice(0, 10);
+  const heatIcon = (h) => h === "NOW" ? "🔴" : h === "SOON" ? "🟡" : "⚪";
+
+  let html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户看板 — ${now}</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 20px; color: #333; }
+  h1 { font-size: 1.5em; }
+  .meta { color: #666; font-size: 0.9em; margin-bottom: 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+  th { background: #f5f5f5; padding: 10px 8px; text-align: left; border-bottom: 2px solid #ddd; position: sticky; top: 0; }
+  td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+  tr:hover td { background: #fafafa; }
+  .heat-now { color: #d32f2f; font-weight: bold; }
+  .heat-soon { color: #f57c00; }
+  .heat-cold { color: #999; }
+  .section-row td { background: #f0f0f0; font-weight: bold; padding: 6px 8px; font-size: 0.85em; color: #666; }
+  .summary { max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .step { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+<body>
+<h1>OKKI 客户看板</h1>
+<p class="meta">生成时间: ${now} | NOW:${rows.filter((r) => r.heat === "NOW").length}人 SOON:${rows.filter((r) => r.heat === "SOON").length}人 COLD:${rows.filter((r) => r.heat === "COLD").length}人</p>
+<table>
+<thead><tr><th>客户</th><th>国家</th><th>热度</th><th>阶段</th><th>最后联系</th><th>聊到哪了</th><th>下一步</th></tr></thead>
+<tbody>
+`;
+
+  let lastHeat = "";
+  for (const r of rows) {
+    if (r.heat !== lastHeat) {
+      lastHeat = r.heat;
+      html += `<tr class="section-row"><td colspan="7">── ${r.heat} ──</td></tr>\n`;
+    }
+    const heatClass = r.heat === "NOW" ? "heat-now" : r.heat === "SOON" ? "heat-soon" : "heat-cold";
+    const summary = (r.talkSummary || "").replace(/</g, "&lt;");
+    const step = (r.nextStep || "").replace(/</g, "&lt;");
+    html += `<tr>
+  <td>${r.name}</td>
+  <td>${r.country}</td>
+  <td class="${heatClass}">${heatIcon(r.heat)} ${r.heat}</td>
+  <td>${r.stage}</td>
+  <td>${r.lastContact}</td>
+  <td class="summary" title="${summary}">${summary}</td>
+  <td class="step" title="${step}">${step}</td>
+</tr>\n`;
+  }
+
+  html += `</tbody></table></body></html>`;
+  return html;
+}
+
+// ── 执行 ──────────────────────────────────────────────────
+
+const rows = buildDashboard();
+
+if (rows.length === 0) {
+  console.log("无状态卡数据。请先运行 batch_gen_briefs.js");
+  process.exit(1);
+}
+
+const output = htmlMode ? renderHTML(rows) : renderMarkdown(rows);
+
+if (outFile) {
+  fs.writeFileSync(outFile, output, "utf-8");
+  console.log(`看板已保存: ${outFile}`);
+} else {
+  console.log(output);
+}

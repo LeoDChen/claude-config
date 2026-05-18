@@ -1,0 +1,71 @@
+# KPI 卡片可点击弹窗 — 设计规格
+
+> 日期：2026-05-14 | 状态：已确认
+
+## 目标
+
+看板顶部的 6 个 KPI 卡片从静态数字改为可点击按钮，点击弹出客户名单，格式与双轴矩阵弹窗一致。
+
+## 范围
+
+**只改一个文件**：[enhanced_classify.js](../08_客户跟进/Okki/scripts/enhanced_classify.js) 的 `generateDashboard` 函数（L461-L715）。
+
+## 实现要点
+
+### 1. 构建 KPI_DATA JSON
+
+在 `matrixJson`（L588-604）之后，新增 `kpiJson` 对象，结构同 `matrixJson` 的数组格式：
+
+```js
+const kpiJson = {
+  "总客户": data.map(e => ({ n, c, d, g, as, st, ac, pr })),
+  "3天活跃": data.filter(e => e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays < 3).map(...),
+  "超90天无互动": data.filter(e => e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays >= 90).map(...),
+  "未读消息": data.filter(e => e.questionUnanswered).map(...),
+  "本期变动": data.filter(e => e.daysAgo <= 3).map(...),
+  "需行动": data.filter(e => urgent || soon || watch).map(...)
+};
+```
+
+筛选条件与 KPI 卡片数字计算完全一致（同一段 filter 代码复用，确保弹窗人数 = 卡片数字）。"需行动"的计算改为 `actionPriority`（urgent/soon/watch），同步修改 L497 行的 `needsAction` 变量，使卡片数字与弹窗同源。
+
+每个 KPI 的客户数组按优先级 → 静默天数升序排列（urgent 最前，同优先级沉默短的在前），与 `gen_mobile_report.js` 排序逻辑一致。
+
+### 2. KPI 卡片加 onclick
+
+L658 行，`kpiCards.map(...)` 中给每个 `.kpi` div 加 `onclick="openKpiModal('总客户')"` 等。同时加 CSS：`.kpi { cursor: pointer; }` + hover 效果。
+
+### 3. 新增 openKpiModal 函数
+
+与 `openModal(stage, grade)`（L689）并行，签名 `openKpiModal(key)`：
+
+- 从 `window.KPI_DATA[key]` 取客户数组
+- 标题格式：`"{key} — N人"`
+- 不做"标准动作参考"行（KPI 卡片无阶段上下文）
+- 表格列、行渲染、优先级图标、关弹窗逻辑全部复用现有代码
+
+### 4. 注入 window.KPI_DATA
+
+在 `<script>` 块中（L678 之后），加一行：
+```js
+window.KPI_DATA = <kpiJson>;
+```
+
+## 不受影响
+
+- 双轴矩阵、静默分级、市场管道、本期变动面板 → 不动
+- `gen_mobile_report.js` → 不动
+- 数据输出文件 → 不动
+
+## 验证
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/enhanced_classify.js
+```
+
+然后用浏览器打开 `output/dashboard_2026-05-14.html`：
+1. 每个 KPI 卡片 clickable，鼠标悬停有 pointer
+2. 点击"总客户"弹 465 人，"3天活跃"弹 N 人，数字对得上卡片
+3. "需行动"弹窗人数 = 手机长图的 紧急+尽快 总数
+4. 表格列：客户(等级标签) | 国家·静默 | 当前状态 | 行动方向
+5. ESC / 点击遮罩关闭

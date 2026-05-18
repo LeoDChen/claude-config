@@ -1,0 +1,171 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  // First check the current state
+  const checkExpr = `
+    (function() {
+      var auth = window._imBaaSSDK.getAuthService();
+      var convs = window.__conversationListFullData__ || [];
+      return JSON.stringify({
+        isLogin: auth.isLogin(),
+        connectionStatus: auth.connectionStatus,
+        convCount: convs.length
+      });
+    })()
+  `;
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: checkExpr } })
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  console.log('SDK State:', results[0]?.val);
+
+  // Now try to fetch messages using the SDK method
+  const convs = JSON.parse(results[0]?.val || '{}');
+  if (convs.convCount < 1) { console.log('No convs'); process.exit(1); }
+
+  // Get first few CIDs that have latestMessage content
+  const getCidsExpr = `
+    (function() {
+      var convs = window.__conversationListFullData__;
+      var withMsg = [];
+      for (var i = 0; i < convs.length && withMsg.length < 5; i++) {
+        if (convs[i].latestMessage && convs[i].latestMessage.content) {
+          withMsg.push({ cid: convs[i].cid, name: convs[i].name, msgType: convs[i].latestMessage.messageType });
+        }
+      }
+      return JSON.stringify(withMsg);
+    })()
+  `;
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: { expression: getCidsExpr } })
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  const sampleCids = JSON.parse(results.find(r => r.id === 2)?.val || '[]');
+  console.log('Sample CIDs:', sampleCids);
+
+  if (sampleCids.length === 0) { console.log('No conversations with messages'); process.exit(1); }
+
+  const testCid = sampleCids[0].cid;
+  console.log('\n=== Testing fetch for CID:', testCid, '===');
+
+  // Test 1: listMessageWithConversationCodeForHistory (the one previously returning empty)
+  console.log('\nTest 1: listMessageWithConversationCodeForHistory');
+  const test1Expr = `
+    (async function() {
+      var msgSvc = window._imsdk.getMessageService();
+      try {
+        var result = await msgSvc.listMessageWithConversationCodeForHistory("${testCid}", 20, 9007199254740991);
+        return JSON.stringify({
+          method: 'listMessageWithConversationCodeForHistory',
+          count: result ? result.length : 0,
+          sample: result && result.length > 0 ? JSON.stringify(result[0]).substring(0, 300) : 'empty',
+          type: typeof result,
+          isArray: Array.isArray(result)
+        });
+      } catch(e) {
+        return JSON.stringify({ method: 'listMessageWithConversationCodeForHistory', error: e.message });
+      }
+    })()
+  `;
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 3, method: 'Runtime.evaluate', params: { expression: test1Expr, awaitPromise: true } })
+  });
+  await new Promise(r => setTimeout(r, 8000));
+  console.log('Test 1 result:', results.find(r => r.id === 3)?.val);
+
+  // Test 2: listMessageWithConversationCode
+  console.log('\nTest 2: listMessageWithConversationCode');
+  const test2Expr = `
+    (async function() {
+      var msgSvc = window._imsdk.getMessageService();
+      try {
+        var result = await msgSvc.listMessageWithConversationCode("${testCid}", 20, 9007199254740991);
+        return JSON.stringify({
+          method: 'listMessageWithConversationCode',
+          count: result ? result.length : 0,
+          sample: result && result.length > 0 ? JSON.stringify(result[0]).substring(0, 300) : 'empty'
+        });
+      } catch(e) {
+        return JSON.stringify({ method: 'listMessageWithConversationCode', error: e.message });
+      }
+    })()
+  `;
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 4, method: 'Runtime.evaluate', params: { expression: test2Expr, awaitPromise: true } })
+  });
+  await new Promise(r => setTimeout(r, 8000));
+  console.log('Test 2 result:', results.find(r => r.id === 4)?.val);
+
+  // Test 3: searchRemoteMessage
+  console.log('\nTest 3: searchRemoteMessage');
+  const test3Expr = `
+    (async function() {
+      var msgSvc = window._imsdk.getMessageService();
+      try {
+        var result = await msgSvc.searchRemoteMessage({ conversationCode: "${testCid}", count: 20 });
+        return JSON.stringify({
+          method: 'searchRemoteMessage',
+          result: typeof result,
+          keys: result ? Object.keys(result).slice(0, 10) : 'null'
+        });
+      } catch(e) {
+        return JSON.stringify({ method: 'searchRemoteMessage', error: e.message });
+      }
+    })()
+  `;
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 5, method: 'Runtime.evaluate', params: { expression: test3Expr, awaitPromise: true } })
+  });
+  await new Promise(r => setTimeout(r, 8000));
+  console.log('Test 3 result:', results.find(r => r.id === 5)?.val);
+
+  // Test 4: Try the HTTP MessageService
+  console.log('\nTest 4: HTTP MessageService');
+  const test4Expr = `
+    (async function() {
+      var baaS = window._imBaaSSDK;
+      var msgSvcHttp = baaS.getMessageServiceHttp();
+      if (!msgSvcHttp) return JSON.stringify({ error: 'getMessageServiceHttp returned null' });
+      var methods = [];
+      for (var k in msgSvcHttp) {
+        if (typeof msgSvcHttp[k] === 'function') methods.push(k);
+      }
+      return JSON.stringify({ methods: methods });
+    })()
+  `;
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 6, method: 'Runtime.evaluate', params: { expression: test4Expr, awaitPromise: true } })
+  });
+  await new Promise(r => setTimeout(r, 3000));
+  console.log('Test 4 result:', results.find(r => r.id === 6)?.val);
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

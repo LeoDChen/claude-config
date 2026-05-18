@@ -1,0 +1,720 @@
+/**
+ * OKKI 一键同步脚本
+ *
+ * 自动检测浏览器状态 → 登录 → 导航TM → 提取会话元数据 → 增量拉消息
+ *
+ * 用法：node scripts/sync_okki.js
+ *
+ * 适用所有场景：
+ * - 刚开机/Chrome没开/没登录 → 自动启动Chrome → 等你登录 → 继续
+ * - Chrome开着+已登录+在TM页 → 直接抓取
+ * - Chrome开着但不在TM页 → 自动导航
+ */
+
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CHAT_DIR = path.join(DATA_DIR, 'chat_history');
+const CDP_URL = 'http://localhost:9222';
+const MSG_COUNT = 50;
+const MAX_PAGES = 20;
+
+// ===================== 工具函数 =====================
+
+function ts() { return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19); }
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function sanitizeFilename(cid) {
+  return cid.replace(/[<>:"/\\|?*#@]/g, '_').substring(0, 200);
+}
+
+// ===================== CDP 端口检测 =====================
+
+function checkCdpPort() {
+  return new Promise((resolve) => {
+    const req = http.get('http://127.0.0.1:9222/json/version', (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          resolve(!!json.webSocketDebuggerUrl);
+        } catch (e) { resolve(false); }
+      });
+    });
+    req.on('error', () => resolve(false));
+    req.setTimeout(2000, () => { req.destroy(); resolve(false); });
+  });
+}
+
+// ===================== 主流程 =====================
+
+async function main() {
+  let browser;
+  let page;
+  let useCdp = false;
+
+  // ---- Step 1: 启动/连接浏览器 ----
+  const cdpAvailable = await checkCdpPort();
+  if (cdpAvailable) {
+    log('检测到 CDP 端口，尝试连接已有 Chrome...');
+    try {
+      browser = await chromium.connectOverCDP(CDP_URL);
+      const pages = browser.contexts()[0]?.pages() || [];
+      page = pages.find(p => p.url().includes('xiaoman') || p.url().includes('onetalk'));
+      if (!page) {
+        page = await browser.contexts()[0].newPage();
+      }
+      useCdp = true;
+      log(`CDP 已连接。当前页面: ${page.url()}`);
+    } catch (e) {
+      log(`CDP 连接失败: ${e.message}，改用独立启动模式`);
+    }
+  }
+
+  if (!browser) {
+    log('启动 Chrome (Profile 4)...');
+    browser = await chromium.launchPersistentContext(PROFILE, {
+      channel: 'chrome',
+      headless: false,
+      viewport: { width: 1440, height: 900 },
+    });
+    page = await browser.newPage();
+    log('Chrome 已启动');
+  }
+
+  // ---- Step 2: 导航到 OKKI + 登录检测 ----
+  const currentUrl = page.url();
+  if (!currentUrl.includes('xiaoman') && !currentUrl.includes('onetalk') && !currentUrl.includes('alibaba')) {
+    log('导航到 crm.xiaoman.cn...');
+    await page.goto('https://crm.xiaoman.cn/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  }
+
+  // 检测登录状态
+  let loginUrl = page.url();
+  if (loginUrl.includes('login.xiaoman.cn') || loginUrl.includes('login.alibaba.com')) {
+    log('');
+    log('========================================');
+    log('  请在浏览器中登录 OKKI (小满)');
+    log('  登录后脚本自动继续...');
+    log('========================================');
+    log('');
+
+    const startTime = Date.now();
+    const maxWait = 5 * 60 * 1000;
+    while (Date.now() - startTime < maxWait) {
+      const url = page.url();
+      if (!url.includes('login.xiaoman.cn') && !url.includes('login.alibaba.com') && url.includes('crm.xiaoman.cn')) {
+        log('登录成功！');
+        break;
+      }
+      await sleep(2000);
+    }
+    if (page.url().includes('login')) {
+      log('超时：未检测到登录。退出。');
+      await browser.close();
+      process.exit(1);
+    }
+  } else {
+    log('已登录状态');
+  }
+
+  // ---- Step 3: 导航到 TM 消息页面 ----
+  log('导航到 TM 消息页...');
+  await page.goto('https://crm.xiaoman.cn/im/', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+  await sleep(3000);
+
+  // 可能需要点击侧边栏进入 TM（OKKI 的 /im/ 可能只显示外壳，onetalk 在 iframe 里）
+  log(`当前 URL: ${page.url()}`);
+
+  // ---- Step 4: 等待 onetalk iframe + 数据就绪 ----
+  log('等待 onetalk iframe 加载...');
+
+  // 递归查找 onetalk 页面（可能在嵌套 iframe 中）
+  function findOnetalkFrame(pageOrFrame) {
+    const frames = pageOrFrame.frames ? pageOrFrame.frames() : (pageOrFrame.childFrames ? pageOrFrame.childFrames() : []);
+    for (const f of frames) {
+      const url = f.url();
+      // 真正的 onetalk PWA 页面，不是 OKKI 外壳
+      if (url.startsWith('https://onetalk.alibaba.com/')) return f;
+      // 递归查找
+      const found = findOnetalkFrame(f);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  let iframePage = null;
+  for (let attempt = 0; attempt < 30; attempt++) {
+    iframePage = findOnetalkFrame(page);
+    if (iframePage) {
+      log(`onetalk iframe 已找到 (尝试 ${attempt + 1}): ${iframePage.url().slice(0, 100)}`);
+      break;
+    }
+    if (attempt === 0) {
+      const bodyText = await page.evaluate(() => document.body.innerText?.slice(0, 500)).catch(() => '');
+      log(`  页面预览: ${bodyText.slice(0, 200)}`);
+      // 检查是否在 OKKI 外壳中
+      const allFrames = page.frames();
+      log(`  当前 ${allFrames.length} 个 frame:`);
+      for (const f of allFrames) {
+        log(`    ${f.url().slice(0, 120)}`);
+      }
+    }
+    await sleep(2000);
+  }
+
+  if (!iframePage) {
+    log('iframe 未找到。请确认：');
+    log('  1. 已退出手机阿里卖家');
+    log('  2. OKKI TM 面板不是 "Click to retry" 状态');
+    log('  3. TM 面板中能看到会话列表');
+    log('');
+    log('脚本保持运行。完成上述操作后回车继续...');
+    await new Promise(() => {});
+  }
+
+  // ---- Step 4.5: 滚动加载全部会话 ----
+  // 虚拟列表只渲染可见窗口，不滚动会漏掉窗口外的新客户/老客户
+  log('滚动加载全部会话...');
+  let initialCount = await iframePage.evaluate(() => (window.__conversationListFullData__ || []).length);
+  log(`  初始会话数: ${initialCount}`);
+
+  let lastCount = initialCount;
+  let unchangedRounds = 0;
+
+  for (let round = 0; round < 50; round++) {
+    const scrollResult = await iframePage.evaluate(() => {
+      let best = null;
+      let bestScore = 0;
+      for (const el of document.querySelectorAll('div')) {
+        const childCount = el.children.length;
+        const scrollDiff = el.scrollHeight - el.clientHeight;
+        if (childCount > 20 && scrollDiff > 200) {
+          const score = childCount + scrollDiff;
+          if (score > bestScore) { best = el; bestScore = score; }
+        }
+      }
+      if (!best) return { done: true, count: (window.__conversationListFullData__ || []).length };
+      const before = (window.__conversationListFullData__ || []).length;
+      best.scrollTop = best.scrollHeight;
+      return { done: false, before, scrollH: best.scrollHeight, clientH: best.clientHeight };
+    });
+
+    if (scrollResult.done) { log('  找不到合适的滚动容器'); break; }
+    await sleep(2000);
+
+    const newCount = await iframePage.evaluate(() => (window.__conversationListFullData__ || []).length);
+    if (round % 3 === 0 || newCount !== lastCount) {
+      log(`  第${round+1}轮: ${scrollResult.before} → ${newCount}`);
+    }
+
+    if (newCount === lastCount) {
+      unchangedRounds++;
+      if (unchangedRounds >= 3) { log('  数据已稳定，滚动完成'); break; }
+    } else {
+      unchangedRounds = 0;
+    }
+    lastCount = newCount;
+  }
+
+  const finalCount = await iframePage.evaluate(() => (window.__conversationListFullData__ || []).length);
+  log(`  滚动后会话总数: ${finalCount} (初始: ${initialCount})`);
+
+  // ---- Step 5: 提取会话列表（带重试） ----
+  log('提取会话元数据...');
+  let convData = null;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    convData = await iframePage.evaluate(() => {
+      const convs = window.__conversationListFullData__;
+      if (!convs || !Array.isArray(convs)) return { error: 'no __conversationListFullData__', type: typeof convs, count: 0 };
+      return {
+        count: convs.length,
+        list: convs.map(c => ({
+          cid: c.cid,
+          name: c.name,
+          loginId: c.loginId,
+          aliId: c.aliId,
+          accountId: c.accountId,
+          companyName: c.companyName,
+          country: c.country,
+          level: c.level,
+          serviceType: c.serviceType,
+          conversationType: c.conversationType,
+          unreadCount: c.unreadCount,
+          stayTop: c.stayTop,
+          lastContactTime: c.lastContactTime,
+          lastContactTimeLong: c.lastContactTimeLong,
+          createAt: c.createAt,
+          tagInfo: c.tagInfo,
+          available: c.available,
+          complianceCountryCode: c.complianceCountryCode,
+          latestMessage: c.latestMessage ? {
+            content: c.latestMessage.content,
+            messageType: c.latestMessage.messageType,
+            messageId: c.latestMessage.messageId,
+            gmtChat: c.latestMessage.gmtChat,
+            contactRead: c.latestMessage.contactRead,
+          } : null,
+        })),
+      };
+    }).catch(e => ({ error: e.message, count: 0 }));
+
+    if (!convData.error && convData.count > 0) {
+      log(`提取成功: ${convData.count} 个会话 (尝试 ${attempt + 1})`);
+      break;
+    }
+    if (attempt === 0) {
+      log(`  等待 TM 数据加载 (${convData.error || '空数据'})...`);
+    }
+    await sleep(2000);
+  }
+
+  if (!convData || convData.error || convData.count === 0) {
+    log(`提取失败: ${convData?.error || '无数据'}`);
+    log('TM 面板可能未正常加载。请确认能看到会话列表后重新运行脚本。');
+    await browser.close();
+    process.exit(1);
+  }
+
+  // 展平结果
+  const convList = convData.list;
+  const totalCount = convData.count;
+
+  log(`提取到 ${totalCount} 个会话`);
+
+  // ---- Step 6: 保存最新元数据 ----
+  const latestMeta = {
+    exportedAt: new Date().toISOString(),
+    total: totalCount,
+    conversations: convList,
+  };
+  const metaPath = path.join(DATA_DIR, 'tm_conversations_latest.json');
+  fs.writeFileSync(metaPath, JSON.stringify(latestMeta, null, 2));
+  log(`元数据已保存: tm_conversations_latest.json (${totalCount} 会话)`);
+
+  // ---- Step 7: Diff 找出变化的会话 ----
+  log('对比上次数据...');
+  let oldMeta = null;
+  const oldPath = path.join(DATA_DIR, 'tm_conversations_full.json');
+  if (fs.existsSync(oldPath)) {
+    oldMeta = JSON.parse(fs.readFileSync(oldPath, 'utf-8'));
+  }
+
+  const changed = [];
+  const oldMap = new Map();
+  if (oldMeta?.conversations) {
+    for (const c of oldMeta.conversations) {
+      oldMap.set(c.cid, c);
+    }
+  }
+
+  for (const c of convList) {
+    const old = oldMap.get(c.cid);
+    if (!old) {
+      // 新会话
+      changed.push({ cid: c.cid, name: c.name, reason: '新会话', oldLmId: null, newLmId: c.latestMessage?.messageId });
+      continue;
+    }
+    const oldLmId = old.latestMessage?.messageId;
+    const newLmId = c.latestMessage?.messageId;
+    const oldLct = old.lastContactTime || 0;
+    const newLct = c.lastContactTime || 0;
+
+    if (oldLmId !== newLmId || newLct > oldLct) {
+      const reason = oldLmId !== newLmId ? '消息更新' : '时间更新';
+      changed.push({ cid: c.cid, name: c.name, reason, oldLmId, newLmId });
+    }
+  }
+
+  log(`变化会话: ${changed.length} 个`);
+  if (changed.length > 0) {
+    for (const ch of changed.slice(0, 15)) {
+      log(`  ${ch.reason}: ${ch.name}`);
+    }
+    if (changed.length > 15) log(`  ... 共 ${changed.length} 个`);
+  }
+
+  // ---- Step 8: 增量拉取聊天历史 ----
+  if (changed.length === 0) {
+    log('无变化，无需拉取聊天历史。同步完成。');
+    computePreComputed(convList);
+    printSummary(convList, changed);
+    log('浏览器保持打开，供后续脚本使用');
+    return;
+  }
+
+  log('');
+  log(`开始增量拉取 ${changed.length} 个会话的聊天历史...`);
+
+  // 获取 CDP session
+  let cdpClient;
+  let iframeSessionId;
+
+  if (!useCdp) {
+    // Playwright 启动模式: 需要通过 CDP 访问 iframe
+    cdpClient = await page.context().newCDPSession(page);
+    const targets = await cdpClient.send('Target.getTargets');
+    const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+    if (ot) {
+      const attached = await cdpClient.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+      iframeSessionId = attached.sessionId;
+      log(`CDP attached to onetalk iframe: ${ot.url.slice(0, 80)}`);
+    } else {
+      log('警告: 未找到 onetalk iframe target，尝试用 page.frames() 方式...');
+    }
+  } else {
+    // CDP 连接模式: page 已经是 CDP 连接的
+    cdpClient = await page.context().newCDPSession(page);
+    const targets = await cdpClient.send('Target.getTargets');
+    const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+    if (!ot) {
+      // 检查 page 本身是否是 onetalk
+      if (page.url().includes('onetalk')) {
+        iframeSessionId = undefined; // page 本身就是 onetalk
+        log('当前页面就是 onetalk');
+      } else {
+        log('警告: 未找到 onetalk target');
+      }
+    } else {
+      const attached = await cdpClient.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+      iframeSessionId = attached.sessionId;
+      log(`CDP attached to onetalk iframe`);
+    }
+  }
+
+  // 安装 LWP 收发器
+  if (iframeSessionId || page.url().includes('onetalk')) {
+    log('安装 LWP 收发器...');
+    await installLwp(cdpClient, iframeSessionId);
+    await sleep(3000);
+
+    // 确认 WS 已捕获
+    const wsState = await evalInIframe(cdpClient, iframeSessionId, 10,
+      `(function(){return JSON.stringify({ws:!!window.__lwpWs,url:window.__lwpWs?window.__lwpWs.url:null})})()`
+    );
+    log(`WS 状态: ${JSON.stringify(wsState)}`);
+
+    if (!wsState?.ws) {
+      log('等待 WebSocket 连接...');
+      await sleep(15000);
+      const wsState2 = await evalInIframe(cdpClient, iframeSessionId, 11,
+        `(function(){return JSON.stringify({ws:!!window.__lwpWs,url:window.__lwpWs?window.__lwpWs.url:null})})()`
+      );
+      log(`WS 状态(重试): ${JSON.stringify(wsState2)}`);
+    }
+
+    // 拉取消息
+    let pulled = 0;
+    let errors = 0;
+    let totalNewMsgs = 0;
+    let msgIdCounter = 100;
+
+    for (let i = 0; i < changed.length; i++) {
+      const conv = changed[i];
+      try {
+        const allMessages = [];
+        let cursor = 9007199254740991;
+        let pageNum = 0;
+
+        while (pageNum < MAX_PAGES) {
+          const msgId = msgIdCounter++;
+          const raw = await evalInIframe(cdpClient, iframeSessionId, msgId,
+            `(async function() {
+              try {
+                var result = await window.__lwpRequest('/r/MessageManager/listUserMessages', ['${conv.cid}', false, ${cursor}, ${MSG_COUNT}, false]);
+                return JSON.stringify(result);
+              } catch(e) {
+                return JSON.stringify({ __error: e.message });
+              }
+            })()`,
+            true
+          );
+
+          await sleep(1500);
+
+          if (!raw || raw.__error) {
+            if (raw?.__error === 'timeout') { log(`  [${conv.name}] LWP超时`); }
+            break;
+          }
+
+          let response;
+          try { response = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { break; }
+          if (response.code !== 200) break;
+
+          const body = response.body;
+          if (!body?.userMessageModels || body.userMessageModels.length === 0) break;
+
+          allMessages.push(...body.userMessageModels);
+
+          if (body.userMessageModels.length < MSG_COUNT || !body.nextCursor) break;
+          cursor = body.nextCursor;
+          pageNum++;
+        }
+
+        // 保存
+        const safeName = sanitizeFilename(conv.cid);
+        const output = {
+          cid: conv.cid,
+          name: conv.name,
+          fetchedAt: new Date().toISOString(),
+          totalMessages: allMessages.length,
+          messages: allMessages,
+        };
+        fs.writeFileSync(path.join(CHAT_DIR, safeName + '.json'), JSON.stringify(output, null, 2));
+        pulled++;
+        totalNewMsgs += allMessages.length;
+        if (allMessages.length > 0) {
+          log(`  [${i+1}/${changed.length}] ${conv.name}: ${allMessages.length} 条消息`);
+        }
+      } catch (e) {
+        errors++;
+        if (errors <= 5) log(`  [${conv.name}] 错误: ${e.message}`);
+      }
+    }
+
+    log(`拉取完成: ${pulled} 个会话, ${totalNewMsgs} 条消息, ${errors} 个错误`);
+  } else {
+    log('跳过 LWP 拉取（无 CDP/iframe 访问）');
+    log('已保存元数据差异。在新对话中可通过 STATE.md 了解哪些客户需要深抓。');
+  }
+
+  // ---- Step 9: 预计算 + 输出摘要 ----
+  computePreComputed(convList);
+  printSummary(convList, changed);
+  log('同步完成。浏览器保持打开，供后续脚本使用');
+}
+
+// ===================== LWP 工具 =====================
+
+async function installLwp(cdpClient, iframeSessionId) {
+  const expr = `
+    (function() {
+      var _send = WebSocket.prototype.send;
+      var _ae = WebSocket.prototype.addEventListener;
+
+      window.__lwpPending = {};
+      window.__lwpSeq = 0;
+
+      WebSocket.prototype.send = function(data) {
+        if (!window.__lwpWs && this.readyState === 1) {
+          window.__lwpWs = this;
+          _ae.call(this, 'message', function(event) {
+            try {
+              var raw = typeof event.data === 'string' ? event.data : '';
+              if (raw.indexOf('"code"') < 0) return;
+              var parsed = JSON.parse(raw);
+              var mid = parsed.headers && parsed.headers.mid;
+              if (mid && window.__lwpPending[mid]) {
+                var p = window.__lwpPending[mid];
+                delete window.__lwpPending[mid];
+                p.resolve(parsed);
+              }
+            } catch(e) {}
+          });
+          console.log('[LWP] WS captured: ' + this.url);
+        }
+        return _send.call(this, data);
+      };
+
+      window.__lwpRequest = function(lwpPath, body) {
+        return new Promise(function(resolve, reject) {
+          var ws = window.__lwpWs;
+          if (!ws || ws.readyState !== 1) { reject(new Error('WS not ready')); return; }
+          var mid = Date.now() + ' ' + (++window.__lwpSeq);
+          var req = JSON.stringify({ lwp: lwpPath, headers: { mid: mid }, body: body });
+          window.__lwpPending[mid] = { resolve: resolve, reject: reject };
+          ws.send(req);
+          setTimeout(function() {
+            if (window.__lwpPending[mid]) { delete window.__lwpPending[mid]; reject(new Error('timeout')); }
+          }, 30000);
+        });
+      };
+
+      return JSON.stringify({ installed: true });
+    })()
+  `;
+
+  return sendToTarget(cdpClient, iframeSessionId, 3, expr);
+}
+
+async function evalInIframe(cdpClient, iframeSessionId, id, expression, awaitPromise) {
+  const raw = await sendToTarget(cdpClient, iframeSessionId, id, expression, awaitPromise);
+  if (!raw) return raw;
+  try { return JSON.parse(raw); } catch (e) { return raw; }
+}
+
+async function sendToTarget(cdpClient, sessionId, id, expression, awaitPromise) {
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(null), 35000);
+
+    const handler = (msg) => {
+      if (sessionId && msg.sessionId !== sessionId) return;
+      try {
+        const m = JSON.parse(msg.message);
+        if (m.id === id) {
+          clearTimeout(timeout);
+          cdpClient.off('Target.receivedMessageFromTarget', handler);
+          if (m.result?.result?.value !== null && m.result?.result?.value !== undefined) {
+            resolve(m.result.result.value);
+          } else if (m.result) {
+            resolve(m.result);
+          } else {
+            resolve(null);
+          }
+        }
+      } catch (e) { clearTimeout(timeout); resolve(null); }
+    };
+
+    cdpClient.on('Target.receivedMessageFromTarget', handler);
+
+    cdpClient.send('Target.sendMessageToTarget', {
+      sessionId: sessionId || cdpClient._sessionId,
+      message: JSON.stringify({
+        id,
+        method: 'Runtime.evaluate',
+        params: { expression, awaitPromise: !!awaitPromise, returnByValue: true }
+      })
+    }).catch(() => { clearTimeout(timeout); resolve(null); });
+  });
+}
+
+// ===================== 预计算 =====================
+
+const SYSTEM_MSG_PATTERNS = [
+  '自动接待将不再触发',
+  'Since you have read the conversation',
+  'Marco大模型翻译',
+  '阿里国际Marco大模型翻译',
+  '买家有流失风险',
+  'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈',
+  '由于您介入该会话',
+  'Due to your intervention in this session',
+  'AI给您生成了一条回复建议',
+  'You have a visitor',
+  'This buyer has been pre-screened',
+];
+
+function computePreComputed(convList) {
+  const now = Date.now();
+  const chatDir = path.join(DATA_DIR, 'chat_history');
+
+  for (const c of convList) {
+    c.preComputed = {};
+
+    // 1. 是否未读
+    c.preComputed.isUnread = (c.unreadCount || 0) > 0;
+
+    // 2. 距上次联系天数
+    const lct = c.lastContactTimeLong || c.lastContactTime || 0;
+    c.preComputed.daysSinceLastContact = lct > 0 ? Math.floor((now - lct) / 86400000) : null;
+
+    // 3. latestMessage 是否是系统消息
+    const lmContent = c.latestMessage?.content || '';
+    c.preComputed.isLatestMessageSystem = false;
+    if (lmContent) {
+      for (const pat of SYSTEM_MSG_PATTERNS) {
+        if (lmContent.includes(pat)) {
+          c.preComputed.isLatestMessageSystem = true;
+          break;
+        }
+      }
+    }
+
+    // 4. 是否有 chat_history 文件
+    const fileName = sanitizeFilename(c.cid) + '.json';
+    const filePath = path.join(chatDir, fileName);
+    c.preComputed.hasChatHistoryFile = fs.existsSync(filePath);
+
+    // 5. 是否有真实消息（chat_history 文件中存在非系统消息）
+    c.preComputed.hasRealMessages = false;
+    if (c.preComputed.hasChatHistoryFile) {
+      try {
+        const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+        for (const msg of (data.messages || [])) {
+          const content = msg.message?.content?.text?.content || '';
+          if (!content) continue;
+          let isSys = false;
+          for (const pat of SYSTEM_MSG_PATTERNS) {
+            if (content.includes(pat)) { isSys = true; break; }
+          }
+          if (!isSys) {
+            c.preComputed.hasRealMessages = true;
+            break;
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  // 重新保存带 preComputed 的元数据
+  const metaPath = path.join(DATA_DIR, 'tm_conversations_latest.json');
+  const latestMeta = {
+    exportedAt: new Date().toISOString(),
+    total: convList.length,
+    conversations: convList,
+  };
+  fs.writeFileSync(metaPath, JSON.stringify(latestMeta, null, 2));
+  log(`preComputed 已计算，元数据已更新`);
+}
+
+function printSummary(convData, changed) {
+  // 统计（基于原始消息数据，不依赖 latestMessage）
+  const now = Date.now();
+  const last24h = convData.filter(c => (c.lastContactTime || 0) > now - 86400000).length;
+
+  // 从 chat_history 文件统计客户回复（不是从 latestMessage）
+  let totalCustomerMsgs = 0;
+  let totalOurMsgs = 0;
+  let customersReplied = new Set();
+  const CUTOFF = now - 7 * 86400000;
+
+  const chatDir = path.join(DATA_DIR, 'chat_history');
+  if (fs.existsSync(chatDir)) {
+    const files = fs.readdirSync(chatDir).filter(f => f.endsWith('.json') && f !== '_summary.json');
+    for (const file of files) {
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(chatDir, file), 'utf-8'));
+        for (const msg of (data.messages || [])) {
+          const ts = msg.message?.createAt || 0;
+          if (ts < CUTOFF) continue;
+          const sender = msg.message?.sender?.uid || '';
+          const content = msg.message?.content?.text?.content || '';
+          if (!content) continue;
+          if (sender === '2500000853693@icbu') {
+            totalOurMsgs++;
+          } else {
+            totalCustomerMsgs++;
+            customersReplied.add(data.cid || file);
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+  log('');
+  log('========== 同步摘要 ==========');
+  log(`总会话: ${convData.length}`);
+  log(`变化会话: ${changed.length}`);
+  log(`24h内有 activity: ${last24h}`);
+  log('');
+  log(`近7天消息 (来自 chat_history 实测):`);
+  log(`  客户回复: ${totalCustomerMsgs} 条 / ${customersReplied.size} 人`);
+  log(`  我方发送: ${totalOurMsgs} 条`);
+  log(`数据已保存到 data/ 目录`);
+  log('==============================');
+}
+
+// ===================== 启动 =====================
+
+main().catch(err => {
+  log(`致命错误: ${err.message}`);
+  console.error(err);
+  process.exit(1);
+});

@@ -1,0 +1,71 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 14:00
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**抓取方案已就绪，待分批执行。** 详见 `RUNBOOK.md`。
+
+## 已完成（本次会话）
+
+### 1. 客户列表全量抓取 ✅
+- `data/okki_full_2026-05-05T05-17-48.json` — 346人，92字段，0错误
+- 脚本: `scripts/scrape_cdp_full.js` — 通过 CDP + XHR 自动翻页
+
+### 2. API 发现 ✅
+- `customerRead/trailList` → 邮件跟进记录（参数: `company_id`）
+- `customerV2Read/detail` → 客户详情字段（参数: `company_id`）
+- `customerV3Read/companyList` → 客户列表（已知）
+
+### 3. 批量抓取脚本 ✅
+- `scripts/scrape_api_batch.js` — 全量/增量 API 抓取
+- `scripts/scrape_tm_chat.js` — TM 聊天探索（实验性）
+- `scripts/explore_tm_network.js` — TM 网络监控（实验性）
+
+### 4. 数据质量验证 ✅
+- 报告: `reports/数据抓取验证报告_2026-05-05.md`
+
+## 待办优先级
+
+| # | 任务 | 脚本 | 新会话? | 需用户? |
+|---|------|------|---------|---------|
+| 1 | **🔥 API 批量抓取 346 人** | `scrape_api_batch.js` | 是 | 启动时登录 |
+| 2 | **TM 聊天探索** | `explore_tm_network.js` | 是 | 是（点聊天） |
+| 3 | **分批 AI 分析** | 待写 | 是×6 | 否 |
+| 4 | **汇总报告** | `generate_report.js` | 是 | 否 |
+
+## 下次启动指令
+
+> 继续OKKI CRM数据抓取。先读STATE.md和RUNBOOK.md。
+>
+> 第1步: API批量抓取
+> 1. 关闭Chrome → 启动CDP Chrome → 登录OKKI
+> 2. node scripts/scrape_api_batch.js
+> 3. 等10-15分钟，生成 data/customers/*.json
+>
+> 第2步: TM聊天探索（需用户在TM页面点击一个聊天联系人）
+> 3. node scripts/explore_tm_network.js
+> 4. 在15秒内点击一个聊天联系人
+
+## 关键数据文件
+
+| 文件 | 说明 | 状态 |
+|------|------|------|
+| `data/okki_full_2026-05-05T05-17-48.json` | 346人客户列表 | ✅ |
+| `data/customers/{company_id}.json` | 单客户邮件+详情 | 待生成 |
+| `data/scrape_state.json` | 增量抓取状态 | 待生成 |
+| `scripts/scrape_api_batch.js` | 批量API抓取 | ✅ |
+| `scripts/scrape_cdp_full.js` | 客户列表抓取 | ✅ |
+| `scripts/scrape_okki.js` | Playwright方案 | ❌ 已废弃 |
+| `RUNBOOK.md` | 完整操作手册 | ✅ |
+
+## CDP 启动命令
+
+```bash
+# 关闭所有 Chrome 后：
+"C:/Users/Administrator/AppData/Local/Google/Chrome/Application/chrome.exe" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="C:\tmp\cdp_session_v3" \
+  https://crm.xiaoman.cn/
+```

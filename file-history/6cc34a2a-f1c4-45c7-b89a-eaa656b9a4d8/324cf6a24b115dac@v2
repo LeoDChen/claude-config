@@ -1,0 +1,193 @@
+// Phase 1 v7: 捕获 API 响应体，理解数据格式
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+    const responses = []; // 存响应体
+
+    ws.addEventListener('message', async (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+        // 捕获响应
+        if (msg.method === 'Network.responseReceived') {
+            const resp = msg.params;
+            const url = resp.response.url;
+            if (!url.match(/\.(js|css|png|jpg|gif|svg|woff2?|ico|ttf)/i) &&
+                !url.includes('aplus.alibaba.com')) {
+                try {
+                    // 获取响应体
+                    const bodyResult = await new Promise((resolve) => {
+                        const id = ++msgId;
+                        pending.set(id, resolve);
+                        ws.send(JSON.stringify({
+                            id,
+                            method: 'Network.getResponseBody',
+                            params: { requestId: resp.requestId }
+                        }));
+                    });
+                    responses.push({
+                        url,
+                        status: resp.response.status,
+                        mimeType: resp.response.mimeType,
+                        body: bodyResult?.body ? bodyResult.body.substring(0, 3000) : (bodyResult?.base64Encoded ? '(base64)' : '(empty)')
+                    });
+                } catch (e) {
+                    // 有些响应体拿不到（已清除或流式）
+                }
+            }
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Network.enable');
+    await cmd('Runtime.enable');
+    await cmd('Page.enable');
+
+    // 刷新页面触发 API 调用
+    console.log('刷新 onetalk 页面以捕获所有 API...');
+    await cmd('Page.reload');
+    await new Promise(r => setTimeout(r, 8000));
+
+    // === 输出捕获的 API 响应 ===
+    console.log(`\n${'='.repeat(70)}`);
+    console.log(`捕获到 ${responses.length} 个 API 响应`);
+    console.log('='.repeat(70));
+
+    // 按 URL 类型分组
+    for (const r of responses) {
+        if (r.body && r.body.length > 5 && r.body !== '(empty)') {
+            const shortUrl = r.url.substring(0, 120);
+            if (r.url.includes('mtop') || r.url.includes('message/') || r.url.includes('chat/') || r.url.includes('im.')) {
+                console.log(`\n--- ${r.status} ${r.mimeType} ---`);
+                console.log(`URL: ${shortUrl}`);
+                console.log(`Body: ${r.body.substring(0, 2000)}`);
+            }
+        }
+    }
+
+    // === 尝试直接用 JS 调用已知 API ===
+    console.log(`\n\n${'='.repeat(70)}`);
+    console.log('尝试 JS XHR 调用 API');
+    console.log('='.repeat(70));
+
+    // 尝试 getuserinfobyparams MTOP API
+    const mtoptest = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', 'https://acs.h.alibaba.com/h5/mtop.alibaba.icbu.im.getuserinfobyparams/1.1/?jsv=2.7.2&appKey=24889839&t=' + Date.now() + '&sign=&api=mtop.alibaba.icbu.im.getUserInfoByParams&v=1.1&dataType=json&type=originaljson&data=' + encodeURIComponent(JSON.stringify({})), true);
+                    xhr.withCredentials = true;
+                    xhr.onload = function() {
+                        resolve('status=' + xhr.status + ' body=' + xhr.responseText.substring(0, 500));
+                    };
+                    xhr.onerror = function() {
+                        resolve('error: ' + xhr.status);
+                    };
+                    xhr.send();
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log('getUserInfoByParams 测试:', mtoptest.result?.value);
+
+    // 找更多接触 IM API 方式
+    // 直接尝试调用 listRecentConversationContactDetail
+    const convTest = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 从页面找 chatToken
+                var chatToken = '';
+                try {
+                    var scripts = document.querySelectorAll('script');
+                    for (var i = 0; i < scripts.length; i++) {
+                        var content = scripts[i].textContent || '';
+                        var match = content.match(/chatToken["']?\s*:\s*["']([^"']+)["']/);
+                        if (match) chatToken = match[1];
+                    }
+                } catch(e) {}
+
+                // 从 localStorage
+                try {
+                    var ls = localStorage;
+                    for (var key in ls) {
+                        if (key.includes('token') || key.includes('chat') || key.includes('im')) {
+                            chatToken += ' | ' + key + '=' + (ls[key] || '').substring(0, 50);
+                        }
+                    }
+                } catch(e) {}
+
+                return 'token: ' + (chatToken || 'NOT FOUND');
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('Token 搜索:', convTest.result?.value);
+
+    // 看页面有什么全局配置
+    const globalConfig = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify({
+                // 查 window 上有什么有用的对象
+                keys: Object.keys(window).filter(function(k) {
+                    return k.includes('im') || k.includes('chat') || k.includes('token') || k.includes('config') || k.includes('ali');
+                }),
+                localStorage_im: localStorage.getItem('im_token') || localStorage.getItem('chat_token') || 'none',
+                sessionStorage_keys: Object.keys(sessionStorage).filter(function(k) {
+                    return k.includes('im') || k.includes('chat') || k.includes('token');
+                })
+            })
+        `,
+        returnByValue: true
+    });
+    console.log('全局配置:', globalConfig.result?.value);
+
+    // 保存
+    fs.writeFileSync(
+        'd:/ClaudeWorkspace/08_客户跟进/Okki/data/phase1_responses.json',
+        JSON.stringify(responses.map(r => ({ url: r.url, status: r.status, body: r.body })), null, 2)
+    );
+    console.log('\n已保存到 data/phase1_responses.json');
+
+    ws.close();
+    console.log('完成');
+})();

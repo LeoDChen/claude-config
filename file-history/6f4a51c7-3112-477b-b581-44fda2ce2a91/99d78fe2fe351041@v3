@@ -1,0 +1,50 @@
+# OKKI 客户分析 — 启动指令
+
+## 对话一：同步数据
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js
+```
+
+## 对话二：分析（新对话，粘贴以下内容）
+
+```
+继续 OKKI CRM。读 STATE.md 和 knowledge/ 全部文件。
+
+读 data/tm_conversations_latest.json。消息在 message.content.text.content，
+发送者在 message.sender.uid，我方=2500000853693@icbu。
+过滤 systemMessage/autoReply。
+
+## S1: 输出五梯队分类清单
+
+含消息数。输出格式：
+
+P0（立即行动）
+1. 客户名 | 国家 | 消息数 | 最后联系 | 一句话理由
+...
+
+P1（本周跟进）
+...
+
+P2-P4 只给统计数字。
+
+## S2: 自动分批深度分析 P0/P1
+
+分组规则：
+- 每批 ≤5 个客户，总消息量 ≤500 条
+- ≤200 条的客户：逐条读完整对话
+- >200 条的客户：头部20条 + 尾部50条 + 全文搜索 PI/payment/invoice/address/quantity/price/sample/order 关键词
+- 每批输出完后，附自检：哪个结论是基于原文哪句话、哪个判断不确定
+
+对每个客户输出：
+**客户名** | 国家 | 消息数 | 最后联系
+阶段：XXX | 证据：对话中哪句话
+卡点：XXX | 证据：对话中哪句话
+下一步：XXX（优先级：今天/48h/本周）
+话术：> [中文可复制版，含工厂背书]
+
+## S3: 自动生成报告
+
+汇总全部批次，输出 reports/客户五梯队分析_YYYY-MM-DD.docx。
+最后附：不确定事项清单。
+```

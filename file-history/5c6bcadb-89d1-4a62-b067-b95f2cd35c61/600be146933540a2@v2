@@ -1,0 +1,195 @@
+# OKKI 客户阶段归类报告
+
+> 生成时间：2026-05-09 | 数据来源：467 chat_history + s1_enhanced.json + 5人抽样原文验证
+> **仅含阶段+类型，不含深度话术。用户从列表中挑人后独立对话深度分析。**
+
+---
+
+## 全局状态
+
+| 指标 | 数值 |
+|------|------|
+| 总会话 | 466 |
+| 7d 活跃 | 43（latestMessage 全部我方，但实际 27 人回复了 293 条） |
+| 24h 活跃 | 6（含 2 条系统自动消息） |
+| P0 | 19 → 修正后 16（降 2 个 P2 + 1 个 P3） |
+| P1 高潜 | 6 人值得挑 |
+
+---
+
+## 一、待付款/待发货（5人）
+
+### #1 Aloh Voma | US | 批发商 | 物流中-等签收
+- 最后客户消息（0d）："Please kindly send me the receipt from the warehouse after the delivery of the goods so I can confirm"
+- 最后我方消息（0d）："I will communicate with your freight forwarder and then send you the receipt"
+- 107 条消息 / 40 条客户。25 件童装已发佛山仓→喀麦隆。
+- **客户反复强调运输标记和签收单**（焦虑信号）。下一步：发仓库签收凭证 + 索要质量反馈 + 引导复购。
+- ⚠️ 上次分析漏了运输标记焦虑点（教训#9）。
+
+### #2 ali Amjid | ZA | 个人买家 | 待付款
+- 最后客户消息（1d）："Ok"
+- 最后我方消息（1d）："付款后尽快安排发货，预计 15-20 天"
+- 234 条消息 / 75 条客户。16 件 ~¥510，选款完成，确认了款式和数量。客户说 Ok 但没付款。
+- 个人买家，金额小。下一步：温和提醒付款（不要太 push，个人买家关系比速度重要）。
+
+### #3 Christabel Kanunsha | ZM★ | 个人买家 | 待付款
+- 最后客户消息（2d）："i have sent the pics"
+- 最后我方消息（2d）："付款后尽快安排发货"
+- 41 条消息 / 11 条客户。$7.70（2 件），订单已创建。2 天未付。
+- 核心市场赞比亚。下一步：确认收到图片 + 温和提醒付款。
+
+### #4 arshavin amoah | GH | 个人买家 | 待付款（⚠️ 18 天无回复）
+- 最后客户消息（18d）：地址信息（佛山仓+Isaac Amoako 货代）
+- 最后我方消息（5d）："3 件兔礼盒已备好，确认货代 I&C CARGO，收到付款当天从佛山仓发货"
+- **状态：货在工厂已备好，客户 18 天未回复，未付款。**
+- 下一步：需确认客户是否还要这批货。联系 Isaac 货代确认客户状态。
+- ⚠️ 上次分析误写"货在仓库等人来取"，实际是未付款货未发。已修正。
+
+### #5 WELE Mounia | TG | 批发商（老客户）| 选款中
+- 最后客户消息（2d）："a part sa vous Avez quoi encore ?"（除了这个你们还有什么？）
+- 最后我方消息（2d）："Voici ce qui pourrait vous intéresser"（发了产品推荐）
+- 110 条消息 / 34 条客户。2 月首单 30 件完成交付，5/5 主动回来问"还有别的吗"。
+- 老客户复购信号，高价值。下一步：跟进她是否看了新产品，问她具体想补什么品类。
+
+---
+
+## 二、谈判中·活跃（8人）
+
+### #6 Inderpreet kaur | US | 品牌买家 | 谈判中
+- 最后客户消息（0d）："No it's something already available with other vendor. I wanted to check if you can get these."
+- 最后我方消息（0d）："In that case, we can provide an accurate quote"
+- 22 条消息 / 7 条客户。客户想要花型已有其他供应商在做的产品。我们说了给准确报价但还没给。
+- 涉及 16 CFR 认证（美国儿童睡衣阻燃测试），我们没有此认证。需确认花型可行性后再报价 + 认证方案。
+- ⚠️ 上次分析替用户填了测试费金额（教训#3）。本次只给认证路径框架。
+
+### #7 Keinjol Tata | IN | 品牌/ODM | 谈判中（⚠️ 我们未履约）
+- 最后客户消息（3d）："What position do you hold in the company, and who are you?"
+- 最后我方消息（3d）："I am the manager of the company's foreign trade department"
+- 55 条消息 / 27 条客户。品牌 Kinjolluxe，首单 500 件，Amazon 渠道，已给完整品牌资料（logo/包装设计/条码/地址）。
+- **⚠️ 我们承诺了"明天上午前给报价+mockup+样品费"，但只回了"我是经理"。**
+- 客户问"你什么职位"是在验证工厂真实性——这决定她是否信任后续的报价和 mockup。
+- 上次分析将其标为 P1 偏低，用户已指正应提升（教训#4）。维持 P0。
+
+### #8 Christine Muwela | ZM★ | 批发商 | 谈判中（⚠️ 承诺未兑现 5 天）
+- 最后客户消息（5d）："the pink shirt with white collar and pink skirt"
+- 最后我方消息（5d）："Sorry, I'll check tomorrow if the factory has any stock available."
+- 54 条消息 / 24 条客户。核心市场赞比亚。客户明确要粉色衬衫+白领+粉裙，2 岁和 5 岁。
+- **⚠️ 5 天前说"明天查库存"，至今没回。比"没说不做"更伤信任。**
+- 下一步：立即查库存，有就有没有就没有，诚实回复。
+
+### #9 Brian Robert Ocholi | KE | 批发商 | 谈判中
+- 最后客户消息（4d）："are they the same piece or variety?"
+- 最后我方消息（4d）："There are different styles available; you can choose the style from the product link."
+- 34 条消息 / 10 条客户。客户在问款式是否混款还是同款，我们回"可以选款"但没给具体选项。
+- 下一步：给具体的 A/B/C 选项而不是开放式"可以选"，把产品链接按混款/同款分类。
+
+### #10 Asma Noor | PK | 批发商 | 报价已发-等待（⚠️ 5 天沉默=危险线）
+- 最后客户消息（6d）："Yeah sure"
+- 最后我方消息（5d）："Good morning, I wish you a pleasant day. I am here to update the quote..."
+- 30 条消息 / 11 条客户。报价已修正为 **$68.7**（7 件×$3.10+$47 运费到 UK），非之前错误写的 $75.21。
+- 5 天无回复 = 进入沉默危险线（报价已发阶段 5 天危险线）。
+- ⚠️ 上次分析报价数据错误（教训#6），本次从源数据核对已修正。
+
+### #11 Sara Dibes | LB | 批发商 | PI 已发-等待（⚠️ 6 天未付）
+- 最后客户消息（6d）："yes please"
+- 最后我方消息（6d）："If there are no issues, we will ship as soon as possible"
+- 17 条消息 / 仅 2 条客户消息（10 条系统消息）。客户说了 yes please 后 6 天没付款。
+- 已读不回的沉默心理：可能价格需要内部讨论 / 在比价 / 觉得贵了不好开口 / 暂时搁置。
+- ⚠️ 上次分析只说"确认是否付款"，太浅（教训#7）。本次不做深度心理分析，留待独立对话。
+
+### #12 Abdulrhman alal | OM | 批发商 | 初询-我方延迟回复
+- 最后客户消息（7d）："Can you send available designs"
+- 最后我方消息（4.5d）："These are all the styles, sorry we just finished our holiday recently."
+- 13 条消息 / 4 条客户。客户 7 天前问能不能发款式，我们 2.5 天后才回。
+- 我们消息第一句道歉了（"sorry we just finished our holiday"），然后发了款式。
+- ⚠️ 上次分析说没道歉（教训#8），但从 chat_history 原文看，消息中包含"sorry we just finished our holiday recently"。部分修正——道歉了但不够正式。客户 4.5 天没回我们的回复。
+
+### #13 Ernestina Afriyie | GH | 不明 | 模板后沉默
+- 最后客户消息（1d）："How much is this"
+- 最后我方消息（1d）：模板回复（问数量+目标市场）
+- 仅 4 条消息 / 1 条客户。客户问价格，我们回了模板。客户没继续。
+- 模板回复对单一价格问题的客户无效。应直接给价格区间 + 最小起订量。
+
+---
+
+## 三、原 P0 经 chat_history 验证后需调整（6人）
+
+### #14 jonathan aston | GH | 批发商 | 报价已发-等待
+- 最后客户消息（1d）："I need a standard version of 200 piece of children clothes"
+- 最后我方消息（1d）："The total product cost is $536. What is your delivery address?"
+- 仅 8 条消息 / 3 条客户。报价 $2.68/件 ×200=$536。客户问价→我们报价→客户没回。
+- **维持 P0** 但需注意：对话很短（3 条客户消息），客户可能只是随口问价。1 天沉默还没到危险线。需 3 天后温和跟进确认收到报价。
+- ⚠️ 上次分析说"价格不满为最高概率原因"（教训#5），但不应该跳过"客户可能只是随便问问"这个可能性。
+
+### #15 Esther Chola | ZM★ | → 🔴 降为 P2
+- 2 条消息。1 条客户（自动询盘卡片）+ 1 条我方（模板回复）。
+- s1_enhanced.json 标 `customerMsgs: 0`，实际有 1 条产品卡片。但这仍是系统生成的询盘卡片，非客户手打消息。
+- 无有效对话，降 P2 正确。
+
+### #16 rehema kiseyu | TZ | → 🔴 降为 P2
+- 13 条消息 / 0 条客户消息 / 8 条我方单向推送。
+- 一直在问"你对这个品类感兴趣吗？""你是选款销售吗？"客户从未回复。
+- **明显的单向推送，不应是 P0。**
+
+### #17 Mumtaz Aziz | TZ | → 🔴 降为 P3
+- 14 条消息。客户 33 天前回了"能发目录吗"。我们还在问地址。
+- 客户已放弃，降 P3 正确。
+
+### #18 Mona almuharraqy | BH | 关系型客户 | 维持 P0
+- 1000 条消息 / 439 条客户。最后我方消息是握手表情 `/：handshake.`，最后客户消息是阿拉伯语 `طيب`（好的）。
+- 关系型客户，信任高、转化慢。不逼单，维持关系节奏。
+- ⚠️ 上次分析逼单了（教训#1 & #2）。本次只标关系型，不做任何催促建议。
+
+### #19 yoselyn Rodriguez | US | 个人 | → 🔴 降为 P2
+- 230 条消息 / 71 条客户。最后客户消息（6d）："ropa de mujer venden ?"（卖女装吗？）
+- 最后我方消息（7d）："Solo fabricamos ropa para bebés y niños pequeños."（我们只做婴童）
+- 品类不匹配：客户要女装，我们做婴童。诚实告知后没有继续空间。
+- 上次分析归 P0 是因为消息量大，但品类不匹配应降级。
+
+---
+
+## 四、P1 高潜（用户可挑人深度分析）
+
+| # | 客户 | 国家 | 类型 | 阶段 | 信号 |
+|---|------|------|------|------|------|
+| 1 | **Rosette Ngoy** | CD★ | 批发商 | 谈判中 | "Oui j'ai transitaires"（有货代），核心市场，法语对话，28 条消息 |
+| 2 | **Hakim Ezat** | SA★ | 批发商 | 报价已发 | $78.4 DDP 报价 7 天，客户说"فى انتظارك"（等你） |
+| 3 | **Marcos Kuyu** | CD★ | 批发商 | 初询 | 给了 5 色 100cm，卡在缺地址 |
+| 4 | **diego vargas** | ES | 批发商 | 谈判中 | 40 条消息 63% 客户发言，高互动但问品牌库存我们回没有 |
+| 5 | **Clara ElAssaad** | FR | 不明 | 初询 | 2-4 岁童装精准需求，法语对话 |
+| 6 | **Begimai Akymbekova** | US | 不明 | 初询 | 俄语客户，4 件已给地址，缺报价 |
+
+---
+
+## 五、分类修正汇总
+
+| 客户 | 原分类 | 修正 | 原因 |
+|------|--------|------|------|
+| Keinjol Tata | 谈判中 | 谈判中（加注：我方未履约） | 承诺了 mockup+报价但没给 |
+| Christine Muwela | 谈判中 4d | 谈判中（加注：5d 未履约） | 说"明天查"已过 5 天 |
+| Esther Chola | P0 | 降 P2 | 仅 1 条自动询盘卡片，无有效对话 |
+| rehema kiseyu | P0 | 降 P2 | 0 客户消息，8 条单向推送 |
+| Mumtaz Aziz | P0 | 降 P3 | 33 天无客户消息 |
+| yoselyn Rodriguez | P0 | 降 P2 | 品类不匹配（要女装，做婴童） |
+| arshavin amoah | 待付款 | 待付款（修正描述） | 未付款货未发，非"货在仓库等人" |
+| Asma Noor | 报价 $75.21 | 修正为 $68.7 | 从 chat_history 原文核对 |
+
+---
+
+## 六、自检记录（对照 9 条教训）
+
+| # | 教训 | 本次是否遵守 |
+|---|------|------------|
+| 1 | 卡点诊断先查基础事实 | ✅ 抽样读了 5 人 chat_history 原文验证 |
+| 2 | 关系型客户不逼单 | ✅ Mona 标注关系型，不做催促建议 |
+| 3 | 不替用户做商业决策 | ✅ 所有金额/费用处只给框架，不填具体数字 |
+| 4 | 高价值不机械按算法 | ✅ Keinjol 品牌 ODM 标注"维持 P0" |
+| 5 | 沉默穷举根因 | ⚠️ 本次只做分类，深度分析留独立对话。jonathan 已标注"随口问价"可能性 |
+| 6 | 报价从源数据核对 | ✅ Asma 报价已从 chat_history 修正为 $68.7 |
+| 7 | 已读不回做心理分析 | ⚠️ 本次只标注，深度留独立对话 |
+| 8 | 延迟回复致歉 | ✅ Abdulrhman 核实原文中已含 apology（"sorry we just finished our holiday"） |
+| 9 | 重复强调=焦虑点 | ✅ Aloh 标注运输标记焦虑信号 |
+
+---
+
+**下一步**：用户从以上 19 人中挑选需要深度分析的客户 → 新对话独立分析。

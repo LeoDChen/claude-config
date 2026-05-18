@@ -1,0 +1,520 @@
+/**
+ * 任务1-4: factor_baselines.json 初始化 + 阶段标签修正 + SOON层建卡 + 冷层/冷冻分层
+ *
+ * 输入: heat_classification.json (466人)
+ * 输出: factor_baselines.json, SOON清单, 冷层/冷冻层清单
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const TODAY = '2026-05-17';
+const TODAY_DATE = new Date(TODAY);
+
+// ============ 配置 ============
+
+/** 旧阶段 → 新9阶段映射 */
+const STAGE_MAP = {
+  '需求探索': '需求探索',
+  '报价已发': '报价已发',
+  '谈判中': '谈判中',
+  '待付款': '待付款',
+  '待发货': '待发货',
+  '已发货/在途': '已发货/在途',
+  '已签收': '已签收',
+  '售后': '售后',
+  '待返单': '待返单',
+  // 旧标签映射
+  '初询沟通': '需求探索',
+  'PI已发': '报价已发',
+  '谈判/样品': '谈判中',
+  '样品阶段': '谈判中',  // 保守: 未付款→谈判中
+  // 未知保持null→冷层
+  '未知': null,
+};
+
+/** SOON因子节奏表 (V5) */
+const RHYTHM = {
+  S1:  [1, 2, 3, 5, 7, 9, 15, 30],  // 需求探索 该深挖需求了
+  S2:  [1, 3, 5, 15, 30],            // 报价已发 该追问了
+  S3:  [1, 3, 5, 7, 15, 30],         // 谈判中 该推进了
+  S4:  [1, 3, 5, 7],                  // 待付款 该催款了 (+每7天观察)
+  S8:  [1, 2, 3, 5, 7, 15, 30],      // 售后 该收尾了
+  S7a: [3, 15, 15, 30, 30, 60],       // 已签收 该回访了 (累计)
+  S7b_sample: [7],                     // 样品单 该推返单
+  S7b_bulk: [30],                      // 大货 该推返单
+  S9_sample: [3, 7, 7, 15, 15, 30, 30],
+  S9_bulk:   [7, 15, 15, 30, 30, 60, 60],
+};
+
+/** S5a 双基线间隔计算 */
+function s5aInterval(meta) {
+  if (meta.customer_type === '样品单') return 3;
+  if (!meta.transit_days) return 7; // 默认大货交期35天÷5≈7
+  const interval = Math.round(meta.transit_days / 5);
+  return Math.max(3, Math.min(10, interval));
+}
+
+/** S6 间隔: 时效÷N */
+function s6Interval(meta) {
+  const transitDays = meta.transit_days || 25;
+  const N = { S: 6, A: 6, B: 5, C: 5, D: 4 }[meta.customer_tier] || 5;
+  const interval = Math.round(transitDays / N);
+  return Math.max(2, Math.min(15, interval));
+}
+
+// ============ 辅助函数 ============
+
+function parseDate(str) {
+  if (!str) return null;
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function daysBetween(d1, d2) {
+  return Math.floor((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+/** 判定节奏命中：返回命中的天数索引，未命中返回-1 */
+function rhythmHit(days, rhythmArr) {
+  // 找到 days 落在哪个间隔的 ±0 容差内 (当天命中)
+  for (let i = 0; i < rhythmArr.length; i++) {
+    const cumulative = rhythmArr.slice(0, i + 1).reduce((a, b) => a + b, 0);
+    if (days === cumulative) return i;
+  }
+  return -1;
+}
+
+/** 获取客户等级 (从 dashboard_snapshot 交叉匹配或默认) */
+let tierMap = null;
+function loadTierMap() {
+  if (tierMap) return tierMap;
+  tierMap = new Map();
+  try {
+    const snap = JSON.parse(fs.readFileSync(
+      path.join(__dirname, '..', 'output', '.dashboard_snapshot.json'), 'utf-8'
+    ));
+    for (const c of snap.customers || []) {
+      const key = (c.name || '').toLowerCase() + '|' + (c.country || '');
+      tierMap.set(key, c.quality || 'C');
+    }
+  } catch (e) { /* ignore */ }
+  return tierMap;
+}
+
+function getTier(name, country) {
+  const map = loadTierMap();
+  return map.get((name || '').toLowerCase() + '|' + (country || '')) || 'C';
+}
+
+/** 判定 target_market 是否非洲/中东 */
+function isAfricaOrMiddleEast(country) {
+  const africaME = ['SD','EG','CD','ZM','CI','SA','AE','IQ','GH','NG','KE','TZ','UG','ET','CM','SN','ML','BF','BJ','TG','LY','MA','DZ','TN','KW','QA','BH','OM','JO','LB','YE','SY','PS'];
+  return africaME.includes((country || '').toUpperCase());
+}
+
+// ============ 主流程 ============
+
+function main() {
+  // 读取源数据
+  const srcPath = path.join(__dirname, '..', 'data', 'heat_classification.json');
+  const data = JSON.parse(fs.readFileSync(srcPath, 'utf-8'));
+  const customers = data.results;
+  console.log(`读取 ${customers.length} 条客户记录`);
+
+  const baselines = {};
+  const stageStats = {};       // 新阶段统计
+  const stageCorrections = []; // 阶段修正记录
+  const soonCustomers = [];    // SOON层清单
+  const coldCustomers = [];    // 冷层清单
+  const frozenLayers = {       // 冷冻层分层
+    highValue: [],   // 高价值沉睡
+    normal: [],      // 普通沉睡
+    neverDeal: [],   // 从未成交
+  };
+
+  for (const c of customers) {
+    const oldStage = c.stage;
+    const newStage = STAGE_MAP[oldStage];
+
+    // 统计
+    stageStats[oldStage] = (stageStats[oldStage] || 0) + 1;
+    if (oldStage !== newStage && newStage !== null) {
+      stageCorrections.push({ cid: c.cid, name: c.name, oldStage, newStage });
+    }
+
+    const tier = getTier(c.name, c.country);
+    const lastMsgDate = parseDate(c.lastMsgTime);
+    const daysSinceMsg = lastMsgDate ? daysBetween(lastMsgDate, TODAY_DATE) : 999;
+    const lastSenderIsMe = c.lastSender === '我';
+
+    // 初始化 meta
+    const meta = {
+      transit_days: null,
+      customer_tier: tier,
+      committed_ship_date: null,
+      has_address: false,
+      customer_type: (oldStage === '样品阶段') ? '样品单' : '大货',
+      repurchase_cycle_days: null,
+      target_market: isAfricaOrMiddleEast(c.country) ? 'africa_me' : 'other',
+      s8_boundary_checked: false,
+    };
+
+    // 初始化 baselines (全部 null)
+    const bl = { S1: null, S2: null, S3: null, S4: null, S5a_A: null, S5a_B: null, S5b: null, S6: null, S7a: null, S7b: null, S8: null, S9: null };
+
+    const stageUpdated = c.lastMsgTime; // proxy
+
+    if (newStage) {
+      // 根据阶段设置对应基线
+      switch (newStage) {
+        case '需求探索':
+          if (lastSenderIsMe) bl.S1 = c.lastMsgTime;
+          break;
+        case '报价已发':
+          bl.S2 = c.lastMsgTime;
+          break;
+        case '谈判中':
+          bl.S3 = c.lastMsgTime;
+          break;
+        case '待付款':
+          bl.S4 = c.lastMsgTime;
+          break;
+        case '待发货':
+          if (lastSenderIsMe) bl.S5a_A = c.lastMsgTime;
+          bl.S5b = c.lastMsgTime; // proxy for 付款到账日
+          break;
+        case '已发货/在途':
+          bl.S6 = c.lastMsgTime;
+          meta.transit_days = isAfricaOrMiddleEast(c.country) ? 30 : 25;
+          break;
+        case '已签收':
+          bl.S7a = c.lastMsgTime;
+          bl.S7b = c.lastMsgTime;
+          break;
+        case '售后':
+          if (lastSenderIsMe) bl.S8 = c.lastMsgTime;
+          break;
+        case '待返单':
+          bl.S9 = c.lastMsgTime;
+          break;
+      }
+
+      // 计算 SOON 因子命中
+      const factors = computeFactors(newStage, bl, meta, daysSinceMsg, lastSenderIsMe);
+
+      baselines[c.cid] = {
+        name: c.name,
+        country: c.country,
+        stage: newStage,
+        stage_updated: stageUpdated,
+        baselines: bl,
+        meta,
+        _heat: c.heat,
+        _daysSinceLastContact: c.daysSinceLastContact,
+      };
+
+      if (factors.length > 0) {
+        soonCustomers.push({
+          cid: c.cid,
+          name: c.name,
+          country: c.country,
+          stage: newStage,
+          heat: c.heat,
+          tier,
+          daysSinceLastContact: c.daysSinceLastContact,
+          factors,
+        });
+      }
+    } else {
+      // 未知阶段 → 冷层
+      baselines[c.cid] = {
+        name: c.name,
+        country: c.country,
+        stage: null,
+        stage_updated: null,
+        baselines: bl,
+        meta,
+        _heat: c.heat,
+        _daysSinceLastContact: c.daysSinceLastContact,
+      };
+      coldCustomers.push({
+        cid: c.cid,
+        name: c.name,
+        country: c.country,
+        daysSinceLastContact: c.daysSinceLastContact,
+        tier,
+        lastMsgTime: c.lastMsgTime,
+        lastSender: c.lastSender,
+      });
+    }
+  }
+
+  // 冷冻层分层
+  for (const cc of coldCustomers) {
+    if (cc.daysSinceLastContact > 180) {
+      frozenLayers.highValue.push(cc); // 超180天归档
+    } else if (cc.tier === 'A' || cc.tier === 'B') {
+      frozenLayers.highValue.push(cc); // 高价值沉睡
+    } else if (cc.tier === 'D') {
+      frozenLayers.neverDeal.push(cc); // D级=从未成交/个人买家
+    } else {
+      frozenLayers.normal.push(cc);
+    }
+  }
+
+  // ==== 输出统计 ====
+  console.log('\n===== 阶段映射统计 =====');
+  for (const [k, v] of Object.entries(stageStats).sort((a, b) => b[1] - a[1])) {
+    const mapped = STAGE_MAP[k];
+    const arrow = mapped === k ? '→ 不变' : mapped === null ? '→ 冷层' : `→ ${mapped}`;
+    console.log(`  ${k}: ${v} ${arrow}`);
+  }
+
+  const newStageCounts = {};
+  for (const v of Object.values(baselines)) {
+    const s = v.stage || '未知(冷层)';
+    newStageCounts[s] = (newStageCounts[s] || 0) + 1;
+  }
+  console.log('\n===== 新9阶段分布 =====');
+  for (const [k, v] of Object.entries(newStageCounts).sort((a, b) => b[1] - a[1])) {
+    console.log(`  ${k}: ${v}`);
+  }
+
+  console.log(`\n===== SOON层: ${soonCustomers.length}人 =====`);
+  console.log(`===== 冷层: ${coldCustomers.length}人 =====`);
+  console.log(`  高价值沉睡: ${frozenLayers.highValue.length}`);
+  console.log(`  普通沉睡: ${frozenLayers.normal.length}`);
+  console.log(`  从未成交: ${frozenLayers.neverDeal.length}`);
+
+  // ==== 写入文件 ====
+
+  // 1. factor_baselines.json
+  const outDir = path.join(__dirname, '..', 'output');
+  const baselinesOut = {};
+  for (const [cid, val] of Object.entries(baselines)) {
+    const { _heat, _daysSinceLastContact, ...rest } = val;
+    baselinesOut[cid] = rest;
+  }
+  fs.writeFileSync(
+    path.join(outDir, 'factor_baselines.json'),
+    JSON.stringify(baselinesOut, null, 2),
+    'utf-8'
+  );
+  console.log('\n✅ factor_baselines.json 已写入');
+
+  // 2. 阶段修正记录
+  fs.writeFileSync(
+    path.join(outDir, 'stage_corrections.json'),
+    JSON.stringify({ date: TODAY, corrections: stageCorrections, total: stageCorrections.length }, null, 2),
+    'utf-8'
+  );
+  console.log(`✅ stage_corrections.json 已写入 (${stageCorrections.length}条修正)`);
+
+  // 3. SOON层清单
+  const soonOutput = {
+    date: TODAY,
+    total: soonCustomers.length,
+    summary: summarizeFactors(soonCustomers),
+    customers: soonCustomers.sort((a, b) => {
+      // NOW优先，然后按因子数降序
+      if (a.heat === 'NOW' && b.heat !== 'NOW') return -1;
+      if (b.heat === 'NOW' && a.heat !== 'NOW') return 1;
+      return b.factors.length - a.factors.length;
+    }),
+  };
+  fs.writeFileSync(
+    path.join(outDir, 'soon_layer_cards.json'),
+    JSON.stringify(soonOutput, null, 2),
+    'utf-8'
+  );
+  console.log(`✅ soon_layer_cards.json 已写入`);
+
+  // 4. 冷层+冷冻分层
+  const coldOutput = {
+    date: TODAY,
+    total: coldCustomers.length,
+    frozen: {
+      highValueDormant: frozenLayers.highValue,
+      normalDormant: frozenLayers.normal,
+      neverDeal: frozenLayers.neverDeal,
+    },
+  };
+  fs.writeFileSync(
+    path.join(outDir, 'cold_layer_stratification.json'),
+    JSON.stringify(coldOutput, null, 2),
+    'utf-8'
+  );
+  console.log(`✅ cold_layer_stratification.json 已写入`);
+
+  // 5. 汇总报告 (markdown)
+  const report = generateReport(newStageCounts, soonOutput, coldOutput, stageCorrections);
+  fs.writeFileSync(path.join(outDir, 'init_report_2026-05-17.md'), report, 'utf-8');
+  console.log(`✅ init_report_2026-05-17.md 已写入`);
+}
+
+/** 计算SOON因子命中 */
+function computeFactors(stage, bl, meta, daysSinceMsg, lastSenderIsMe) {
+  const factors = [];
+  const t = TODAY_DATE;
+
+  function check(baselineKey, rhythmArr, factorName, opts = {}) {
+    const bDate = parseDate(bl[baselineKey]);
+    if (!bDate) return;
+    const days = daysBetween(bDate, t);
+    if (days < 1) return; // 今天刚设基线，不触发
+
+    const hitIdx = rhythmHit(days, rhythmArr);
+    if (hitIdx >= 0) {
+      const cumulative = rhythmArr.slice(0, hitIdx + 1).reduce((a, b) => a + b, 0);
+      factors.push({
+        factor: factorName,
+        days,
+        rhythmDay: cumulative,
+        intervalIndex: hitIdx,
+        baseline: bl[baselineKey],
+        ...opts,
+      });
+    }
+  }
+
+  switch (stage) {
+    case '需求探索':
+      check('S1', RHYTHM.S1, 'S1 该深挖需求了');
+      break;
+    case '报价已发':
+      check('S2', RHYTHM.S2, 'S2 该追问了');
+      break;
+    case '谈判中':
+      check('S3', RHYTHM.S3, 'S3 该推进了');
+      break;
+    case '待付款':
+      check('S4', RHYTHM.S4, 'S4 该催款了');
+      // 超过Day7后每7天观察
+      if (bl.S4) {
+        const days = daysBetween(parseDate(bl.S4), t);
+        if (days > 7 && days % 7 === 0) {
+          factors.push({ factor: 'S4 该催款了(观察)', days, baseline: bl.S4, observeMode: true });
+        }
+      }
+      break;
+    case '待发货':
+      // S5a: 双基线
+      if (bl.S5a_A) {
+        const daysA = daysBetween(parseDate(bl.S5a_A), t);
+        const interval = s5aInterval(meta);
+        if (daysA >= interval && daysA % interval === 0) {
+          factors.push({ factor: 'S5a 该更新进度了', days: daysA, interval, baseline: bl.S5a_A, priority: 'normal' });
+        }
+      }
+      if (meta.committed_ship_date) {
+        const shipDate = parseDate(meta.committed_ship_date);
+        if (shipDate && t > shipDate) {
+          const overdue = daysBetween(shipDate, t);
+          factors.push({ factor: 'S5a 该更新进度了(超期)', days: overdue, priority: 'high', reason: '超承诺发货日' });
+        }
+      }
+      // S5b: 该要地址了
+      if (!meta.has_address && bl.S5b) {
+        const days = daysBetween(parseDate(bl.S5b), t);
+        if (days >= 1) {
+          factors.push({ factor: 'S5b 该要地址了', days, baseline: bl.S5b });
+        }
+      }
+      break;
+    case '已发货/在途':
+      check('S6', [s6Interval(meta)], 'S6 该更新物流了', { interval: s6Interval(meta) });
+      break;
+    case '已签收':
+      check('S7a', RHYTHM.S7a, 'S7a 该回访了');
+      if (bl.S7b) {
+        const rhythm = meta.customer_type === '样品单' ? RHYTHM.S7b_sample : RHYTHM.S7b_bulk;
+        check('S7b', rhythm, 'S7b 该推返单了');
+      }
+      break;
+    case '售后':
+      check('S8', RHYTHM.S8, 'S8 该收尾了');
+      break;
+    case '待返单':
+      if (bl.S9) {
+        const rhythm = meta.customer_type === '样品单' ? RHYTHM.S9_sample : RHYTHM.S9_bulk;
+        check('S9', rhythm, 'S9 该接触了');
+      }
+      break;
+  }
+
+  return factors;
+}
+
+/** 因子命中统计 */
+function summarizeFactors(soonCustomers) {
+  const factorCounts = {};
+  for (const c of soonCustomers) {
+    for (const f of c.factors) {
+      const key = f.factor.split('(')[0].trim();
+      factorCounts[key] = (factorCounts[key] || 0) + 1;
+    }
+  }
+  return factorCounts;
+}
+
+/** 生成 markdown 报告 */
+function generateReport(newStageCounts, soonOutput, coldOutput, corrections) {
+  const lines = [
+    `# OKKI SOON 层初始化报告`,
+    `> 日期: ${TODAY}`,
+    `> 数据源: heat_classification.json (466人)`,
+    ``,
+    `## 一、阶段标签修正`,
+    ``,
+    `| 旧标签 | 新标签 | 人数 |`,
+    `|--------|--------|------|`,
+  ];
+  const oldCounts = {};
+  for (const corr of corrections) {
+    oldCounts[corr.oldStage] = (oldCounts[corr.oldStage] || 0) + 1;
+  }
+  for (const [old, count] of Object.entries(oldCounts)) {
+    lines.push(`| ${old} | ${STAGE_MAP[old]} | ${count} |`);
+  }
+  lines.push(`| (其他) | 不变 | ${466 - corrections.length - coldOutput.total} |`);
+  lines.push('');
+
+  lines.push(`## 二、新9阶段分布`);
+  lines.push('');
+  lines.push(`| 阶段 | 人数 |`);
+  lines.push(`|------|------|`);
+  for (const [k, v] of Object.entries(newStageCounts).sort((a, b) => b[1] - a[1])) {
+    lines.push(`| ${k} | ${v} |`);
+  }
+  lines.push('');
+
+  lines.push(`## 三、SOON 层`);
+  lines.push('');
+  lines.push(`- **总计**: ${soonOutput.total} 人命中 SOON 因子`);
+  lines.push(`- **因子分布**:`);
+  for (const [factor, count] of Object.entries(soonOutput.summary)) {
+    lines.push(`  - ${factor}: ${count}人`);
+  }
+  lines.push('');
+
+  lines.push(`## 四、冷层 & 冷冻分层`);
+  lines.push('');
+  lines.push(`- **冷层总计**: ${coldOutput.total} 人`);
+  lines.push(`  - 高价值沉睡 (A/B级或>180天): ${coldOutput.frozen.highValueDormant.length} 人`);
+  lines.push(`  - 普通沉睡: ${coldOutput.frozen.normalDormant.length} 人`);
+  lines.push(`  - 从未成交 (D级): ${coldOutput.frozen.neverDeal.length} 人`);
+  lines.push('');
+
+  lines.push(`## 五、产出文件`);
+  lines.push('');
+  lines.push(`- \`factor_baselines.json\` — 466人阶段+基线数据`);
+  lines.push(`- \`stage_corrections.json\` — ${corrections.length}条阶段修正记录`);
+  lines.push(`- \`soon_layer_cards.json\` — ${soonOutput.total}人 SOON 清单`);
+  lines.push(`- \`cold_layer_stratification.json\` — ${coldOutput.total}人冷层/冷冻分层`);
+  lines.push(`- \`init_report_2026-05-17.md\` — 本报告`);
+
+  return lines.join('\n');
+}
+
+main();

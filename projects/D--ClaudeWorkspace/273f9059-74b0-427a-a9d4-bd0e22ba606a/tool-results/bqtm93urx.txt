@@ -1,0 +1,600 @@
+d:/ClaudeWorkspace/08_客户跟进/:
+total 28
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 17:00 .
+drwxr-xr-x 1 Administrator 197121 0 May  3 08:56 ..
+drwxr-xr-x 1 Administrator 197121 0 Apr 30 17:14 Okki
+drwxr-xr-x 1 Administrator 197121 0 Apr 30 16:48 knowledge
+
+d:/ClaudeWorkspace/08_客户跟进/Okki:
+total 188
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 17:14 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 17:00 ..
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 21:17 data
+-rw-r--r-- 1 Administrator 197121  8086 Apr 30 17:10 generate_p0_report.js
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 images
+-rw-r--r-- 1 Administrator 197121 28128 Apr 30 17:14 p0_analysis_data.json
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 15:01 reports
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 screenshots
+drwxr-xr-x 1 Administrator 197121     0 May  3 08:40 scripts
+-rw-r--r-- 1 Administrator 197121 71765 Apr 29 19:49 数据_2026-04-29T11-49-16.json
+-rw-r--r-- 1 Administrator 197121 13172 Apr 29 19:49 看板报告_2026-04-29T11-49-16.docx
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/data:
+total 4311
+drwxr-xr-x 1 Administrator 197121      0 Apr 30 21:17 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 30 17:14 ..
+-rw-r--r-- 1 Administrator 197121  24587 Apr 29 20:13 2026-04-29T12-13-17_P0P1深抓清单.json
+-rw-r--r-- 1 Administrator 197121 412110 Apr 29 20:13 2026-04-29T12-13-17_全量客户分类.json
+-rw-r--r-- 1 Administrator 197121  24030 Apr 30 11:57 2026-04-30T03-57-30_P0P1深抓清单.json
+-rw-r--r-- 1 Administrator 197121 412664 Apr 30 11:57 2026-04-30T03-57-30_全量客户分类.json
+-rw-r--r-- 1 Administrator 197121  18891 Apr 30 14:00 2026-04-30T06-00-12_P0P1深抓清单.json
+-rw-r--r-- 1 Administrator 197121 411079 Apr 30 14:00 2026-04-30T06-00-12_全量客户分类.json
+-rw-r--r-- 1 Administrator 197121  19213 Apr 30 15:21 2026-04-30T07-21-49_P0P1深抓清单.json
+-rw-r--r-- 1 Administrator 197121 411591 Apr 30 15:21 2026-04-30T07-21-49_全量客户分类.json
+-rw-r--r-- 1 Administrator 197121  20063 Apr 30 17:22 2026-04-30T09-22-29_P0P1深抓清单.json
+-rw-r--r-- 1 Administrator 197121 413218 Apr 30 17:22 2026-04-30T09-22-29_全量客户分类.json
+-rw-r--r-- 1 Administrator 197121  23313 Apr 30 18:49 2026-04-30T10-49-19_P0P1深抓清单.json
+-rw-r--r-- 1 Administrator 197121 417227 Apr 30 18:49 2026-04-30T10-49-19_全量客户分类.json
+-rw-r--r-- 1 Administrator 197121    359 Apr 30 19:42 _debug_api_response.json
+-rw-r--r-- 1 Administrator 197121  22814 Apr 30 20:05 _debug_dom_explore.json
+-rw-r--r-- 1 Administrator 197121   3493 Apr 30 21:34 _debug_v7_explore.json
+-rw-r--r-- 1 Administrator 197121  21394 Apr 30 10:54 batch1_input.json
+-rw-r--r-- 1 Administrator 197121 382840 Apr 29 20:09 classified_customers_2026-04-29T12-09-29.json
+-rw-r--r-- 1 Administrator 197121 122636 Apr 29 20:17 deep_scrape_2026-04-29T12-17-12.json
+-rw-r--r-- 1 Administrator 197121  25696 Apr 30 14:12 deep_scrape_2026-04-30T06-12-00.json
+-rw-r--r-- 1 Administrator 197121  22080 Apr 30 15:40 deep_scrape_2026-04-30T07-40-03.json
+-rw-r--r-- 1 Administrator 197121   1696 Apr 30 19:10 deep_scrape_api_2026-04-30T11-10-47.json
+-rw-r--r-- 1 Administrator 197121   1864 Apr 30 19:22 deep_scrape_api_2026-04-30T11-22-05.json
+-rw-r--r-- 1 Administrator 197121   1864 Apr 30 19:43 deep_scrape_api_2026-04-30T11-43-35.json
+-rw-r--r-- 1 Administrator 197121   1878 Apr 30 20:07 deep_scrape_api_2026-04-30T12-07-13.json
+-rw-r--r-- 1 Administrator 197121  57954 Apr 30 20:34 deep_scrape_api_2026-04-30T12-34-00.json
+-rw-r--r-- 1 Administrator 197121  54705 Apr 30 20:59 deep_scrape_api_2026-04-30T12-59-34.json
+-rw-r--r-- 1 Administrator 197121  15354 Apr 30 18:53 deep_scrape_api_diag_2026-04-30T10-53-37.json
+-rw-r--r-- 1 Administrator 197121 126043 Apr 29 21:05 deep_scrape_final_2026-04-29T13-05-38.json
+-rw-r--r-- 1 Administrator 197121 126066 Apr 29 20:45 deep_scrape_merged_2026-04-29T12-45-19.json
+-rw-r--r-- 1 Administrator 197121 154840 Apr 29 21:23 deep_scrape_merged_v2_2026-04-29T13-23-38.json
+-rw-r--r-- 1 Administrator 197121 104460 Apr 30 11:49 deep_scrape_merged_v2_2026-04-29T13-23-38_cleaned.json
+-rw-r--r-- 1 Administrator 197121   1173 Apr 30 13:33 deep_scrape_p0_2026-04-30T05-33-45.json
+-rw-r--r-- 1 Administrator 197121    499 Apr 30 17:33 deep_scrape_v3_2026-04-30T09-33-37.json
+-rw-r--r-- 1 Administrator 197121 103705 Apr 30 21:17 deep_scrape_v7_2026-04-30T13-17-13.json
+drwxr-xr-x 1 Administrator 197121      0 Apr 30 10:52 diffs
+-rw-r--r-- 1 Administrator 197121      2 Apr 29 20:09 p0p1_deep_scrape_list_2026-04-29T12-09-29.json
+drwxr-xr-x 1 Administrator 197121      0 Apr 30 10:47 snapshots
+-rw-r--r-- 1 Administrator 197121  13520 Apr 28 19:36 发件数据_2026-04-28T11-36-32.json
+-rw-r--r-- 1 Administrator 197121  78852 Apr 28 19:50 客户档案_2026-04-28T11-50-19.json
+-rw-r--r-- 1 Administrator 197121  61181 Apr 28 19:18 数据_2026-04-28T11-18-57.json
+-rw-r--r-- 1 Administrator 197121 123302 Apr 28 20:57 数据快照_2026-04-28T12-57-02.json
+-rw-r--r-- 1 Administrator 197121  80925 Apr 28 19:33 邮件数据_2026-04-28T11-33-02.json
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/data/diffs:
+total 60
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 10:52 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 21:17 ..
+-rw-r--r-- 1 Administrator 197121 41194 Apr 30 10:52 diff_2026-04-30T02-52-18.json
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/data/snapshots:
+total 104
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 10:47 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 21:17 ..
+-rw-r--r-- 1 Administrator 197121 51872 Apr 29 20:04 full_customers_2026-04-29T12-04-33.json
+-rw-r--r-- 1 Administrator 197121  6871 Apr 29 19:40 snapshot_2026-04-29T11-40-36.json
+-rw-r--r-- 1 Administrator 197121 11612 Apr 30 10:47 snapshot_2026-04-30T02-47-53.json
+-rw-r--r-- 1 Administrator 197121 10966 Apr 29 19:52 snapshot_full_2026-04-29T11-52-55.json
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images:
+total 12
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121 0 Apr 30 17:14 ..
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 Adm Reda
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 Ahmed Darrat
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 Assiatou Barry
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 Aula Alsaad
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Charlotte Asibey
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Cindy Nadal
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Doris Akpabio
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Jemima Piema
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Katchenan Soro
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Nasta Goncaruk
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 Sifa Vano
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 Susuanna ParkerAdentwi
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 TheodoraAdelaide Mahe
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 User name
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 azaan ss
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 fernande Pochette
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 raymond cramotte
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 rehema kiseyu
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 zainab Babesets
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Adm Reda:
+total 120
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 114425 Apr 29 19:49 1777463351739_e8db4180f9.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Ahmed Darrat:
+total 172
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 167584 Apr 29 19:49 1777463340952_e1cfcfedfd.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Assiatou Barry:
+total 104
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 97819 Apr 29 19:49 1777463343089_4cf3ecea06.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Aula Alsaad:
+total 240
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 122182 Apr 29 19:49 1777463349495_752cb930f6.jpg
+-rw-r--r-- 1 Administrator 197121 112884 Apr 29 19:49 1777463349608_406872385c.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Charlotte Asibey:
+total 9
+drwxr-xr-x 1 Administrator 197121   0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121   0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 404 Apr 29 19:48 1777463310949_de5f5fc6ce.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Cindy Nadal:
+total 8
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 19:49 ..
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Doris Akpabio:
+total 68
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 60733 Apr 29 19:48 1777463315370_c34c8f0e6e.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Jemima Piema:
+total 228
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 222486 Apr 29 19:48 1777463338800_c7214828c8.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Katchenan Soro:
+total 160
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 153923 Apr 29 19:48 1777463317525_6b39df61b9.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Nasta Goncaruk:
+total 184
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 179333 Apr 29 19:48 1777463319729_dae7874817.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Sifa Vano:
+total 108
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 99175 Apr 29 19:49 1777463356161_856fa991df.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/Susuanna ParkerAdentwi:
+total 120
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 112263 Apr 29 19:48 1777463336665_36c6447a74.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/TheodoraAdelaide Mahe:
+total 228
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 223957 Apr 29 19:48 1777463326074_9517d5c05e.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/User name:
+total 360
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 145181 Apr 29 19:49 1777463353875_111fbb0322.jpg
+-rw-r--r-- 1 Administrator 197121 210851 Apr 29 19:49 1777463353985_6d5039c156.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/azaan ss:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 78694 Apr 29 19:48 1777463321911_58b9f64b38.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/fernande Pochette:
+total 56
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 45414 Apr 29 19:48 1777463334532_02cf0761ea.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/raymond cramotte:
+total 112
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 104464 Apr 29 19:48 1777463313158_7d4f82b6a9.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/rehema kiseyu:
+total 212
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:48 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 163525 Apr 29 19:48 1777463328228_a9fa5b8784.jpg
+-rw-r--r-- 1 Administrator 197121  42662 Apr 29 19:48 1777463328353_d996db77a5.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/images/zainab Babesets:
+total 340
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 19:49 ..
+-rw-r--r-- 1 Administrator 197121 149082 Apr 29 19:49 1777463345218_b15fe75b5d.png
+-rw-r--r-- 1 Administrator 197121 186574 Apr 29 19:49 1777463345325_0f2e8e7fc8.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/reports:
+total 112
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 15:01 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 17:14 ..
+-rw-r--r-- 1 Administrator 197121  3340 Apr 28 15:11 CHECKPOINT.md
+-rw-r--r-- 1 Administrator 197121 13341 Apr 29 20:29 今日跟进战报_2026-04-29.md
+-rw-r--r-- 1 Administrator 197121  4691 Apr 29 13:28 外贸B2B跟进SOP参考.md
+-rw-r--r-- 1 Administrator 197121 20081 Apr 29 21:23 外贸跟进战报_2026-04-29.docx
+-rw-r--r-- 1 Administrator 197121 16159 Apr 30 15:01 外贸跟进战报_2026-04-30.docx
+-rw-r--r-- 1 Administrator 197121 22296 Apr 28 19:50 完整档案_2026-04-28T11-50-19.docx
+-rw-r--r-- 1 Administrator 197121 13053 Apr 28 19:18 看板报告_2026-04-28T11-18-57.docx
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots:
+total 512
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 30 17:14 ..
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Adm Reda
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Ahmed Darrat
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Amal Alamhrooqi
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Assiatou Barry
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Aula Alsaad
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Cindy Nadal
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Jemima Piema
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Krisgel Igros
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Lohgah Sharon
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Regina Kabanda
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Sayfullaeva Shahnoza
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Sifa Vano
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 Susuanna ParkerAdentwi
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 TheodoraAdelaide Mahe
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 User name
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 __mail__
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 amer ly
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 azaan ss
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 fernande Pochette
+-rw-r--r-- 1 Administrator 197121 210359 Apr 28 15:52 okki_full.png
+-rw-r--r-- 1 Administrator 197121 211918 Apr 28 15:30 okki_screenshot.png
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 rehema kiseyu
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 zainab Babesets
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Adm Reda:
+total 232
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 114425 Apr 29 13:28 1777375126613_e8db4180f9.jpg
+-rw-r--r-- 1 Administrator 197121 114425 Apr 29 13:28 1777381001641_e8db4180f9.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Ahmed Darrat:
+total 348
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121   5746 Apr 29 13:28 1777375113389_94d24bc8b9.jpg
+-rw-r--r-- 1 Administrator 197121 167584 Apr 29 13:28 1777375113763_e1cfcfedfd.png
+-rw-r--r-- 1 Administrator 197121 167584 Apr 29 13:28 1777380986801_e1cfcfedfd.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Amal Alamhrooqi:
+total 36
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 25849 Apr 29 13:28 1777381021976_30f63843b7.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Assiatou Barry:
+total 200
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 97819 Apr 29 13:28 1777375115892_4cf3ecea06.jpg
+-rw-r--r-- 1 Administrator 197121 97819 Apr 29 13:28 1777380989733_4cf3ecea06.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Aula Alsaad:
+total 684
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 104464 Apr 29 13:28 1777375124272_7d4f82b6a9.jpg
+-rw-r--r-- 1 Administrator 197121 122182 Apr 29 13:28 1777375124393_752cb930f6.jpg
+-rw-r--r-- 1 Administrator 197121 112884 Apr 29 13:28 1777375124487_406872385c.png
+-rw-r--r-- 1 Administrator 197121 104464 Apr 29 13:28 1777380998542_7d4f82b6a9.jpg
+-rw-r--r-- 1 Administrator 197121 122182 Apr 29 13:28 1777380998630_752cb930f6.jpg
+-rw-r--r-- 1 Administrator 197121 112884 Apr 29 13:28 1777380998715_406872385c.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Cindy Nadal:
+total 16
+drwxr-xr-x 1 Administrator 197121    0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 4123 Apr 29 13:28 1777375101254_064df32616.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Jemima Piema:
+total 448
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 222486 Apr 29 13:28 1777375107810_c7214828c8.jpg
+-rw-r--r-- 1 Administrator 197121 222486 Apr 29 13:28 1777380980957_c7214828c8.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Krisgel Igros:
+total 20
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 12197 Apr 29 13:28 1777375121814_be33bd2339.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Lohgah Sharon:
+total 8
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 13:28 ..
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Regina Kabanda:
+total 184
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 86686 Apr 29 13:28 1777375132980_560364ba93.jpg
+-rw-r--r-- 1 Administrator 197121 86686 Apr 29 13:28 1777381010394_560364ba93.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Sayfullaeva Shahnoza:
+total 108
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 99175 Apr 29 13:28 1777381016221_856fa991df.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Sifa Vano:
+total 716
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 145181 Apr 29 13:28 1777375130752_111fbb0322.jpg
+-rw-r--r-- 1 Administrator 197121 210851 Apr 29 13:28 1777375130845_6d5039c156.png
+-rw-r--r-- 1 Administrator 197121 145181 Apr 29 13:28 1777381007377_111fbb0322.jpg
+-rw-r--r-- 1 Administrator 197121 210851 Apr 29 13:28 1777381007459_6d5039c156.png
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/Susuanna ParkerAdentwi:
+total 232
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 112263 Apr 29 13:28 1777375105695_36c6447a74.jpg
+-rw-r--r-- 1 Administrator 197121 112263 Apr 29 13:28 1777380978035_36c6447a74.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/TheodoraAdelaide Mahe:
+total 461
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121   2161 Apr 29 13:28 1777375091160_61229d0996.png
+-rw-r--r-- 1 Administrator 197121   1452 Apr 29 13:28 1777375091288_e630116381.png
+-rw-r--r-- 1 Administrator 197121    503 Apr 29 13:28 1777375091365_961c6ae2b8.png
+-rw-r--r-- 1 Administrator 197121 223957 Apr 29 13:28 1777375091447_9517d5c05e.jpg
+-rw-r--r-- 1 Administrator 197121 223957 Apr 29 13:28 1777380960560_9517d5c05e.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/User name:
+total 8
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 13:28 ..
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/__mail__:
+total 1662
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375792797_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375792947_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375794612_daa789fa88.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375795066_14ec786ee2.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375797799_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121 264507 Apr 29 13:28 1777375797976_f459611836.jpg
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375799302_f875c5d495.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375799523_fa4f7927f7.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375802255_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375802340_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121 163525 Apr 29 13:28 1777375802504_a9fa5b8784.jpg
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375805757_6da202e703.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375805981_560867decd.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375808699_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375808785_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375812197_5b2a0e2d47.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375812425_12ee9695d0.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375815160_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375815248_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121 223957 Apr 29 13:28 1777375815410_9517d5c05e.jpg
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375818671_a547d0e13a.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375818891_392b983cfc.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375821627_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375821711_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121 223957 Apr 29 13:28 1777375821874_9517d5c05e.jpg
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375825171_2252271be0.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375825401_7c883fbc62.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375828153_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375828246_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375831694_538c103be1.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375831916_343c4d6f8d.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375834926_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375835012_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375838421_f105f3a84e.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375838653_d68a7bc7ca.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375841386_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375841471_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375844884_f105f3a84e.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375845105_d68a7bc7ca.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375847880_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375847966_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375851469_2403e4bf8a.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375851698_057bef3280.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375854418_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375854501_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375857932_ca88ff3ace.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375858170_fd1ea8480e.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375866734_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375866817_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375870250_1a1b962829.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375870471_8853d75fa9.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375873198_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375873285_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375876697_49c8b917fd.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375876923_fa8eec49f1.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375879663_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375879744_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375883165_f208a81756.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375883397_32ab8d5166.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375886128_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375886216_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375889664_fd8812187f.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375889892_1e17192cd1.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375892684_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121  99175 Apr 29 13:28 1777375892862_856fa991df.jpg
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375896133_accc61bc05.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375896366_e5b340eb2d.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375899293_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375899378_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375902786_b62d4c399d.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375903054_1fc6c169ad.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375911556_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375911640_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375915073_b141a34728.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375915323_4bbfe81099.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375918038_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375918124_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375920323_44d7c27734.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375920551_5fe4f75d66.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375928938_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375929025_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375932500_b1274d8034.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375932729_c5214b0392.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375941158_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375941246_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375944702_8872b7c8b3.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375944955_a97889d447.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375953499_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375953585_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375957020_ce00702053.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375957243_c1c41dc46f.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375966015_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375966099_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375969520_daba914c9b.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375969749_9c55fa074f.jpg
+-rw-r--r-- 1 Administrator 197121  20984 Apr 29 13:28 1777375978243_25b208a5e4.png
+-rw-r--r-- 1 Administrator 197121    249 Apr 29 13:28 1777375978329_0e4043ff34.png
+-rw-r--r-- 1 Administrator 197121      4 Apr 29 13:28 1777375981763_71953f468a.jpg
+-rw-r--r-- 1 Administrator 197121     43 Apr 29 13:28 1777375981989_998ace5415.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/amer ly:
+total 553
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121   1858 Apr 29 13:28 1777375093663_bd3c3623a7.png
+-rw-r--r-- 1 Administrator 197121    695 Apr 29 13:28 1777375093733_7d737e86b4.png
+-rw-r--r-- 1 Administrator 197121   4075 Apr 29 13:28 1777375093826_585880766e.png
+-rw-r--r-- 1 Administrator 197121   2128 Apr 29 13:28 1777375094002_7847f778b0.jpg
+-rw-r--r-- 1 Administrator 197121   3954 Apr 29 13:28 1777375094527_6ce2fff535.png
+-rw-r--r-- 1 Administrator 197121    336 Apr 29 13:28 1777375094676_7ebcf40fba.webp
+-rw-r--r-- 1 Administrator 197121 264507 Apr 29 13:28 1777375094819_f459611836.jpg
+-rw-r--r-- 1 Administrator 197121 264507 Apr 29 13:28 1777380963505_f459611836.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/azaan ss:
+total 204
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121  8339 Apr 29 13:28 1777375109946_d531de48ef.jpg
+-rw-r--r-- 1 Administrator 197121  9618 Apr 29 13:28 1777375110380_2e8eb425dd.jpg
+-rw-r--r-- 1 Administrator 197121  4934 Apr 29 13:28 1777375110803_15c3779f99.jpg
+-rw-r--r-- 1 Administrator 197121 78694 Apr 29 13:28 1777375111220_58b9f64b38.jpg
+-rw-r--r-- 1 Administrator 197121 78694 Apr 29 13:28 1777380983881_58b9f64b38.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/fernande Pochette:
+total 116
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121  4504 Apr 29 13:28 1777375103436_0837f62d51.png
+-rw-r--r-- 1 Administrator 197121 45414 Apr 29 13:28 1777375103575_02cf0761ea.jpg
+-rw-r--r-- 1 Administrator 197121 45414 Apr 29 13:28 1777380975107_02cf0761ea.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/rehema kiseyu:
+total 420
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121 163525 Apr 29 13:28 1777375097022_a9fa5b8784.jpg
+-rw-r--r-- 1 Administrator 197121  42662 Apr 29 13:28 1777375097114_d996db77a5.jpg
+-rw-r--r-- 1 Administrator 197121 163525 Apr 29 13:28 1777380966429_a9fa5b8784.jpg
+-rw-r--r-- 1 Administrator 197121  42662 Apr 29 13:28 1777380966511_d996db77a5.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/screenshots/zainab Babesets:
+total 720
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 .
+drwxr-xr-x 1 Administrator 197121      0 Apr 29 13:28 ..
+-rw-r--r-- 1 Administrator 197121  11268 Apr 29 13:28 1777375118009_01639aa4c0.jpg
+-rw-r--r-- 1 Administrator 197121  14117 Apr 29 13:28 1777375118414_f00bbf34fd.jpg
+-rw-r--r-- 1 Administrator 197121 149082 Apr 29 13:28 1777375118842_b15fe75b5d.png
+-rw-r--r-- 1 Administrator 197121 186574 Apr 29 13:28 1777375118952_0f2e8e7fc8.jpg
+-rw-r--r-- 1 Administrator 197121   5868 Apr 29 13:28 1777375119056_2af665d64a.jpg
+-rw-r--r-- 1 Administrator 197121   6788 Apr 29 13:28 1777375119424_51a77aa215.jpg
+-rw-r--r-- 1 Administrator 197121 149082 Apr 29 13:28 1777380992665_b15fe75b5d.png
+-rw-r--r-- 1 Administrator 197121 186574 Apr 29 13:28 1777380992774_0f2e8e7fc8.jpg
+
+d:/ClaudeWorkspace/08_客户跟进/Okki/scripts:
+total 564
+drwxr-xr-x 1 Administrator 197121     0 May  3 08:40 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 17:14 ..
+-rw-r--r-- 1 Administrator 197121   875 Apr 28 13:47 check_okki.js
+-rw-r--r-- 1 Administrator 197121 13100 Apr 29 13:28 classifier.mjs
+-rw-r--r-- 1 Administrator 197121 21765 Apr 28 12:28 compare_invoice.js
+-rw-r--r-- 1 Administrator 197121  3515 Apr 29 17:40 daily-check.mjs
+-rw-r--r-- 1 Administrator 197121  2038 Apr 29 20:30 daily-pipeline.mjs
+-rw-r--r-- 1 Administrator 197121  6044 Apr 30 11:49 data-cleaner.mjs
+-rw-r--r-- 1 Administrator 197121  8494 Apr 29 20:51 deep-scrape-all-sections.mjs
+-rw-r--r-- 1 Administrator 197121 12113 May  3 08:40 deep-scrape-api.mjs
+-rw-r--r-- 1 Administrator 197121 14704 Apr 30 13:33 deep-scrape-p0-only.mjs
+-rw-r--r-- 1 Administrator 197121 15835 Apr 30 15:15 deep-scrape-p0p1.mjs
+-rw-r--r-- 1 Administrator 197121  6833 Apr 29 20:44 deep-scrape-skipped.mjs
+-rw-r--r-- 1 Administrator 197121 10859 Apr 30 15:58 deep-scrape-v3.mjs
+-rw-r--r-- 1 Administrator 197121  6543 Apr 29 20:01 diagnose-tm.mjs
+-rw-r--r-- 1 Administrator 197121  9454 Apr 29 17:40 diff.mjs
+-rw-r--r-- 1 Administrator 197121  1081 Apr 30 13:55 dump-dom-sessions.mjs
+-rw-r--r-- 1 Administrator 197121  4416 Apr 28 15:57 explore_frames.js
+-rw-r--r-- 1 Administrator 197121  3926 Apr 28 15:32 explore_okki.js
+-rw-r--r-- 1 Administrator 197121  9416 Apr 29 20:08 extract-all-customers.mjs
+-rw-r--r-- 1 Administrator 197121 11268 Apr 30 11:53 extract-all-v2.mjs
+-rw-r--r-- 1 Administrator 197121  7665 Apr 29 20:04 extract-full-data.mjs
+-rwxr-xr-x 1 Administrator 197121 13945 Apr 29 13:28 final-report.mjs
+-rw-r--r-- 1 Administrator 197121  1239 Apr 28 13:52 find_chat.js
+-rw-r--r-- 1 Administrator 197121  2102 Apr 28 13:53 find_chat2.js
+-rw-r--r-- 1 Administrator 197121  7328 Apr 30 11:03 gen-batch-report.mjs
+-rw-r--r-- 1 Administrator 197121  8890 Apr 29 21:49 gen-peggy-report-v2.mjs
+-rw-r--r-- 1 Administrator 197121  9215 Apr 29 21:40 gen-peggy-report.mjs
+-rwxr-xr-x 1 Administrator 197121 55238 Apr 29 15:07 generate-action-plan.mjs
+-rw-r--r-- 1 Administrator 197121 28763 Apr 29 20:37 generate-battle-report.mjs
+-rw-r--r-- 1 Administrator 197121  4519 Apr 29 17:57 generate-daily-report.mjs
+-rw-r--r-- 1 Administrator 197121 16529 Apr 30 15:01 generate-report.mjs
+-rw-r--r-- 1 Administrator 197121  7278 Apr 29 17:58 generate-weekly-report.mjs
+-rw-r--r-- 1 Administrator 197121  6375 Apr 29 13:28 image-utils.mjs
+-rwxr-xr-x 1 Administrator 197121  8097 Apr 29 13:28 integrate.mjs
+-rw-r--r-- 1 Administrator 197121  5372 Apr 28 18:31 investigate_customers.js
+-rw-r--r-- 1 Administrator 197121  2549 Apr 28 18:35 investigate_email.js
+-rw-r--r-- 1 Administrator 197121  3309 Apr 28 18:34 investigate_files.js
+-rw-r--r-- 1 Administrator 197121  4486 Apr 28 18:14 investigate_scope.js
+-rw-r--r-- 1 Administrator 197121   964 Apr 28 13:38 launch_okki.js
+-rw-r--r-- 1 Administrator 197121  1202 Apr 28 13:45 launch_okki2.js
+-rwxr-xr-x 1 Administrator 197121 11747 Apr 29 13:28 mail-scraper.mjs
+-rw-r--r-- 1 Administrator 197121   985 Apr 28 13:56 open_rehema.js
+-rw-r--r-- 1 Administrator 197121  1502 Apr 28 13:47 read_chat.js
+-rw-r--r-- 1 Administrator 197121  1536 Apr 28 13:54 read_chat3.js
+-rw-r--r-- 1 Administrator 197121  2007 Apr 28 13:50 read_rehema.js
+-rw-r--r-- 1 Administrator 197121 12266 Apr 29 13:28 reporter.mjs
+-rwxr-xr-x 1 Administrator 197121  9772 Apr 29 13:28 run-scrape.mjs
+-rw-r--r-- 1 Administrator 197121  1919 Apr 28 15:09 scan_all_chats.js
+-rw-r--r-- 1 Administrator 197121  5230 Apr 29 21:23 scrape-visible-9.mjs
+-rw-r--r-- 1 Administrator 197121 15553 Apr 29 13:28 scraper.mjs
+-rw-r--r-- 1 Administrator 197121  5610 Apr 29 19:52 snapshot-full.mjs
+-rw-r--r-- 1 Administrator 197121  4670 Apr 29 17:38 snapshot.mjs
+-rw-r--r-- 1 Administrator 197121  2682 Apr 30 18:03 test-css-override.mjs
+-rw-r--r-- 1 Administrator 197121  3464 Apr 30 18:04 test-network-sniff.mjs
+-rw-r--r-- 1 Administrator 197121  2464 Apr 28 12:22 verify_output.js
+-rw-r--r-- 1 Administrator 197121  2335 Apr 28 12:25 verify_output2.js
+
+d:/ClaudeWorkspace/08_客户跟进/knowledge:
+total 56
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 16:48 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 29 17:00 ..
+-rw-r--r-- 1 Administrator 197121  2687 Apr 29 17:28 business-rules.md
+-rw-r--r-- 1 Administrator 197121   606 Apr 30 16:48 cases.md
+-rw-r--r-- 1 Administrator 197121  2550 Apr 29 17:01 factory.md
+-rw-r--r-- 1 Administrator 197121  8167 Apr 29 17:29 hooks-library.md
+-rw-r--r-- 1 Administrator 197121  3472 Apr 29 17:01 market-psychology.md
+-rw-r--r-- 1 Administrator 197121  3498 Apr 30 10:28 sales-playbook.md
+-rw-r--r-- 1 Administrator 197121 11387 Apr 30 16:48 system-prompt.md
+-rw-r--r-- 1 Administrator 197121  3830 Apr 29 17:01 value-translation.md

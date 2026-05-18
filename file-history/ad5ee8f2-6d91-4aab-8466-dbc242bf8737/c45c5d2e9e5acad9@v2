@@ -1,0 +1,224 @@
+/**
+ * OKKI 数据抓取 — Playwright 复用 Profile 4（不触发新认证）
+ *
+ * 原理：
+ * - 直接用你 Chrome 的 Profile 4 启动浏览器
+ * - OKKI 登录 cookie 已在 Profile 中，打开就是已登录
+ * - 拦截所有 OKKI API 响应，完整数据落盘
+ * - 不经过 SSO 认证层 → 同事账号零影响
+ *
+ * 使用：
+ * 1. 关闭 Chrome（Profile 不能同时被两个进程用）
+ * 2. node scripts/scrape_okki.js
+ * 3. 浏览器会自动打开 crm.xiaoman.cn
+ * 4. 你正常浏览客户页面，所有 API 数据自动抓取
+ * 5. 完成后 Ctrl+C 停止，数据在 data/ 目录
+ *
+ * 也支持指定客户：
+ *   node scripts/scrape_okki.js "Peggy Hamungala"
+ */
+
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+
+const PROFILE_PATH = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const OUTPUT_DIR = path.join(__dirname, '..', 'data');
+const TARGET_CUSTOMER = process.argv[2];
+
+// 确保输出目录存在
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
+
+const captured = {
+  apiResponses: [],
+  customers: [],
+  currentPage: null,
+};
+
+async function main() {
+  console.log('[OKKI Scraper] 启动中...');
+  console.log(`[OKKI Scraper] Profile: ${PROFILE_PATH}`);
+
+  const browser = await chromium.launchPersistentContext(PROFILE_PATH, {
+    channel: 'chrome',
+    headless: false,
+    viewport: { width: 1440, height: 900 },
+    // 只拦截 OKKI 相关请求，不碰其他站点
+  });
+
+  const page = await browser.newPage();
+
+  // ===== 拦截所有 OKKI API 响应 =====
+  page.on('response', async (response) => {
+    const url = response.url();
+    // 只捕获 OKKI CRM 的 API 请求
+    if (!url.includes('xiaoman') && !url.includes('okki')) return;
+
+    try {
+      const contentType = response.headers()['content-type'] || '';
+      if (!contentType.includes('json')) return;
+
+      const body = await response.json().catch(() => null);
+      if (!body) return;
+
+      const entry = {
+        time: new Date().toISOString(),
+        url: url.split('?')[0], // 去掉 query 参数去重用
+        fullUrl: url,
+        status: response.status(),
+        data: body,
+      };
+
+      captured.apiResponses.push(entry);
+      console.log(`  [API] ${response.status()} ${entry.url}`);
+
+      // 尝试提取客户列表
+      if (body.data?.list || body.data?.records || body.list || body.records) {
+        const list = body.data?.list || body.data?.records || body.list || body.records;
+        if (Array.isArray(list)) {
+          for (const c of list) {
+            const name = c.name || c.companyName || c.company_name || c.customerName || 'unknown';
+            if (!captured.customers.find(x => x.name === name)) {
+              captured.customers.push({ name, raw: c });
+            }
+          }
+          console.log(`  → 捕获 ${list.length} 个客户`);
+        }
+      }
+    } catch (e) {
+      // 忽略无法解析的响应
+    }
+  });
+
+  // ===== 导航到 OKKI =====
+  console.log('[OKKI Scraper] 导航到 crm.xiaoman.cn ...');
+  await page.goto('https://crm.xiaoman.cn/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // 等待用户确认登录状态
+  console.log('[OKKI Scraper] 浏览器已打开。检查登录状态...');
+
+  // 等页面稳定
+  await page.waitForTimeout(3000);
+
+  const currentUrl = page.url();
+  console.log(`[OKKI Scraper] 当前页面: ${currentUrl}`);
+
+  // 保存当前页面快照
+  captured.currentPage = {
+    url: currentUrl,
+    title: await page.title(),
+  };
+
+  if (TARGET_CUSTOMER) {
+    // ===== 指定客户模式 =====
+    console.log(`[OKKI Scraper] 搜索客户: "${TARGET_CUSTOMER}"`);
+
+    // 尝试找搜索框
+    const searchSelectors = [
+      'input[placeholder*="搜索"]',
+      'input[placeholder*="search"]',
+      'input[placeholder*="Search"]',
+      'input[class*="search"]',
+      'input[class*="Search"]',
+      '.search-input input',
+      '[class*="search"] input',
+    ];
+
+    let searched = false;
+    for (const sel of searchSelectors) {
+      const el = page.locator(sel).first();
+      if (await el.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await el.fill(TARGET_CUSTOMER);
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(2000);
+        searched = true;
+        console.log(`[OKKI Scraper] 已搜索: "${TARGET_CUSTOMER}"`);
+        break;
+      }
+    }
+
+    if (!searched) {
+      console.log('[OKKI Scraper] 未找到搜索框，请手动搜索后按 Enter 继续...');
+      // 等待用户手动操作
+      await page.waitForTimeout(30000);
+    }
+
+    // 点击第一个客户
+    const rowSelectors = [
+      'tr[class*="row"]',
+      '[class*="table"] tr',
+      '[class*="list"] [class*="item"]',
+      'tbody tr',
+    ];
+    for (const sel of rowSelectors) {
+      const row = page.locator(sel).first();
+      if (await row.isVisible({ timeout: 500 }).catch(() => false)) {
+        await row.click();
+        await page.waitForTimeout(2000);
+        console.log('[OKKI Scraper] 已打开客户详情');
+        break;
+      }
+    }
+  }
+
+  // 持续抓取
+  console.log('');
+  console.log('========================================');
+  console.log('[OKKI Scraper] 抓取中... 正常浏览即可');
+  console.log('[OKKI Scraper] 每个 API 响应自动捕获');
+  console.log('[OKKI Scraper] 按 Ctrl+C 停止并保存');
+  console.log('========================================');
+
+  // 每 30 秒保存一次中间结果
+  const saveInterval = setInterval(saveData, 30000);
+
+  // 优雅退出
+  process.on('SIGINT', async () => {
+    clearInterval(saveInterval);
+    console.log('\n[OKKI Scraper] 正在保存...');
+    saveData();
+    await browser.close();
+    console.log('[OKKI Scraper] 完成。');
+    process.exit(0);
+  });
+
+  // 保持运行
+  await new Promise(() => {});
+}
+
+function saveData() {
+  if (captured.apiResponses.length === 0) {
+    console.log('[Save] 暂无数据');
+    return;
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const filepath = path.join(OUTPUT_DIR, `okki_capture_${timestamp}.json`);
+
+  // 去重
+  const seen = new Set();
+  const unique = captured.apiResponses.filter(e => {
+    const key = e.url + JSON.stringify(e.data).substring(0, 200);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  fs.writeFileSync(filepath, JSON.stringify({
+    capturedAt: timestamp,
+    page: captured.currentPage,
+    customerCount: captured.customers.length,
+    apiCount: unique.length,
+    customers: captured.customers,
+    apiResponses: unique,
+  }, null, 2));
+
+  console.log(`[Save] ${unique.length} 条API + ${captured.customers.length} 个客户 → ${filepath}`);
+}
+
+main().catch(err => {
+  console.error('[OKKI Scraper] 错误:', err.message);
+  process.exit(1);
+});

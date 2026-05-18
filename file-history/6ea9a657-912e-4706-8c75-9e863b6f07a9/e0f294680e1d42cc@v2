@@ -1,0 +1,174 @@
+/**
+ * 小满CRM — 图片抓取工具
+ *
+ * 从 TM 聊天中检测图片 URL，通过浏览器上下文下载到本地
+ */
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const IMAGES_DIR = join(__dirname, '..', 'images');
+
+/**
+ * 提取当前会话消息中的所有图片 URL（带消息索引）
+ * Returns Array<{url: string, messageIndex: number}>
+ */
+export async function extractImageUrls(frame) {
+  return frame.evaluate(() => {
+    const seen = new Set();
+    const results = [];
+    const wrappers = document.querySelectorAll('.message-item-wrapper.messenger');
+    wrappers.forEach((wrapper, idx) => {
+      wrapper.querySelectorAll('img').forEach(img => {
+        if (img.classList.contains('emotion')) return;
+        const src = img.src || '';
+        if (!src.startsWith('http') || seen.has(src)) return;
+        // Skip chat platform emoji/smile images
+        if (src.includes('atmgateway-client.alibaba.com/smily')) return;
+        if (src.includes('clouddisk.alibaba.com')) return;
+        // Skip tiny emoji images (72x72, 80x80 thumbnails with tps- pattern)
+        if (/tps-\d+-\d+\.(png|webp)/.test(src) && (src.includes('tps-72-72') || src.includes('tps-80-80') || src.includes('tps-60-60') || src.includes('tps-48-48'))) return;
+        seen.add(src);
+        results.push({ url: img.src, messageIndex: idx });
+      });
+    });
+    return results;
+  });
+}
+
+/**
+ * 通过浏览器上下文下载图片（复用登录态 cookie）
+ * 创建临时页面 -> 导航到图片URL -> 保存响应体 -> 关闭页面
+ */
+async function downloadImageViaContext(ctx, url, savePath) {
+  const newPage = await ctx.newPage();
+  try {
+    const response = await newPage.goto(url, {
+      waitUntil: 'load',
+      timeout: 20000,
+    });
+    if (!response.ok()) {
+      throw new Error(`HTTP ${response.status()}`);
+    }
+    const buffer = await response.body();
+    writeFileSync(savePath, buffer);
+    return buffer.length;
+  } finally {
+    await newPage.close();
+  }
+}
+
+/**
+ * 为当前客户保存所有图片
+ * @param {BrowserContext} ctx - Playwright 浏览器上下文（含登录态）
+ * @param {object} frame - TM 聊天 iframe
+ * @param {string} customerName - 客户名称（用于目录名）
+ * @param {Set} globalDedup - 全局去重 Set（避免重复下载）
+ * @param {Array} messages - 当前会话的消息数组（用于关联消息索引）
+ * @returns {Promise<Array<{url: string, filePath: string, size: number, messageIndex: number}>>}
+ */
+export async function saveCustomerImages(ctx, frame, customerName, globalDedup, messages = []) {
+  const imageEntries = await extractImageUrls(frame);
+  if (imageEntries.length === 0) return [];
+
+  const dir = join(IMAGES_DIR, sanitizeName(customerName));
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+  // Build a map: DOM wrapper index → message index
+  // The wrappers in DOM and messages array are aligned (both 0-indexed in order)
+  const domToMsgIndex = new Map();
+  for (const msg of messages) {
+    if (msg.index !== undefined) {
+      domToMsgIndex.set(msg.index, msg.index);
+    }
+  }
+
+  const saved = [];
+  for (const { url, messageIndex: domIndex } of imageEntries) {
+    if (globalDedup.has(url)) continue;
+    globalDedup.add(url);
+
+    const ext = url.match(/\.(jpe?g|png|gif|webp|bmp)(?:[?#]|$)/i)?.[1] || 'jpg';
+    const hash = createHash('md5').update(url).digest('hex').substring(0, 10);
+    const filename = `${Date.now()}_${hash}.${ext}`;
+    const filePath = join(dir, filename);
+
+    try {
+      const size = await downloadImageViaContext(ctx, url, filePath);
+      // Map DOM wrapper index to message array index
+      const msgIndex = messages.findIndex(m => m.index === domIndex);
+      saved.push({ url, filePath, size, messageIndex: msgIndex >= 0 ? msgIndex : domIndex });
+    } catch (err) {
+      console.log(`   ⚠️ 图片跳过: ${url.substring(0, 60)}… (${err.message})`);
+    }
+  }
+  return saved;
+}
+
+/**
+ * 在每条消息中检测图片并注入 URL（带消息索引）
+ */
+export function extractMessageImages(frame) {
+  return frame.evaluate(() => {
+    const results = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach((wrapper, idx) => {
+      const imgs = wrapper.querySelectorAll('img');
+      if (imgs.length === 0) return;
+      const urls = Array.from(imgs)
+        .map(img => img.src)
+        .filter(s => s && s.startsWith('http'));
+      if (urls.length > 0) results.push({ messageIndex: idx, urls });
+    });
+    return results;
+  });
+}
+
+/**
+ * 提取当前会话消息中的文件链接（云盘/下载等）
+ */
+export async function extractFileUrls(frame) {
+  return frame.evaluate(() => {
+    const files = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach((wrapper, idx) => {
+      // 卡消息中的链接
+      wrapper.querySelectorAll('a').forEach(a => {
+        const href = a.href || '';
+        if (href.includes('clouddisk') || href.includes('download') || href.includes('aliyundoc')) {
+          files.push({
+            url: href,
+            name: (a.textContent || '').trim() || (a.title || ''),
+            type: 'clouddisk',
+            messageIndex: idx,
+          });
+        }
+      });
+      // Also check img src for cloud disk file links
+      wrapper.querySelectorAll('img').forEach(img => {
+        const src = img.src || '';
+        if (src.includes('clouddisk.alibaba.com') && !files.some(f => f.url === src)) {
+          files.push({
+            url: src,
+            name: (img.alt || img.title || ''),
+            type: 'clouddisk',
+            messageIndex: idx,
+          });
+        }
+      });
+      // 文件类元素的文本内容
+      const cardText = wrapper.querySelector('.session-rich-content.card');
+      if (cardText) {
+        const text = cardText.textContent || '';
+        if (/\.(pdf|docx?|xlsx?|pptx?|zip|rar|jpg|png)\b/i.test(text) && !files.some(f => f.text === text)) {
+          files.push({ url: '', name: text.substring(0, 100), type: 'card_reference', messageIndex: idx });
+        }
+      }
+    });
+    return files;
+  });
+}
+
+function sanitizeName(name) {
+  return name.replace(/[/\\?%*:|"<>]/g, '_').substring(0, 60);
+}

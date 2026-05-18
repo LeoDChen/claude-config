@@ -1,0 +1,213 @@
+{
+  "_说明": "客户五梯队分类规则。修改条件后运行 node scripts/daily_pipeline.js 即可生效。",
+  "_字段说明": {
+    "hasPI": "对话中出现PI/形式发票",
+    "hasAddress": "客户已提供地址",
+    "hasOrderSignal": "客户说下单/place order/make order等",
+    "hasPrice": "已报价",
+    "hasSample": "涉及样品",
+    "hasFreight": "涉及运费讨论",
+    "hasMOQ": "涉及起订量讨论",
+    "hasQuantity": "客户提供了数量",
+    "daysAgo": "最近一次联系距今多少天",
+    "lastCustomerMsgDays": "客户最近一次发消息距今多少天",
+    "customerMsgs": "客户真实消息数",
+    "realMsgs": "真实对话总数(不含系统消息)",
+    "cRatio": "客户消息占比(百分比)"
+  },
+
+  "p0": {
+    "label": "立即行动",
+    "description": "PI已发等付款/客户主动表示要下单/地址数量已确认",
+    "rules": [
+      {
+        "name": "PI已发且地址已给(近成交)",
+        "all": [
+          {"field": "hasPI", "op": "eq", "value": true},
+          {"field": "hasAddress", "op": "eq", "value": true},
+          {"field": "daysAgo", "op": "lte", "value": 7}
+        ]
+      },
+      {
+        "name": "客户主动说要下单",
+        "all": [
+          {"field": "hasOrderSignal", "op": "eq", "value": true},
+          {"field": "daysAgo", "op": "lte", "value": 7}
+        ]
+      },
+      {
+        "name": "地址+数量已确认且近期活跃",
+        "all": [
+          {"field": "hasAddress", "op": "eq", "value": true},
+          {"field": "hasQuantity", "op": "eq", "value": true},
+          {"field": "daysAgo", "op": "lte", "value": 3}
+        ]
+      },
+      {
+        "name": "高频互动+有下单信号",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 30},
+          {"field": "hasOrderSignal", "op": "eq", "value": true}
+        ]
+      }
+    ]
+  },
+
+  "p1": {
+    "label": "本周跟进",
+    "description": "报价已发等回复/近期活跃谈判中/有实质讨论",
+    "rules": [
+      {
+        "name": "报价已发,3-14天内等客户回复",
+        "all": [
+          {"field": "hasPrice", "op": "eq", "value": true},
+          {"field": "lastCustomerMsgDays", "op": "gte", "value": 3},
+          {"field": "lastCustomerMsgDays", "op": "lte", "value": 14}
+        ]
+      },
+      {
+        "name": "近期活跃谈判中(有来有回)",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 15},
+          {"field": "customerMsgs", "op": "gte", "value": 3},
+          {"field": "daysAgo", "op": "lte", "value": 3}
+        ]
+      },
+      {
+        "name": "已报价+有样品讨论+7天内",
+        "all": [
+          {"field": "hasPrice", "op": "eq", "value": true},
+          {"field": "hasSample", "op": "eq", "value": true},
+          {"field": "daysAgo", "op": "lte", "value": 7}
+        ]
+      },
+      {
+        "name": "初询但客户消息占比高(有诚意)",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 10},
+          {"field": "cRatio", "op": "gte", "value": 40},
+          {"field": "daysAgo", "op": "lte", "value": 2}
+        ]
+      },
+      {
+        "name": "有PI但无地址(等地址阶段,14天内)",
+        "all": [
+          {"field": "hasPI", "op": "eq", "value": true},
+          {"field": "daysAgo", "op": "lte", "value": 14}
+        ]
+      },
+      {
+        "name": "近期活跃+高客户消息占比(中互动)",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 7},
+          {"field": "cRatio", "op": "gte", "value": 40},
+          {"field": "daysAgo", "op": "lte", "value": 5}
+        ]
+      },
+      {
+        "name": "有地址+近期中等互动(活跃中)",
+        "all": [
+          {"field": "hasAddress", "op": "eq", "value": true},
+          {"field": "realMsgs", "op": "gte", "value": 5},
+          {"field": "daysAgo", "op": "lte", "value": 5}
+        ]
+      }
+    ]
+  },
+
+  "p2": {
+    "label": "观察中",
+    "description": "初询阶段/低频互动/需激活/有信号但过期",
+    "rules": [
+      {
+        "name": "报价已发但客户沉默超过14天",
+        "all": [
+          {"field": "hasPrice", "op": "eq", "value": true},
+          {"field": "lastCustomerMsgDays", "op": "gt", "value": 14}
+        ]
+      },
+      {
+        "name": "有互动但超过7天未联系",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 5},
+          {"field": "daysAgo", "op": "gt", "value": 7},
+          {"field": "daysAgo", "op": "lte", "value": 30}
+        ]
+      },
+      {
+        "name": "有PI但超过7天未推进",
+        "all": [
+          {"field": "hasPI", "op": "eq", "value": true},
+          {"field": "daysAgo", "op": "gt", "value": 7},
+          {"field": "daysAgo", "op": "lte", "value": 30}
+        ]
+      },
+      {
+        "name": "少量互动+高客户消息占比(有潜力)",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 4},
+          {"field": "realMsgs", "op": "lte", "value": 10},
+          {"field": "cRatio", "op": "gte", "value": 30},
+          {"field": "daysAgo", "op": "lte", "value": 14}
+        ]
+      }
+    ]
+  },
+
+  "p3": {
+    "label": "低优先级",
+    "description": "有少量互动但近期沉默/超过30天未联系",
+    "rules": [
+      {
+        "name": "1-3条消息但超过30天未联系",
+        "all": [
+          {"field": "realMsgs", "op": "gte", "value": 1},
+          {"field": "realMsgs", "op": "lte", "value": 3},
+          {"field": "daysAgo", "op": "gte", "value": 30}
+        ]
+      },
+      {
+        "name": "30-60天未联系但曾有互动",
+        "all": [
+          {"field": "daysAgo", "op": "gte", "value": 30},
+          {"field": "daysAgo", "op": "lt", "value": 60},
+          {"field": "realMsgs", "op": "gte", "value": 4},
+          {"field": "realMsgs", "op": "lt", "value": 10}
+        ]
+      }
+    ]
+  },
+
+  "p4": {
+    "label": "沉默/沉睡",
+    "description": "超过60天未联系或几乎无对话",
+    "default": true
+  },
+
+  "silence_warnings": {
+    "_说明": "沉默风险阈值(天数)，超过warning标黄，超过danger标红",
+    "p0": {"warning": 2, "danger": 5},
+    "p1": {"warning": 3, "danger": 7},
+    "p2": {"warning": 7, "danger": 14},
+    "p3": {"warning": 30, "danger": 60},
+    "p4": {"warning": 60, "danger": 90}
+  },
+
+  "core_markets": ["SD", "EG", "CD", "ZM", "CI", "SA", "AE"],
+
+  "system_msg_patterns": [
+    "自动接待将不再触发",
+    "Marco大模型翻译",
+    "阿里国际Marco大模型翻译",
+    "Since you have read the conversation",
+    "买家有流失风险",
+    "Buyer has churn risk",
+    "一旦离开平台发生纠纷或欺诈",
+    "由于您介入该会话",
+    "Due to your intervention in this session",
+    "AI给您生成了一条回复建议",
+    "You have a visitor",
+    "This buyer has been pre-screened",
+    "反馈"
+  ]
+}

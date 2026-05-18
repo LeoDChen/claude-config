@@ -1,0 +1,107 @@
+/**
+ * 客户状态清单 — 基于真实对话内容，不依赖平台元数据
+ */
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType, BorderStyle, ShadingType } from 'docx';
+import { writeFileSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import os from 'os';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const DESKTOP = join(os.homedir(), 'Desktop');
+
+const SYS = [/automatic reception/i,/由于您介入/i,/Marco大模型/i,/买家有流失/i,/AI给您生成/i,/建议查看/i,/一旦离开平台/i,/反馈/,/You have a visitor/i,/pre-screened/i,/系统自动发送/];
+
+function loadLatest(prefix) {
+  const files = readdirSync(DATA_DIR).filter(f => f.startsWith(prefix) && f.endsWith('.json')).sort().reverse();
+  return JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf8'));
+}
+
+function getRealMsgs(messages) {
+  return (messages || []).filter(m => m.text && m.text.length > 3 && !SYS.some(p => p.test(m.text || '')));
+}
+
+function summary(msgs, maxLen = 140) {
+  const last = msgs.slice(-3);
+  return last.map(m => (m.side === 'received' ? '←' : '→') + (m.text || '').substring(0, maxLen).replace(/\n/g, ' ')).join(' | ');
+}
+
+async function main() {
+  const data = loadLatest('2026-');
+  const ds = loadLatest('deep_scrape_v7_');
+  const dsMap = {};
+  for (const r of (ds.results || [])) dsMap[r.name] = r;
+
+  const groups = {
+    payment: { label: '💰 待付款/待确认订单', emoji: '💰', desc: '地址已确认、PI已发/即将发出，推进到付款', items: [] },
+    active: { label: '🔥 谈判中·近期活跃', emoji: '🔥', desc: '正在讨论价格、样品、规格，双方有来有回', items: [] },
+    quoted: { label: '⏳ 报价已发·等客户回应', emoji: '⏳', desc: '报了价或发了模板问题，客户暂未继续回应', items: [] },
+    initial: { label: '🆕 初询阶段·需推进', emoji: '🆕', desc: '客户发了产品卡/问了价，需要有效推进（非模板回复）', items: [] },
+    low: { label: '⚪ 低互动/非采购意向', emoji: '⚪', desc: '系统消息为主、对话极少、或非真实采购', items: [] },
+  };
+
+  for (const c of (data.customers || [])) {
+    const dsC = dsMap[c.name];
+    const msgs = dsC ? getRealMsgs(dsC.messages || []) : [];
+    const lastCust = msgs.filter(m => m.side === 'received').slice(-1)[0];
+    const lastOurs = msgs.filter(m => m.side === 'sent').slice(-1)[0];
+
+    if (msgs.length === 0) {
+      groups.low.items.push({ ...c, _msgs: msgs, _summary: '[无对话数据]' });
+      continue;
+    }
+
+    const allText = msgs.map(m => (m.text || '').toLowerCase()).join(' ');
+
+    // === 💰 待付款 ===
+    const hasAddress = /地址|address|location|广州市|伊拉克|Iraq|Russia|Москва|Nasiriyah|delivery|shipping mark/i.test(allText);
+    const hasPrice = /\$\d+\.\d{2}|usd|price|单价|总价|total|рубл|dollars/i.test(allText);
+    const hasPi = /order|create order|prepare|proforma|起草/i.test(allText);
+
+    if (hasAddress && hasPrice && hasPi) {
+      groups.payment.items.push({ ...c, _msgs: msgs, _summary: summary(msgs) });
+      continue;
+    }
+    if (hasAddress && hasPrice) {
+      groups.payment.items.push({ ...c, _msgs: msgs, _summary: summary(msgs) });
+      continue;
+    }
+
+    // === 🔥 谈判中 ===
+    const custMsgs = msgs.filter(m => m.side === 'received');
+    const ourMsgs = msgs.filter(m => m.side === 'sent');
+    const hasBackAndForth = custMsgs.length >= 2 && ourMsgs.length >= 2;
+
+    const negotiatingKeywords = /sample|price|cost|how much|сколько|كم|color|size|quantity|design|style|fabric|cotton|material|video|catalog|尺码|面料/i;
+    if (hasBackAndForth && negotiatingKeywords.test(allText)) {
+      groups.active.items.push({ ...c, _msgs: msgs, _summary: summary(msgs) });
+      continue;
+    }
+
+    // === ⏳ 报价已发等回应 ===
+    if (hasPrice && lastOurs && custMsgs.length >= 1) {
+      groups.quoted.items.push({ ...c, _msgs: msgs, _summary: summary(msgs) });
+      continue;
+    }
+
+    // === 🆕 初询 ===
+    if (custMsgs.length >= 1) {
+      groups.initial.items.push({ ...c, _msgs: msgs, _summary: summary(msgs) });
+      continue;
+    }
+
+    // === ⚪ 低互动 ===
+    groups.low.items.push({ ...c, _msgs: msgs, _summary: summary(msgs) });
+  }
+
+  // Print summary to console
+  for (const [key, g] of Object.entries(groups)) {
+    console.log(`\n${g.label} (${g.items.length}人)`);
+    console.log('─'.repeat(60));
+    for (const c of g.items) {
+      console.log(`  ${c.name.padEnd(24)} | ${c.countryCode||'?'} | ${c._summary.substring(0,180)}`);
+    }
+  }
+}
+main().catch(e => { console.error(e.message); process.exit(1); });

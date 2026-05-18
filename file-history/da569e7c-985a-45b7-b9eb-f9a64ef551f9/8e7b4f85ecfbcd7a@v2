@@ -1,0 +1,98 @@
+# OKKI 项目知识索引
+
+> 自动生成：2026-05-18 | 用途：新对话中按需 Read，精准定位不翻遍所有文件
+
+---
+
+## 1. 核心系统设计
+
+### 阶段流转系统
+- **定稿规则**：[stage-transition-system-v1.md](d:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\stage-transition-system-v1.md)
+- **生命周期规则**：[customer-lifecycle-rules.md](d:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\customer-lifecycle-rules.md)
+- **记忆指针**：`okki_stage_transition_design.md`
+
+### SOON 因子自动化
+- **设计文档**：[soon-factor-automation-design.md](d:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\soon-factor-automation-design.md)
+- **综合计划**：[soon-layer-comprehensive-plan.md](d:\ClaudeWorkspace\08_客户跟进\Okki\output\soon-layer-comprehensive-plan.md)
+- **驱动因子模型**：`okki_driver_factors.md`
+- **S5b 删除决策**：`s5b_factor_removal.md`
+- **审查方法论**：[review-attack-methodology.md](d:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\review-attack-methodology.md)
+
+### 脚本代码
+- **因子基线初始化**：`d:\ClaudeWorkspace\08_客户跟进\Okki\scripts\init_factor_baselines.js`
+- **初始化报告**：[init_report_2026-05-18.md](d:\ClaudeWorkspace\08_客户跟进\Okki\output\init_report_2026-05-18.md)
+
+---
+
+## 2. 客户分类与分层
+
+### 分类系统
+- **五梯队规则**：[OKKI客户五梯队分类规则.md](OKKI客户五梯队分类规则.md)
+- **分类重构**：`okki_classification_refactor.md`
+- **客户等级设计**：`okki_customer_tier_design.md`
+- **AI判定 × 脚本分工**：`ai_script_judgment_pattern.md`
+
+### 分类可靠性
+- **交叉分析**：`okki_reliability_debate.md`
+- **分析经验教训**：`okki_analysis_lessons.md`
+- **审计反馈**：`feedback_audit_validation.md`
+
+---
+
+## 3. 工作流与操作
+
+### 分析工作流
+- **分批工作流**：`okki_workflow_split.md`
+- **输出模板**：`okki_output_templates.md`
+- **批量分析规则**：`feedback_batch_output.md`
+
+### 平台与同步
+- **OKKI 平台说明**：`okki_platform_notes.md`
+- **订单同步**：`okki_order_sync.md`
+- **启动指令**：[OKKI客户分析启动指令.md](OKKI客户分析启动指令.md)
+- **AccioWork 架构**：[OKKI_AccioWork_协作架构分析.md](OKKI_AccioWork_协作架构分析.md)
+- **旧脚本归档**：[2026-05-14_OKKI旧脚本归档.md](2026-05-14_OKKI旧脚本归档.md)
+
+---
+
+## 4. 运营操作日志
+
+| 日期 | 文件 | 内容 |
+|------|------|------|
+| 2026-05-09 | [actions_2026-05-09.md](d:\ClaudeWorkspace\08_客户跟进\Okki\output\actions_2026-05-09.md) | 日常操作 |
+| 2026-05-12 | [actions_2026-05-12.md](d:\ClaudeWorkspace\08_客户跟进\Okki\output\actions_2026-05-12.md) | 日常操作 |
+| 2026-05-15 | [actions_2026-05-15.md](d:\ClaudeWorkspace\08_客户跟进\Okki\output\actions_2026-05-15.md) | 日常操作 |
+
+---
+
+## 5. 客户深度分析
+
+| 客户 | 文件 | 日期 |
+|------|------|------|
+| Keinjol Tata | `keinjol_tata_status.md` + [深度分析](d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md) | 2026-05-12 |
+| Asselya Marina | [深度分析](d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md) | 2026-05-13 |
+| Dila Cakir | [深度分析](d:\ClaudeWorkspace\08_客户跟进\Okki\output\dila_cakir_深度分析_2026-05-13.md) | 2026-05-13 |
+
+---
+
+## 6. 业务规则
+
+- **PI 生成**：`pi_generation_rules.md`
+- **MOQ 规则**：`moq_rules.md`
+- **货运报价**：`shipping_freight_rules.md`
+- **输出语言**：`output_language_rules.md`
+
+---
+
+## 7. 设计迭代记录
+
+- **2026-05-15 重设计**：`okki_redesign_may15.md`
+- **2026-05-18 阶段流转定稿**：本对话 → 保存为 `2026-05-18_OKKI_阶段流转定稿.md`
+
+---
+
+## 使用说明
+
+- 新对话中提到任何 OKKI 话题 → 先 Read 此索引定位 → 再 Read 具体文件
+- 每次保存新对话到 OB 后 → 更新此索引对应章节
+- 此文件不自动加载，按需 Read

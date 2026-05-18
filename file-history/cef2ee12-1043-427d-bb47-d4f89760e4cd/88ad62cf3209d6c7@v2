@@ -1,0 +1,61 @@
+const { spawn } = require('child_process');
+const path = require('path');
+
+const CHROME_EXE = path.join(process.env.LOCALAPPDATA, 'Google', 'Chrome', 'Application', 'chrome.exe');
+const USER_DATA = path.join(process.env.LOCALAPPDATA, 'Google', 'Chrome', 'User Data');
+
+console.log('启动 Chrome 测试 --remote-debugging-pipe...');
+
+const chrome = spawn(CHROME_EXE, [
+  `--user-data-dir=${USER_DATA}`,
+  '--profile-directory=Profile 4',
+  '--remote-debugging-pipe',
+  '--no-first-run',
+  '--no-default-browser-check',
+  '--window-size=800,600',
+  'about:blank',
+], {
+  stdio: ['pipe', 'pipe', 'pipe'],
+});
+
+let started = false;
+const startTime = Date.now();
+
+// Chrome sends CDP JSON messages to stdout when --remote-debugging-pipe is used
+chrome.stdout.on('data', (data) => {
+  if (!started) {
+    started = true;
+    console.log(`✅ Pipe 模式生效！耗时 ${Date.now() - startTime}ms`);
+    console.log(`收到首个CDP消息 (${data.length} 字节):`);
+    console.log(data.toString().substring(0, 500));
+  } else {
+    console.log(`更多CDP数据 (${data.length} 字节)`);
+  }
+});
+
+chrome.stderr.on('data', (data) => {
+  const text = data.toString();
+  if (text.includes('DevTools')) {
+    console.log('[stderr DevTools]:', text.substring(0, 200));
+  }
+});
+
+// Check after 8 seconds
+setTimeout(() => {
+  if (started) {
+    console.log('\n✅✅ --remote-debugging-pipe 工作正常！');
+    console.log('CDP 管道协议可用，可以构建 pipe-to-WebSocket 桥接。');
+  } else {
+    console.log('\n❌ --remote-debugging-pipe 也未工作。');
+  }
+  chrome.kill();
+  process.exit(started ? 0 : 1);
+}, 8000);
+
+chrome.on('close', (code) => {
+  console.log(`Chrome 退出, code=${code}`);
+  if (!started) {
+    console.log('Chrome过早退出，--remote-debugging-pipe可能不支持。');
+    process.exit(1);
+  }
+});

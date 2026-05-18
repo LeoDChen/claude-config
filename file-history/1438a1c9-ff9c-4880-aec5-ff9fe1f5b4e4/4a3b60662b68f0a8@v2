@@ -1,0 +1,206 @@
+const ExcelJS = require("exceljs");
+const path = require("path");
+const BASE = "D:/桌面";
+
+const F = {
+  title:    { name: "Calibri", size: 20, color: { argb: "FF1D1D1F" } },
+  subtitle: { name: "Calibri", size: 10, color: { argb: "FF86868B" } },
+  section:  { name: "Calibri", size: 13, bold: true, color: { argb: "FF1D1D1F" } },
+  hdr:      { name: "Calibri", size: 9, bold: true, color: { argb: "FF636366" } },
+  body:     { name: "Calibri", size: 10, color: { argb: "FF1D1D1F" } },
+  bold:     { name: "Calibri", size: 10, bold: true, color: { argb: "FF1D1D1F" } },
+  sumFont:  { name: "Calibri", size: 11, bold: true, color: { argb: "FF1D1D1F" } },
+  grand:    { name: "Calibri", size: 13, bold: true, color: { argb: "FF1D1D1F" } },
+  note:     { name: "Calibri", size: 8.5, italic: true, color: { argb: "FFAEAEB2" } },
+};
+const BG = {
+  white:  { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" } },
+  alt:    { type: "pattern", pattern: "solid", fgColor: { argb: "FFF5F5F7" } },
+  header: { type: "pattern", pattern: "solid", fgColor: { argb: "FFFAFAFA" } },
+};
+const BD = {
+  thin: { bottom: { style: "thin", color: { argb: "FFE5E5EA" } } },
+  mid:  { bottom: { style: "thin", color: { argb: "FFC7C7CC" } } },
+  top:  { top:    { style: "thin", color: { argb: "FFD1D1D6" } } },
+};
+const AL = {
+  L:  { horizontal: "left",   vertical: "middle", wrapText: true },
+  C:  { horizontal: "center", vertical: "middle", wrapText: true },
+  R:  { horizontal: "right",  vertical: "middle" },
+  CR: { horizontal: "right",  vertical: "middle" },
+};
+
+function cell(ws, r, c, v, font, fill, align, border) {
+  const cl = ws.getCell(r, c); cl.value = v;
+  if (font) cl.font = font; if (fill) cl.fill = fill;
+  if (align) cl.alignment = align; if (border) cl.border = border;
+  return cl;
+}
+
+async function main() {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("Quotation");
+
+  // 列宽 — col 3 收窄到正好匹配图片宽度
+  ws.getColumn(1).width = 5;
+  ws.getColumn(2).width = 17;
+  ws.getColumn(3).width = 20;   // ~140px, 匹配图片
+  ws.getColumn(4).width = 10;
+  ws.getColumn(5).width = 7;
+  ws.getColumn(6).width = 13;
+  ws.getColumn(7).width = 13;
+
+  let row = 1, seq = 0;
+
+  // ── 标题 ──
+  ws.mergeCells(row, 1, row, 7);
+  cell(ws, row, 1, "Quotation", F.title, BG.white, AL.C, {});
+  ws.getRow(row).height = 44; row++;
+  ws.mergeCells(row, 1, row, 7);
+  cell(ws, row, 1, "Baby & Kids Garments — 50 Pcs Mixed Order  ·  DDP Air Freight", F.subtitle, BG.white, AL.C, {});
+  ws.getRow(row).height = 20; row += 2;
+
+  function section(t) {
+    ws.mergeCells(row, 1, row, 7);
+    cell(ws, row, 1, t, F.section, BG.white, AL.L, BD.mid);
+    for (let c = 2; c <= 7; c++) ws.getCell(row, c).border = BD.mid;
+    ws.getRow(row).height = 32; row++;
+  }
+  function header() {
+    ["No.","Product","Photo","Size","Qty","Unit Price","Amount"].forEach((h, i) => {
+      cell(ws, row, i + 1, h, F.hdr, BG.header, AL.C, BD.mid);
+    });
+    ws.getRow(row).height = 22; row++;
+  }
+
+  // 图片：铺满单元格，极小偏移
+  async function imgFill(r, c, file, w, h) {
+    try {
+      const ext = path.extname(file).slice(1);
+      const id = wb.addImage({ filename: file, extension: ext });
+      ws.addImage(id, {
+        tl: { col: c - 1 + 0.02, row: r - 1 + 0.02 },
+        ext: { width: w, height: h },
+        editAs: "oneCell",
+      });
+    } catch (e) { ws.getCell(r, c).value = "[img]"; }
+  }
+
+  // 单行: rowH=135, img 136×128 (col3=20 ≈140px)
+  async function single(imgFile, prod, sz, qty, up, alt) {
+    seq++; const r = row;
+    ws.getRow(r).height = 135;
+    const amt = +(qty * up).toFixed(2);
+    const bg = alt ? BG.alt : BG.white, bd = BD.thin;
+
+    cell(ws, r, 1, seq, F.body, bg, AL.C, bd);
+    cell(ws, r, 2, prod, F.body, bg, AL.L, bd);
+    cell(ws, r, 3, "",   F.body, bg, AL.C, bd);
+    cell(ws, r, 4, sz,   F.body, bg, AL.C, bd);
+    cell(ws, r, 5, qty,  F.body, bg, AL.C, bd);
+    cell(ws, r, 6, up,   F.body, bg, AL.R, bd); ws.getCell(r, 6).numFmt = "$#,##0.00";
+    cell(ws, r, 7, amt,  F.body, bg, AL.R, bd); ws.getCell(r, 7).numFmt = "$#,##0.00";
+
+    if (imgFile) await imgFill(r, 3, imgFile, 138, 128);
+    row++;
+  }
+
+  // 双行合并: 2×70=140, img 138×132
+  async function merged(imgFile, prod, sz1, q1, sz2, q2, up, alt) {
+    seq++; const r1 = row, r2 = row + 1;
+    ws.getRow(r1).height = 70; ws.getRow(r2).height = 70;
+    const bg = alt ? BG.alt : BG.white;
+    const amt = +((q1 + q2) * up).toFixed(2);
+
+    cell(ws, r1, 1, seq,  F.body, bg, AL.C, BD.thin);
+    cell(ws, r1, 2, prod, F.body, bg, AL.L, BD.thin);
+    cell(ws, r1, 3, "",    F.body, bg, AL.C, BD.thin);
+    cell(ws, r1, 4, sz1,   F.body, bg, AL.C, BD.thin);
+    cell(ws, r1, 5, q1,    F.body, bg, AL.C, BD.thin);
+    cell(ws, r1, 6, up,    F.body, bg, AL.R, BD.thin); ws.getCell(r1, 6).numFmt = "$#,##0.00";
+    cell(ws, r1, 7, amt,   F.body, bg, AL.R, BD.thin); ws.getCell(r1, 7).numFmt = "$#,##0.00";
+
+    cell(ws, r2, 1, "",  F.body, bg, AL.C, BD.thin);
+    cell(ws, r2, 2, "",  F.body, bg, AL.L, BD.thin);
+    cell(ws, r2, 3, "",  F.body, bg, AL.C, BD.thin);
+    cell(ws, r2, 4, sz2, F.body, bg, AL.C, BD.thin);
+    cell(ws, r2, 5, q2,  F.body, bg, AL.C, BD.thin);
+    cell(ws, r2, 6, "",  F.body, bg, AL.R, BD.thin);
+    cell(ws, r2, 7, "",  F.body, bg, AL.R, BD.thin);
+
+    ws.mergeCells(r1, 1, r2, 1);
+    ws.mergeCells(r1, 2, r2, 2);
+    ws.mergeCells(r1, 3, r2, 3);
+    ws.mergeCells(r1, 6, r2, 6);
+    ws.mergeCells(r1, 7, r2, 7);
+
+    if (imgFile) await imgFill(r1, 3, imgFile, 138, 132);
+    row += 2;
+  }
+
+  function subtotal(label, amt) {
+    ws.mergeCells(row, 1, row, 5);
+    cell(ws, row, 1, label, F.bold, BG.white, AL.CR, BD.thin);
+    for (let c = 2; c <= 7; c++) cell(ws, row, c, "", F.bold, BG.white, AL.C, BD.thin);
+    cell(ws, row, 7, amt, F.bold, BG.white, AL.R, BD.thin);
+    ws.getCell(row, 7).numFmt = "$#,##0.00";
+    ws.getRow(row).height = 26; row++; row++;
+  }
+
+  // ═══ 1. BOY 7Y ═══
+  section("Boy, 7 Years  ·  140 cm  ·  5 Styles × 2 Pcs"); header();
+  const b7 = ["O1CN01439sFc1aXJR9dCMBt_!!2274733339-0-cib.jpg","O1CN018fU7kQ1aXJR9dl09Y_!!2274733339-0-cib.jpg","O1CN01Aot0Fx1aXJY9ogDvp_!!2274733339-0-cib.jpg","O1CN01rhakve1aXJRFVo2qM_!!2274733339-0-cib.jpg","O1CN01wsHnbc1aXJRAZL50J_!!2274733339-0-cib.jpg"];
+  for (let i = 0; i < 5; i++) await single(`${BASE}/7岁男孩/${b7[i]}`, "Kids Set", "140cm", 2, 4.50, i % 2 === 1);
+  subtotal("Boy, 7 Years  Subtotal  ·  10 Pcs", 45.00);
+
+  // ═══ 2. GIRL 5Y ═══
+  section("Girl, 5 Years  ·  120 cm  ·  5 Styles × 2 Pcs"); header();
+  const g5 = ["O1CN010Af1kh1aXJS6vRZOz_!!2274733339-0-cib.jpg","O1CN01aB2tB81aXJS7xVzgy_!!2274733339-0-cib.jpg","O1CN01dwAVF61aXJS8kO70t_!!2274733339-0-cib.jpg","O1CN01gd2rBe1aXJS4vDEGe_!!2274733339-0-cib.jpg","O1CN01njRSAS1aXJS6AqN7g_!!2274733339-0-cib.jpg"];
+  for (let i = 0; i < 5; i++) await single(`${BASE}/5岁女孩/${g5[i]}`, "Kids Set", "120cm", 2, 3.80, i % 2 === 1);
+  subtotal("Girl, 5 Years  Subtotal  ·  10 Pcs", 38.00);
+
+  // ═══ 3. BOY 15M-2Y ═══
+  section("Boy, 15M-2Y  ·  7 Products  ·  90 cm + 100 cm Each  (666: 90cm ×2 + 100cm ×1)"); header();
+  const g3 = [
+    ["333","1.jpg",3.45,1,1],["444","2.jpg",3.10,1,1],["555","3.jpg",3.60,1,1],
+    ["666","4.jpg",4.65,2,1],["777","5.jpg",2.95,1,1],["888","6.jpg",2.65,1,1],["999","7.jpg",2.98,1,1],
+  ];
+  for (let i = 0; i < g3.length; i++) {
+    const [, fi, pr, q1, q2] = g3[i];
+    await merged(`${BASE}/15个月-2岁男孩/${fi}`, "Kids Set", "90cm", q1, "100cm", q2, pr, i % 2 === 1);
+  }
+  subtotal("Boy, 15M-2Y  Subtotal  ·  15 Pcs", 51.41);
+
+  // ═══ 4. BABY 1M ═══
+  section("Baby, 1 Month  ·  3 Products, 7 Styles"); header();
+  await single(`${BASE}/1个月婴儿/1.jpg`, "Baby Romper", "0-3M", 3, 8.80, false);
+  for (let s = 2; s <= 4; s++) await single(`${BASE}/1个月婴儿/${s}.jpg`, "Baby Romper", "52cm", 2, 4.00, s % 2 === 1);
+  const ln = ["O1CN01Atuesr1LUMkgdVwtZ_!!2218361591302-0-cib.jpg","O1CN01m77qBb1LUMkWZHLzb_!!2218361591302-0-cib.jpg","O1CN01vcRbeF1LUMkYROsun_!!2218361591302-0-cib.jpg"];
+  for (let i = 0; i < 3; i++) await single(`${BASE}/1个月婴儿/${ln[i]}`, "Baby Romper", "0-3M", 2, 10.00, i % 2 === 1);
+  subtotal("Baby, 1 Month  Subtotal  ·  15 Pcs", 110.40);
+
+  // ═══ 5. SUMMARY ═══
+  ws.mergeCells(row, 1, row, 7);
+  cell(ws, row, 1, "", F.body, BG.white, AL.C, BD.top);
+  ws.getRow(row).height = 8; row++;
+
+  [{l:"Products Total  ·  50 Pcs",v:244.81,g:false},{l:"Freight  ·  DDP Air  ~15 Days",v:121.70,g:false},{l:"Grand Total",v:366.51,g:true}].forEach(s => {
+    ws.mergeCells(row, 1, row, 5);
+    const f = s.g ? F.grand : F.sumFont;
+    ws.getRow(row).height = s.g ? 34 : 26;
+    cell(ws, row, 1, s.l, f, BG.white, AL.CR, BD.thin);
+    for (let c = 2; c <= 6; c++) cell(ws, row, c, "", f, BG.white, AL.C, BD.thin);
+    cell(ws, row, 7, s.v, f, BG.white, AL.R, BD.thin);
+    ws.getCell(row, 7).numFmt = "$#,##0.00"; row++;
+  });
+
+  row++;
+  ws.mergeCells(row, 1, row, 7);
+  cell(ws, row, 1, "Trade Terms: DDP  ·  Air Freight  ·  Transit ~15 Days  ·  Dispatch 1-7 Days  ·  Custom Order MOQ: 500 Pcs/Style", F.note, BG.white, AL.C, {});
+
+  const out = "D:/桌面/Quotation_50Pcs.xlsx";
+  await wb.xlsx.writeFile(out);
+  console.log("OK:", out);
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

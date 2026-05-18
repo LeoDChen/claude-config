@@ -1,0 +1,69 @@
+/**
+ * 探索 TM iframe 网络请求 — 使用 Playwright CDP session
+ * 运行后请在 Chrome TM 页面点击一个聊天联系人
+ */
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+  if (!page) { console.log('No OKKI page'); process.exit(1); }
+
+  // 找 TM iframe target
+  const targetsResp = await (await fetch('http://localhost:9222/json')).json();
+  const tmTarget = targetsResp.find(t => t.url.includes('onetalk.alibaba.com'));
+  if (!tmTarget) {
+    console.log('Available targets:', targetsResp.map(t => t.url?.substring(0, 80)));
+    console.log('TM iframe target not found. Please open TM chat page in Chrome.');
+    process.exit(1);
+  }
+
+  console.log('TM Target:', tmTarget.url.substring(0, 200));
+
+  // 创建 CDP session 连接到 iframe target
+  const cdpSession = await browser.contexts()[0].newCDPSession(page);
+
+  // 但我们连的是 page 的 session... 对于 iframe target, 我们需要用 browser 级别的
+  // Playwright 限制: newCDPSession 只能连 page/frame
+
+  // 改用 frame 的 CDP
+  const tmFrame = page.frames().find(f => f.url().includes('onetalk.alibaba.com'));
+  if (!tmFrame) { console.log('No TM frame'); process.exit(1); }
+
+  // 通过 frame 的 parent page 的 CDP session
+  // 实际上我们用 page 级别的 session 也能收到 iframe 的网络事件
+  await cdpSession.send('Network.enable');
+
+  const requests = [];
+  const bodies = [];
+
+  cdpSession.on('Network.responseReceived', (params) => {
+    const url = params.response.url;
+    if (url.includes('mtop') || url.includes('contact') || url.includes('message') || url.includes('chat') || url.includes('im')) {
+      requests.push({ requestId: params.requestId, url, mimeType: params.response.mimeType });
+    }
+  });
+
+  console.log('Monitoring for 15 seconds. Click a chat contact in Chrome NOW.');
+  await new Promise(r => setTimeout(r, 15000));
+
+  // Get response bodies
+  for (const req of requests.filter(r => r.mimeType === 'application/json').slice(0, 10)) {
+    try {
+      const body = await cdpSession.send('Network.getResponseBody', { requestId: req.requestId });
+      bodies.push({ url: req.url, body: body.body?.substring(0, 500), base64: body.base64Encoded });
+    } catch(_) {}
+  }
+
+  console.log('');
+  console.log('=== Captured (' + requests.length + ') ===');
+  requests.forEach(r => console.log('  ' + r.mimeType + ' ' + r.url.substring(0, 200)));
+
+  console.log('');
+  console.log('=== Bodies (' + bodies.length + ') ===');
+  bodies.forEach(b => console.log('  ' + b.url.substring(0, 100) + '\n    ' + b.body?.substring(0, 400)));
+
+  await cdpSession.detach();
+  console.log('Done.');
+  process.exit(0);
+})().catch(err => { console.error(err.message); process.exit(1); });

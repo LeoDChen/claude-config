@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>新矩阵布局 Mockup</title>
+<style>
+  :root {
+    --bg-primary: #f5f5f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5e7;
+    --border: #d1d1d6; --text-primary: #1d1d1f; --text-secondary: #86868b;
+    --amber: #ff9f0a; --green: #34c759; --red: #ff3b30; --blue: #0071e3; --purple: #af52de;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary); color: var(--text-primary); line-height: 1.5;
+    padding: 24px; max-width: 1500px; margin: 0 auto; }
+  h1 { font-size: 1.2rem; margin-bottom: 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 20px; }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden; margin-bottom: 20px; }
+  .card-hd { background: var(--bg-tertiary); padding: 10px 14px; font-weight: 600; font-size: 13px;
+    border-bottom: 1px solid var(--border); }
+
+  /* ─── 管线 ─── */
+  .pipeline { display: flex; gap: 0; padding: 16px 14px; overflow-x: auto; }
+  .pipe-step { flex: 0 0 110px; text-align: center; position: relative; }
+  .pipe-node { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 6px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    background: var(--bg-tertiary); }
+  .pipe-step.active .pipe-node { background: var(--blue); color: #fff; }
+  .pipe-label { font-size: 11px; font-weight: 600; }
+  .pipe-sublabel { font-size: 10px; color: var(--text-secondary); }
+  .pipe-arrow { position: absolute; top: 14px; right: -4px; color: var(--text-tertiary); font-size: 14px; }
+  .pipe-step:last-child .pipe-arrow { display: none; }
+
+  /* ─── 双轴矩阵 ─── */
+  table.mx { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table.mx th { padding: 8px 6px; border: 1px solid var(--border); background: var(--bg-tertiary);
+    font-weight: 600; font-size: 10px; text-align: center; }
+  table.mx th.stage-col { width: 80px; }
+  table.mx td { border: 1px solid var(--border); text-align: center; padding: 8px 4px; }
+  table.mx td.rl { font-weight: 600; font-size: 11px; background: var(--bg-tertiary); }
+  .cell-hot { background: rgba(255,159,10,0.35); font-weight: 700; cursor: pointer; }
+  .cell-warm { background: rgba(255,159,10,0.2); font-weight: 600; cursor: pointer; }
+  .cell-cool { background: rgba(255,159,10,0.1); cursor: pointer; }
+  .cell-empty { color: var(--text-tertiary); font-size: 10px; }
+
+  /* ─── 终态区 ─── */
+  .terminal-row { display: flex; gap: 16px; padding: 14px; }
+  .terminal-pool { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .terminal-pool h4 { font-size: 12px; margin-bottom: 6px; }
+  .terminal-pool .from-tag { font-size: 10px; color: var(--text-secondary); background: var(--bg-tertiary);
+    padding: 1px 6px; border-radius: 10px; }
+  .terminal-pool .client-row { font-size: 11px; padding: 3px 0;
+    display: flex; justify-content: space-between; border-bottom: 1px dotted var(--border); }
+  .terminal-pool .client-row:last-child { border-bottom: none; }
+
+  .legend { display: flex; gap: 18px; padding: 8px 14px; font-size: 10px; color: var(--text-secondary); }
+  .stale { border-color: var(--red); background: rgba(255,59,48,0.04); }
+  .stale h4 { color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>客户双轴矩阵（新版 Mockup）</h1>
+<div class="subtitle">8 阶段生命周期管线 × S/A/B/C/D 质量等级 | 终态独立池 | 仅供布局评审</div>
+
+<!-- ──────── 管线示意 ──────── -->
+<div class="card">
+  <div class="card-hd">生命周期管线（活跃阶段）— 8 阶段</div>
+  <div class="pipeline">
+    <div class="pipe-step active"><div class="pipe-node">1</div><div class="pipe-label">需求探索</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">2</div><div class="pipe-label">报价已发</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">3</div><div class="pipe-label">谈判中</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">4</div><div class="pipe-label">待付款</div><div class="pipe-sublabel">谈判完成·等付款</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">5</div><div class="pipe-label">待发货</div><div class="pipe-sublabel">款到·备货/生产中</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">6</div><div class="pipe-label">已发货</div><div class="pipe-sublabel">在途</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">7</div><div class="pipe-label">已签收</div><div class="pipe-arrow">→</div></div>
+    <div class="pipe-step active"><div class="pipe-node">8</div><div class="pipe-label">待返单</div><div class="pipe-sublabel">复购窗口</div></div>
+  </div>
+  <div style="padding:0 14px 10px;font-size:10px;color:var(--text-secondary);">
+    从 需求探索 / 报价已发 / 谈判中 / 待付款 任一节点均可掉入 ↓ 终态池
+  </div>
+</div>
+
+<!-- ──────── 双轴矩阵 ──────── -->
+<div class="card">
+  <div class="card-hd">活跃阶段 × 质量等级 <span>（点击数字弹出客户名单 + 方向建议）</span></div>
+  <div style="overflow-x:auto;">
+    <table class="mx">
+      <tr>
+        <th class="stage-col">阶段 \ 等级</th>
+        <th>S</th><th>A</th><th>B</th><th>C</th><th>D</th>
+      </tr>
+      <tr>
+        <td class="rl">需求探索</td>
+        <td class="cell-warm">1</td>
+        <td class="cell-hot">37</td>
+        <td class="cell-hot">117</td>
+        <td class="cell-warm">26</td>
+        <td class="cell-cool">6</td>
+      </tr>
+      <tr>
+        <td class="rl">报价已发</td>
+        <td class="cell-warm">1</td>
+        <td class="cell-warm">8</td>
+        <td class="cell-hot">26</td>
+        <td class="cell-warm">10</td>
+        <td class="cell-cool">13</td>
+      </tr>
+      <tr>
+        <td class="rl">谈判中</td>
+        <td class="cell-hot">4</td>
+        <td class="cell-hot">85</td>
+        <td class="cell-hot">68</td>
+        <td class="cell-warm">2</td>
+        <td class="cell-empty">0</td>
+      </tr>
+      <tr>
+        <td class="rl">待付款</td>
+        <td class="cell-warm">1</td>
+        <td class="cell-warm">3</td>
+        <td class="cell-warm">8</td>
+        <td class="cell-cool">2</td>
+        <td class="cell-empty">0</td>
+      </tr>
+      <tr>
+        <td class="rl">待发货</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-warm">4</td>
+        <td class="cell-warm">3</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-empty">0</td>
+      </tr>
+      <tr>
+        <td class="rl">已发货/在途</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-cool">2</td>
+        <td class="cell-cool">1</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-empty">0</td>
+      </tr>
+      <tr>
+        <td class="rl">已签收</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-warm">1</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-empty">0</td>
+      </tr>
+      <tr>
+        <td class="rl">待返单</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-cool">1</td>
+        <td class="cell-warm">3</td>
+        <td class="cell-empty">0</td>
+        <td class="cell-empty">0</td>
+      </tr>
+    </table>
+  </div>
+  <div class="legend">
+    <span>颜色越深 = 该格客户越多</span>
+    <span>|</span>
+    <span>S/A/B/C/D = 客户质量等级</span>
+    <span>|</span>
+    <span>数字为示例数据</span>
+  </div>
+</div>
+
+<!-- ──────── 终态区 ──────── -->
+<div class="card">
+  <div class="card-hd">终态池 <span>（从活跃阶段掉出，不出现在上方矩阵）</span></div>
+  <div class="terminal-row">
+    <div class="terminal-pool">
+      <h4>⏸ 搁置 — 自然中断，未明确拒绝</h4>
+      <div class="client-row"><span>Fatima <span class="from-tag">← 报价已发</span></span><span>沉默 12 天</span></div>
+      <div class="client-row"><span>Musa <span class="from-tag">← 谈判中</span></span><span>沉默 3 周</span></div>
+      <div class="client-row"><span>Grace <span class="from-tag">← 待付款</span></span><span>PI 已发，未付</span></div>
+      <div class="client-row"><span>David <span class="from-tag">← 需求探索</span></span><span>问了一句就不回了</span></div>
+      <div style="font-size:10px;color:var(--text-secondary);margin-top:6px;">回访策略：直接跟进，"上次那个案子还在推进吗？"</div>
+    </div>
+    <div class="terminal-pool stale">
+      <h4>❌ 未成交 — 明确拒绝/放弃</h4>
+      <div class="client-row"><span>Ibrahim <span class="from-tag">← 谈判中</span></span><span>价格太高</span></div>
+      <div class="client-row"><span>Ngozi <span class="from-tag">← 报价已发</span></span><span>已找别家</span></div>
+      <div class="client-row"><span>John <span class="from-tag">← 待付款</span></span><span>明确说暂时不需要</span></div>
+      <div style="font-size:10px;color:var(--red);margin-top:6px;">回访策略：换产品/新切入点/等认证更新后重新激活</div>
+    </div>
+  </div>
+  <div class="legend">
+    <span>每个终态客户标注 ← 从哪个阶段掉出，决定回访切入角度</span>
+    <span>|</span>
+    <span>搁置和未成交行动方向完全不同，必须区分</span>
+  </div>
+</div>
+
+<div style="margin-top:24px;font-size:10px;color:var(--text-secondary);">
+  Mockup 仅供布局评审，数字为示例。实际数据需跑脚本生成。
+</div>
+
+</body>
+</html>

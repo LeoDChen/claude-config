@@ -1,0 +1,554 @@
+=== S1 METADATA CLASSIFICATION ===
+Total: 466 conversations
+
+--- P0 Candidates: 0 ---
+
+--- P1 Candidates: 18 ---
+  [0d][CN] Assistant Eva | You haven't responded to this buyer yet, which may risk losi |  | 24h有互动;7天内有互动
+  [0d][IQ] alnwd alnwd | مرحباً، هذا المنتج مصنوع من القطن الخالص، ومناسب للأطفال الر |  | 24h有互动;7天内有互动
+  [0d][US] Inderpreet kaur | In that case, we can provide an accurate quote |  | 24h有互动;7天内有互动
+  [0d][ES] diego vargas | Since you have read the conversation, the automatic receptio | SYSMSG | 24h有互动
+  [0d][GH] jonathan aston | The total product cost is $536. What is your delivery addres |  | 24h有互动;7天内有互动
+  [0d][US] Aloh Voma | I will communicate with your freight forwarder and then send |  | 24h有互动;7天内有互动
+  [1d][GH] Ernestina Afriyie | Since you have read the conversation, the automatic receptio | SYSMSG | 24h有互动
+  [1d][FR] Clara ElAssaad | Est-ce que vous en avez besoin pour un usage personnel ou po |  | 24h有互动;7天内有互动
+  [1d][ZA] ali Amjid | Okay, we will arrange it as soon as possible after payment,  |  | 24h有互动;7天内有互动
+  [2d][CD] Rosette Ngoy | Ce n'est pas un produit de notre magasin, n'est-ce pas ? | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [2d][CI] Aboulaye Rabiatou | Avez-vous besoin de produits en stock ou de produits sur mes | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [2d][ZM] Christabel Kanunsha | We will arrange shipment as soon as possible after payment | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [2d][ZM] Esther Chola | Thank you for your inquiry. The price of this product mainly | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [2d][CI] Bamba Ami | Merci pour votre demande de prix. Le prix de ce produit dépe | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [4d][ZM] Christine Muwela | Sorry, I'll check tomorrow if the factory has any stock avai | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [4d][EG] ayh khyry | Hello, can I talk to you? | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [5d][SA] Hakim Ezat | تفاصيل عرض الأسعار: 
+ سعر الوحدة للمنتج: 3.68 دولار أمريكي 
+ | 核心 | 核心市场活跃;7天内有互动;核心市场2周内
+  [6d][ZM] Aka-Mwau Esme | Since you have read the conversation, the automatic receptio | 核心,SYSMSG | 核心市场活跃;核心市场2周内
+
+--- P2 Candidates: 26 ---
+  [2d][BH] Mona almuharraqy | /:handshake. |  | 7天内有互动
+  [2d][TG] WELE Mounia | Voici ce qui pourrait vous intéresser. |  | 7天内有互动
+  [2d][US] Marcos Kuyu | Veuillez me communiquer la quantité et l'adresse de livraiso |  | 7天内有互动
+  [2d][OM] Mezna Alawfi | ما هو الفئة العمرية؟ |  | 7天内有互动
+  [2d][US] Christelle ITwite | Bonjour, nous sommes des fournisseurs de Disney et de Pamper |  | 7天内有互动
+  [2d][US] adriano.1989 NA | Desculpe, fui atrasado hoje devido a um assunto urgente. Res |  | 7天内有互动
+  [3d][IN] Keinjol Tata | I am the manager of the company's foreign trade department |  | 7天内有互动
+  [3d][UK] Alina Svinchuk | Could you please briefly introduce the product categories an |  | 7天内有互动
+  [3d][AR] Celeste Albarracin | De acuerdo, el precio unitario del producto es de 6 dólares. |  | 7天内有互动
+  [3d][US] Begimai Akymbekova | Мы являемся партнерской фабрикой Disney и Pampers, уровень б |  | 7天内有互动
+  [3d][IQ] Aula Alsaad | سعر الوحدة لهذا المنتج هو 5.6 دولار أمريكي. |  | 7天内有互动
+  [4d][OM] Abdulrhman alal | These are all the styles, sorry we just finished our holiday |  | 7天内有互动
+  [4d][KE] Brian Robert Ocholi | There are different styles available; you can choose the sty |  | 7天内有互动
+  [4d][PK] Asma Noor | Good morning, I wish you a pleasant day. I am here to update |  | 7天内有互动
+  [5d][GH] arshavin amoah | Arshavin, your 3-piece rabbit gift box is ready. I have conf |  | 7天内有互动
+  [5d][IQ] amer ly | مرحباً حسين،
+
+ليو هنا من مصنع نجم النجوم للمنسوجات. أتفقد فق |  | 7天内有互动
+  [5d][TZ] rehema kiseyu | I see you are interested in this type of product. Are you se |  | 7天内有互动
+  [6d][US] yoselyn Rodriguez | Solo fabricamos ropa para bebés y niños pequeños. |  | 7天内有互动
+  [6d][LB] Sara Dibes | If there are no issues, we will ship as soon as possible |  | 7天内有互动
+  [7d][US] Sifa Vano | Please wait a moment, I will send you the details |  | 7天内有互动
+  [7d][US] LISKEY RIVERO | Puedes elegir un poco y luego te lo presento. |  | 7天内有互动
+  [7d][TZ] Mumtaz Aziz | What is your delivery address? I will also quote you the shi |  | 7天内有互动
+  [8d][SA] Wigdan Gasim | هذا المنتج متوفر في المخزون. كم قطعة تريده؟ وإلى أي بلد سيتم | 核心 | 核心市场2周内
+  [9d][CD] Djany Konzi | D'accord, je vous enverrai les informations de devis complèt | 核心 | 核心市场2周内
+  [13d][AE] Adm Reda | أقدم لك اقتراحات مُخصَّصة. | 核心 | 核心市场2周内
+  [13d][ZM] Regina Kabanda | Yes, this product is available in sizes from 6 months to abo | 核心 | 核心市场2周内
+
+--- P3 Candidates: 67 ---
+  [8d][AR] Mel Paccot | En cuanto a los baberos, también tenemos la categoría de bab |  | 
+  [8d][HK] Diana Yao | Dear Diana,
+
+We offer two bib options as above. Both can mee |  | 
+  [8d][US] Eddie Kilumba | Ce modèle est en stock. Combien de pièces vous faut-il ? Dan |  | 
+  [8d][AR] Dario Callini | Dear Dario Callini,
+
+Thank you for your inquiry. We are a pr |  | 
+  [8d][IQ] zainab Babesets | شكراً لاهتمامك! هل يمكنك تأكيد الكمية التي تحتاجها وعنوان ال |  | 
+  [9d][ZA] Charlotte Asibey | OK |  | 
+  [9d][FR] raymond cramotte | Merci pour cette liste si détaillée, c'est très clair. Selon |  | 
+  [9d][US] Doris Akpabio | Hello, I am Leo. Do you need samples? |  | 
+  [9d][BY] Nasta Goncaruk | Вы осуществляете продажи в России? Если да, то можете предос |  | 
+  [9d][OM] azaan ss | Regarding the Kids Cotton Set you asked about, the price for |  | 
+  [11d][FR] Cindy Nadal | Voici les détails des frais de port : 
+ 
+ Montant : 68 dolla |  | 
+  [11d][US] fernande Pochette | Hi, hope everything is going well for you! Just checking in  |  | 
+  [11d][GH] Susuanna ParkerAdentwi | After confirmation, I will create an order for you |  | 
+  [11d][US] Jemima Piema | Merci de l'intérêt que vous portez à nos ensembles pour enfa |  | 
+  [12d][LY] Ahmed Darrat | Thank you for your interest in our children's sets. In order |  | 
+  [13d][CN] User name | Hello |  | 
+  [15d][OM] Amal Alamhrooqi | لقد استفسرت بالفعل من وكيل الشحن، ولا توجد خطوط شحن بنظام DD |  | 
+  [15d][US] Melisapierina Apenaadvincula | Somos fabricantes autorizados por Disney y nuestros producto |  | 
+  [16d][LY] Emad Jumah | You can take a look and choose, then tell me which pattern y |  | 
+  [16d][SA] Conteza Elias | Hi Teza! 😊
+
+Welcome — and congratulations on starting your  | 核心 | 
+  [16d][VE] Deisy Hoyos | Estimated Deisy holes,
+
+I have seen that you are looking for |  | 
+  [16d][IN] Tanaya Mallick | Dear Tanaya Mallick,
+
+Greetings from Yiyang Xiaoxingxing Gar |  | 
+  [16d][GH] Patience Mensah Agyeman Prempeh | Hi, Patience， nice to meet you! You have found the right fac |  | 
+  [16d][AU] irfan khan | Irfan, I am from Yiyang Xiaoxingxing Apparel Company. We are |  | 
+  [16d][CN] User name | 好的 |  | 
+  [16d][CI] Vie Merveilleux | Hello [customer name], 
+ 
+ Hope you are doing well. As Labor | 核心 | 
+  [17d][ZM] bester chandah | I'll check the shipping cost and send it to you for confirma | 核心 | 
+  [17d][ZM] Fairness Sikani | Hi there! Just checking in—Happy early Labor Day! 🇿🇲 
+
+Reg | 核心 | 
+  [17d][RU] YULIA GOLUBTSOVA | Нет проблем, я подожду тебя. Примерно сколько времени? |  | 
+  [18d][US] Kings Sikaz | Thank you for your inquiry. The price of this product mainly |  | 
+  [18d][KE] fatma delicacies | Jumlah barang yang Anda pilih sebagai target adalah 100-500  |  | 
+  [19d][CD] Nelly Lupity | Pourriez-vous me dire le modèle, la taille et la quantité so | 核心 | 
+  [19d][ZW] Cryn Nyabadza | There are a total of these 4 styles |  | 
+  [20d][DE] Gabriela Bajer | Dies ist die BSCI-Zertifizierung, die Disney-Fabrikinspektio |  | 
+  [21d][KE] Umm Aysha | We don't have such photos |  | 
+  [21d][GH] Lois Anokye | Hello, are there any other products you are interested in? |  | 
+  [21d][KE] rayan shafi | Can you talk about your situation? |  | 
+  [21d][US] syf khdr | صباح الخير، يرجى التحقق من معلومات العرض في الوقت الذي يناسب |  | 
+  [22d][EG] Loza Bondok | You're welcome, I'll update you with the information then | 核心 | 
+  [22d][CI] JeanRomain Ouffouet | Hello, I hope everything is going well for you. I would like | 核心 | 
+  [22d][IQ] fatmt mtr | تفاصيل عرض أسعار المنتج: 
+ عدد قطع المنتج: قطعتان 
+ سعر الوح |  | 
+  [22d][ZM] Peggy Hamungala | The shipping cost details are as follows: 
+ 
+ Amount: $176 
+ | 核心 | 
+  [24d][US] Rocio L | Yes, that would be best; we have a very rich selection of ex |  | 
+  [24d][ZM] florence salima | You're welcome! If you have any other needs or questions, pl | 核心 | 
+  [25d][MW] Flora Phisso | /:smile. |  | 
+  [25d][NP] ShudeshB Thapa | Dear ShudeshB Thapa, 
+ I am pleased to process 100 orders fo |  | 
+  [25d][ZM] martin wamundila | The shipping cost details are as follows: 
+ 
+ Amount: $50 
+  | 核心 | 
+  [25d][MZ] Eulalia Julio Chiau | Prezada Eulalia, dando continuidade à nossa última conversa  |  | 
+  [25d][US] Consolate Kasongo | Bonjour [Nom du client], j'espère que vous allez bien ! Je v |  | 
+  [25d][LR] Tamba Fayiah | Hello, Tamba! I hope you're having a great day. Have you had |  | 
+  [25d][CL] Vanessa Arroyomejias | Recibido, ADD recibido. 
+ 
+ 100-500 unidades, fabricante de  |  | 
+  [25d][US] Josh Martinez | Thank you for your honesty! I understand; however, how about |  | 
+  [26d][DE] Lisa Ketelsen | Wow, your scale is quite impressive! With so many markets, y |  | 
+  [26d][MZ] Euzito Carlos | Escolha e veja, e me diga quais você gosta. |  | 
+  [27d][IN] SKYHIGH COMPANY | Okay, I received it |  | 
+  [27d][US] Vanilla Balite | Can you tell me which colors you like? |  | 
+  [28d][US] Karl brown | Dear Karl, we sincerely apologize for the delay I have alrea |  | 
+  [28d][ZM] carol chisumpa | I have selected a few products that you might be interested  | 核心 | 
+  [28d][KW] lela alamera | مرحباً، ما هي طريقة التوصيل التي تفضلها؟ بعد التأكيد، يمكننا |  | 
+  [29d][AE] Nanthini Rss | Hello, Nantini, 
+ Of course, the samples are absolutely fine | 核心 | 
+  [29d][ZW] Tafadzwa Rinemota | Hello, hope everything is going well for you! We haven't bee |  | 
+  [29d][SN] Boubacar DIARISSO | 好的 |  | 
+  [30d][EG] Heba Gamal | Sorry, the freight forwarder staff are off today. I will che | 核心 | 
+  [30d][CG] mavie Mbouele | /:handshake. |  | 
+  [30d][ID] Mery Xu Xu | Saya telah mengirimkan email kepada Anda, Anda bisa memeriks |  | 
+  [30d][US] SUSAN MPUNGA | Okay, looking forward to your feedback! |  | 
+  [30d][CD] Christy Malemba | La gamme de tailles de ce produit est de 90 à 140 cm, ce qui | 核心 | 
+
+--- P4 Candidates: 355 ---
+  [2d][CA] Tahar benmohamed | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [3d][IQ] sarah alnajar | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [4d][US] Amenanchristine Boua | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [5d][US] Gabriela Torrealba |  | SYSMSG | 
+  [5d][US] Angela O |  | SYSMSG | 
+  [6d][IQ] Israa Fawzi | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [8d][US] Claudia Mersilus | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [8d][US] Aldane Elister | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [8d][IL] Talosh talosh | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [9d][CI] Katchenan Soro |  | 核心,SYSMSG | 核心市场2周内
+  [10d][CI] TheodoraAdelaide Mahe | Since you have read the conversation, the automatic receptio | 核心,SYSMSG | 核心市场2周内
+  [11d][SA] User name |  | 核心,SYSMSG | 核心市场2周内
+  [12d][GN] Assiatou Barry | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [12d][BN] Krisgel Igros | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [14d][CM] Lohgah Sharon | You have a visitor. Follow up with them as soon as possible. | SYSMSG | 
+  [14d][UZ] Sayfullaeva Shahnoza | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [14d][US] AnneMarie Nsomp | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [15d][ML] maimouna cisse | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [16d][ZM] Ruth mutambo | Since you have read the conversation, the automatic receptio | 核心,SYSMSG | 
+  [16d][CN] d zm | This buyer has been pre-screened and has a clear request. Pl | SYSMSG | 
+  [17d][PT] victorina Rosada |  | SYSMSG | 
+  [17d][DZ] Assia Assia |  | SYSMSG | 
+  [18d][IQ] nshwan altayy | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [19d][EG] adm hsyn | Since you have read the conversation, the automatic receptio | 核心,SYSMSG | 
+  [19d][US] undefined | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [21d][MZ] Sonia Monjane | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [22d][US] Chloé St-Germain |  | SYSMSG | 
+  [22d][LY] BuyLi Now |  | SYSMSG | 
+  [22d][ID] Afiq Amrullah | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [22d][LY] slwyahmd bas | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [23d][ZW] Mercy Tambayi | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [24d][CI] Amah Doumbia | Since you have read the conversation, the automatic receptio | 核心,SYSMSG | 
+  [24d][MA] Laroussi Ilhame | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [25d][SA] Saleh Hamad | Since you have read the conversation, the automatic receptio | 核心,SYSMSG | 
+  [27d][PH] ChaireMae DePedro | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [27d][US] ChristianTshikomb Muland | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [28d][CM] Ayuk Esther Ojong | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [28d][BJ] Hind AHOUANTO | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [29d][VE] Orglys Ruiz | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [30d][ZR] denewade khady |  | SYSMSG | 
+  [30d][CA] Rahmani Khadija | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [31d][FR] Kouada Wanda | Greetings Kouada,
+
+Addressing your specific needs, our Baby  |  | 
+  [31d][US] bshry wn | أنت تحتاج إلى 90 سم، أليس كذلك؟ |  | 
+  [31d][GH] Justina Sosa | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [31d][HU] Krisztina Juhasz | Dear Ms. Krisztina Juhasz:
+Thank you for your RFQ demand for |  | 
+  [31d][MX] Gal Frishwaser | Hola Gal,
+
+Thank you for your new inquiry. We remember you f |  | 
+  [31d][TZ] Mom Gianna | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [31d][TR] sahra gül körükçü | İyi bayramlar!   Türkiye'deki bayram tatili nedeniyle yoğun  |  | 
+  [31d][US] Firmino Nunes | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [31d][US] Fontus Richardson | Nous n'avons que des tailles pour 6 à 9 mois. |  | 
+  [31d][UA] Perizat Ernazarova | Привет, тебе нравятся детские летние костюмы? Я могу предлож |  | 
+  [32d][BJ] NONFON Ariace | Vous avez besoin de marchandises en stock, n'est-ce pas ? |  | 
+  [32d][MA] ABDELMOULA LEKRET | Which method do you think is better? |  | 
+  [32d][ZR] Nedith Nsimba | Nos produits sont de haute qualité et polyvalents. Pensez à  |  | 
+  [33d][SN] Abdou Salam Kane | L'effet anti-fuite est plutôt bon. |  | 
+  [33d][CI] Kamadenise Konan | Voici notre usine. | 核心 | 
+  [33d][CD] Mamanje Jean | Hallo | 核心 | 
+  [33d][CI] NACOULMA CALEB | Je suis Léo, comment dois-je vous appeler ? | 核心 | 
+  [33d][ZR] ToPray Mvuenga | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [33d][IT] Gift Bello ALIU | This is our factory, specializing in infant and toddler clot |  | 
+  [33d][DZ] alhajt alrby |  | SYSMSG | 
+  [33d][PS] Mosab Sh | مرحباً، مصنعنا يتعاون مع ديزني، وهو أكبر مورد لمنتجات ملابس  |  | 
+  [33d][EG] Hdh Gjg | هل تحتاج إلى عينة من هذا التصميم؟ ما هو عنوان استلامك؟ هل هو | 核心 | 
+  [34d][ZW] emmanuel maguma | /:handshake./:handshake./:handshake./:handshake. |  | 
+  [34d][VN] Khanh Bui Thi Ngoc | Tuổi chỉ là một tham chiếu. Để có sự vừa vặn tốt nhất, vui l |  | 
+  [34d][RU] Temur Hasanov | Please let me know the quantity and size you need, so I can  |  | 
+  [34d][ID] wandi wandi | Rincian biaya pengiriman adalah sebagai berikut: 
+ 
+ Jumlah: |  | 
+  [34d][GH] Dorothy Bosea | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [35d][US] Daimy Cucarella | Hello |  | 
+  [35d][EG] Haneen Khaled | مصنعنا هو أكبر مورد لملابس الأطفال والرضع لشركة ديزني في الص | 核心 | 
+  [35d][ES] leydi vargas | There is a courier service that ships to Venezuela, but it d |  | 
+  [35d][BD] Sumaiya Umama |  | SYSMSG | 
+  [35d][RO] Ssaa Ssaa | صباح الخير! أتمنى أن تكون الأمور على ما يرام. لمواصلة طلبك،  |  | 
+  [35d][ZW] Chipo Kamuriwo | Hello, I have checked the shipping costs from China to Harar |  | 
+  [35d][ES] SANTIAGOGARCIA JUSTA | Esta es nuestra fábrica. |  | 
+  [35d][US] Rahilu Bah | This is our factory |  | 
+  [35d][US] julie brown | Yes, that's my colleague; you can also consult her if you ha |  | 
+  [36d][IN] SONIYA PAUL | Hello |  | 
+  [36d][PH] Sharmaine Jalgalado | My name is Leo, nice to meet you |  | 
+  [36d][DZ] nesrin hafri | هل تعتقد أن المنتجات التي أوصيت بها للتو هي ما تبحث عنه، أم  |  | 
+  [36d][UZ] Aziz Zaripov | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [36d][ZM] Becky Nams | /:handshake. | 核心 | 
+  [36d][GA] Marcelle Ngoulou | Notre usine est un fournisseur de vêtements pour bébés et je |  | 
+  [37d][UK] Maria  Evans | Okay, thank you for your reply, I'm very happy/:smile. |  | 
+  [37d][FR] Lilian John |  | SYSMSG | 
+  [37d][US] Elisabeth Tony | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [38d][ID] Tresia Leleany | This is our factory |  | 
+  [38d][US] so ma | The child is growing, so it's better to buy a bigger size |  | 
+  [39d][FR] Agnes Tlomak | Notre usine est un fournisseur de vêtements pour bébés et je |  | 
+  [39d][IN] Snehal Kachhadiya | Good morning! I hope everything is going well for you. Have  |  | 
+  [39d][US] Yusneiry Ramirez | Para bebés de 24 meses (2 años), recomiendo la talla 90. 
+ 
+ |  | 
+  [39d][CM] Lamare Fatim Yigam |  | SYSMSG | 
+  [40d][CM] Mbankwene Mbankwene | 还需要其它的产品吗 |  | 
+  [40d][MX] Todo BonitoparaBebe | Hello, what type of products are you interested in? I can as |  | 
+  [41d][MU] Soujeeta reetoo | This is the revised invoice with the product quantity change |  | 
+  [41d][AU] Lu Julie | After you have made your selection, you can share with me th |  | 
+  [41d][SA] Annabel Olarte | The unit price of the product is $2.9. There are 56 items in | 核心 | 
+  [41d][CG] Ella Christelle SAMBA | Les tailles de 73 à 130 cm conviennent aux enfants de 6 à 9  |  | 
+  [41d][ID] Sittirohani Sit |  | SYSMSG | 
+  [41d][IQ] Mus tafa | هل تتحدث معي باللغة العربية أم الإنجليزية؟ |  | 
+  [42d][TZ] Christina Thomas | Do you need a custom order or a ready-made product? |  | 
+  [43d][RU] Ibragimova Feruza | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [43d][US] A A | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [43d][IN] DEEPAK MANGLANI |  | SYSMSG | 
+  [43d][PK] Zani Sheikh | The shipping cost details are as follows: 
+ 
+ Amount: $58 
+  |  | 
+  [43d][IQ] Youssif Mohammed | I have created an order for you |  | 
+  [45d][ZA] Mbali Sibiya | What sizes do you need? |  | 
+  [45d][SA] hsn hsan | الخطة الثانية: 
+ المبلغ: 232 دولارًا أمريكيًا 
+ 
+ شروط التجا | 核心 | 
+  [45d][RU] Tanya Domanina | Вариант 3: 
+ Сумма: 8750 рублей 
+ 
+ Термины торговли: DDP (п |  | 
+  [45d][UK] Rizwan ALi | The price of the product is 17 RMB |  | 
+  [47d][CD] Guellor Isenge | It's okay, did you add it? | 核心 | 
+  [47d][IN] Ronak Patel | You can have more options |  | 
+  [47d][VE] Yohali Herrera | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [47d][LY] Gr Grand | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [48d][SN] RoyalShoppingSenegal Senegal | J'ai entendu une blague aujourd'hui, je la partage avec toi  |  | 
+  [48d][ZR] Tania Manzongani | The prices are: $3.2, $3.5, $3, and $2.3 per item. Let me kn |  | 
+  [49d][IN] Vivek Goel | Dear Vivek,
+
+Thank you for your inquiry about 500,000 pairs  |  | 
+  [49d][KE] Loyal Queen | Hi, just checking in to see if you need more information or  |  | 
+  [49d][US] Kakundika Heritier | 一旦离开平台发生纠纷或遭遇欺诈，您的权益将无法得到平台保障。若主动引导买家进行站外沟通或交易，一经投诉或被平台巡查发现， |  | 
+  [49d][BR] MarisadeFatima Souza | Olá! Notamos o seu interesse em nossas roupas de bebê. Você  |  | 
+  [50d][ID] Dian Novitasari |  | SYSMSG | 
+  [50d][US] Fatima Suarez |  | SYSMSG | 
+  [50d][ZW] Nomagugu Nkomo | If you like any product, you can let me know, and I will pro |  | 
+  [52d][GR] mikaella ioannidou | Dear, we have a new catalog. Please find it attached here fo |  | 
+  [52d][AR] Micka Gonzalez | Nuestra fábrica colabora con Disney y es el mayor proveedor  |  | 
+  [53d][NL] Leon Scott Kennedy | 鸭梨 |  | 
+  [53d][SE] Batool Makhzoum | تفاصيل تكاليف الشحن كالتالي: 
+ 
+ المبلغ: 39.5 دولار أمريكي 
+ |  | 
+  [54d][PH] Mariacaselyn Aninion | I will deliver the product to the freight forwarder's addres |  | 
+  [54d][US] Jo Ki | Option 2: Shipping cost details are as follows: 
+ 
+ Amount:  |  | 
+  [54d][EG] Aisha Nassar | هذه هي أسعار الدولار مقابل الأحجام المختلفة، هل تحتاج إلى تح | 核心 | 
+  [54d][GA] farel nash | Do you need a custom order or a ready-made product? |  | 
+  [55d][NG] Mbam Oluchi | These are the prices of RMB in different denominations. Do y |  | 
+  [56d][US] Vhyne SanAndres | I need to convert the unit price of your currency |  | 
+  [57d][CM] OUSMANHANGATA HALIMA | Parfait. N'hésitez pas à me contacter si vous avez d'autres  |  | 
+  [57d][MX] Dania Sanchez | Tiempo estimado de entrega: 10-25 días hábiles. |  | 
+  [57d][IT] Christian Ferraro | Dear Gloria,
+
+Thank you for your patience. I want to be comp |  | 
+  [57d][NO] Angelika Satro AandS Factory | Okay, I'll resend it |  | 
+  [57d][TR] Fatma Ucar | I am now checking the shipping costs for you. I apologize fo |  | 
+  [57d][GH] zenabu issaka | Hi there! Just checking in. Since you're in Ghana, hope you  |  | 
+  [57d][US] Shirley Tyler | Hello there, 
+ 
+ Thank you for your inquiry! We are happy to |  | 
+  [57d][US] Valoune Etienne | Hello! Our adorable 8-piece rabbit gift sets are in stock an |  | 
+  [58d][GA] Sarah nell roly Othayi MAMALHY | N'oubliez pas de me faire un retour après réception de la co |  | 
+  [58d][CD] Grace Kanku | Pourriez-vous me communiquer l'adresse de votre transitaire  | 核心 | 
+  [58d][UK] Laura McGlade. | Good morning, regarding the baby onesies we discussed earlie |  | 
+  [58d][CG] Salome Ambali |  | SYSMSG | 
+  [58d][TZ] Lujayna Dida | What I mean is that it has already arrived at the freight fo |  | 
+  [58d][MR] Fama Sow | La gamme de tailles de ce produit est de 90 à 120 cm et il e |  | 
+  [59d][LB] ROLEENGENOVA BORCELAS |  | SYSMSG | 
+  [59d][CD] Keren Matadi |  | 核心,SYSMSG | 
+  [59d][ZM] sylvia malawa | Dear, have you had a chance to review the catalog? 😊 We'd l | 核心 | 
+  [60d][SG] Tiffany tay |  | SYSMSG | 
+  [60d][UZ] Nilufar Isa | Здравствуйте, как вам рекомендованные товары? 😊 Ваше мнение |  | 
+  [60d][AU] Kiana Talbot | Hi! Just checking in to see if you have any questions about  |  | 
+  [60d][CI] djaha anik | Bonjour ! J'espère que vous allez bien. Avez-vous eu l'occas | 核心 | 
+  [60d][MZ] Eunice Mucavele | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [61d][US] Ivana Rosales | Are you selling in your own store? |  | 
+  [61d][VE] Dayana Areinamo | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [62d][US] Mariearcheline Deorsainvil | What age group are you looking for? |  | 
+  [63d][US] Asselya Marina | Thank you for your trust, I will wait for you |  | 
+  [63d][AU] Taylah Wolff | Are you there? |  | 
+  [63d][US] musitekie masanga | Trois pièces de 80 cm, c'est bien ça ? |  | 
+  [63d][US] norma  aguilar | I have temporarily set the delivery address to the United St |  | 
+  [64d][CL] Oliver Rivera | I see you've read it~ Could you please reply when you have a |  | 
+  [64d][NO] Linda Vaage | I see you've read it~ Could you please reply when you have a |  | 
+  [64d][US] Roseline Roseline | Bonjour ! J'espère que vous allez bien. Avez-vous eu l'occas |  | 
+  [64d][RU] Latifa Abdullaeva | Детская одежда действительно требует высоких требований к ма |  | 
+  [64d][ES] Alina K |  | SYSMSG | 
+  [64d][DE] Ramona Jeutner | Vielen Dank für deine Antwort. Ich werde dich umgehend infor |  | 
+  [65d][GE] Anabel Gevorgyan | How long does it take for the shipment to arrive in your cou |  | 
+  [65d][US] Yvonne Mbithe |  | SYSMSG | 
+  [65d][FR] Gueye Khadidiatou |  | SYSMSG | 
+  [65d][IT] camillagiusy pasto |  | SYSMSG | 
+  [65d][ZM] Peter Mungulube |  | 核心,SYSMSG | 
+  [65d][IL] mws bgh |  | SYSMSG | 
+  [65d][PS] Aseel Nassar |  | SYSMSG | 
+  [65d][AE] Ananthu Anilkumar | I understand that the situation in the Middle East has been  | 核心 | 
+  [65d][UZ] Muhayyo Xasanova |  | SYSMSG | 
+  [65d][US] Lukas Pabst |  | SYSMSG | 
+  [66d][US] Aragsan Abdul | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [66d][RO] Tina Dinu | Bonjour, j'espère que vous allez bien ! Je voulais faire un  |  | 
+  [66d][IQ] RD RDG | مرحباً RD! برنامج عينات VIP لشهر مارس يتيح طلبات أولى لـ 50  |  | 
+  [66d][IQ] rami Alseeraf | مرحباً! أتمنى أن تكون بخير. لقد مر وقت طويل منذ آخر محادثة ب |  | 
+  [66d][UA] Galyna Klochko | Здравствуйте! Наш комплект жилетов с животным принтом для ма |  | 
+  [66d][CA] Murielle Lindoyi |  | SYSMSG | 
+  [66d][GH] Rashidatu Issahaku | Hello, I hope everything is going well for you! I would like |  | 
+  [66d][RU] Alena Bucenko |  | SYSMSG | 
+  [66d][RU] Ludmila Manevskaa |  | SYSMSG | 
+  [66d][GH] Bel Nas | Hello, I hope everything is going well for you. I sent some  |  | 
+  [66d][DE] Iudith Artin |  | SYSMSG | 
+  [66d][IQ] Zahraa Pharmacist | Dear friend, I understand that the situation in the Middle E |  | 
+  [66d][MX] Antonio Lugo | Hola Antonio, hemos compilado un catálogo de personalizacion |  | 
+  [66d][US] Jennifer Dominguez |  | SYSMSG | 
+  [66d][US] Roota  Shirinyans | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [67d][US] Kinana Zahraa | حسناً |  | 
+  [68d][GM] Amie Jaiteh | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [68d][ZA] NOKUFA RADEBE | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [70d][NP] Daya Josephat | This product is suitable for wearing in the summer, as it us |  | 
+  [71d][ES] Yusleisy Jurado | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [73d][IN] surbhi jain | The message has been sent |  | 
+  [73d][IQ] zanamuhamad Zana | نحن مصنعون معتمدون من ديزني، ونحن على ثقة بأننا نستطيع تلبية |  | 
+  [73d][DJ] Idil Elmi |  | SYSMSG | 
+  [74d][US] theresa green | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [74d][US] Daylen Diaz | Nuestros productos principales son ropa para bebés y niños p |  | 
+  [75d][YE] ammhmd mhmd | هل تحتاج إلى تحويل السعر إلى عملتك المحلية؟ |  | 
+  [77d][US] SulmyMarixa CanoRodriguez | Este mes tenemos ofertas especiales para nuevos clientes. ¿N |  | 
+  [78d][SE] Vazira Alimova | Это наша фабрика, авторизованный производитель Disney, и мы  |  | 
+  [78d][US] Aurelie Manitu | Bonjour, quel motif et quelle taille vous faut-il ? |  | 
+  [79d][BD] MdImrun Hossen | If you have specific size requirements, custom sizes are ava |  | 
+  [79d][ZW] Faith Mundondo | I have received your message and look forward to you sharing |  | 
+  [79d][CD] Mimi Kwanzay | What color do you need? | 核心 | 
+  [82d][KE] abdurahim Omar | Apa saja persyaratan Anda untuk detail pakaian anak-anak? Mi |  | 
+  [82d][ID] Aisah Aisah | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [83d][IT] safia bacha |  | SYSMSG | 
+  [84d][NL] Beer Sonja | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [86d][CG] Harry Ikouara | Voici ce que l'emballage ressemble à l'image. |  | 
+  [86d][CO] Kesselin Fuentes | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [88d][US] Julna Jean | Dear Julna,
+
+Thank you for your interest in our Korean-style |  | 
+  [88d][US] Tzivi Schreiber | Thank you for your patience. We understand the importance of |  | 
+  [89d][QA] Ahmed Boukaala | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [92d][CI] Raby Kone | Do you need me to recommend this series of products for you? | 核心 | 
+  [92d][US] Kabelwa Kabelwa | 100% pure cotton material, safe and comfortable |  | 
+  [94d][FR] Rapel Rapel | We haven't made these 1347 products, but we can customize th |  | 
+  [94d][US] monzer mahgoub |  | SYSMSG | 
+  [95d][JP] Winda Palastri | Hi Winda! Got your email as sales@topmate.cc, right? We'll s |  | 
+  [95d][US] Pamela Harper | Dear Pamela,
+
+Thank you for your RFQ. We are a professional  |  | 
+  [95d][IN] Catherine Shajan | These are baby bibs and square towels that are particularly  |  | 
+  [96d][ID] Muhamadpadilah Padil | Senang menerima pesan Anda. Kami adalah produsen resmi Disne |  | 
+  [97d][HR] Nina Vidacic |  | SYSMSG | 
+  [97d][ID] Salsabila Anny | Glad to hear from you! We are an authorized Disney manufactu |  | 
+  [99d][CA] Steeve Drapeau | What specific content do you need to customize? For example, |  | 
+  [100d][AE] Ryan Luke | Good morning! I hope you are doing well. Do you have a chanc | 核心 | 
+  [100d][TZ] tahir abbas | Hi, just checking if you received the payment link for the $ |  | 
+  [102d][US] Dan Songua | Quelle est l'adresse de livraison ? |  | 
+  [102d][US] Ashley Marie | Dear Buyer,
+
+We understand your urgent need for inventory be |  | 
+  [102d][SL] Abibatu sidique Abibatu sidique | Shipping to your country, the shipping terms are DAP, the sh |  | 
+  [102d][RO] Emese Incze | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [103d][UK] Anna Krzywicka | Do you have a Chinese freight forwarder? |  | 
+  [103d][BF] Namanata Kone | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [105d][US] Persia Rodriguez | El tiempo de envío es de aproximadamente 7 a 15 días. |  | 
+  [105d][FR] Fanta camara |  | SYSMSG | 
+  [105d][IN] Rajesh Chavan | Dear Mr. Rajesh Chavan,
+
+Thank you for your inquiry. We are  |  | 
+  [105d][US] Ngọc Thu | All right |  | 
+  [106d][VN] Van Truong |  | SYSMSG | 
+  [106d][US] Halima Tahir | The unit price of this product is $2.80. |  | 
+  [106d][VN] Hoang ThiUyen | Số lượng đặt hàng tối thiểu (MOQ) là 5 chiếc và có thể điều  |  | 
+  [107d][MY] Carmen Ng |  | SYSMSG | 
+  [108d][ID] Riandi Jr | Beritahu saya apa yang Anda butuhkan, saya selalu siap memba |  | 
+  [108d][KE] Richard mulili | We are professional manufacturers for Disney, and we can ful |  | 
+  [108d][ES] Jennifer Jaranagarcia | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [109d][BO] Amalia Suarezguarimo | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [109d][IE] Aoife Geary | Dear Effie,
+
+Thank you for your inquiry. We are a profession |  | 
+  [110d][US] Takudzwa Mpofu | What styles and sizes do you need, and how many of each? |  | 
+  [111d][US] Ijaz Ahmad | Please wait a moment, I'll recommend something for you, I'm  |  | 
+  [111d][CA] France Caron | 1. Is the front made of polyester-cotton blend fabric, knitt |  | 
+  [112d][UZ] Ulduz Rahmatova | If you need samples, that's absolutely fine. |  | 
+  [112d][SN] Mariama Keita | /:smile.You're welcome |  | 
+  [112d][IL] sym mwsrty |  | SYSMSG | 
+  [113d][SD] mynas mhmd | المهم أن أكون قد ساعدتك، هنا توجد أسباب اختيار المنتجات ودعم | 核心 | 
+  [115d][TZ] omari shabani | Yes, I will recommend the appropriate products to you later, |  | 
+  [115d][AE] kristine marquez |  | 核心,SYSMSG | 
+  [115d][HK] Elias Onni | OK |  | 
+  [116d][US] Adrienne Davis | 一旦离开平台发生纠纷或遭遇欺诈，您的权益将无法得到平台保障。若主动引导买家进行站外沟通或交易，一经投诉或被平台巡查发现， |  | 
+  [116d][US] Bianka Zizic | For your protection and the buyer's protection, please keep  |  | 
+  [117d][PA] Keileb Martinez | No dudes en comunicarte si tienes algún problema. |  | 
+  [118d][RU] Elena hartunova | Рубль |  | 
+  [120d][ES] sara buitrago | Hola |  | 
+  [121d][UK] Tom Mills | Good morning, I have sent the email, please check it. If the |  | 
+  [122d][MD] Viorica Railean | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [123d][AF] Fazela Orya | You're welcome |  | 
+  [123d][HK] SUSAN YANG | If you have anything else you'd like to know, feel free to c |  | 
+  [124d][US] Jodi Norto | Are you there? |  | 
+  [124d][PH] Mazuin Talib | Hi Mazun,
+Thank you for your RFQ for baby footies! We've pre |  | 
+  [125d][US] Ruth Adidja | Okay 👌 |  | 
+  [125d][US] Coulani Coulibaly | Je n'ai pas vu le message tout à l'heure, désolé. N'hésitez  |  | 
+  [125d][US] Lea Kaja | Quels produits de ceux-ci vous intéressent ? Je vous les pré |  | 
+  [126d][EG] amal ahmd | السعر الموجود على الرابط هو السعر الصحيح. | 核心 | 
+  [127d][US] Waleed Mustafabenheba | What is your target price? |  | 
+  [128d][CD] Kebba Keita | Which style do you need? | 核心 | 
+  [128d][US] Clint Georg | We are a manufacturer authorized by Disney, capable of stric |  | 
+  [128d][TR] dila cakir | Good morning! I hope you are well. Have you had a chance to  |  | 
+  [129d][UK] Summer bannister | Dear Summer,
+
+Thank you for your inquiry and for sharing the |  | 
+  [130d][GB] Ichie Eimann | This buyer has been pre-screened and has a clear request. Pl | SYSMSG | 
+  [132d][IQ] Atheer Sadoon | لدينا أيضًا عملاء يبيعون على أمازون، وسنستمر في تزويدهم بمنت |  | 
+  [132d][MY] Marina Zainudin | Okay 👌 Feel free to communicate if you have any questions |  | 
+  [132d][TG] Lucky Bamoudonfao | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [133d][US] Emma Mumba | This is our set product, which can meet the grooming needs o |  | 
+  [133d][IQ] bdalrzaqyasynhsyn frhan | /:smile./:smile./:smile. |  | 
+  [135d][IQ] sharaf almuslim |  | SYSMSG | 
+  [135d][PT] Belinda JoaoVaz |  | SYSMSG | 
+  [135d][BJ] Jessica Makangila |  | SYSMSG | 
+  [135d][CD] Soreah Akawa |  | 核心,SYSMSG | 
+  [135d][US] Ouido Koivogui |  | SYSMSG | 
+  [135d][US] Yvonne Boateng |  | SYSMSG | 
+  [135d][KR] Sanjida Akter |  | SYSMSG | 
+  [135d][GH] Opeyemi Omolara |  | SYSMSG | 
+  [135d][KE] Matiiida Wakesho |  | SYSMSG | 
+  [135d][IN] sadiya sadiq |  | SYSMSG | 
+  [135d][TM] Arslan A |  | SYSMSG | 
+  [135d][TZ] hajra mohamed |  | SYSMSG | 
+  [135d][UZ] Xusniddin Raximov |  | SYSMSG | 
+  [135d][IQ] ryan alshykh |  | SYSMSG | 
+  [135d][EG] Esraa Abuziada |  | 核心,SYSMSG | 
+  [135d][IE] carla  lucchesi |  | SYSMSG | 
+  [135d][US] yessica larios |  | SYSMSG | 
+  [135d][US] surbhidudeja NA |  | SYSMSG | 
+  [135d][US] Allison |  | SYSMSG | 
+  [135d][IQ] zaed maghdid |  | SYSMSG | 
+  [135d][US] jordan silver |  | SYSMSG | 
+  [135d][UG] Aisha Nakibuuka |  | SYSMSG | 
+  [135d][AZ] Ayisha Heyderova |  | SYSMSG | 
+  [135d][ES] Ionela Sandru |  | SYSMSG | 
+  [135d][BJ] Bernice Toffa |  | SYSMSG | 
+  [135d][GH] Sarah Tawiah |  | SYSMSG | 
+  [135d][NP] Niwa limbu |  | SYSMSG | 
+  [135d][MU] ishwari reedoy |  | SYSMSG | 
+  [135d][GH] Mujeeb Rahman |  | SYSMSG | 
+  [135d][ZA] Tebatso Motlhamme |  | SYSMSG | 
+  [135d][SA] zia ul haq |  | 核心,SYSMSG | 
+  [135d][TT] Victoria Chen |  | SYSMSG | 
+  [135d][CM] Rosalie Lalhensia Ngassama |  | SYSMSG | 
+  [135d][PK] Ch Maha |  | SYSMSG | 
+  [135d][BD] TheCakes Creation |  | SYSMSG | 
+  [135d][BR] Patty Vega |  | SYSMSG | 
+  [135d][US] Judith Mbabu |  | SYSMSG | 
+  [135d][BJ] Amirath Salassi |  | SYSMSG | 
+  [135d][SO] imaan abdi |  | SYSMSG | 
+  [135d][IL] Nimrod Levi |  | SYSMSG | 
+  [135d][US] mixu yeemu |  | SYSMSG | 
+  [135d][US] NITISH AGGARWAL |  | SYSMSG | 
+  [135d][IT] Sadiq Ullah |  | SYSMSG | 
+  [135d][IL] karin keren |  | SYSMSG | 
+  [135d][KZ] mirkul Arajlym |  | SYSMSG | 
+  [135d][UZ] Gulzoda Rasidovna |  | SYSMSG | 
+  [135d][PS] majd majd |  | SYSMSG | 
+  [135d][VE] Nathaly Medrano |  | SYSMSG | 
+  [135d][IT] maurizio pierconti | /:handshake./:handshake./:handshake. |  | 
+  [135d][EG] shw shw | أود أن أعرف في أي منطقة تقوم بالبيع؟ | 核心 | 
+  [135d][JP] Marika Takaoka | どう思いますか？ |  | 
+  [135d][RU] Alyona Panfilova | Thank you for your blessings! If you have any new plans or n |  | 
+  [135d][US] Akbar Rahimi |  | SYSMSG | 
+  [135d][FR] Julie Legrand |  | SYSMSG | 
+  [135d][ZA] Moabelo Mokgaetje |  | SYSMSG | 
+  [135d][US] Djenabou Yattara |  | SYSMSG | 
+  [135d][KZ] bauirjan Tilekbaev | Добрый день. Как у вас дела с продажами детской одежды в пос |  | 
+  [135d][CA] Jassy Nancy | Hi, Jassy, I hope this message finds you well! It's been a w |  | 
+  [135d][QA] Vijila Vinod |  | SYSMSG | 
+  [135d][PK] Abdullah Khalid | Merry Christmas 🎁🎄🎅, if you need anything, please let me  |  | 
+  [135d][KW] fajer Aln | Are you currently selling online? |  | 
+  [140d][QA] Najeeba Jashid | Haha, this is Chinese food, and I can't help but want to sha |  | 
+  [142d][IN] Deekshith Shekar | I hope we can have a pleasant conversation, even if you don' |  | 
+  [151d][CN] Anne Shen | /:handshake. |  | 
+  [154d][NL] james wilson | Sorry, I didn't see the file after opening it. |  | 
+  [173d][SN] NDEYE AMI Diouf | Since you have read the conversation, the automatic receptio | SYSMSG | 
+  [178d][CI] JeanClaver benie | Bonjour Jean, si vous envisagez de développer un produit com | 核心 | 
+  [184d][CM] MENTZEKO Mathi | Okay, looking forward to hearing from you |  | 
+
+Exported to data/s1_classification.json

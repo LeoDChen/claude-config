@@ -1,0 +1,120 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 16:00
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**Phase 1 完成。** TM 聊天 API 和 SDK 已完整映射。已提取 453 会话数据。
+
+## Phase 1 成果
+
+### 1. TM SDK 完整映射 ✅
+
+页面：`onetalk.alibaba.com/message/weblitePWA.htm` (阿里卖家 PWA)
+
+**SDK 对象：**
+- `window._imsdk` — 阿里 IM SDK 主入口
+- `window._imBaaSSDK` — 底层 BaaS SDK
+- `window.__conversationListFullData__` — 453 会话完整数据（已在内存）
+
+**SDK 服务：**
+| 服务 | 获取方式 | 模式 |
+|------|---------|------|
+| AuthService | `_imsdk.getAuthService()` | WS |
+| MessageService | `_imsdk.getMessageService()` | WS |
+| MessageServiceV2 | `_imBaaSSDK.getMessageServiceV2()` | WS |
+| MessageServiceHttp | `_imBaaSSDK.getMessageServiceHttp()` | HTTP |
+| ConversationService | `_imsdk.getConversationService()` | WS |
+| ConversationServiceHttp | `_imBaaSSDK.getConversationServiceHttp()` | HTTP |
+
+**关键 HTTP API (onetalk.alibaba.com)：**
+| 端点 | 方法 | 用途 | 状态 |
+|------|------|------|------|
+| `/message/listRecentConversation.htm` | POST | 获取会话列表 | ✅ 已验证 |
+| `/message/listRecentConversationContactDetail.htm` | POST | 获取联系人详情 | ✅ 已验证 |
+| `/message/changeConversationTopStatus.htm` | POST | 置顶会话 | ✅ 已知 |
+| `/message/changeConversationMuteStatus.htm` | POST | 免打扰 | ✅ 已知 |
+
+**关键 MTOP API (acs.h.alibaba.com)：**
+| API | 用途 |
+|-----|------|
+| `mtop.alibaba.icbu.im.login.token.get/1.0/` | IM 登录令牌 |
+| `mtop.alibaba.icbu.im.getuserinfobyparams/1.1/` | 用户信息（需签名） |
+
+### 2. 已保存数据 ✅
+
+| 文件 | 内容 | 大小 |
+|------|------|------|
+| `data/tm_conversations_compact.json` | 453 会话精简数据 | 394KB |
+| `data/okki_full_2026-05-05T05-17-48.json` | 346 客户列表 | ✅ |
+
+**453 会话统计：**
+- 354 条有 latestMessage 内容
+- 25 个置顶会话
+- 66,879 字符消息文本
+- 国家分布：US=93, IQ=17, ZM=13, GH=12, IN=12, CD=10, CI=10, EG=10, ID=10, FR=9, RU=9...
+- 全部 L1+ 级别
+
+### 3. 消息历史 API ⚠️ 待解决
+
+**问题：** WebSocket 已断开 (`isLogin=false`)，SDK 的 `listMessageWithConversationCodeForHistory()` 返回空。
+
+**根本原因：** 页面长时间未操作，IM WebSocket 连接断开。需要重新建立连接才能拉取完整聊天历史。
+
+**已测试的 HTTP 端点（均不可用）：**
+- `GET/POST /message/imhistory.htm` → 404/405
+- `POST /message/listPrevMessage.htm` → 405
+- `POST /message/listMessage.htm` → 405
+- MTOP `listPrevMsgs` → API 不存在
+
+### 4. SDK API 调用方法（连接恢复后可用）
+
+```javascript
+// 获取完整聊天历史（回调模式，非 Promise）
+var msgSvc = window._imsdk.getMessageService();
+msgSvc.listMessageWithConversationCodeForHistory({
+    conversationCode: cid,       // 从 __conversationListFullData__[i].cid 获取
+    count: 50,                   // 每次拉取条数
+    cursor: { sendTime: Date.now() }, // 分页游标（可选）
+    dataCallback: function(result) {
+        // result.data = 消息数组
+        // result.hasMore = 是否还有更多
+    },
+    errorCallBack: function(err) {}
+});
+```
+
+## 待解决
+
+| # | 任务 | 阻断 | 方案 |
+|---|------|------|------|
+| 1 | TM 聊天历史全量抓取 | WS 断开 | 用户在 TM 页面点击联系人恢复连接；或找到 HTTP 消息端点 |
+| 2 | API 批量抓取（邮件+详情） | 无 | `node scripts/scrape_api_batch.js` 即可执行 |
+| 3 | 分批 AI 分析 | 待数据就绪 | 每批 20-30 客户 |
+
+## 下次启动指令
+
+> 继续 OKKI CRM 数据抓取。先读 STATE.md。
+>
+> **先跑 API 批量抓取（已有脚本，立即可执行）：**
+> 1. 确认 CDP Chrome 运行中：`curl -s http://localhost:9222/json/version`
+> 2. `node scripts/scrape_api_batch.js`
+> 3. 等 10-15 分钟 → `data/customers/*.json`
+>
+> **TM 聊天恢复（需用户配合）：**
+> 4. 在 Chrome TM 页面点击联系人恢复 WebSocket
+> 5. 运行 `phase1_get_messages_v2.js` 验证
+> 6. 如能拿到消息 → 写全量聊天抓取脚本
+
+## 项目文件
+
+| 文件 | 说明 |
+|------|------|
+| `scripts/scrape_api_batch.js` | API 批量抓取（邮件+详情） |
+| `scripts/scrape_cdp_full.js` | 客户列表抓取 |
+| `scripts/phase1_*.js` | Phase 1 TM 侦察脚本系列 |
+| `data/tm_conversations_compact.json` | 453 会话精简数据 |
+| `data/okki_full_2026-05-05T05-17-48.json` | 346 客户列表 |
+| `RUNBOOK.md` | 完整操作手册 |
+| `PHASE1_执行指令.md` | 手动 F12 侦察步骤（已自动化完成） |

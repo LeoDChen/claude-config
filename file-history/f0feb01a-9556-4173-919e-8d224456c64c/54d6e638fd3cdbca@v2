@@ -1,0 +1,66 @@
+{
+  "model": "claude-sonnet-4-6[1m]",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+    "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000"
+  },
+  "effortLevel": "xhigh",
+  "includeCoAuthoredBy": false,
+  "autoCompactThreshold": 70,
+
+  "hooks": {
+    "UserPromptSubmit": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "node -e \"console.log(require('fs').readFileSync('d:/ClaudeWorkspace/.claude/hooks/inject-rules.txt','utf8'))\""
+      }]
+    }],
+
+    "PreToolUse": [{
+      "matcher": "Bash",
+      "hooks": [{
+        "type": "command",
+        "command": "node d:/ClaudeWorkspace/.claude/hooks/block-dangerous.js"
+      }]
+    }],
+
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "node d:/ClaudeWorkspace/.claude/hooks/warn-env-file.js"
+      }]
+    }],
+
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "node d:/ClaudeWorkspace/.claude/hooks/ensure-archive-dir.js"
+      }]
+    }]
+  },
+
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kemikeai.1688.com)",
+      "WebSearch",
+      "Bash(python3 *)",
+      "Bash(npm *)",
+      "Bash(node *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(curl *)",
+      "Bash(cd *)",
+      "Bash(taskkill *)",
+      "Bash(tasklist *)",
+      "Bash(sleep *)",
+      "Bash(cmd.exe *)",
+      "Bash(mkdir *)",
+      "Bash(rm *)",
+      "Bash(echo *)",
+      "Bash(find *)"
+    ]
+  }
+}

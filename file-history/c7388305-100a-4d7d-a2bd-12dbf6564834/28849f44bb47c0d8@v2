@@ -1,0 +1,45 @@
+// PostToolUse hook: 配置文件修改后自动同步到 OB
+const fs = require('fs');
+const path = require('path');
+
+const OB_BASE = 'E:/道友的宝贝/道友的宝贝/对话归档/CC/CC配置备份';
+
+const RULES = [
+  {
+    match: (p) => p.includes('/Administrator/.claude/') && !p.includes('/projects/'),
+    dest: '全局',
+    files: ['CLAUDE.md', 'settings.json', 'settings.local.json', '.mcp.json']
+  },
+  {
+    match: (p) => p.includes('/ClaudeWorkspace/.claude/'),
+    dest: '项目',
+    files: ['CLAUDE.md', 'settings.json', 'settings.local.json', 'operations-rules.md', '.mcp.json']
+  }
+];
+
+const filePath = process.env.FILE_PATH || '';
+if (!filePath) process.exit(0);
+
+const fileName = path.basename(filePath);
+const relativePath = filePath.replace(/^.*[\\/]\.claude[\\/]/, '');
+
+for (const rule of RULES) {
+  if (!rule.match(filePath)) continue;
+
+  const destDir = path.join(OB_BASE, rule.dest);
+  fs.mkdirSync(destDir, { recursive: true });
+
+  if (rule.files.includes(fileName)) {
+    fs.copyFileSync(filePath, path.join(destDir, fileName));
+    process.stderr.write(`[SyncHook] ${fileName} → ${rule.dest}/\n`);
+    break;
+  }
+
+  if (relativePath.startsWith('hooks/')) {
+    const hookDestDir = path.join(destDir, 'hooks');
+    fs.mkdirSync(hookDestDir, { recursive: true });
+    fs.copyFileSync(filePath, path.join(hookDestDir, path.basename(fileName)));
+    process.stderr.write(`[SyncHook] hooks/${fileName} → ${rule.dest}/hooks/\n`);
+    break;
+  }
+}

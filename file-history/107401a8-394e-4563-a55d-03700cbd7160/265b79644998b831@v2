@@ -1,0 +1,7 @@
+$chromePath = "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
+$tempDir = "$env:TEMP\chrome-debug-profile"
+
+$proc = Start-Process -FilePath $chromePath -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$tempDir", "about:blank" -PassThru
+Write-Host "Chrome PID: $($proc.Id)"
+Start-Sleep -Seconds 3
+if (-not $proc.HasExited) { Write-Host "Chrome RUNNING - CDP on port 9222" } else { Write-Host "FAILED, exit: $($proc.ExitCode)" }

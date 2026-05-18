@@ -1,0 +1,1403 @@
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/:
+total 241448
+drwxr-xr-x 1 Administrator 197121        0 May 18 14:51 ./
+drwxr-xr-x 1 Administrator 197121        0 May  8 23:27 ../
+drwxr-xr-x 1 Administrator 197121        0 May  4 20:50 00cfc655-ef6f-4d87-a953-23791f45e99e/
+-rw-r--r-- 1 Administrator 197121  1249058 May  7 09:27 00cfc655-ef6f-4d87-a953-23791f45e99e.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 00ef2a14-f073-4f39-aca6-a3cfdd5bab7d/
+-rw-r--r-- 1 Administrator 197121  4044038 Apr 29 11:50 00ef2a14-f073-4f39-aca6-a3cfdd5bab7d.jsonl
+-rw-r--r-- 1 Administrator 197121  1060956 May  8 23:34 011c36fe-6088-4511-be8c-7a0958f86b09.jsonl
+-rw-r--r-- 1 Administrator 197121    77589 May 17 16:50 01234587-e1f3-4dce-a9c0-07bbbb0c9fd0.jsonl
+-rw-r--r-- 1 Administrator 197121   739028 May 12 19:28 013c9f6d-c7a0-4efe-9624-843f83525973.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 019382a4-f2b1-443f-85c0-888e5d510e19/
+-rw-r--r-- 1 Administrator 197121  4276417 Apr 28 10:56 019382a4-f2b1-443f-85c0-888e5d510e19.jsonl
+-rw-r--r-- 1 Administrator 197121     1816 Apr 28 10:56 03c4f8f3-7ec2-415b-9803-37f7aa0deb72.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 15 11:52 04053218-e99a-4148-a8f6-0545549accc3/
+-rw-r--r-- 1 Administrator 197121  1479357 May 15 16:38 04053218-e99a-4148-a8f6-0545549accc3.jsonl
+-rw-r--r-- 1 Administrator 197121     9574 Apr 28 10:56 05913d91-b497-48e8-bdcf-77d08a70c9da.jsonl
+-rw-r--r-- 1 Administrator 197121  2053463 May 14 18:28 05d40904-11d4-4220-8f46-cc3600cc2d66.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  9 01:58 069ef8b8-54d8-48bb-be72-8144f49c3585/
+-rw-r--r-- 1 Administrator 197121  1440495 May  9 02:50 069ef8b8-54d8-48bb-be72-8144f49c3585.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 18 09:33 07a31d24-74b5-475e-82c9-47c19efcd3d1/
+-rw-r--r-- 1 Administrator 197121   229087 May 18 10:40 07a31d24-74b5-475e-82c9-47c19efcd3d1.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 29 12:57 07a593cf-bcb9-4bf9-a969-effe2aaab829/
+-rw-r--r-- 1 Administrator 197121   908982 Apr 29 14:23 07a593cf-bcb9-4bf9-a969-effe2aaab829.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 12 19:36 088833bc-34b2-4149-96cf-18a5382504cb/
+-rw-r--r-- 1 Administrator 197121  3757623 May 13 14:53 088833bc-34b2-4149-96cf-18a5382504cb.jsonl
+-rw-r--r-- 1 Administrator 197121  1213309 May  3 13:56 08ea4b12-ac96-47f0-8728-b83ab308c68a.jsonl
+-rw-r--r-- 1 Administrator 197121    92280 May  4 21:12 0933d7e3-84cb-48b0-a388-dcaa3dd0c8b1.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 14 13:39 0b0a9c85-8d9d-4597-8c38-a45ea40fa1fd/
+-rw-r--r-- 1 Administrator 197121  4343451 May 14 18:27 0b0a9c85-8d9d-4597-8c38-a45ea40fa1fd.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 14 14:06 0bb41191-afd4-434c-ad68-3fc063789392/
+-rw-r--r-- 1 Administrator 197121   355977 May 14 18:28 0bb41191-afd4-434c-ad68-3fc063789392.jsonl
+-rw-r--r-- 1 Administrator 197121   137161 Apr 28 10:56 0d8175df-674d-4df5-bbb7-f9c21b3cd8c2.jsonl
+-rw-r--r-- 1 Administrator 197121    79510 May 18 13:43 0f67daa0-10dd-430c-8a04-399b0631bd51.jsonl
+-rw-r--r-- 1 Administrator 197121  1716746 May 14 17:46 0f9b64d9-f6d9-4f41-9b6e-5f3b61174002.jsonl
+-rw-r--r-- 1 Administrator 197121    18908 Apr 28 10:56 0ffb58c9-a080-4e66-a1d4-15b4d606019a.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 29 16:16 107401a8-394e-4563-a55d-03700cbd7160/
+-rw-r--r-- 1 Administrator 197121  4375440 May  4 11:23 107401a8-394e-4563-a55d-03700cbd7160.jsonl
+-rw-r--r-- 1 Administrator 197121  2481690 Apr 30 11:55 126609f9-2a88-4fa4-a871-206ce5802f64.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  8 22:59 131d0833-fd17-4ec0-90db-80e2917c9d3a/
+-rw-r--r-- 1 Administrator 197121   776010 May  9 02:32 131d0833-fd17-4ec0-90db-80e2917c9d3a.jsonl
+-rw-r--r-- 1 Administrator 197121  5823436 May 18 11:02 1438a1c9-ff9c-4880-aec5-ff9fe1f5b4e4.jsonl
+-rw-r--r-- 1 Administrator 197121   664188 Apr 30 15:38 148f9c56-c7bb-42bb-b1cf-ae9d090d022f.jsonl
+-rw-r--r-- 1 Administrator 197121    10349 Apr 28 10:56 154c25f9-8db4-4829-91b8-cd4505c1b026.jsonl
+-rw-r--r-- 1 Administrator 197121  1167567 May  3 16:44 162d5b16-1949-4bac-bcc8-d6222f904e0c.jsonl
+-rw-r--r-- 1 Administrator 197121    28042 May 12 17:43 169cf7bd-2992-4089-85a6-0e93bb80865c.jsonl
+-rw-r--r-- 1 Administrator 197121    41320 May  3 08:36 1a065eee-f9b8-410d-b76a-d38d0b6a4b1f.jsonl
+-rw-r--r-- 1 Administrator 197121    11504 May 12 18:09 1e1ad49b-d467-432e-bb8a-8fe661fc3ac0.jsonl
+-rw-r--r-- 1 Administrator 197121    61498 Apr 28 20:28 2089a09c-2a76-4c4f-beab-7b0448d03c39.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 15 10:28 21cd7ec3-8ccc-4cdc-ae2f-74816f6a6482/
+-rw-r--r-- 1 Administrator 197121  1363580 May 15 14:40 21cd7ec3-8ccc-4cdc-ae2f-74816f6a6482.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 2249efc0-d48a-4b6d-9782-bfb04d88970c/
+-rw-r--r-- 1 Administrator 197121 22956394 Apr 28 10:56 2249efc0-d48a-4b6d-9782-bfb04d88970c.jsonl
+-rw-r--r-- 1 Administrator 197121    11370 May 12 18:34 2403cfba-63bf-445a-8d59-3ff0b3cf3903.jsonl
+-rw-r--r-- 1 Administrator 197121   901097 May 17 15:28 25729107-5f92-4ed3-a938-18629f4933b5.jsonl
+-rw-r--r-- 1 Administrator 197121   776919 May 16 17:37 271430d5-4582-4124-8527-35ac4f0d6089.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  3 09:11 273f9059-74b0-427a-a9d4-bd0e22ba606a/
+-rw-r--r-- 1 Administrator 197121  1995486 May  8 22:29 273f9059-74b0-427a-a9d4-bd0e22ba606a.jsonl
+-rw-r--r-- 1 Administrator 197121    33501 Apr 28 11:30 281dfeaf-95f8-4645-a92d-07a9df200d29.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 28f862ce-6e22-4bd3-aaea-d0c19332ae71/
+-rw-r--r-- 1 Administrator 197121   496905 Apr 28 10:56 28f862ce-6e22-4bd3-aaea-d0c19332ae71.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 10 16:49 2c808720-92cf-4e53-98fe-a6b08b4e5a40/
+-rw-r--r-- 1 Administrator 197121  3548365 May 15 17:21 2c808720-92cf-4e53-98fe-a6b08b4e5a40.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 13 09:58 2cdd3ec3-20c4-4019-94e0-177fce4cdbfb/
+-rw-r--r-- 1 Administrator 197121   837303 May 14 18:29 2cdd3ec3-20c4-4019-94e0-177fce4cdbfb.jsonl
+-rw-r--r-- 1 Administrator 197121  2577978 May 16 17:00 2e93e7af-77c8-4369-93a7-8075a47a826b.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  8 18:04 2ffb45b7-8ee1-42f3-919f-ba73072210d5/
+-rw-r--r-- 1 Administrator 197121  1833143 May  8 23:35 2ffb45b7-8ee1-42f3-919f-ba73072210d5.jsonl
+-rw-r--r-- 1 Administrator 197121   383486 Apr 28 10:56 303bcac6-6c88-43eb-a323-f4e654faf5f5.jsonl
+-rw-r--r-- 1 Administrator 197121  1006282 Apr 28 10:56 3253b406-64d6-46d1-aa23-7bacac83b8b1.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 3289e472-9bc7-48b8-ab1c-9321b358a110/
+-rw-r--r-- 1 Administrator 197121  1149902 Apr 28 10:56 3289e472-9bc7-48b8-ab1c-9321b358a110.jsonl
+-rw-r--r-- 1 Administrator 197121   821267 Apr 28 10:56 33a6df80-6a0b-4972-ae49-6d24bd7ed773.jsonl
+-rw-r--r-- 1 Administrator 197121    10525 Apr 28 10:56 363dda88-f579-4c45-ba20-eaf72945117c.jsonl
+-rw-r--r-- 1 Administrator 197121    11348 May 12 18:37 37492418-98b3-4396-9b08-6ad7ad4598d9.jsonl
+-rw-r--r-- 1 Administrator 197121   930003 May  4 16:13 385fa0ff-0817-4be8-9c81-809521038d7b.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  3 08:46 38e9089f-6290-4a01-8446-57bcbe583ba0/
+-rw-r--r-- 1 Administrator 197121    48874 May  3 08:46 38e9089f-6290-4a01-8446-57bcbe583ba0.jsonl
+-rw-r--r-- 1 Administrator 197121    13607 May 12 18:44 3906e587-855c-40aa-b9f9-a00dcbbcd85d.jsonl
+-rw-r--r-- 1 Administrator 197121  1052419 May 17 18:03 3bf308aa-a214-464f-81e1-0f16e4bd8efa.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 18 11:30 3c3ddd5f-5815-48a8-b11a-17f915ac0800/
+-rw-r--r-- 1 Administrator 197121  1816767 May 18 14:19 3c3ddd5f-5815-48a8-b11a-17f915ac0800.jsonl
+-rw-r--r-- 1 Administrator 197121   994209 May 15 17:20 3da30281-ba65-4692-86c8-e8de6e8965bb.jsonl
+-rw-r--r-- 1 Administrator 197121  1382855 May 15 17:19 40c2e3ac-2d6a-4d10-8f7b-67eff5df28a9.jsonl
+-rw-r--r-- 1 Administrator 197121   355840 May  5 19:26 4396d507-2ae5-41bf-8b52-54db6ad56256.jsonl
+-rw-r--r-- 1 Administrator 197121    40943 Apr 28 10:56 44e8fe4b-4e9b-4226-8bdf-fa21244f7075.jsonl
+-rw-r--r-- 1 Administrator 197121    13417 May 12 18:44 45e5c78b-d174-46d0-a248-1036e8ad6819.jsonl
+-rw-r--r-- 1 Administrator 197121   932822 May 15 16:38 46382048-0fd1-4d51-a0f4-5fac1b8b03e6.jsonl
+-rw-r--r-- 1 Administrator 197121     5064 Apr 28 10:56 46550448-cf67-4236-ada8-ecc5fedb36b3.jsonl
+-rw-r--r-- 1 Administrator 197121    11463 May 12 18:34 46e8f428-a8f9-4abb-9eb8-18e52417751f.jsonl
+-rw-r--r-- 1 Administrator 197121     7351 Apr 28 10:56 48deb555-c70d-4705-95a4-13f6cafcfdce.jsonl
+-rw-r--r-- 1 Administrator 197121   751789 May 17 15:31 4b6889ef-6826-48bc-8208-e9762bf0319a.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 12 16:36 4e5dc35f-ac1a-4b34-8339-d22517c6757c/
+-rw-r--r-- 1 Administrator 197121  5550136 May 14 18:28 4e5dc35f-ac1a-4b34-8339-d22517c6757c.jsonl
+-rw-r--r-- 1 Administrator 197121   476321 May 17 11:55 4f517b98-6bb2-42b8-893f-620fd14d4962.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  9 05:01 51d9040f-9a97-4de0-b021-d7eb91c51bea/
+-rw-r--r-- 1 Administrator 197121  1697549 May 10 21:37 51d9040f-9a97-4de0-b021-d7eb91c51bea.jsonl
+-rw-r--r-- 1 Administrator 197121   924410 May 12 12:59 5247b30f-9107-475d-90c5-c7dc3d2e6608.jsonl
+-rw-r--r-- 1 Administrator 197121    11392 May 12 18:44 524d1f92-16e1-4fb7-858c-8a6fc2d77f8f.jsonl
+-rw-r--r-- 1 Administrator 197121   479585 May 17 15:28 527b77fd-e9d5-42e6-b816-f5f9f329a1be.jsonl
+-rw-r--r-- 1 Administrator 197121    11393 May 12 18:24 532a2392-1eac-4ff0-abe1-98f17cb868ea.jsonl
+-rw-r--r-- 1 Administrator 197121  3462366 Apr 28 10:56 541a68f0-c469-4149-9db9-e90766adc834.jsonl
+-rw-r--r-- 1 Administrator 197121   327333 May 15 17:20 547abfe7-74f4-4c13-98aa-0ea93a52312c.jsonl
+-rw-r--r-- 1 Administrator 197121   254058 Apr 28 10:56 55efcd6a-7adc-423a-af16-2746512d5b07.jsonl
+-rw-r--r-- 1 Administrator 197121   304271 Apr 28 10:56 55efcd6a-7adc-423a-af16-2746512d5b07.jsonl.backup
+drwxr-xr-x 1 Administrator 197121        0 May  5 16:43 5887184f-148d-4024-a827-cf2be03911d6/
+-rw-r--r-- 1 Administrator 197121  1584188 May  5 17:23 5887184f-148d-4024-a827-cf2be03911d6.jsonl
+-rw-r--r-- 1 Administrator 197121    14929 Apr 29 12:22 5ad30e4a-591e-470e-b099-c05e38d8bdc0.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  9 04:04 5c6bcadb-89d1-4a62-b067-b95f2cd35c61/
+-rw-r--r-- 1 Administrator 197121  1119865 May  9 04:58 5c6bcadb-89d1-4a62-b067-b95f2cd35c61.jsonl
+-rw-r--r-- 1 Administrator 197121   524358 May  4 12:26 5cd42d8e-bf32-406f-a916-d548f184102e.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 10 19:50 5de6bbb0-e6a9-4a73-b436-5c19aa71abe4/
+-rw-r--r-- 1 Administrator 197121   678424 May 15 17:20 5de6bbb0-e6a9-4a73-b436-5c19aa71abe4.jsonl
+-rw-r--r-- 1 Administrator 197121   208105 May 12 11:10 5de883e1-0624-4924-b2c6-7019e34ca22d.jsonl
+-rw-r--r-- 1 Administrator 197121    11580 May 12 17:56 5f5e1d86-0a4a-4d3f-a38f-ce0f2d7eeaeb.jsonl
+-rw-r--r-- 1 Administrator 197121    48803 May  5 17:23 615fe163-6d82-4401-87cf-4c250fcb9f92.jsonl
+-rw-r--r-- 1 Administrator 197121   278929 May  3 08:40 62057de3-68d1-4fd6-8595-1f11aae5343f.jsonl
+-rw-r--r-- 1 Administrator 197121   727223 Apr 28 10:56 622f4ea5-2051-4dd6-b74c-2e2fca0fdd91.jsonl
+-rw-r--r-- 1 Administrator 197121   429641 May  9 04:58 641e2f66-b753-4546-a72a-23819e372e5d.jsonl
+-rw-r--r-- 1 Administrator 197121  1175709 May  4 16:37 64538e16-a377-4b27-bc94-c81699114570.jsonl
+-rw-r--r-- 1 Administrator 197121   180526 May 18 09:31 657e4670-e5f2-4a54-bf03-6870f683097c.jsonl
+-rw-r--r-- 1 Administrator 197121   484460 May  8 21:49 65ae317f-3509-4d60-9e00-635267885950.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  5 13:13 6639429b-4348-49fd-a968-a79e38db9d78/
+-rw-r--r-- 1 Administrator 197121  1933349 May  5 18:01 6639429b-4348-49fd-a968-a79e38db9d78.jsonl
+-rw-r--r-- 1 Administrator 197121   269342 Apr 28 10:56 66f01fa0-e0d5-48de-8cdc-f45a3f938fef.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 672600f4-fc5c-4eff-8dda-8e98a7c3f66b/
+-rw-r--r-- 1 Administrator 197121   717859 May 10 20:42 672600f4-fc5c-4eff-8dda-8e98a7c3f66b.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  3 16:26 67369027-c481-4329-9f6f-5b4960ac4ada/
+-rw-r--r-- 1 Administrator 197121   746818 May  4 16:13 67369027-c481-4329-9f6f-5b4960ac4ada.jsonl
+-rw-r--r-- 1 Administrator 197121    64205 Apr 28 10:56 6877c5ef-7eec-4827-9c4d-d1a5801a3c87.jsonl
+-rw-r--r-- 1 Administrator 197121     5173 Apr 28 10:56 6a3c7ca3-67b5-41ca-9fdb-abc3b5789f05.jsonl
+-rw-r--r-- 1 Administrator 197121  3901433 May  5 19:25 6cc34a2a-f1c4-45c7-b89a-eaa656b9a4d8.jsonl
+-rw-r--r-- 1 Administrator 197121    22347 May 12 17:46 6d03a4a7-7ab7-4982-91f9-dcd793c43d95.jsonl
+-rw-r--r-- 1 Administrator 197121   258472 May 17 15:27 6d971ae2-dce9-4515-bf10-09547a638e4e.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 20:05 6ea9a657-912e-4706-8c75-9e863b6f07a9/
+-rw-r--r-- 1 Administrator 197121  3079170 Apr 28 21:45 6ea9a657-912e-4706-8c75-9e863b6f07a9.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  5 20:58 6f00ea6b-6e2c-4ca9-8ed4-af210b89ecde/
+-rw-r--r-- 1 Administrator 197121  1289156 May  9 00:00 6f00ea6b-6e2c-4ca9-8ed4-af210b89ecde.jsonl
+-rw-r--r-- 1 Administrator 197121 18760444 Apr 28 10:56 6f0553cd-c379-4782-9914-6c2919425163.jsonl
+-rw-r--r-- 1 Administrator 197121    14763 Apr 28 13:42 6f9d1acc-b89e-4e09-8ad6-f9d1e26adf9d.jsonl
+-rw-r--r-- 1 Administrator 197121   664054 May 17 15:28 71073277-e318-4d97-8a4a-6a06d2f39c38.jsonl
+-rw-r--r-- 1 Administrator 197121   702015 May 11 15:55 726d3dad-e917-4227-91e9-f43b8b2aabdb.jsonl
+-rw-r--r-- 1 Administrator 197121   222698 Apr 28 10:56 72e32e31-8584-4cc1-ab94-06038c4cf524.jsonl
+-rw-r--r-- 1 Administrator 197121     8732 Apr 28 10:56 73c9f715-5daa-407b-a066-c644c0a39539.jsonl
+-rw-r--r-- 1 Administrator 197121    11451 May 12 18:11 748210b3-fb5d-47bd-b682-b39ded363296.jsonl
+-rw-r--r-- 1 Administrator 197121   610076 May  3 13:55 74f75bb4-fbd3-4e11-96a6-6ac67c666e18.jsonl
+-rw-r--r-- 1 Administrator 197121    27107 Apr 28 10:56 76e31b79-a9cb-4ec2-9add-e363e22180cd.jsonl
+-rw-r--r-- 1 Administrator 197121    11277 May 12 18:17 77da63f1-7f3e-486d-bb04-13d66f66c0ea.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 7be9d149-b50e-4207-b5a9-6abe797da2b0/
+-rw-r--r-- 1 Administrator 197121   804310 Apr 28 10:56 7be9d149-b50e-4207-b5a9-6abe797da2b0.jsonl
+-rw-r--r-- 1 Administrator 197121   767410 May 11 15:53 7bfae09a-02df-4773-bef2-e23a049d581a.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 12 15:33 7ec81fa2-3e8a-4cdc-b6b1-704b8f2387e0/
+-rw-r--r-- 1 Administrator 197121   318795 May 17 15:34 7ec81fa2-3e8a-4cdc-b6b1-704b8f2387e0.jsonl
+-rw-r--r-- 1 Administrator 197121   111462 Apr 30 16:52 7fc35b01-110a-4fa3-a8e0-12e182e08f93.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 13 09:05 84bf36da-d7f7-4758-909d-35e98dd5933e/
+-rw-r--r-- 1 Administrator 197121   920986 May 14 18:29 84bf36da-d7f7-4758-909d-35e98dd5933e.jsonl
+-rw-r--r-- 1 Administrator 197121    14548 Apr 28 10:56 84c8979c-cc2e-417d-b6dd-59b0abf88851.jsonl
+-rw-r--r-- 1 Administrator 197121    11440 May 12 17:46 854012af-c725-4087-b1c7-6f720ac3cdc3.jsonl
+-rw-r--r-- 1 Administrator 197121     9554 Apr 28 10:56 85f332d0-426f-4988-9a8b-c97d348d8c6c.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 13 16:12 87ba2961-dd99-403b-b5c5-6de2130be09a/
+-rw-r--r-- 1 Administrator 197121   690163 May 13 16:58 87ba2961-dd99-403b-b5c5-6de2130be09a.jsonl
+-rw-r--r-- 1 Administrator 197121  1446419 Apr 28 10:56 89584a43-aeb4-486a-8c36-bb4e694b2a14.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 12 11:30 89776cb6-52af-474b-b0a1-55734729b026/
+-rw-r--r-- 1 Administrator 197121    98729 May 12 11:36 89776cb6-52af-474b-b0a1-55734729b026.jsonl
+-rw-r--r-- 1 Administrator 197121   665253 Apr 28 10:56 89ab564b-accb-4c58-a109-0825424d803e.jsonl
+-rw-r--r-- 1 Administrator 197121    14750 Apr 28 10:56 8a98e838-f71e-4789-bd65-aa7c7e3ee27a.jsonl
+-rw-r--r-- 1 Administrator 197121   811857 Apr 28 10:56 8b73861b-d1b9-4991-a832-1a18f98e9674.jsonl
+-rw-r--r-- 1 Administrator 197121  1313604 May 17 18:34 8f716c90-1331-4139-969d-33527c2d1888.jsonl
+-rw-r--r-- 1 Administrator 197121   907284 May 15 17:21 90436220-6949-4e5e-bd7b-e6f1aa9e7a87.jsonl
+-rw-r--r-- 1 Administrator 197121   871471 May  4 17:19 911c277e-c309-444a-b121-fac88d441a88.jsonl
+-rw-r--r-- 1 Administrator 197121   869512 May  4 16:31 91bd1080-1989-4b9a-ba69-5190cad1a713.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 18 11:01 94a964f0-4e4c-4411-a9de-f74c691550d6/
+-rw-r--r-- 1 Administrator 197121  1688140 May 18 12:47 94a964f0-4e4c-4411-a9de-f74c691550d6.jsonl
+-rw-r--r-- 1 Administrator 197121  1252195 May 17 15:06 94d82a5a-ef8a-4c3b-999a-80c37fcda3c3.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 15:35 95ac523c-e9e3-4b4b-8701-7454e494b52e/
+-rw-r--r-- 1 Administrator 197121  1809497 Apr 28 19:13 95ac523c-e9e3-4b4b-8701-7454e494b52e.jsonl
+-rw-r--r-- 1 Administrator 197121    74450 May 12 13:27 976a2918-b61a-49ac-9a6c-5219408eea00.jsonl
+-rw-r--r-- 1 Administrator 197121   773842 May  4 16:13 986e4d48-78db-47ac-a9d3-6c9f194aa3d1.jsonl
+-rw-r--r-- 1 Administrator 197121   817594 Apr 30 15:38 9922ada1-c7e4-4013-9358-337337f66303.jsonl
+-rw-r--r-- 1 Administrator 197121    21583 Apr 28 10:56 9a6a0c0a-06a1-46ca-bde9-59518d9bb3f6.jsonl
+-rw-r--r-- 1 Administrator 197121  2421784 Apr 29 16:57 9cdea3fb-1eba-4638-9a2c-b4085b39d270.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 14 18:41 9eeec93d-e384-4f98-aa25-d731bf2b92cf/
+-rw-r--r-- 1 Administrator 197121  1525736 May 17 15:28 9eeec93d-e384-4f98-aa25-d731bf2b92cf.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 15:59 9fc1e192-8e23-499e-a8e0-705727373284/
+-rw-r--r-- 1 Administrator 197121  2680490 Apr 29 14:22 9fc1e192-8e23-499e-a8e0-705727373284.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 14 09:33 a47875af-47b9-47a5-9ef3-57cf23f94abc/
+-rw-r--r-- 1 Administrator 197121  1369958 May 14 11:17 a47875af-47b9-47a5-9ef3-57cf23f94abc.jsonl
+-rw-r--r-- 1 Administrator 197121  1192799 May 11 19:53 a4d5481f-6a50-4ef8-a38e-5f54937f3868.jsonl
+-rw-r--r-- 1 Administrator 197121    24424 Apr 28 10:56 a65a1f79-9ecf-4010-af5b-2e004855624c.jsonl
+-rw-r--r-- 1 Administrator 197121   163583 Apr 28 10:56 a733a52a-187f-4cb7-bb1f-d88158586115.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 14 17:37 a9224428-45e4-4e64-abc3-260c7e858b09/
+-rw-r--r-- 1 Administrator 197121  1255294 May 17 15:28 a9224428-45e4-4e64-abc3-260c7e858b09.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 11 20:50 ab8fd7dc-6438-466f-9be1-10f231217624/
+-rw-r--r-- 1 Administrator 197121   835855 May 15 17:19 ab8fd7dc-6438-466f-9be1-10f231217624.jsonl
+-rw-r--r-- 1 Administrator 197121   120057 Apr 28 10:56 ad48f08c-33ce-458f-94b1-82a819459b75.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 12:23 ad538ca6-16e2-4a04-8808-e153b3707d82/
+-rw-r--r-- 1 Administrator 197121   583955 Apr 28 12:29 ad538ca6-16e2-4a04-8808-e153b3707d82.jsonl
+-rw-r--r-- 1 Administrator 197121   506332 May  5 12:27 ad5ee8f2-6d91-4aab-8466-dbc242bf8737.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 11 19:50 b03ab2dc-d6bb-49cd-8091-8bfde5a188ae/
+-rw-r--r-- 1 Administrator 197121  1410557 May 14 18:29 b03ab2dc-d6bb-49cd-8091-8bfde5a188ae.jsonl
+-rw-r--r-- 1 Administrator 197121   149679 May 15 16:38 b1a20bf7-cc71-4994-a79e-dcef58964424.jsonl
+-rw-r--r-- 1 Administrator 197121   332344 Apr 28 10:56 b363ef62-12fa-45f0-ad0e-98c43848a433.jsonl
+-rw-r--r-- 1 Administrator 197121   419611 Apr 28 12:44 b38e286a-1f61-4c82-bc91-595c33f178a3.jsonl
+-rw-r--r-- 1 Administrator 197121    24665 Apr 28 10:56 b3b3f0c2-61d5-42a4-90bf-dc37ec5a5452.jsonl
+-rw-r--r-- 1 Administrator 197121   240592 May  9 03:51 b596c58c-d2a7-4f29-a619-b00c2b0f5004.jsonl
+-rw-r--r-- 1 Administrator 197121   617132 May  5 11:00 b792d527-4d6b-4d81-bd43-49ca07af7d8a.jsonl
+-rw-r--r-- 1 Administrator 197121     9564 Apr 28 10:56 ba7f2afe-1267-4abb-81ee-a4c3ca5d2511.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 12 11:18 bb2cb3cd-c87c-4c58-ba8d-5ec95f9b6e51/
+-rw-r--r-- 1 Administrator 197121    88036 May 12 11:23 bb2cb3cd-c87c-4c58-ba8d-5ec95f9b6e51.jsonl
+-rw-r--r-- 1 Administrator 197121   155907 May 16 19:20 bb77f816-9deb-40f9-a150-5715aefb6d26.jsonl
+-rw-r--r-- 1 Administrator 197121  1435110 Apr 28 11:30 bb8dbedb-f475-442e-aac4-295346949c64.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  9 02:50 bc0dab36-c3a8-4db5-a782-e2343f988d75/
+-rw-r--r-- 1 Administrator 197121   828409 May  9 04:58 bc0dab36-c3a8-4db5-a782-e2343f988d75.jsonl
+-rw-r--r-- 1 Administrator 197121    11614 May 12 18:26 bc17a336-1209-4dd7-a756-75f68817781f.jsonl
+-rw-r--r-- 1 Administrator 197121   182895 Apr 28 10:56 bdc53d02-548a-4c0e-8cad-569d0f65774e.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 c0267601-2a1d-480d-bdfd-e7f6e8b8a29c/
+-rw-r--r-- 1 Administrator 197121  6402111 Apr 28 10:56 c0267601-2a1d-480d-bdfd-e7f6e8b8a29c.jsonl
+-rw-r--r-- 1 Administrator 197121  1566634 May 17 20:22 c0393c43-624c-4a25-927c-33373f639a44.jsonl
+-rw-r--r-- 1 Administrator 197121    15367 Apr 28 10:56 c11c4429-0c58-43c4-94d5-8b655a26691b.jsonl
+-rw-r--r-- 1 Administrator 197121    11329 May 12 18:42 c2046538-0294-49b5-a64f-cb9272e2a0f3.jsonl
+-rw-r--r-- 1 Administrator 197121   392523 May 17 15:28 c23ef20d-4ca7-4cab-a43f-b1ecda05c7f7.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  8 20:50 c4db733e-05ee-4277-b298-56901402e8eb/
+-rw-r--r-- 1 Administrator 197121   784183 May  9 00:38 c4db733e-05ee-4277-b298-56901402e8eb.jsonl
+-rw-r--r-- 1 Administrator 197121  2303463 May 15 17:18 c533880b-0cc5-4837-ae71-1697dfb0e329.jsonl
+-rw-r--r-- 1 Administrator 197121   136084 May  3 09:28 c7c6bb29-e14c-4120-b6e4-351a5281b7d7.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 10:56 c7e06c6a-8029-4d8b-86ad-964b61b73a7b/
+-rw-r--r-- 1 Administrator 197121   472796 Apr 28 10:56 c7e06c6a-8029-4d8b-86ad-964b61b73a7b.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  8 22:39 c864f25a-7a4e-42cb-a1dc-3cfee72b56ce/
+-rw-r--r-- 1 Administrator 197121   617611 May  8 23:34 c864f25a-7a4e-42cb-a1dc-3cfee72b56ce.jsonl
+-rw-r--r-- 1 Administrator 197121   123313 May 16 18:53 c8c5fe43-01ca-4e11-93e7-6fddde55b9d5.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  4 18:08 c9e1cd64-e6a5-4024-a58c-bd9a656c4719/
+-rw-r--r-- 1 Administrator 197121  5039594 May  4 21:36 c9e1cd64-e6a5-4024-a58c-bd9a656c4719.jsonl
+-rw-r--r-- 1 Administrator 197121    43721 Apr 28 10:56 ca0cae61-a35d-4d6c-9628-a73fea1f6536.jsonl
+-rw-r--r-- 1 Administrator 197121    15365 Apr 28 10:56 cb3c74b5-73ac-47de-928b-d910ca2e38d2.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 10 17:23 cc328e39-91ad-4fbd-8de9-70120d91c775/
+-rw-r--r-- 1 Administrator 197121   743827 May 15 17:19 cc328e39-91ad-4fbd-8de9-70120d91c775.jsonl
+-rw-r--r-- 1 Administrator 197121    40531 May 14 15:13 cca3abde-165a-4c4c-8cf7-59530c31faa8.jsonl
+-rw-r--r-- 1 Administrator 197121   489150 May 17 11:52 cd3bf0c6-dc3d-427e-a4c6-941b825a9720.jsonl
+-rw-r--r-- 1 Administrator 197121    19844 May 12 19:42 ce79e03c-23c4-4a29-8cb3-b5e4826c33c9.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  4 17:19 cef2ee12-1043-427d-bb47-d4f89760e4cd/
+-rw-r--r-- 1 Administrator 197121   860030 May  5 09:15 cef2ee12-1043-427d-bb47-d4f89760e4cd.jsonl
+-rw-r--r-- 1 Administrator 197121   998860 May 11 10:34 d3d375cf-57e0-42a4-9dc2-e33fbcbaa1be.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  9 00:31 d3fba581-e1a9-4b1f-82d8-fc566ab69fed/
+-rw-r--r-- 1 Administrator 197121  1846433 May  9 02:22 d3fba581-e1a9-4b1f-82d8-fc566ab69fed.jsonl
+-rw-r--r-- 1 Administrator 197121  2402923 May 11 17:41 d43482eb-9106-415e-ab41-9d073d59f28d.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 18 14:51 d47a5849-8d8b-4549-9a1a-9147dbbe488c/
+-rw-r--r-- 1 Administrator 197121   160531 May 18 14:51 d47a5849-8d8b-4549-9a1a-9147dbbe488c.jsonl
+-rw-r--r-- 1 Administrator 197121   218162 May 10 18:39 d6116866-5c98-4058-ade9-7194fd15c4f4.jsonl
+-rw-r--r-- 1 Administrator 197121    41320 May  4 09:45 d7722cac-d69a-481a-923e-8f17584f2e73.jsonl
+-rw-r--r-- 1 Administrator 197121  1103000 May 11 15:55 d80e8a73-59f9-4c84-a431-42b22fdc9071.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 12 15:46 d96845d0-49dd-488c-8d95-706514acacf0/
+-rw-r--r-- 1 Administrator 197121   118697 May 12 16:16 d96845d0-49dd-488c-8d95-706514acacf0.jsonl
+-rw-r--r-- 1 Administrator 197121    37313 May 12 17:33 da2ec11e-6029-4db5-aa96-a6f552b42dd8.jsonl
+-rw-r--r-- 1 Administrator 197121   465873 Apr 30 21:05 dda00c36-9ead-4aaf-a94f-cf72ccc0da04.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 14 14:35 de10042f-ce46-437b-bfe6-4ba1affb8272/
+-rw-r--r-- 1 Administrator 197121  2727895 May 14 15:05 de10042f-ce46-437b-bfe6-4ba1affb8272.jsonl
+-rw-r--r-- 1 Administrator 197121   182328 May  8 23:30 de22f52a-46bb-4221-b065-488c810a7ddf.jsonl
+-rw-r--r-- 1 Administrator 197121    11782 Apr 28 10:56 de71d282-9622-4a67-9902-344182b8e285.jsonl
+-rw-r--r-- 1 Administrator 197121   679509 May  4 16:00 deec11ad-07aa-4767-a5e5-39a53b52ee21.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  9 03:13 df936c0f-fc28-4067-a347-242a9180f6ba/
+-rw-r--r-- 1 Administrator 197121  1334297 May  9 04:58 df936c0f-fc28-4067-a347-242a9180f6ba.jsonl
+-rw-r--r-- 1 Administrator 197121    54854 Apr 30 11:22 e0d10cef-712d-4fbe-89b0-6d3526cef4c3.jsonl
+-rw-r--r-- 1 Administrator 197121    11633 May 12 18:09 e10f6df1-71f0-46f6-8e82-22f0eafb5ca1.jsonl
+-rw-r--r-- 1 Administrator 197121  4281733 Apr 28 10:56 e16070b0-5bd7-4889-85b9-33db487edaf9.jsonl
+-rw-r--r-- 1 Administrator 197121    88871 May  5 11:07 e275148b-12fc-4960-9490-d231d6692123.jsonl
+-rw-r--r-- 1 Administrator 197121  9480501 Apr 28 11:09 e3fb8285-0231-4115-ac24-784ac56438eb.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 18 12:55 e52932ac-639d-4ede-821f-8fba7f53300f/
+-rw-r--r-- 1 Administrator 197121  3892908 May 18 14:22 e52932ac-639d-4ede-821f-8fba7f53300f.jsonl
+-rw-r--r-- 1 Administrator 197121   229895 Apr 28 11:09 e55487a2-0f87-439e-8ee7-ee9432cb706f.jsonl
+-rw-r--r-- 1 Administrator 197121   547819 May 11 19:40 e5f0eea8-c4d2-4bb9-92af-4ef47ef3baa0.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  4 20:06 e7ec8a2c-636a-4482-b846-515823d5ad68/
+-rw-r--r-- 1 Administrator 197121   194741 May  4 20:18 e7ec8a2c-636a-4482-b846-515823d5ad68.jsonl
+-rw-r--r-- 1 Administrator 197121   831120 May  9 04:58 eac3baa6-eacc-4379-99eb-cece0973d9e5.jsonl
+-rw-r--r-- 1 Administrator 197121   277647 May 14 18:28 eae5fa5e-9855-4f10-9f8c-8d7b1a09f1e2.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 30 13:37 ecad918b-4a34-4255-82f3-4b6221dcd56e/
+-rw-r--r-- 1 Administrator 197121   199613 Apr 30 14:46 ecad918b-4a34-4255-82f3-4b6221dcd56e.jsonl
+-rw-r--r-- 1 Administrator 197121    17042 May 12 18:34 ed4f72dd-f828-482c-9535-28cd44f650ea.jsonl
+-rw-r--r-- 1 Administrator 197121   853055 May 18 09:20 ee8fceb6-b6f5-45d6-8385-b1cd536555bb.jsonl
+-rw-r--r-- 1 Administrator 197121   288027 May  5 11:04 eec9aacc-03c6-4c24-8f37-90fec6966b44.jsonl
+-rw-r--r-- 1 Administrator 197121  1021417 May 18 11:24 f0608d60-c9cd-441f-9300-fb73f95b7792.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 15 18:00 f061e181-268e-4a2a-b263-37c8bea48083/
+-rw-r--r-- 1 Administrator 197121  1953678 May 15 21:18 f061e181-268e-4a2a-b263-37c8bea48083.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  4 13:54 f0feb01a-9556-4173-919e-8d224456c64c/
+-rw-r--r-- 1 Administrator 197121  1129245 May  4 14:08 f0feb01a-9556-4173-919e-8d224456c64c.jsonl
+-rw-r--r-- 1 Administrator 197121   311070 May 15 10:43 f10d2b83-e348-4ff6-809c-edcb86cdee30.jsonl
+-rw-r--r-- 1 Administrator 197121   187914 Apr 28 10:56 f139627c-2d0b-466b-8fc5-667afce8710e.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  8 19:38 f22eeb65-d399-4e64-9f7f-f0218759a078/
+-rw-r--r-- 1 Administrator 197121   902690 May  8 23:57 f22eeb65-d399-4e64-9f7f-f0218759a078.jsonl
+-rw-r--r-- 1 Administrator 197121  1318925 Apr 28 11:09 f5983e30-a134-4150-883a-2fa142531953.jsonl
+-rw-r--r-- 1 Administrator 197121   101198 May  4 11:40 fc233515-133f-4e1c-ad4b-e944608bc0b9.jsonl
+-rw-r--r-- 1 Administrator 197121     8727 Apr 28 10:56 fd2e9e67-4557-4d6a-a2ae-cb585fb70246.jsonl
+drwxr-xr-x 1 Administrator 197121        0 Apr 28 16:58 fee91644-efe7-4999-99b6-1939529c07d8/
+-rw-r--r-- 1 Administrator 197121  1873863 Apr 28 19:11 fee91644-efe7-4999-99b6-1939529c07d8.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May  8 21:46 ff243317-aa34-40d9-935e-e0c174a2dfad/
+-rw-r--r-- 1 Administrator 197121   394911 May  8 22:44 ff243317-aa34-40d9-935e-e0c174a2dfad.jsonl
+-rw-r--r-- 1 Administrator 197121    27084 Apr 28 10:56 ff2aa113-9398-401f-9358-6d7c315f54f6.jsonl
+drwxr-xr-x 1 Administrator 197121        0 May 18 11:20 memory/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/00cfc655-ef6f-4d87-a953-23791f45e99e:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  4 20:50 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  4 21:48 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/00cfc655-ef6f-4d87-a953-23791f45e99e/tool-results:
+total 532
+drwxr-xr-x 1 Administrator 197121      0 May  4 21:48 ./
+drwxr-xr-x 1 Administrator 197121      0 May  4 20:50 ../
+-rw-r--r-- 1 Administrator 197121 465670 May  4 20:50 bx8o9nl8t.txt
+-rw-r--r-- 1 Administrator 197121  75926 May  4 21:48 bxlj7393q.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/00ef2a14-f073-4f39-aca6-a3cfdd5bab7d:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 subagents/
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/00ef2a14-f073-4f39-aca6-a3cfdd5bab7d/subagents:
+total 181
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 183110 Apr 28 10:56 agent-af2a9ab2b3ce38556.jsonl
+-rw-r--r-- 1 Administrator 197121     60 Apr 28 10:56 agent-af2a9ab2b3ce38556.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/00ef2a14-f073-4f39-aca6-a3cfdd5bab7d/tool-results:
+total 132
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 37184 Apr 28 10:56 b617b25ey.txt
+-rw-r--r-- 1 Administrator 197121 35729 Apr 28 10:56 b9jxvwicr.txt
+-rw-r--r-- 1 Administrator 197121 22379 Apr 28 10:56 call_00_CspBPhKd5Dq1VkTGpYZp9Vvy.txt
+-rw-r--r-- 1 Administrator 197121 27583 Apr 28 10:56 call_01_yNY4uIvW62rftioFOj5lxa0q.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/019382a4-f2b1-443f-85c0-888e5d510e19:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/019382a4-f2b1-443f-85c0-888e5d510e19/subagents:
+total 53
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 51123 Apr 28 10:56 agent-a6c06884a23d0f4d3.jsonl
+-rw-r--r-- 1 Administrator 197121    85 Apr 28 10:56 agent-a6c06884a23d0f4d3.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/04053218-e99a-4148-a8f6-0545549accc3:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 15 11:52 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 15 14:00 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 15 11:49 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/04053218-e99a-4148-a8f6-0545549accc3/subagents:
+total 804
+drwxr-xr-x 1 Administrator 197121      0 May 15 14:00 ./
+drwxr-xr-x 1 Administrator 197121      0 May 15 11:52 ../
+-rw-r--r-- 1 Administrator 197121 110419 May 15 11:58 agent-a0947bbfd262bd69a.jsonl
+-rw-r--r-- 1 Administrator 197121     78 May 15 11:52 agent-a0947bbfd262bd69a.meta.json
+-rw-r--r-- 1 Administrator 197121 250196 May 15 14:05 agent-a28b98e7ca1405298.jsonl
+-rw-r--r-- 1 Administrator 197121     76 May 15 14:00 agent-a28b98e7ca1405298.meta.json
+-rw-r--r-- 1 Administrator 197121 324483 May 15 14:09 agent-a67744c697aaec1cb.jsonl
+-rw-r--r-- 1 Administrator 197121     67 May 15 14:00 agent-a67744c697aaec1cb.meta.json
+-rw-r--r-- 1 Administrator 197121 119563 May 15 11:58 agent-a80fb2e100e225fbd.jsonl
+-rw-r--r-- 1 Administrator 197121     76 May 15 11:52 agent-a80fb2e100e225fbd.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/04053218-e99a-4148-a8f6-0545549accc3/tool-results:
+total 128
+drwxr-xr-x 1 Administrator 197121     0 May 15 11:49 ./
+drwxr-xr-x 1 Administrator 197121     0 May 15 11:52 ../
+-rw-r--r-- 2 Administrator 197121 33030 May 15 11:49 baair571r.txt
+-rw-r--r-- 2 Administrator 197121 90467 May 15 11:48 bvl1zxjwb.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/069ef8b8-54d8-48bb-be72-8144f49c3585:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  9 01:58 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  9 02:16 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/069ef8b8-54d8-48bb-be72-8144f49c3585/tool-results:
+total 128
+drwxr-xr-x 1 Administrator 197121     0 May  9 02:16 ./
+drwxr-xr-x 1 Administrator 197121     0 May  9 01:58 ../
+-rw-r--r-- 1 Administrator 197121 40835 May  9 01:58 bf7gkaup6.txt
+-rw-r--r-- 1 Administrator 197121 40835 May  9 02:07 bmubj98m7.txt
+-rw-r--r-- 1 Administrator 197121 47452 May  9 02:16 bql1ujig0.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/07a31d24-74b5-475e-82c9-47c19efcd3d1:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 18 09:33 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 18 09:33 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/07a31d24-74b5-475e-82c9-47c19efcd3d1/subagents:
+total 295
+drwxr-xr-x 1 Administrator 197121      0 May 18 09:33 ./
+drwxr-xr-x 1 Administrator 197121      0 May 18 09:33 ../
+-rw-r--r-- 1 Administrator 197121 109220 May 18 09:35 agent-aa36a84971746d4fd.jsonl
+-rw-r--r-- 1 Administrator 197121     82 May 18 09:33 agent-aa36a84971746d4fd.meta.json
+-rw-r--r-- 1 Administrator 197121  69833 May 18 09:35 agent-ad7ad5801837f126d.jsonl
+-rw-r--r-- 1 Administrator 197121     87 May 18 09:33 agent-ad7ad5801837f126d.meta.json
+-rw-r--r-- 1 Administrator 197121 106736 May 18 09:34 agent-ae2d5d1d3400af372.jsonl
+-rw-r--r-- 1 Administrator 197121     81 May 18 09:33 agent-ae2d5d1d3400af372.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/07a593cf-bcb9-4bf9-a969-effe2aaab829:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 12:57 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 13:01 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/07a593cf-bcb9-4bf9-a969-effe2aaab829/tool-results:
+total 3052
+drwxr-xr-x 1 Administrator 197121       0 Apr 29 13:01 ./
+drwxr-xr-x 1 Administrator 197121       0 Apr 29 12:57 ../
+-rw-r--r-- 1 Administrator 197121  113975 Apr 29 12:57 br58fwa5s.txt
+-rw-r--r-- 1 Administrator 197121 1404816 Apr 29 13:00 br8t5f1ct.txt
+-rw-r--r-- 1 Administrator 197121 1604583 Apr 29 13:01 bzyc100bk.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/088833bc-34b2-4149-96cf-18a5382504cb:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 12 19:36 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 12 19:36 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/088833bc-34b2-4149-96cf-18a5382504cb/tool-results:
+total 48
+drwxr-xr-x 1 Administrator 197121     0 May 12 19:36 ./
+drwxr-xr-x 1 Administrator 197121     0 May 12 19:36 ../
+-rw-r--r-- 2 Administrator 197121 47836 May 12 19:36 b8ecnkls4.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/0b0a9c85-8d9d-4597-8c38-a45ea40fa1fd:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 14 13:39 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 14 17:30 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 14 13:39 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/0b0a9c85-8d9d-4597-8c38-a45ea40fa1fd/subagents:
+total 1072
+drwxr-xr-x 1 Administrator 197121      0 May 14 17:30 ./
+drwxr-xr-x 1 Administrator 197121      0 May 14 13:39 ../
+-rw-r--r-- 1 Administrator 197121 148804 May 14 13:40 agent-a0619a02e0fdf8a0d.jsonl
+-rw-r--r-- 1 Administrator 197121     68 May 14 13:39 agent-a0619a02e0fdf8a0d.meta.json
+-rw-r--r-- 1 Administrator 197121 493130 May 14 17:37 agent-a3a5cefc17a7eeb32.jsonl
+-rw-r--r-- 1 Administrator 197121     57 May 14 17:30 agent-a3a5cefc17a7eeb32.meta.json
+-rw-r--r-- 1 Administrator 197121 174647 May 14 11:39 agent-a77b882de3bb08363.jsonl
+-rw-r--r-- 1 Administrator 197121     68 May 14 11:38 agent-a77b882de3bb08363.meta.json
+-rw-r--r-- 1 Administrator 197121 263164 May 14 13:28 agent-a77fd3a0a5c4fdcf1.jsonl
+-rw-r--r-- 1 Administrator 197121     60 May 14 13:25 agent-a77fd3a0a5c4fdcf1.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/0b0a9c85-8d9d-4597-8c38-a45ea40fa1fd/tool-results:
+total 392
+drwxr-xr-x 1 Administrator 197121      0 May 14 13:39 ./
+drwxr-xr-x 1 Administrator 197121      0 May 14 13:39 ../
+-rw-r--r-- 2 Administrator 197121 399001 May 14 13:39 b9pqq4uyb.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/0bb41191-afd4-434c-ad68-3fc063789392:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 14 14:06 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 14 14:06 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/0bb41191-afd4-434c-ad68-3fc063789392/tool-results:
+total 96
+drwxr-xr-x 1 Administrator 197121     0 May 14 14:06 ./
+drwxr-xr-x 1 Administrator 197121     0 May 14 14:06 ../
+-rw-r--r-- 2 Administrator 197121 98226 May 14 14:06 baiopmvat.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/107401a8-394e-4563-a55d-03700cbd7160:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 16:16 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 30 15:06 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/107401a8-394e-4563-a55d-03700cbd7160/subagents:
+total 7609
+drwxr-xr-x 1 Administrator 197121       0 Apr 30 15:06 ./
+drwxr-xr-x 1 Administrator 197121       0 Apr 29 16:16 ../
+-rw-r--r-- 1 Administrator 197121  454855 Apr 29 16:20 agent-a0880a6e07edcc70a.jsonl
+-rw-r--r-- 1 Administrator 197121      68 Apr 29 16:16 agent-a0880a6e07edcc70a.meta.json
+-rw-r--r-- 1 Administrator 197121  248948 Apr 29 16:20 agent-a4d1a836f6ae963c8.jsonl
+-rw-r--r-- 1 Administrator 197121      72 Apr 29 16:16 agent-a4d1a836f6ae963c8.meta.json
+-rw-r--r-- 1 Administrator 197121  197133 Apr 30 15:08 agent-a70deff12c03ded88.jsonl
+-rw-r--r-- 1 Administrator 197121      74 Apr 30 15:06 agent-a70deff12c03ded88.meta.json
+-rw-r--r-- 1 Administrator 197121  163240 Apr 29 16:20 agent-a71eecdb9c5d130e3.jsonl
+-rw-r--r-- 1 Administrator 197121      67 Apr 29 16:16 agent-a71eecdb9c5d130e3.meta.json
+-rw-r--r-- 1 Administrator 197121 6706772 Apr 29 16:57 agent-afd71b5832dc52a6a.jsonl
+-rw-r--r-- 1 Administrator 197121      71 Apr 29 16:43 agent-afd71b5832dc52a6a.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/131d0833-fd17-4ec0-90db-80e2917c9d3a:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  8 22:59 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  8 22:59 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/131d0833-fd17-4ec0-90db-80e2917c9d3a/subagents:
+total 325
+drwxr-xr-x 1 Administrator 197121      0 May  8 22:59 ./
+drwxr-xr-x 1 Administrator 197121      0 May  8 22:59 ../
+-rw-r--r-- 1 Administrator 197121 331597 May  8 23:03 agent-ae3304f335f76def9.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May  8 22:59 agent-ae3304f335f76def9.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/21cd7ec3-8ccc-4cdc-ae2f-74816f6a6482:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 15 10:28 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 15 10:32 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/21cd7ec3-8ccc-4cdc-ae2f-74816f6a6482/tool-results:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 May 15 10:32 ./
+drwxr-xr-x 1 Administrator 197121     0 May 15 10:28 ../
+-rw-r--r-- 2 Administrator 197121 45554 May 15 10:32 b3tdx7x3y.txt
+-rw-r--r-- 2 Administrator 197121 35915 May 15 10:28 bq1eugpxx.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2249efc0-d48a-4b6d-9782-bfb04d88970c:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2249efc0-d48a-4b6d-9782-bfb04d88970c/tool-results:
+total 212
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 55329 Apr 28 10:56 balhbt5t0.txt
+-rw-r--r-- 1 Administrator 197121 53655 Apr 28 10:56 bbpya5z11.txt
+-rw-r--r-- 1 Administrator 197121 30498 Apr 28 10:56 bf7e8euei.txt
+-rw-r--r-- 1 Administrator 197121 62673 Apr 28 10:56 by0fgg3o8.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/273f9059-74b0-427a-a9d4-bd0e22ba606a:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  3 09:11 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  3 11:09 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/273f9059-74b0-427a-a9d4-bd0e22ba606a/tool-results:
+total 72
+drwxr-xr-x 1 Administrator 197121     0 May  3 11:09 ./
+drwxr-xr-x 1 Administrator 197121     0 May  3 09:11 ../
+-rw-r--r-- 1 Administrator 197121 32065 May  3 11:09 bi9ssfb10.txt
+-rw-r--r-- 1 Administrator 197121 37090 May  3 09:11 bqtm93urx.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/28f862ce-6e22-4bd3-aaea-d0c19332ae71:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/28f862ce-6e22-4bd3-aaea-d0c19332ae71/tool-results:
+total 848
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 864528 Apr 28 10:56 bj8272ih2.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2c808720-92cf-4e53-98fe-a6b08b4e5a40:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 10 16:49 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 10 16:49 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2c808720-92cf-4e53-98fe-a6b08b4e5a40/subagents:
+total 25
+drwxr-xr-x 1 Administrator 197121     0 May 10 16:49 ./
+drwxr-xr-x 1 Administrator 197121     0 May 10 16:49 ../
+-rw-r--r-- 1 Administrator 197121 23501 May 10 16:50 agent-a652a350246929e73.jsonl
+-rw-r--r-- 1 Administrator 197121    75 May 10 16:49 agent-a652a350246929e73.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2cdd3ec3-20c4-4019-94e0-177fce4cdbfb:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 13 09:58 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 13 09:58 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2cdd3ec3-20c4-4019-94e0-177fce4cdbfb/tool-results:
+total 24
+drwxr-xr-x 1 Administrator 197121     0 May 13 09:58 ./
+drwxr-xr-x 1 Administrator 197121     0 May 13 09:58 ../
+-rw-r--r-- 1 Administrator 197121 24165 May 13 09:58 call_00_W0uhNvF5LHN1iula7sq56704.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2ffb45b7-8ee1-42f3-919f-ba73072210d5:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  8 18:04 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  8 18:07 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/2ffb45b7-8ee1-42f3-919f-ba73072210d5/tool-results:
+total 336
+drwxr-xr-x 1 Administrator 197121      0 May  8 18:07 ./
+drwxr-xr-x 1 Administrator 197121      0 May  8 18:04 ../
+-rw-r--r-- 1 Administrator 197121  35489 May  8 18:04 bsaefw7ei.txt
+-rw-r--r-- 1 Administrator 197121 306337 May  8 18:07 bsg7ifogw.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/3289e472-9bc7-48b8-ab1c-9321b358a110:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/3289e472-9bc7-48b8-ab1c-9321b358a110/tool-results:
+total 36
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 33882 Apr 28 10:56 beqv76tgb.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/38e9089f-6290-4a01-8446-57bcbe583ba0:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  3 08:46 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  3 08:46 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/38e9089f-6290-4a01-8446-57bcbe583ba0/subagents:
+total 89
+drwxr-xr-x 1 Administrator 197121     0 May  3 08:46 ./
+drwxr-xr-x 1 Administrator 197121     0 May  3 08:46 ../
+-rw-r--r-- 1 Administrator 197121 88154 May  3 08:53 agent-a8b268e9fc9e1eb5e.jsonl
+-rw-r--r-- 1 Administrator 197121    88 May  3 08:46 agent-a8b268e9fc9e1eb5e.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/3c3ddd5f-5815-48a8-b11a-17f915ac0800:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 18 11:30 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 18 11:29 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 18 11:30 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/3c3ddd5f-5815-48a8-b11a-17f915ac0800/subagents:
+total 425
+drwxr-xr-x 1 Administrator 197121      0 May 18 11:29 ./
+drwxr-xr-x 1 Administrator 197121      0 May 18 11:30 ../
+-rw-r--r-- 1 Administrator 197121 431673 May 18 11:31 agent-aae05b5530ccd3d42.jsonl
+-rw-r--r-- 1 Administrator 197121     66 May 18 11:29 agent-aae05b5530ccd3d42.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/3c3ddd5f-5815-48a8-b11a-17f915ac0800/tool-results:
+total 28
+drwxr-xr-x 1 Administrator 197121     0 May 18 11:30 ./
+drwxr-xr-x 1 Administrator 197121     0 May 18 11:30 ../
+-rw-r--r-- 1 Administrator 197121 24862 May 18 11:30 call_00_8TAIQF7jmqbz4lZ6MhG21936.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/4e5dc35f-ac1a-4b34-8339-d22517c6757c:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 12 16:36 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 12 14:32 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 12 17:29 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/4e5dc35f-ac1a-4b34-8339-d22517c6757c/subagents:
+total 498
+drwxr-xr-x 1 Administrator 197121      0 May 12 14:32 ./
+drwxr-xr-x 1 Administrator 197121      0 May 12 16:36 ../
+-rw-r--r-- 1 Administrator 197121 175652 May 12 14:36 agent-a8471e6df83667c63.jsonl
+-rw-r--r-- 1 Administrator 197121     71 May 12 14:32 agent-a8471e6df83667c63.meta.json
+-rw-r--r-- 1 Administrator 197121 327664 May 12 13:16 agent-a9d6c2ab5fd9a34ae.jsonl
+-rw-r--r-- 1 Administrator 197121     65 May 12 13:11 agent-a9d6c2ab5fd9a34ae.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/4e5dc35f-ac1a-4b34-8339-d22517c6757c/tool-results:
+total 9128
+drwxr-xr-x 1 Administrator 197121       0 May 12 17:29 ./
+drwxr-xr-x 1 Administrator 197121       0 May 12 16:36 ../
+-rw-r--r-- 1 Administrator 197121  887663 May 12 17:29 b380oybem.txt
+-rw-r--r-- 1 Administrator 197121 8412807 May 12 16:58 bmrbclk2v.txt
+-rw-r--r-- 1 Administrator 197121   41768 May 12 16:36 call_01_ySuHNoF6RtJ4VQeRxuaT8697.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/51d9040f-9a97-4de0-b021-d7eb91c51bea:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May  9 05:01 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  9 05:01 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/51d9040f-9a97-4de0-b021-d7eb91c51bea/subagents:
+total 387
+drwxr-xr-x 1 Administrator 197121      0 May  9 05:01 ./
+drwxr-xr-x 1 Administrator 197121      0 May  9 05:01 ../
+-rw-r--r-- 1 Administrator 197121 179888 May  9 05:04 agent-a3b57600bff7ae910.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May  9 05:01 agent-a3b57600bff7ae910.meta.json
+-rw-r--r-- 1 Administrator 197121 120783 May  9 05:07 agent-a8ed6b8339587bc91.jsonl
+-rw-r--r-- 1 Administrator 197121     75 May  9 05:01 agent-a8ed6b8339587bc91.meta.json
+-rw-r--r-- 1 Administrator 197121  82069 May  9 05:02 agent-ad25ecc642f1b3004.jsonl
+-rw-r--r-- 1 Administrator 197121     65 May  9 05:01 agent-ad25ecc642f1b3004.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/5887184f-148d-4024-a827-cf2be03911d6:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  5 16:43 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  5 19:36 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/5887184f-148d-4024-a827-cf2be03911d6/tool-results:
+total 92
+drwxr-xr-x 1 Administrator 197121     0 May  5 19:36 ./
+drwxr-xr-x 1 Administrator 197121     0 May  5 16:43 ../
+-rw-r--r-- 1 Administrator 197121 34225 May  5 16:43 b6x3mhur5.txt
+-rw-r--r-- 1 Administrator 197121 53350 May  5 16:58 bjogb7zrn.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/5c6bcadb-89d1-4a62-b067-b95f2cd35c61:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May  9 04:04 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  9 04:04 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/5c6bcadb-89d1-4a62-b067-b95f2cd35c61/subagents:
+total 462
+drwxr-xr-x 1 Administrator 197121      0 May  9 04:04 ./
+drwxr-xr-x 1 Administrator 197121      0 May  9 04:04 ../
+-rw-r--r-- 1 Administrator 197121  58308 May  9 04:05 agent-a8ba2406d31064f41.jsonl
+-rw-r--r-- 1 Administrator 197121     68 May  9 04:04 agent-a8ba2406d31064f41.meta.json
+-rw-r--r-- 1 Administrator 197121 404519 May  9 04:08 agent-ad4ae41f33d001114.jsonl
+-rw-r--r-- 1 Administrator 197121     71 May  9 04:04 agent-ad4ae41f33d001114.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/5de6bbb0-e6a9-4a73-b436-5c19aa71abe4:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 10 19:50 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 10 19:50 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/5de6bbb0-e6a9-4a73-b436-5c19aa71abe4/subagents:
+total 217
+drwxr-xr-x 1 Administrator 197121      0 May 10 19:50 ./
+drwxr-xr-x 1 Administrator 197121      0 May 10 19:50 ../
+-rw-r--r-- 1 Administrator 197121 219599 May 10 19:58 agent-a8f11532240e0b28f.jsonl
+-rw-r--r-- 1 Administrator 197121     67 May 10 19:50 agent-a8f11532240e0b28f.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6639429b-4348-49fd-a968-a79e38db9d78:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  5 13:13 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  5 13:13 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6639429b-4348-49fd-a968-a79e38db9d78/tool-results:
+total 32
+drwxr-xr-x 1 Administrator 197121     0 May  5 13:13 ./
+drwxr-xr-x 1 Administrator 197121     0 May  5 13:13 ../
+-rw-r--r-- 1 Administrator 197121 32418 May  5 13:13 bn8xdcwlq.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/672600f4-fc5c-4eff-8dda-8e98a7c3f66b:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/672600f4-fc5c-4eff-8dda-8e98a7c3f66b/subagents:
+total 206
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 150541 Apr 28 10:56 agent-a89db2b39e925f49d.jsonl
+-rw-r--r-- 1 Administrator 197121     64 Apr 28 10:56 agent-a89db2b39e925f49d.meta.json
+-rw-r--r-- 1 Administrator 197121  50831 Apr 28 10:56 agent-aeadca655e0a3d73a.jsonl
+-rw-r--r-- 1 Administrator 197121     61 Apr 28 10:56 agent-aeadca655e0a3d73a.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/67369027-c481-4329-9f6f-5b4960ac4ada:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  3 16:26 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  3 16:26 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/67369027-c481-4329-9f6f-5b4960ac4ada/tool-results:
+total 28
+drwxr-xr-x 1 Administrator 197121     0 May  3 16:26 ./
+drwxr-xr-x 1 Administrator 197121     0 May  3 16:26 ../
+-rw-r--r-- 1 Administrator 197121 26102 May  3 16:26 call_00_00HCK00Q8gkZFcVfeUFY5113.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6ea9a657-912e-4706-8c75-9e863b6f07a9:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 20:05 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 20:11 subagents/
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 20:05 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6ea9a657-912e-4706-8c75-9e863b6f07a9/subagents:
+total 733
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 20:11 ./
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 20:05 ../
+-rw-r--r-- 1 Administrator 197121 252958 Apr 28 20:06 agent-a45cb430da1e57d23.jsonl
+-rw-r--r-- 1 Administrator 197121    132 Apr 28 20:05 agent-a45cb430da1e57d23.meta.json
+-rw-r--r-- 1 Administrator 197121 191148 Apr 28 20:08 agent-aa75a91cffc575dc2.jsonl
+-rw-r--r-- 1 Administrator 197121     94 Apr 28 20:06 agent-aa75a91cffc575dc2.meta.json
+-rw-r--r-- 1 Administrator 197121  65118 Apr 28 20:08 agent-ad2852fd1a2ff0e1b.jsonl
+-rw-r--r-- 1 Administrator 197121     92 Apr 28 20:06 agent-ad2852fd1a2ff0e1b.meta.json
+-rw-r--r-- 1 Administrator 197121  87660 Apr 28 20:13 agent-adae09a4bd832ee67.jsonl
+-rw-r--r-- 1 Administrator 197121     82 Apr 28 20:11 agent-adae09a4bd832ee67.meta.json
+-rw-r--r-- 1 Administrator 197121 137413 Apr 28 20:13 agent-ae9f12a8fd20b398f.jsonl
+-rw-r--r-- 1 Administrator 197121     70 Apr 28 20:11 agent-ae9f12a8fd20b398f.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6ea9a657-912e-4706-8c75-9e863b6f07a9/tool-results:
+total 28
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 20:05 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 20:05 ../
+-rw-r--r-- 1 Administrator 197121 24843 Apr 28 20:05 call_00_TRPxMSD7pAWF13cGkVRNmasj.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6f00ea6b-6e2c-4ca9-8ed4-af210b89ecde:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  5 20:58 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  5 21:15 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/6f00ea6b-6e2c-4ca9-8ed4-af210b89ecde/tool-results:
+total 100
+drwxr-xr-x 1 Administrator 197121     0 May  5 21:15 ./
+drwxr-xr-x 1 Administrator 197121     0 May  5 20:58 ../
+-rw-r--r-- 1 Administrator 197121 35266 May  5 20:58 bqkmfj779.txt
+-rw-r--r-- 1 Administrator 197121 62357 May  5 21:15 bx0dt930o.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/7be9d149-b50e-4207-b5a9-6abe797da2b0:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/7be9d149-b50e-4207-b5a9-6abe797da2b0/tool-results:
+total 64
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 63392 Apr 28 10:56 b21qd9et4.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/7ec81fa2-3e8a-4cdc-b6b1-704b8f2387e0:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 12 15:33 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 12 15:33 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/7ec81fa2-3e8a-4cdc-b6b1-704b8f2387e0/subagents:
+total 337
+drwxr-xr-x 1 Administrator 197121      0 May 12 15:33 ./
+drwxr-xr-x 1 Administrator 197121      0 May 12 15:33 ../
+-rw-r--r-- 1 Administrator 197121 340008 May 12 15:40 agent-aa02f8e710aa4df5d.jsonl
+-rw-r--r-- 1 Administrator 197121     64 May 12 15:33 agent-aa02f8e710aa4df5d.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/84bf36da-d7f7-4758-909d-35e98dd5933e:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 13 09:05 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 13 09:05 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/84bf36da-d7f7-4758-909d-35e98dd5933e/tool-results:
+total 48
+drwxr-xr-x 1 Administrator 197121     0 May 13 09:05 ./
+drwxr-xr-x 1 Administrator 197121     0 May 13 09:05 ../
+-rw-r--r-- 2 Administrator 197121 47249 May 13 09:05 b0exethop.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/87ba2961-dd99-403b-b5c5-6de2130be09a:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 13 16:12 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 13 16:12 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/87ba2961-dd99-403b-b5c5-6de2130be09a/tool-results:
+total 100
+drwxr-xr-x 1 Administrator 197121     0 May 13 16:12 ./
+drwxr-xr-x 1 Administrator 197121     0 May 13 16:12 ../
+-rw-r--r-- 2 Administrator 197121 98398 May 13 16:12 bpixsrz8v.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/89776cb6-52af-474b-b0a1-55734729b026:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 12 11:30 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 12 11:30 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/89776cb6-52af-474b-b0a1-55734729b026/subagents:
+total 29
+drwxr-xr-x 1 Administrator 197121     0 May 12 11:30 ./
+drwxr-xr-x 1 Administrator 197121     0 May 12 11:30 ../
+-rw-r--r-- 1 Administrator 197121 25176 May 12 11:31 agent-aaa5a67162fe1a846.jsonl
+-rw-r--r-- 1 Administrator 197121    80 May 12 11:30 agent-aaa5a67162fe1a846.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/94a964f0-4e4c-4411-a9de-f74c691550d6:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 18 11:01 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 18 11:01 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/94a964f0-4e4c-4411-a9de-f74c691550d6/tool-results:
+total 184
+drwxr-xr-x 1 Administrator 197121      0 May 18 11:01 ./
+drwxr-xr-x 1 Administrator 197121      0 May 18 11:01 ../
+-rw-r--r-- 2 Administrator 197121 186864 May 18 11:01 b5h0ny8cs.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/95ac523c-e9e3-4b4b-8701-7454e494b52e:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 15:35 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 14:16 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/95ac523c-e9e3-4b4b-8701-7454e494b52e/subagents:
+total 185
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 14:16 ./
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 15:35 ../
+-rw-r--r-- 1 Administrator 197121 186650 Apr 28 14:20 agent-aa310c16dcfb7f208.jsonl
+-rw-r--r-- 1 Administrator 197121     67 Apr 28 14:16 agent-aa310c16dcfb7f208.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/9eeec93d-e384-4f98-aa25-d731bf2b92cf:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 14 18:41 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 14 18:41 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 14 18:41 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/9eeec93d-e384-4f98-aa25-d731bf2b92cf/subagents:
+total 739
+drwxr-xr-x 1 Administrator 197121      0 May 14 18:41 ./
+drwxr-xr-x 1 Administrator 197121      0 May 14 18:41 ../
+-rw-r--r-- 1 Administrator 197121 289977 May 14 18:42 agent-a22050282667f061f.jsonl
+-rw-r--r-- 1 Administrator 197121     66 May 14 18:41 agent-a22050282667f061f.meta.json
+-rw-r--r-- 1 Administrator 197121 234726 May 14 18:42 agent-a7d2c697256028042.jsonl
+-rw-r--r-- 1 Administrator 197121     63 May 14 18:41 agent-a7d2c697256028042.meta.json
+-rw-r--r-- 1 Administrator 197121 220588 May 14 18:42 agent-ad7da3a4c73c45537.jsonl
+-rw-r--r-- 1 Administrator 197121     63 May 14 18:41 agent-ad7da3a4c73c45537.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/9eeec93d-e384-4f98-aa25-d731bf2b92cf/tool-results:
+total 232
+drwxr-xr-x 1 Administrator 197121      0 May 14 18:41 ./
+drwxr-xr-x 1 Administrator 197121      0 May 14 18:41 ../
+-rw-r--r-- 2 Administrator 197121 103210 May 14 18:41 b2mbpzrzc.txt
+-rw-r--r-- 2 Administrator 197121  78064 May 14 18:41 bkff5sd4w.txt
+-rw-r--r-- 2 Administrator 197121  49096 May 14 18:41 bucr954gw.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/9fc1e192-8e23-499e-a8e0-705727373284:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 15:59 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 15:59 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/9fc1e192-8e23-499e-a8e0-705727373284/tool-results:
+total 32
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 15:59 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 15:59 ../
+-rw-r--r-- 1 Administrator 197121 31722 Apr 28 15:59 b8a6qj4it.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/a47875af-47b9-47a5-9ef3-57cf23f94abc:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 14 09:33 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 14 09:35 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 14 09:23 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/a47875af-47b9-47a5-9ef3-57cf23f94abc/subagents:
+total 194
+drwxr-xr-x 1 Administrator 197121      0 May 14 09:35 ./
+drwxr-xr-x 1 Administrator 197121      0 May 14 09:33 ../
+-rw-r--r-- 1 Administrator 197121  79612 May 14 09:35 agent-adac3183d3900f417.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May 14 09:35 agent-adac3183d3900f417.meta.json
+-rw-r--r-- 1 Administrator 197121 109069 May 14 09:34 agent-ae56c04f7cc625b6d.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May 14 09:33 agent-ae56c04f7cc625b6d.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/a47875af-47b9-47a5-9ef3-57cf23f94abc/tool-results:
+total 96
+drwxr-xr-x 1 Administrator 197121     0 May 14 09:23 ./
+drwxr-xr-x 1 Administrator 197121     0 May 14 09:33 ../
+-rw-r--r-- 2 Administrator 197121 98258 May 14 09:23 boarnfdsw.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/a9224428-45e4-4e64-abc3-260c7e858b09:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 14 17:37 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 14 17:37 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/a9224428-45e4-4e64-abc3-260c7e858b09/tool-results:
+total 28
+drwxr-xr-x 1 Administrator 197121     0 May 14 17:37 ./
+drwxr-xr-x 1 Administrator 197121     0 May 14 17:37 ../
+-rw-r--r-- 1 Administrator 197121 27466 May 14 17:37 call_01_IyEtTyjdIbhpPl9ufA2P9403.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ab8fd7dc-6438-466f-9be1-10f231217624:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 11 20:50 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 11 20:50 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ab8fd7dc-6438-466f-9be1-10f231217624/subagents:
+total 202
+drwxr-xr-x 1 Administrator 197121      0 May 11 20:50 ./
+drwxr-xr-x 1 Administrator 197121      0 May 11 20:50 ../
+-rw-r--r-- 1 Administrator 197121 101129 May 11 20:53 agent-ab0ad860e38738fe0.jsonl
+-rw-r--r-- 1 Administrator 197121     73 May 11 20:50 agent-ab0ad860e38738fe0.meta.json
+-rw-r--r-- 1 Administrator 197121  95932 May 11 20:55 agent-ad175bb4e17ebab7e.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May 11 20:50 agent-ad175bb4e17ebab7e.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ad538ca6-16e2-4a04-8808-e153b3707d82:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 12:23 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 12:23 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ad538ca6-16e2-4a04-8808-e153b3707d82/tool-results:
+total 36
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 12:23 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 12:23 ../
+-rw-r--r-- 1 Administrator 197121 33950 Apr 28 12:23 b98kqrmfg.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/b03ab2dc-d6bb-49cd-8091-8bfde5a188ae:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 11 19:50 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 11 19:50 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/b03ab2dc-d6bb-49cd-8091-8bfde5a188ae/tool-results:
+total 100
+drwxr-xr-x 1 Administrator 197121      0 May 11 19:50 ./
+drwxr-xr-x 1 Administrator 197121      0 May 11 19:50 ../
+-rw-r--r-- 1 Administrator 197121 101725 May 11 19:50 bttywg6f1.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/bb2cb3cd-c87c-4c58-ba8d-5ec95f9b6e51:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 12 11:18 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 12 11:18 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/bb2cb3cd-c87c-4c58-ba8d-5ec95f9b6e51/subagents:
+total 49
+drwxr-xr-x 1 Administrator 197121     0 May 12 11:18 ./
+drwxr-xr-x 1 Administrator 197121     0 May 12 11:18 ../
+-rw-r--r-- 1 Administrator 197121 49033 May 12 11:20 agent-a9655bc55a5879e3c.jsonl
+-rw-r--r-- 1 Administrator 197121    75 May 12 11:18 agent-a9655bc55a5879e3c.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/bc0dab36-c3a8-4db5-a782-e2343f988d75:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  9 02:50 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  9 02:50 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/bc0dab36-c3a8-4db5-a782-e2343f988d75/tool-results:
+total 56
+drwxr-xr-x 1 Administrator 197121     0 May  9 02:50 ./
+drwxr-xr-x 1 Administrator 197121     0 May  9 02:50 ../
+-rw-r--r-- 1 Administrator 197121 53668 May  9 02:50 bp94lba4g.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c0267601-2a1d-480d-bdfd-e7f6e8b8a29c:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c0267601-2a1d-480d-bdfd-e7f6e8b8a29c/tool-results:
+total 372
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121      0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 379597 Apr 28 10:56 bcb63zoxv.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c4db733e-05ee-4277-b298-56901402e8eb:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  8 20:50 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  8 20:50 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c4db733e-05ee-4277-b298-56901402e8eb/tool-results:
+total 276
+drwxr-xr-x 1 Administrator 197121      0 May  8 20:50 ./
+drwxr-xr-x 1 Administrator 197121      0 May  8 20:50 ../
+-rw-r--r-- 1 Administrator 197121 149557 May  8 20:50 ban90ahmt.txt
+-rw-r--r-- 1 Administrator 197121 126982 May  8 20:50 brv9psodf.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c7e06c6a-8029-4d8b-86ad-964b61b73a7b:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 10:56 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c7e06c6a-8029-4d8b-86ad-964b61b73a7b/tool-results:
+total 40
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 28 10:56 ../
+-rw-r--r-- 1 Administrator 197121 38880 Apr 28 10:56 bindzlav2.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c864f25a-7a4e-42cb-a1dc-3cfee72b56ce:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May  8 22:39 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  8 22:50 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May  8 22:52 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c864f25a-7a4e-42cb-a1dc-3cfee72b56ce/subagents:
+total 370
+drwxr-xr-x 1 Administrator 197121      0 May  8 22:50 ./
+drwxr-xr-x 1 Administrator 197121      0 May  8 22:39 ../
+-rw-r--r-- 1 Administrator 197121 135326 May  8 22:53 agent-a2b7cede0884201b6.jsonl
+-rw-r--r-- 1 Administrator 197121     67 May  8 22:50 agent-a2b7cede0884201b6.meta.json
+-rw-r--r-- 1 Administrator 197121 229384 May  8 22:45 agent-a6bf3fe1c626063e2.jsonl
+-rw-r--r-- 1 Administrator 197121     71 May  8 22:39 agent-a6bf3fe1c626063e2.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c864f25a-7a4e-42cb-a1dc-3cfee72b56ce/tool-results:
+total 124
+drwxr-xr-x 1 Administrator 197121     0 May  8 22:52 ./
+drwxr-xr-x 1 Administrator 197121     0 May  8 22:39 ../
+-rw-r--r-- 1 Administrator 197121 46204 May  8 22:40 baul9fyqb.txt
+-rw-r--r-- 1 Administrator 197121 32883 May  8 22:31 brmirv7kk.txt
+-rw-r--r-- 1 Administrator 197121 39605 May  8 22:52 call_01_jjPmIE1YrPeVF8hYQh178896.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c9e1cd64-e6a5-4024-a58c-bd9a656c4719:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May  4 18:08 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  4 18:08 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May  4 17:20 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c9e1cd64-e6a5-4024-a58c-bd9a656c4719/subagents:
+total 299
+drwxr-xr-x 1 Administrator 197121      0 May  4 18:08 ./
+drwxr-xr-x 1 Administrator 197121      0 May  4 18:08 ../
+-rw-r--r-- 1 Administrator 197121  77855 May  4 18:12 agent-a62a2491c88e87c4e.jsonl
+-rw-r--r-- 1 Administrator 197121     71 May  4 18:08 agent-a62a2491c88e87c4e.meta.json
+-rw-r--r-- 1 Administrator 197121 117773 May  4 18:14 agent-af7fdaaaa8f5cd604.jsonl
+-rw-r--r-- 1 Administrator 197121     64 May  4 18:08 agent-af7fdaaaa8f5cd604.meta.json
+-rw-r--r-- 1 Administrator 197121  94405 May  4 18:12 agent-af857620232504783.jsonl
+-rw-r--r-- 1 Administrator 197121     71 May  4 18:08 agent-af857620232504783.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/c9e1cd64-e6a5-4024-a58c-bd9a656c4719/tool-results:
+total 16
+drwxr-xr-x 1 Administrator 197121     0 May  4 17:20 ./
+drwxr-xr-x 1 Administrator 197121     0 May  4 18:08 ../
+-rw-r--r-- 1 Administrator 197121 13088 May  4 17:20 hook-431f9bbc-2776-4de6-b186-6c5f09eb0b63-2-systemMessage.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/cc328e39-91ad-4fbd-8de9-70120d91c775:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 10 17:23 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 10 17:59 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/cc328e39-91ad-4fbd-8de9-70120d91c775/tool-results:
+total 1280
+drwxr-xr-x 1 Administrator 197121      0 May 10 17:59 ./
+drwxr-xr-x 1 Administrator 197121      0 May 10 17:23 ../
+-rw-r--r-- 1 Administrator 197121 754012 May 10 17:59 bceq99jpz.txt
+-rw-r--r-- 1 Administrator 197121 502231 May 10 17:55 bwseps41r.txt
+-rw-r--r-- 1 Administrator 197121  48742 May 10 17:23 call_01_ImsTbWcHYIKnHaSvgGma7240.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/cef2ee12-1043-427d-bb47-d4f89760e4cd:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  4 17:19 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  4 17:19 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/cef2ee12-1043-427d-bb47-d4f89760e4cd/tool-results:
+total 16
+drwxr-xr-x 1 Administrator 197121     0 May  4 17:19 ./
+drwxr-xr-x 1 Administrator 197121     0 May  4 17:19 ../
+-rw-r--r-- 1 Administrator 197121 13088 May  4 17:19 hook-95a4059b-8a94-4b7e-82cf-be4df211d454-2-systemMessage.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d3fba581-e1a9-4b1f-82d8-fc566ab69fed:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May  9 00:31 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  9 00:31 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May  9 00:31 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d3fba581-e1a9-4b1f-82d8-fc566ab69fed/subagents:
+total 1008
+drwxr-xr-x 1 Administrator 197121      0 May  9 00:31 ./
+drwxr-xr-x 1 Administrator 197121      0 May  9 00:31 ../
+-rw-r--r-- 1 Administrator 197121 159131 May  9 00:30 agent-a45a5d5c7da0b6761.jsonl
+-rw-r--r-- 1 Administrator 197121     69 May  9 00:25 agent-a45a5d5c7da0b6761.meta.json
+-rw-r--r-- 1 Administrator 197121 250550 May  9 00:28 agent-a6584f04b96d90360.jsonl
+-rw-r--r-- 1 Administrator 197121     66 May  9 00:25 agent-a6584f04b96d90360.meta.json
+-rw-r--r-- 1 Administrator 197121 243910 May  9 00:30 agent-a6e0dcf7d30ab4eee.jsonl
+-rw-r--r-- 1 Administrator 197121     66 May  9 00:25 agent-a6e0dcf7d30ab4eee.meta.json
+-rw-r--r-- 1 Administrator 197121 364471 May  9 00:37 agent-afc127e02f15e9c56.jsonl
+-rw-r--r-- 1 Administrator 197121     67 May  9 00:31 agent-afc127e02f15e9c56.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d3fba581-e1a9-4b1f-82d8-fc566ab69fed/tool-results:
+total 596
+drwxr-xr-x 1 Administrator 197121      0 May  9 00:31 ./
+drwxr-xr-x 1 Administrator 197121      0 May  9 00:31 ../
+-rw-r--r-- 1 Administrator 197121 608032 May  9 00:31 b0u8nnfqq.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d47a5849-8d8b-4549-9a1a-9147dbbe488c:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d47a5849-8d8b-4549-9a1a-9147dbbe488c/subagents:
+total 217
+drwxr-xr-x 1 Administrator 197121      0 May 18 14:51 ./
+drwxr-xr-x 1 Administrator 197121      0 May 18 14:51 ../
+-rw-r--r-- 1 Administrator 197121 217126 May 18 14:52 agent-a93cb788a3bec9d79.jsonl
+-rw-r--r-- 1 Administrator 197121     69 May 18 14:51 agent-a93cb788a3bec9d79.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d47a5849-8d8b-4549-9a1a-9147dbbe488c/tool-results:
+total 584
+drwxr-xr-x 1 Administrator 197121      0 May 18 14:51 ./
+drwxr-xr-x 1 Administrator 197121      0 May 18 14:51 ../
+-rw-r--r-- 2 Administrator 197121 595461 May 18 14:51 bh45mp9id.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d96845d0-49dd-488c-8d95-706514acacf0:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 12 15:46 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 12 16:12 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/d96845d0-49dd-488c-8d95-706514acacf0/subagents:
+total 82
+drwxr-xr-x 1 Administrator 197121     0 May 12 16:12 ./
+drwxr-xr-x 1 Administrator 197121     0 May 12 15:46 ../
+-rw-r--r-- 1 Administrator 197121 23126 May 12 16:14 agent-a1144897eee3702d6.jsonl
+-rw-r--r-- 1 Administrator 197121    80 May 12 16:12 agent-a1144897eee3702d6.meta.json
+-rw-r--r-- 1 Administrator 197121 51344 May 12 15:50 agent-aecbdce8da4485217.jsonl
+-rw-r--r-- 1 Administrator 197121    92 May 12 15:46 agent-aecbdce8da4485217.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/de10042f-ce46-437b-bfe6-4ba1affb8272:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 14 14:35 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 14 14:35 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 14 14:35 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/de10042f-ce46-437b-bfe6-4ba1affb8272/subagents:
+total 426
+drwxr-xr-x 1 Administrator 197121      0 May 14 14:35 ./
+drwxr-xr-x 1 Administrator 197121      0 May 14 14:35 ../
+-rw-r--r-- 1 Administrator 197121 189645 May 14 14:36 agent-a13c9452f65a6d15b.jsonl
+-rw-r--r-- 1 Administrator 197121     75 May 14 14:35 agent-a13c9452f65a6d15b.meta.json
+-rw-r--r-- 1 Administrator 197121 235926 May 14 14:35 agent-aa1ac759605a7ac22.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May 14 14:35 agent-aa1ac759605a7ac22.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/de10042f-ce46-437b-bfe6-4ba1affb8272/tool-results:
+total 56
+drwxr-xr-x 1 Administrator 197121     0 May 14 14:35 ./
+drwxr-xr-x 1 Administrator 197121     0 May 14 14:35 ../
+-rw-r--r-- 1 Administrator 197121 24684 May 14 14:35 call_02_2LElNAruqRjvDDUIozj73194.txt
+-rw-r--r-- 1 Administrator 197121 24603 May 14 14:35 call_02_rebyUqn2BhY6WnO8QwLw8870.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/df936c0f-fc28-4067-a347-242a9180f6ba:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  9 03:13 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  9 03:13 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/df936c0f-fc28-4067-a347-242a9180f6ba/tool-results:
+total 36
+drwxr-xr-x 1 Administrator 197121     0 May  9 03:13 ./
+drwxr-xr-x 1 Administrator 197121     0 May  9 03:13 ../
+-rw-r--r-- 1 Administrator 197121 33113 May  9 03:13 call_00_KNY3s9DYI4pd0lOPU45F8209.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/e52932ac-639d-4ede-821f-8fba7f53300f:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May 18 12:55 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 18 12:55 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/e52932ac-639d-4ede-821f-8fba7f53300f/subagents:
+total 217
+drwxr-xr-x 1 Administrator 197121      0 May 18 12:55 ./
+drwxr-xr-x 1 Administrator 197121      0 May 18 12:55 ../
+-rw-r--r-- 1 Administrator 197121 217688 May 18 12:58 agent-a7b531cbe14ada5ee.jsonl
+-rw-r--r-- 1 Administrator 197121     79 May 18 12:55 agent-a7b531cbe14ada5ee.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/e7ec8a2c-636a-4482-b846-515823d5ad68:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  4 20:06 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  4 20:06 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/e7ec8a2c-636a-4482-b846-515823d5ad68/tool-results:
+total 16
+drwxr-xr-x 1 Administrator 197121     0 May  4 20:06 ./
+drwxr-xr-x 1 Administrator 197121     0 May  4 20:06 ../
+-rw-r--r-- 1 Administrator 197121 12405 May  4 20:06 hook-fb516d10-80ab-4eae-aab5-819777381377-2-systemMessage.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ecad918b-4a34-4255-82f3-4b6221dcd56e:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 30 13:37 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 30 13:37 subagents/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ecad918b-4a34-4255-82f3-4b6221dcd56e/subagents:
+total 65
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 13:37 ./
+drwxr-xr-x 1 Administrator 197121     0 Apr 30 13:37 ../
+-rw-r--r-- 1 Administrator 197121 63229 Apr 30 13:41 agent-a440d5d277db15a72.jsonl
+-rw-r--r-- 1 Administrator 197121    80 Apr 30 13:37 agent-a440d5d277db15a72.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f061e181-268e-4a2a-b263-37c8bea48083:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May 15 18:00 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May 15 19:40 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May 15 18:00 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f061e181-268e-4a2a-b263-37c8bea48083/subagents:
+total 756
+drwxr-xr-x 1 Administrator 197121      0 May 15 19:40 ./
+drwxr-xr-x 1 Administrator 197121      0 May 15 18:00 ../
+-rw-r--r-- 1 Administrator 197121  97365 May 15 18:00 agent-a3f2ff416bd7ac63b.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May 15 17:59 agent-a3f2ff416bd7ac63b.meta.json
+-rw-r--r-- 1 Administrator 197121 142319 May 15 18:01 agent-a8468ed443008736e.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May 15 17:59 agent-a8468ed443008736e.meta.json
+-rw-r--r-- 1 Administrator 197121 334202 May 15 19:42 agent-aabc4065abce0ffbc.jsonl
+-rw-r--r-- 1 Administrator 197121     67 May 15 19:40 agent-aabc4065abce0ffbc.meta.json
+-rw-r--r-- 1 Administrator 197121 186186 May 15 18:05 agent-af81da45cf4a0e183.jsonl
+-rw-r--r-- 1 Administrator 197121     64 May 15 17:59 agent-af81da45cf4a0e183.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f061e181-268e-4a2a-b263-37c8bea48083/tool-results:
+total 272
+drwxr-xr-x 1 Administrator 197121      0 May 15 18:00 ./
+drwxr-xr-x 1 Administrator 197121      0 May 15 18:00 ../
+-rw-r--r-- 2 Administrator 197121 194211 May 15 18:00 b4kykiiaf.txt
+-rw-r--r-- 2 Administrator 197121  78225 May 15 18:00 bavu7geqc.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f0feb01a-9556-4173-919e-8d224456c64c:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  4 13:54 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  4 13:54 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f0feb01a-9556-4173-919e-8d224456c64c/tool-results:
+total 52
+drwxr-xr-x 1 Administrator 197121     0 May  4 13:54 ./
+drwxr-xr-x 1 Administrator 197121     0 May  4 13:54 ../
+-rw-r--r-- 1 Administrator 197121 49288 May  4 13:54 bw0v4mzqm.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f22eeb65-d399-4e64-9f7f-f0218759a078:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 May  8 19:38 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  8 19:38 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/f22eeb65-d399-4e64-9f7f-f0218759a078/tool-results:
+total 40
+drwxr-xr-x 1 Administrator 197121     0 May  8 19:38 ./
+drwxr-xr-x 1 Administrator 197121     0 May  8 19:38 ../
+-rw-r--r-- 1 Administrator 197121 40847 May  8 19:38 b8insu4gy.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/fee91644-efe7-4999-99b6-1939529c07d8:
+total 128
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 16:58 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 28 18:37 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/fee91644-efe7-4999-99b6-1939529c07d8/tool-results:
+total 3084
+drwxr-xr-x 1 Administrator 197121       0 Apr 28 18:37 ./
+drwxr-xr-x 1 Administrator 197121       0 Apr 28 16:58 ../
+-rw-r--r-- 1 Administrator 197121 1034732 Apr 28 17:21 b2ifft0d1.txt
+-rw-r--r-- 1 Administrator 197121  944968 Apr 28 18:37 b7w215wk1.txt
+-rw-r--r-- 1 Administrator 197121  874638 Apr 28 16:58 bj0lcwkgq.txt
+-rw-r--r-- 1 Administrator 197121  298736 Apr 28 17:22 btdl0ruy6.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ff243317-aa34-40d9-935e-e0c174a2dfad:
+total 132
+drwxr-xr-x 1 Administrator 197121 0 May  8 21:46 ./
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 ../
+drwxr-xr-x 1 Administrator 197121 0 May  8 21:46 subagents/
+drwxr-xr-x 1 Administrator 197121 0 May  8 21:47 tool-results/
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ff243317-aa34-40d9-935e-e0c174a2dfad/subagents:
+total 157
+drwxr-xr-x 1 Administrator 197121      0 May  8 21:46 ./
+drwxr-xr-x 1 Administrator 197121      0 May  8 21:46 ../
+-rw-r--r-- 1 Administrator 197121 156077 May  8 21:49 agent-acf3ffb0f43faab60.jsonl
+-rw-r--r-- 1 Administrator 197121     70 May  8 21:46 agent-acf3ffb0f43faab60.meta.json
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/ff243317-aa34-40d9-935e-e0c174a2dfad/tool-results:
+total 1140
+drwxr-xr-x 1 Administrator 197121      0 May  8 21:47 ./
+drwxr-xr-x 1 Administrator 197121      0 May  8 21:46 ../
+-rw-r--r-- 1 Administrator 197121 716854 May  8 21:46 beay2wk6t.txt
+-rw-r--r-- 1 Administrator 197121  55977 May  8 21:46 bh3mdmnfb.txt
+-rw-r--r-- 1 Administrator 197121 291265 May  8 21:46 by197somy.txt
+-rw-r--r-- 1 Administrator 197121  37367 May  8 21:47 call_03_aYER5q5b9LZds3sk2RQN0669.txt
+-rw-r--r-- 1 Administrator 197121  45668 May  8 21:47 call_06_O8PJePvKfGeaPqj3G2B18861.txt
+
+C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/memory:
+total 278
+drwxr-xr-x 1 Administrator 197121    0 May 18 11:20 ./
+drwxr-xr-x 1 Administrator 197121    0 May 18 14:51 ../
+-rw-r--r-- 1 Administrator 197121 4268 May 18 11:20 MEMORY.md
+-rw-r--r-- 1 Administrator 197121 2324 May 16 21:41 ai_script_judgment_pattern.md
+-rw-r--r-- 1 Administrator 197121 1035 Apr 28 10:56 cc_interface_distinction.md
+-rw-r--r-- 1 Administrator 197121 1268 May 11 20:17 context_management_rules.md
+-rw-r--r-- 1 Administrator 197121 1005 May  9 02:36 feedback_audit_validation.md
+-rw-r--r-- 1 Administrator 197121  651 May  9 03:07 feedback_batch_output.md
+-rw-r--r-- 1 Administrator 197121  492 May 14 18:25 gemini_api_key.md
+-rw-r--r-- 1 Administrator 197121 1212 Apr 28 10:56 grsai_mcp_image_compositing.md
+-rw-r--r-- 1 Administrator 197121 1350 May 13 19:22 keinjol_tata_status.md
+-rw-r--r-- 1 Administrator 197121  458 May 14 15:44 mobile_report_preference.md
+-rw-r--r-- 1 Administrator 197121 1095 May  5 10:23 moq_rules.md
+-rw-r--r-- 1 Administrator 197121 5204 May 11 10:00 okki_analysis_lessons.md
+-rw-r--r-- 1 Administrator 197121 1423 May 14 11:35 okki_classification_refactor.md
+-rw-r--r-- 1 Administrator 197121 1504 May 16 15:18 okki_customer_tier_design.md
+-rw-r--r-- 1 Administrator 197121 3441 May 16 14:49 okki_driver_factors.md
+-rw-r--r-- 1 Administrator 197121 2511 May 14 15:47 okki_order_sync.md
+-rw-r--r-- 1 Administrator 197121  953 May 11 15:53 okki_output_templates.md
+-rw-r--r-- 1 Administrator 197121 1651 May  3 10:12 okki_platform_notes.md
+-rw-r--r-- 1 Administrator 197121 1575 May 15 16:37 okki_redesign_may15.md
+-rw-r--r-- 1 Administrator 197121 2667 May 14 18:28 okki_reliability_debate.md
+-rw-r--r-- 1 Administrator 197121 1621 May  9 04:23 okki_workflow_split.md
+-rw-r--r-- 1 Administrator 197121 1102 May 11 20:17 output_language_rules.md
+-rw-r--r-- 1 Administrator 197121 1556 Apr 28 10:56 p4p_optimization_skill.md
+-rw-r--r-- 1 Administrator 197121 1104 Apr 28 10:56 pi_generation_rules.md
+-rw-r--r-- 1 Administrator 197121 1059 May 11 20:17 problem_solving_approach.md
+-rw-r--r-- 1 Administrator 197121 1574 Apr 28 10:56 project_context.md
+-rw-r--r-- 1 Administrator 197121  599 Apr 28 18:03 report_format.md
+-rw-r--r-- 1 Administrator 197121 1376 May 18 11:20 s5b_factor_removal.md
+-rw-r--r-- 1 Administrator 197121 1482 May  5 11:03 shipping_freight_rules.md
+-rw-r--r-- 1 Administrator 197121 1569 Apr 28 10:56 tool_permissions.md
+-rw-r--r-- 1 Administrator 197121 1860 May 13 09:25 usage_feedback.md
+-rw-r--r-- 1 Administrator 197121 1272 May 10 17:24 user_profile.md
+-rw-r--r-- 1 Administrator 197121 1928 Apr 28 10:56 workflow_patterns.md
+total 168
+drwxr-xr-x 1 Administrator 197121 0 May  8 23:27 ./
+drwxr-xr-x 1 Administrator 197121 0 May 15 11:39 ../
+drwxr-xr-x 1 Administrator 197121 0 Apr 29 13:00 C--Users-Administrator/
+drwxr-xr-x 1 Administrator 197121 0 May  4 21:36 C--Users-Administrator--claude-mem-observer-sessions/
+drwxr-xr-x 1 Administrator 197121 0 May 18 14:51 D--ClaudeWorkspace/
+drwxr-xr-x 1 Administrator 197121 0 May  8 23:34 E-------------/

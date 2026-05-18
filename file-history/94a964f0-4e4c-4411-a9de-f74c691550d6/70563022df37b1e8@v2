@@ -1,0 +1,55 @@
+Write-Host "=== Explorer status ==="
+$exp = Get-Process explorer -ErrorAction SilentlyContinue
+if ($exp) {
+    Write-Host "PID: $($exp.Id), Responding: $($exp.Responding), StartTime: $($exp.StartTime)"
+    Write-Host "Threads: $($exp.Threads.Count), WorkingSet: $([math]::Round($exp.WorkingSet64/1MB,1)) MB"
+}
+
+Write-Host "`n=== Check if .git on desktop could be issue ==="
+$desktop = [Environment]::GetFolderPath('Desktop')
+$gitFolder = Join-Path $desktop '.git'
+if (Test-Path $gitFolder) {
+    $gitItems = (Get-ChildItem $gitFolder -Recurse -ErrorAction SilentlyContinue | Measure-Object).Count
+    Write-Host ".git folder on desktop: EXISTS ($gitItems items) - this CAN cause Explorer hangs!"
+}
+
+Write-Host "`n=== Check for known problematic shell extensions ==="
+$problematicCLSIDs = @(
+    '{9F15235D-BA64-48D6-B805-7F7AECB22F8C}',  # Dropbox
+    '{942E5030-9C19-11D2-93B0-000000000000}',  # Some adware
+    '{D4027C79-FC10-11D2-9EA0-0060083FD19D}'   # Some video codec
+)
+
+foreach ($clsid in $problematicCLSIDs) {
+    $path = "HKCR:\CLSID\$clsid"
+    if (Test-Path $path) {
+        $default = (Get-ItemProperty $path -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        Write-Host "Found: $clsid = $default"
+    }
+}
+
+Write-Host "`n=== Context menu handlers (shell extensions) ==="
+$ctxPaths = @(
+    'HKCR:\*\shellex\ContextMenuHandlers',
+    'HKCR:\Directory\shellex\ContextMenuHandlers',
+    'HKCR:\Folder\shellex\ContextMenuHandlers',
+    'HKCR:\AllFilesystemObjects\shellex\ContextMenuHandlers'
+)
+
+foreach ($ctxPath in $ctxPaths) {
+    Write-Host "`n-- $ctxPath --"
+    if (Test-Path $ctxPath) {
+        Get-ChildItem $ctxPath -ErrorAction SilentlyContinue | ForEach-Object {
+            $val = (Get-ItemProperty $_.PSPath -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+            Write-Host "  $($_.PSChildName) = $val"
+        }
+    }
+}
+
+Write-Host "`n=== D: drive status ==="
+$dDrive = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='D:'"
+Write-Host "Size: $([math]::Round($dDrive.Size/1GB,1)) GB, Free: $([math]::Round($dDrive.FreeSpace/1GB,1)) GB"
+Write-Host "DriveType: $($dDrive.DriveType)"
+
+Write-Host "`n=== Recent Event Log errors (last 5) ==="
+Get-WinEvent -LogName Application -MaxEvents 100 | Where-Object { $_.LevelDisplayName -eq 'Error' } | Select-Object -First 5 TimeCreated, @{N='Source';E={$_.ProviderName}}, Message | Format-List

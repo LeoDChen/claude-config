@@ -1,0 +1,54 @@
+# OKKI 看板 — "今日需跟进"面板方案
+
+## Context
+
+当前看板 KPI 卡片显示"需行动 56 人"，但用户无法直接看到**是谁**。要找到具体客户需点击矩阵格子 → 弹窗，操作路径太长。手机端行动清单（`gen_mobile_report.js`）已经在做这件事了，但 PC 看板没有。
+
+## 方案：在看板顶部增加"今日需跟进"面板
+
+### 位置
+
+KPI 卡片下方、双轴矩阵上方。
+
+### 内容
+
+一张紧凑表格，列出所有 `urgent` (🔴) + `soon` (🟡) 客户，按紧急度 → 静默天数排序。列结构：
+
+| 优先级 | 客户 | 国家 | 阶段 | 静默 | 行动方向 |
+|--------|------|------|------|------|----------|
+
+- **客户列**：客户名 + 等级标签（彩色 S/A/B/C/D 标签）
+- **行动方向列**：`actionText` 的内容（如"确认PI已收到""催款+问是否需要调整PI"）
+
+### 数据来源
+
+已有的 `actionPriority` / `actionText` / `actionStatus` 字段（`enhanced_classify.js` 的 `getAction()` 已计算好），不需要新增逻辑。
+
+筛选条件与 `gen_mobile_report.js` 一致：
+```js
+data.filter(c => c.actionPriority === 'urgent' || c.actionPriority === 'soon')
+```
+
+排序：urgent 在前 → 同优先级按 `lastCustomerMsgDays` 升序。
+
+### 修改文件
+
+**`scripts/enhanced_classify.js`**（`generateDashboard` 函数内，约 L491-508 之间）
+
+1. 在 KPI 计算区之后（L497 之后），增加 actionable 客户数组筛选
+2. 在 HTML 模板中，KPI 网格之后、双轴矩阵标题之前，插入"今日需跟进"面板的 HTML
+3. 样式：卡片式面板，与 KPI 风格统一
+
+### 边界处理
+
+- urgent + soon 客户数 = 0 时显示"✅ 今日无需紧急跟进客户"
+- 面板可折叠？不做过度设计，先展示。如果觉得占地方再加收起按钮
+- 面板中的客户行点击后可弹出该客户的简要信息（v1 不做，先出列表）
+
+### 验证
+
+1. 运行 `node scripts/enhanced_classify.js` 重新生成看板
+2. 用浏览器打开 `output/dashboard_2026-05-14.html`
+3. 确认"今日需跟进"面板显示在 KPI 卡片下方
+4. 确认 urgent 客户显示红色背景/图标，soon 显示黄色
+5. 核对面板客户数量 = 手机端长图的紧急+尽快总数

@@ -1,0 +1,18 @@
+---
+name: Chrome CDP 启动路径
+description: 本机 Chrome 安装路径及 CDP 启动方式，避免每次重新查找
+type: reference
+originSessionId: 911c277e-c309-444a-b121-fac88d441a88
+---
+本机 Chrome 安装在用户级目录，不在 Program Files，也不在系统 PATH 中。
+
+**正确路径**: `C:\Users\Administrator\AppData\Local\Google\Chrome\Application\chrome.exe`
+
+**CDP 启动命令** (Win+R 粘贴):
+```
+"C:\Users\Administrator\AppData\Local\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+```
+
+**Why**: 用户级安装（per-user install），Chrome 装在 `%LOCALAPPDATA%\Google\Chrome\` 而非 `Program Files`。`where chrome` 在 CMD 中能找到但 bash 环境路径映射不同，Win+R 也不搜索此路径。
+
+**How to apply**: 需要 CDP 连接时直接给出完整路径，不要假设 `chrome.exe` 可在 PATH 中找到。

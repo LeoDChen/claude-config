@@ -1,0 +1,132 @@
+# factor_baselines 初始化漏洞修复方案
+
+> 日期：2026-05-18  
+> 触发：独立审查攻击（review-attack-methodology.md 四问框架）  
+> 对象：init_factor_baselines.js + 4 个输出文件
+
+---
+
+## 一、审查发现（验证后）
+
+### 确认的致命问题
+
+| # | 问题 | 数据事实 |
+|---|------|---------|
+| F1 | `has_address` 硬编码 false → S5b 55人全量假阳性 | 466/466 = false，0 个 true |
+| F3 | `committed_ship_date` 永远 null → S5a 超期分支死代码 | 466/466 = null |
+
+### 已被数据推翻的指控
+
+| 指控 | 实际数据 | 结论 |
+|------|---------|:--:|
+| "S级全部降级为C" | S级21人全部命中，factor_baselines中tier分布 S=21/A=143/B=213/C=89 | ❌ 不成立 |
+| "tier匹配大量丢失" | name-only匹配率 99.6%，name+country 99.4% | ❌ 不成立 |
+
+### 确认的中等问题
+
+| # | 问题 | 数据事实 |
+|---|------|---------|
+| M1 | 节奏终点未定义 — 超期客户静默消失 | 9个待付款客户中5个超过16天无S4触发（25/30/38/39/43天） |
+| M3 | lastSender 字段未验证 | 初始化脚本直接信任 heat_classification 的 lastSender |
+
+---
+
+## 二、修正方案
+
+### Fix-1: `has_address` 三态化（修复 F1）
+
+**当前**: `has_address: false` — 全员假阳性  
+**改为**: `has_address: null` — null = 未知，不触发 S5b
+
+```
+// init 脚本
+meta.has_address = null;  // 未知状态，待 AI / 正则判定
+
+// S5b 触发逻辑
+if (meta.has_address === false) → 正常触发 S5b
+if (meta.has_address === null)  → 不触发，标为"待确认地址状态"
+if (meta.has_address === true)  → 跳过
+```
+
+S5b 触发条件加防：`has_address === false` 才触发。null 视为"未判定，跳过"。
+
+### Fix-2: S5a 超期分支加 guard（修复 F3）
+
+**当前**: `committed_ship_date` 永远 null，超期检测分支永远不触发  
+**改为**: 加 null guard，null 时只走正常间隔逻辑
+
+```
+// 脚本 S5a 段
+if (meta.committed_ship_date && today > committed_ship_date) {
+  → flag S5a priority=high "超承诺发货日"
+} else if (bl.S5a_A && days >= interval) {
+  → flag S5a priority=normal
+}
+```
+
+`committed_ship_date` 保持 null 直到 AI 从报价消息提取。不造假数据。
+
+### Fix-3: 节奏终点降级规则（修复 M1）
+
+**当前**: 所有因子用 `rhythmHit()` 精确匹配累计天数，超最大累计天后永不命中  
+**改为**: 超过节奏数组终点后，按因子类型分三种降级：
+
+| 因子 | 终点后行为 | 实现 |
+|------|----------|------|
+| S1/S8 | Day 45 兜底 → 静默 | `if days > 45: skip` |
+| S2/S3 | Day 30 后静默 | `if days > 30: skip` |
+| S4 | 每 7 天观察提醒 | `if days > 16 && (days - 16) % 7 === 0: flag observer` |
+| S7a/S7b/S9 | Day 60 后仅看板可见 | `if days > 60: skip` |
+| S5a/S5b/S6 | 无终点（自然完成） | 维持最后一个间隔 |
+
+节奏命中检测改为两段式：
+```
+function getFactorHit(days, rhythmArr, endBehavior) {
+  // 第一段：精确节奏匹配
+  const hitIdx = rhythmHit(days, rhythmArr);
+  if (hitIdx >= 0) return { hit: true, type: 'rhythm', index: hitIdx };
+  
+  // 第二段：终点降级
+  const maxDay = rhythmArr.reduce((a,b)=>a+b, 0);
+  if (days <= maxDay) return { hit: false };  // 还在节奏间隔内
+  return endBehavior(days, maxDay);  // 超过终点，按降级规则
+}
+```
+
+### Fix-4: 冷层 tier 来源声明（修复 I2 假象）
+
+**实际数据**: 冷层 143 人中 tier 分布为 S=3/A=51/B=69/C=20，匹配率正常。  
+**修正**: 输出文件加 `_tier_source` 字段标注数据来源（`dashboard_snapshot` / `default_C`），便于后续 AI 复核。
+
+---
+
+## 三、涉及文件
+
+| 文件 | 动作 |
+|------|------|
+| `scripts/init_factor_baselines.js` | 改 has_address→null、加 S5a guard、改两段式 rhythm、加终点降级 |
+| `output/factor_baselines.json` | 重新生成 |
+| `output/soon_layer_cards.json` | 重新生成（S5b 55人→预期降到个位数、S4 5人→预期恢复） |
+| `output/init_report_2026-05-18.md` | 更新报告 |
+
+---
+
+## 四、预期变化
+
+| 指标 | 修复前 | 修复后 |
+|------|:---:|:---:|
+| SOON 层总人数 | 90 | ~35-40（S5b 55人撤回） |
+| S5b 触发 | 55 人 | 0 人（全部 has_address=null，待AI判定） |
+| S4 超16天观察 | 0 人（丢失） | 5 人恢复（irfan khan 等） |
+| has_address 分布 | false=466 | null=466 |
+| committed_ship_date | null=466 | null=466（不变，等AI填充） |
+
+---
+
+## 五、验证步骤
+
+1. 运行修正后 `init_factor_baselines.js`，检查 S5b 触发数为 0
+2. 检查 9 个待付款客户中超过 16 天的 5 人是否都有 S4 observer 标记
+3. 检查 `has_address` 全量为 null
+4. 检查 factor_baselines.json 新增字段 `_tier_source`
+5. 目视抽查 3 个 SOON 客户的因子命中是否合理

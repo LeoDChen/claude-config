@@ -1,0 +1,350 @@
+/**
+ * 全量客户提取 v2 — DOM实时状态 + window全量数据合并
+ * DOM: 获取未读状态、消息方向
+ * window: 获取全部422人完整数据
+ * v2.1: 系统消息过滤，避免分类被污染
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+// ====== 系统消息识别 ======
+const SYS_PATTERNS = [
+  /automatic reception will no longer intervene/i,
+  /由于您介入该会话/i,
+  /Marco大模型翻译/i,
+  /阿里国际Marco大模型翻译/i,
+  /买家有流失风险/i,
+  /AI给您生成了一条回复建议/i,
+  /建议查看买家特征/i,
+  /一旦离开平台发生纠纷或遭遇欺诈/i,
+  /一旦离开平台.*纠纷.*欺诈/i,
+  /请勿在站外沟通或交易/i,
+  /在Alibaba\.com平台聊天和交易.*享受安全保障/i,
+  /买家尚未在平台完成身份验证/i,
+  /注意交易安全/i,
+  /该买家在站外/i,
+  /跟进提醒/,
+  /以上内容由阿里翻译提供/,
+  /自动接待对话轮次已达上限/,
+  /自动接待将不再触发/,
+  /系统自动发送/,
+  /反馈$/,
+  /pre-screened.*clear request/i,
+  /You have a visitor/i,
+];
+
+function isSysMsg(text) {
+  if (!text || text.length < 2) return true;
+  return SYS_PATTERNS.some(p => p.test(text));
+}
+
+function getRealContent(c) {
+  const main = c.latestMessageContent || '';
+  if (!isSysMsg(main)) return main;
+  const dom = c.domLastMsg || '';
+  if (dom && !isSysMsg(dom)) return dom;
+  return '';
+}
+
+function classify(c) {
+  const now = Date.now();
+  const lastTime = c.lastContactTime || c.modifyTime || 0;
+  const daysAgo = (now - lastTime) / (1000 * 60 * 60 * 24);
+  const rawMsg = c.latestMessageContent || '';
+  const effectiveContent = getRealContent(c);
+  const content = effectiveContent.toLowerCase();
+  const hasContent = content.length > 5;
+  const sysBlocked = isSysMsg(rawMsg);
+  const isUnread = c.isUnread || c.unreadCount > 0;
+  const isFromCustomer = c.msgFromCustomer === true;
+  const contactRead = c.contactRead;
+
+  // 如果未读是由系统消息造成的，忽略未读标记
+  if (isUnread && sysBlocked && !hasContent) {
+    if (daysAgo <= 7) return { priority: 'P2', tier: 'C', reasons: ['近期互动(系统消息已过滤)'] };
+    return { priority: 'P3', tier: 'C', reasons: [`${Math.round(daysAgo)}天未联系`] };
+  }
+
+  // 关键词（使用过滤后的有效内容）
+  const hasPrice = /price|quote|cost|how much|报价|价格|cuánto|combien|كم|сколько/i.test(content);
+  const hasSample = /sample|muestra|échantillon|样品|试用|试单/i.test(content);
+  const hasPayment = /payment|pay|deposit|付款|pago|paiement|دفع|tt\b|wire|transfer/i.test(content);
+  const hasShipping = /ship|delivery|envío|livraison|快递|海运|dhl|fedex|物流/i.test(content);
+  const hasComplaint = /complaint|return|refund|damage|defect|wrong|quality issue|not as described|退换|退款|投诉|破损/i.test(content);
+  const hasNegotiation = /discount|better price|cheaper|moq|minimum|negotiate|better deal|优惠|折扣/i.test(content);
+  const hasUrgent = /urgent|asap|immediately|尽快|urgente|dringend/i.test(content);
+
+  // ===== P0: 紧急 =====
+  // 1. 有未读（且不是系统消息造成的）
+  if (isUnread && !sysBlocked) {
+    return { priority: 'P0', tier: 'S', reasons: ['有未读消息'] };
+  }
+
+  // 2. 客户消息 + 售后投诉
+  if (isFromCustomer && hasComplaint) {
+    return { priority: 'P0', tier: 'S', reasons: ['售后/投诉'] };
+  }
+
+  // 3. 客户消息 + 24h内 + 询价/付款
+  if (isFromCustomer && daysAgo <= 1 && (hasPrice || hasPayment)) {
+    return { priority: 'P0', tier: 'A', reasons: ['24h内询价/付款'] };
+  }
+
+  // 4. 客户未读(contactRead=false) + 近期 + 有内容
+  if (contactRead === false && daysAgo <= 3 && hasContent) {
+    return { priority: 'P0', tier: 'A', reasons: ['未读+3天内'] };
+  }
+
+  // 5. 客户消息 + 急迫
+  if (isFromCustomer && hasUrgent) {
+    return { priority: 'P0', tier: 'A', reasons: ['紧急措辞'] };
+  }
+
+  // 6. 客户消息 + 谈判中
+  if (isFromCustomer && hasNegotiation && daysAgo <= 7) {
+    return { priority: 'P0', tier: 'B', reasons: ['谈判中'] };
+  }
+
+  // ===== P1: 高优 =====
+  // 7. 客户消息 + 7天内 + 询价/样品/物流
+  if (isFromCustomer && daysAgo <= 7 && (hasPrice || hasSample || hasShipping || hasPayment)) {
+    return { priority: 'P1', tier: 'A', reasons: ['近期业务相关'] };
+  }
+
+  // 8. contactRead=false + 14天内
+  if (contactRead === false && daysAgo <= 14 && hasContent) {
+    return { priority: 'P1', tier: 'B', reasons: ['待阅读消息'] };
+  }
+
+  // 9. 客户消息 + 14天内
+  if (isFromCustomer && daysAgo <= 14) {
+    return { priority: 'P1', tier: 'B', reasons: ['客户近期消息'] };
+  }
+
+  // ===== P2: 待回访 =====
+  if (daysAgo <= 30) {
+    return { priority: 'P2', tier: 'C', reasons: ['30天内互动'] };
+  }
+
+  // ===== P3: 休眠 =====
+  return { priority: 'P3', tier: 'C', reasons: [`${Math.round(daysAgo)}天未联系`] };
+}
+
+async function main() {
+  console.log('[extract-v2] 连接小满...');
+  const { talkFrame } = await connect();
+
+  // Step 1: 从DOM获取实时状态（未读、方向）
+  console.log('[1/3] 从DOM获取实时状态...');
+  const domStatus = await talkFrame.evaluate(() => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    const statusMap = {};
+
+    containers.forEach(el => {
+      const text = el.textContent || '';
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+
+      const isUnread = text.includes('[未读]');
+      const lastMsg = nameText
+        .replace(/^.+?\d{2,4}[-:\/]\d{1,2}[-:\/]?\d{0,2}\s*/, '')
+        .replace(/\[(未读|已读)\]\s*/, '')
+        .trim();
+
+      const isFromUs = lastMsg.includes('以上内容') ||
+        lastMsg.includes('发送了') ||
+        lastMsg.includes('[文件]') ||
+        lastMsg.startsWith('Due to your intervention') ||
+        lastMsg.startsWith('由于您介入');
+
+      statusMap[name] = {
+        isUnread,
+        msgFromCustomer: !isFromUs && lastMsg.length > 0,
+        domLastMsg: lastMsg.substring(0, 100),
+      };
+    });
+
+    return statusMap;
+  });
+
+  console.log(`   DOM中${Object.keys(domStatus).length}个客户`);
+
+  // Step 2: 从window变量获取全量数据
+  console.log('[2/3] 从window提取全量数据...');
+  const rawCustomers = await talkFrame.evaluate(() => {
+    const data = window.__conversationListFullData__;
+    if (!data || !Array.isArray(data)) return [];
+
+    return data
+      .filter(item => {
+        const name = item.contact?.name || '';
+        if (/Assistant\s*Eva/i.test(name)) return false;
+        if (/系统通知/.test(name)) return false;
+        if (/机器人/.test(name)) return false;
+        if (/^\d{6,}$/.test(name)) return false;
+        if (!name || name === 'unknown') return false;
+        return item.available !== false;
+      })
+      .map(item => {
+        const contact = item.contact || {};
+        const latestMsg = item.latestMessage || {};
+        return {
+          name: contact.name || contact.companyName || 'Unknown',
+          companyName: contact.companyName || '',
+          countryCode: contact.complianceCountryCode || '',
+          buyerLevel: contact.userNewLevel || '',
+          loginId: contact.loginId || '',
+
+          unreadCount: item.unreadCount || 0,
+          muted: item.mute || false,
+          pinned: item.stayTop || false,
+          blocked: item.block || false,
+          replyCountdown: item.replyCountdown || 0,
+
+          lastContactTime: item.lastContactTime || item.modifyTime || 0,
+          joinTime: item.joinTime || 0,
+          modifyTime: item.modifyTime || 0,
+
+          latestMessageContent: latestMsg.content || '',
+          latestMessageType: latestMsg.messageType || '',
+          latestMessageTime: latestMsg.gmtChat || 0,
+          contactRead: latestMsg.contactRead !== undefined ? latestMsg.contactRead : (item.contactRead !== undefined ? item.contactRead : true),
+
+          tagInfo: item.tagInfo || null,
+          cid: item.cid || '',
+          accountId: contact.accountId || item.accountId || '',
+        };
+      });
+  });
+
+  console.log(`   window中${rawCustomers.length}个客户`);
+
+  // Step 3: 合并DOM状态到window数据
+  console.log('[3/3] 合并数据+分类...');
+  const merged = rawCustomers.map(c => {
+    const dom = domStatus[c.name];
+    if (dom) {
+      return {
+        ...c,
+        isUnread: dom.isUnread || c.unreadCount > 0,
+        msgFromCustomer: dom.msgFromCustomer,
+        domLastMsg: dom.domLastMsg,
+      };
+    }
+    return {
+      ...c,
+      isUnread: c.unreadCount > 0,
+      msgFromCustomer: null,
+      domLastMsg: '',
+    };
+  });
+
+  // 统计系统消息占比
+  const sysCount = merged.filter(c => isSysMsg(c.latestMessageContent || '')).length;
+  if (sysCount > 0) console.log(`   ⚠ 系统消息污染: ${sysCount}/${merged.length} (${(sysCount/merged.length*100).toFixed(1)}%)`);
+
+  // 分类
+  const classified = merged.map(c => {
+    const cls = classify(c);
+    return { ...c, ...cls, _sysBlocked: isSysMsg(c.latestMessageContent || '') };
+  });
+
+  // 统计
+  const stats = { P0: [], P1: [], P2: [], P3: [] };
+  for (const p of ['P0', 'P1', 'P2', 'P3']) {
+    stats[p] = classified.filter(c => c.priority === p);
+  }
+
+  console.log('\n═══════════════════════════════════');
+  console.log('       全量客户分类结果');
+  console.log('═══════════════════════════════════');
+  console.log(`  总计: ${classified.length}人 (系统消息污染: ${sysCount})`);
+  for (const [p, arr] of Object.entries(stats)) {
+    const emoji = { P0: '🔴', P1: '🟡', P2: '🔵', P3: '⚪' }[p];
+    const unread = arr.filter(c => c.isUnread).length;
+    console.log(`  ${emoji} ${p}: ${arr.length}人 (未读${unread})`);
+  }
+
+  // P0详情
+  console.log('\n── 🔴 P0 紧急客户 ──');
+  stats.P0.sort((a, b) => b.lastContactTime - a.lastContactTime).forEach(c => {
+    const days = Math.round((Date.now() - c.lastContactTime) / (1000 * 60 * 60 * 24));
+    const msg = (getRealContent(c) || c.latestMessageContent || '').substring(0, 70);
+    const blocked = c._sysBlocked ? '[系统]' : '';
+    console.log(`  ${c.isUnread ? '📩' : '  '} ${c.name} | ${c.countryCode} | ${days}d前 | ${c.reasons.join(',')} ${blocked} | "${msg}"`);
+  });
+
+  // P1详情（前30）
+  console.log('\n── 🟡 P1 高优客户 (前30) ──');
+  stats.P1.sort((a, b) => b.lastContactTime - a.lastContactTime).slice(0, 30).forEach(c => {
+    const days = Math.round((Date.now() - c.lastContactTime) / (1000 * 60 * 60 * 24));
+    const msg = (getRealContent(c) || c.latestMessageContent || '').substring(0, 70);
+    console.log(`  ${c.name} | ${c.countryCode} | ${days}d前 | ${c.reasons.join(',')} | "${msg}"`);
+  });
+  if (stats.P1.length > 30) console.log(`  ... 共${stats.P1.length}人`);
+
+  // 保存
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+
+  const output = {
+    capturedAt: now.toISOString(),
+    stats: {
+      total: classified.length,
+      P0: stats.P0.length,
+      P1: stats.P1.length,
+      P2: stats.P2.length,
+      P3: stats.P3.length,
+      totalUnread: classified.filter(c => c.isUnread).length,
+      sysBlocked: sysCount,
+    },
+    customers: classified,
+  };
+
+  const filename = `${dateStr}_全量客户分类.json`;
+  writeFileSync(join(DATA_DIR, filename), JSON.stringify(output, null, 2));
+  console.log(`\n✅ 已保存: ${filename}`);
+
+  // P0/P1深抓清单
+  const p0p1 = [...stats.P0, ...stats.P1].map(c => ({
+    name: c.name,
+    countryCode: c.countryCode,
+    priority: c.priority,
+    tier: c.tier,
+    reasons: c.reasons,
+    isUnread: c.isUnread,
+    cid: c.cid,
+    latestMessageContent: c.latestMessageContent,
+    realContent: getRealContent(c),
+  }));
+
+  const listFilename = `${dateStr}_P0P1深抓清单.json`;
+  writeFileSync(join(DATA_DIR, listFilename), JSON.stringify(p0p1, null, 2));
+  console.log(`✅ P0/P1深抓清单: ${listFilename} (${p0p1.length}人)`);
+}
+
+main().catch(err => {
+  console.error('[extract-v2] 错误:', err.message);
+  process.exit(1);
+});

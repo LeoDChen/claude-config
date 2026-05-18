@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>行动信号优化 — 弹窗前后对比</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background: #1d1d1f; color: #f5f5f7; padding: 30px; }
+  h1 { font-size: 1.2rem; margin-bottom: 6px; }
+  .sub { color: #86868b; font-size: 0.8rem; margin-bottom: 24px; }
+  .compare { display: flex; gap: 24px; margin-bottom: 40px; }
+  .col { flex: 1; }
+  .col h2 { font-size: 0.85rem; padding: 10px 14px; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+  .col.old h2 { background: #3d3d3f; color: #86868b; }
+  .col.new h2 { background: #0a84ff; color: #fff; }
+  .box { background: #2d2d2f; border-radius: 0 0 8px 8px; padding: 0; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { padding: 8px 10px; background: #3d3d3f; text-align: left; font-weight: 600; font-size: 11px; color: #86868b; border-bottom: 1px solid #424245; }
+  td { padding: 8px 10px; border-bottom: 1px solid #3d3d3f; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; padding: 1px 7px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+  .tag-s { background: #ff9f0a; color: #1d1d1f; }
+  .tag-a { background: #0a84ff; color: #fff; }
+  .tag-b { background: #636366; color: #fff; }
+  .action-cell { color: #30d158; font-weight: 600; font-size: 12px; line-height: 1.6; }
+  .status-cell { font-size: 12px; line-height: 1.6; }
+  .desc { color: #86868b; font-size: 11px; margin-top: 2px; }
+  .why { color: #ff9f0a; font-size: 10px; margin-top: 1px; }
+  .highlight { background: rgba(10,132,255,0.1); }
+  .section-label { padding: 12px 14px 6px; font-size: 10px; text-transform: uppercase; color: #86868b; letter-spacing: 0.5px; }
+  .action-bar { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot.urgent { background: #ff3b30; }
+  .dot.soon { background: #ff9f0a; }
+  .dot.watch { background: #30d158; }
+  .dot.idle { background: #636366; }
+  th.w80 { width: 80px; }
+  th.w60 { width: 60px; }
+  th.w110 { width: 110px; }
+  .name-cell { font-weight: 600; }
+  .name-cell .tag { margin-right: 4px; }
+</style>
+</head>
+<body>
+
+<h1>谈判/样品 × S级 — 弹窗对比</h1>
+<div class="sub">点击矩阵格子后弹出。3个客户：Keinjol Tata、Asselya Marina、dila cakir</div>
+
+<div class="compare">
+  <!-- 旧版 -->
+  <div class="col old">
+    <h2>旧版：标准动作 + 关注/观察标签</h2>
+    <div class="box">
+      <div style="padding:10px 14px; background:rgba(255,159,10,0.08); color:#ff9f0a; font-size:11px;">S级 × 谈判/样品：主动做mockup/方案，不等客户开口，48h跟进</div>
+      <table>
+        <tr><th>客户</th><th style="text-align:center;">国家</th><th style="text-align:center;">静默</th><th style="text-align:center;">状态</th></tr>
+        <tr>
+          <td class="name-cell">Keinjol Tata</td>
+          <td style="text-align:center;">IN</td><td style="text-align:center;">2d</td>
+          <td style="text-align:center;"><span class="tag tag-b">正常</span></td>
+        </tr>
+        <tr>
+          <td class="name-cell">Asselya Marina</td>
+          <td style="text-align:center;">US</td><td style="text-align:center;">67d</td>
+          <td style="text-align:center;"><span class="tag tag-a">观察</span></td>
+        </tr>
+        <tr>
+          <td class="name-cell">dila cakir</td>
+          <td style="text-align:center;">TR</td><td style="text-align:center;">134d</td>
+          <td style="text-align:center;"><span class="tag tag-s">关注</span></td>
+        </tr>
+      </table>
+      <div style="padding:8px 14px; font-size:10px; color:#636366;">问题：三人等级/阶段完全相同，但沉默 2天 vs 67天 vs 134天 → 同样的"48h跟进"适用于谁？</div>
+    </div>
+  </div>
+
+  <!-- 新版 -->
+  <div class="col new">
+    <h2>新版：当前状态 + 行动方向 分开</h2>
+    <div class="box">
+      <div style="padding:8px 14px; background:rgba(10,132,255,0.08); color:#0a84ff; font-size:11px;">标准动作参考 — S级 × 谈判/样品：主动做mockup/方案，48h跟进</div>
+      <table>
+        <tr><th class="w110">客户</th><th class="w60">国家</th><th>当前状态</th><th>行动方向</th></tr>
+        <tr class="highlight">
+          <td class="name-cell"><span class="tag tag-s">S</span> Keinjol Tata</td>
+          <td>印度</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot urgent"></span>谈判活跃期，上次互动2天前</div>
+            <div class="desc">品牌ODM+2000件，50条深度沟通，样品讨论中</div>
+          </td>
+          <td class="action-cell">确认样品进度，附品牌定制方案参考，推动下单决策</td>
+        </tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-s">S</span> Asselya Marina</td>
+          <td>美国</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot idle"></span>深度沉默67天</div>
+            <div class="desc">S级客户，322条对话，曾讨论样品和价格后中断</div>
+            <div class="why">⚠ 高价值客户异常沉默，不适用"48h跟进"</div>
+          </td>
+          <td class="action-cell">不催单。发工厂认证更新/新面料/同行案例重建存在感。问"上次讨论的方向还需要继续吗"</td>
+        </tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-s">S</span> dila cakir</td>
+          <td>土耳其</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot idle"></span>沉淀134天</div>
+            <div class="desc">S级客户，品牌ODM+800件曾报价，51条对话后完全沉淀</div>
+            <div class="why">⚠ 超90天，直接激活成功率极低</div>
+          </td>
+          <td class="action-cell">不主动触达。等新产品/新认证/旺季节点再激活，当前标记关注即可</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 第二组：PI已发 × A -->
+<h1>PI已发 × A级 — 弹窗对比</h1>
+<div class="sub">3个客户：maimouna cisse、Aloh Voma、WELE Mounia</div>
+
+<div class="compare">
+  <div class="col old">
+    <h2>旧版</h2>
+    <div class="box">
+      <div style="padding:10px 14px; background:rgba(255,159,10,0.08); color:#ff9f0a; font-size:11px;">A级 × PI已发：48h确认收到 → 第5天提醒 → PI到期前提醒</div>
+      <table>
+        <tr><th>客户</th><th style="text-align:center;">国家</th><th style="text-align:center;">静默</th><th style="text-align:center;">状态</th></tr>
+        <tr><td class="name-cell">maimouna cisse</td><td style="text-align:center;">ML</td><td style="text-align:center;">1d</td><td style="text-align:center;"><span class="tag tag-b">正常</span></td></tr>
+        <tr><td class="name-cell">Aloh Voma</td><td style="text-align:center;">US</td><td style="text-align:center;">5d</td><td style="text-align:center;"><span class="tag tag-b">正常</span></td></tr>
+        <tr><td class="name-cell">WELE Mounia</td><td style="text-align:center;">TG</td><td style="text-align:center;">6d</td><td style="text-align:center;"><span class="tag tag-b">正常</span></td></tr>
+      </table>
+      <div style="padding:8px 14px; font-size:10px; color:#636366;">问题：maimouna刚互动1天（应确认PI），Aloh已5天（该提醒付款）— 阶段完全不同但标签一样。</div>
+    </div>
+  </div>
+  <div class="col new">
+    <h2>新版</h2>
+    <div class="box">
+      <div style="padding:8px 14px; background:rgba(10,132,255,0.08); color:#0a84ff; font-size:11px;">标准动作参考 — A级 × PI已发：48h确认收到 → 第5天提醒 → PI到期前提醒</div>
+      <table>
+        <tr><th class="w110">客户</th><th class="w60">国家</th><th>当前状态</th><th>行动方向</th></tr>
+        <tr class="highlight">
+          <td class="name-cell"><span class="tag tag-a">A</span> maimouna cisse</td>
+          <td>马里</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot urgent"></span>PI刚发1天，确认期</div>
+            <div class="desc">500件+价格谈判后PI已发，深度沟通28条，MOQ已接受</div>
+          </td>
+          <td class="action-cell">确认PI收到：问"PI里的价格和数量核对OK吗？有需要调整的地方随时说"</td>
+        </tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-a">A</span> Aloh Voma</td>
+          <td>美国</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot soon"></span>PI已发5天，超确认期</div>
+            <div class="desc">89条对话，客户未确认收到PI，进入提醒窗口</div>
+          </td>
+          <td class="action-cell">首次提醒：不催款，问"PI收到了吗？运输标记需要确认一下"</td>
+        </tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-a">A</span> WELE Mounia</td>
+          <td>多哥</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot soon"></span>PI已发6天，超确认期</div>
+            <div class="desc">88条对话，法语区非洲核心市场客户</div>
+          </td>
+          <td class="action-cell">首次提醒：法语温和确认PI状态，非洲客户节奏偏慢，不等同于催款</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 第三组：报价已发 × B -->
+<h1>报价已发 × B级 — 弹窗对比</h1>
+<div class="sub">3个客户：jonathan aston、Ernestina Afriyie、diego vargas</div>
+
+<div class="compare">
+  <div class="col old">
+    <h2>旧版</h2>
+    <div class="box">
+      <div style="padding:10px 14px; background:rgba(255,159,10,0.08); color:#ff9f0a; font-size:11px;">B级 × 报价已发：3-5天温和提醒，确认是否收到报价</div>
+      <table>
+        <tr><th>客户</th><th style="text-align:center;">国家</th><th style="text-align:center;">静默</th><th style="text-align:center;">状态</th></tr>
+        <tr><td class="name-cell">jonathan aston</td><td style="text-align:center;">GH</td><td style="text-align:center;">1d</td><td style="text-align:center;"><span class="tag tag-b">正常</span></td></tr>
+        <tr><td class="name-cell">Ernestina Afriyie</td><td style="text-align:center;">GH</td><td style="text-align:center;">1d</td><td style="text-align:center;"><span class="tag tag-b">正常</span></td></tr>
+        <tr><td class="name-cell">diego vargas</td><td style="text-align:center;">ES</td><td style="text-align:center;">5d</td><td style="text-align:center;"><span class="tag tag-b">正常</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="col new">
+    <h2>新版</h2>
+    <div class="box">
+      <div style="padding:8px 14px; background:rgba(10,132,255,0.08); color:#0a84ff; font-size:11px;">标准动作参考 — B级 × 报价已发：3-5天温和提醒，确认是否收到报价</div>
+      <table>
+        <tr><th class="w110">客户</th><th class="w60">国家</th><th>当前状态</th><th>行动方向</th></tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-b">B</span> jonathan aston</td>
+          <td>加纳</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot watch"></span>刚报价1天</div>
+            <div class="desc">9条对话，加纳核心市场</div>
+          </td>
+          <td class="action-cell">不跟进。给他2-3天消化报价，第3-4天再温和提醒</td>
+        </tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-b">B</span> Ernestina Afriyie</td>
+          <td>加纳</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot watch"></span>刚报价1天</div>
+            <div class="desc">5条对话，卡通睡衣=母婴正品，加纳核心市场</div>
+          </td>
+          <td class="action-cell">不跟进。刚报价不急，等第3天</td>
+        </tr>
+        <tr>
+          <td class="name-cell"><span class="tag tag-b">B</span> diego vargas</td>
+          <td>西班牙</td>
+          <td class="status-cell">
+            <div class="action-bar"><span class="dot soon"></span>报价后沉默5天</div>
+            <div class="desc">32条对话，已到跟进窗口</div>
+          </td>
+          <td class="action-cell">温和提醒。带一个具体问题（"报价里的尺寸需要调整吗"），不给"催"的感觉</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

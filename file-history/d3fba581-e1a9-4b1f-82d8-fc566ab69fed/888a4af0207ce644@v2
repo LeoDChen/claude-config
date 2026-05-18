@@ -1,0 +1,138 @@
+# AI外贸顾问系统 — 项目重启
+
+**创建日期**：2026-04-29
+**最后更新**：2026-05-09
+**当前阶段**：运营中 — 466客户五梯队体系，一键同步就绪
+
+---
+
+## 项目目标
+
+Claude Code 专属外贸军师——监控 466 个 OKKI 客户，按五梯队（P0-P4）+ 四层渐进模型诊断卡点、生成差异化话术、输出每日跟进战报。
+
+---
+
+## 核心文件
+
+### 知识库（8 个文件）
+```
+D:\ClaudeWorkspace\08_客户跟进\knowledge\
+├── system-prompt.md        ← 四层渐进判断 + S/A/B分流（V3）
+├── sales-playbook.md       ← 阶段5-9细粒度规则（运输/频率/情感/物流）
+├── factory.md              ← 工厂硬实力/品牌背书/技术/品类/禁用声称
+├── business-rules.md       ← 商务规则+交期标准+现货判断+报价区分
+├── value-translation.md    ← 16个卖点体感翻译
+├── market-psychology.md    ← 中东/非洲/欧美客户决策心理
+├── hooks-library.md        ← 7类钩子×素材状态×话术模板
+└── cases.md                ← 案例分析库
+```
+
+### OKKI 本地知识库
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\
+├── system-prompt.md        ← 两遍法+五步分析框架
+├── business-rules.md       ← 五梯队分类升级/降级触发器
+├── factory.md              ← 工厂知识库（本地副本）
+└── security.md             ← 账号安全原理（SSO/CDP/Playwright）
+```
+
+### 核心脚本
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\scripts\
+├── sync_okki.js            ← ⭐ 一键同步（启动Chrome→检测登录→拉取→diff→更新STATE.md）
+├── classifier.mjs          ← 分类器引擎
+├── scraper.mjs             ← Playwright CDP爬虫
+├── diff.mjs                ← 差异检测
+├── s1_classify.js          ← 第一遍：元数据分类
+├── s2_deep.js              ← 第二遍：深度内容分析
+├── s3_report.js            ← 第三遍：报告生成
+├── generate-action-plan.mjs← 行动方案生成（55KB）
+├── generate-battle-report.mjs ← 战报生成
+└── daily-smart.mjs         ← 智能日报
+```
+
+### 数据文件
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\data\
+├── tm_conversations_latest.json   ← 466条会话元数据（最新，2026-05-08）
+├── chat_history/{id}.json         ← 467个会话聊天历史
+├── customers/{id}.json            ← 346个客户详情
+└── snapshots/                     ← 历史快照
+```
+
+### STATE.md
+`D:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md` — 项目状态追踪，SessionStart 自动注入上下文
+
+---
+
+## 新对话重启指令
+
+**标准启动**（复制发给 CC）：
+
+> 我要继续 OKKI 客户跟进分析。先读取：
+> 1. STATE.md：`D:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md`
+> 2. Okki knowledge/ 下全部文件
+> 3. 最新会话数据：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_latest.json`
+>
+> 读完告诉我：P0/P1/P2/P3/P4 各多少人，P0 客户名单按紧急度排序。
+> 然后对前 5 个 P0 客户逐个出完整方案。
+
+**数据同步**（新对话，独立执行）：
+
+> 执行 OKKI 数据同步。先关闭 Chrome，然后运行：
+> `cd D:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js`
+
+---
+
+## 五梯队体系（当前状态 2026-05-08）
+
+| 梯队 | 人数 | 说明 |
+|------|------|------|
+| P0 立即行动 | 9 | 失联风险/PI待付款/高意向 |
+| P1 本周跟进 | 14 | 有互动待推进 |
+| P2 观察 | 26 | 7天内互动 |
+| P3 低活跃 | 67 | 8-30天前互动 |
+| P4 沉默 | 355 | >30天/仅系统消息 |
+
+### 关键发现
+- diego vargas：19条客户消息仅1条我方回复，最严重跟进失误
+- Mona almuharraqy：846条消息/429条客户消息，关系好但未转化
+- 多笔PI待付款：Christabel($43.96)、WELE Mounia、Mezna($75试单)、amer ly
+- 非洲核心市场活跃但运费是核心障碍
+- Inderpreet kaur 问 16 CFR 认证
+
+---
+
+## V3 核心规则
+
+### 四层渐进判断
+1. **第一层：阶段**（10个阶段）→ 初次接触→询价中→已报价→谈判中→待付款→已付款→已发货→运输中→已签收→已完结→售后
+2. **第二层：意图** — 只在阶段 1-2 做
+3. **第三层：卡点** — 只在阶段 3-4 做
+4. **第四层：推进** — 把客户从当前阶段推到下一阶段
+
+### S/A/B 自动分流
+| 等级 | 标准 | 输出深度 |
+|------|------|---------|
+| S级 | 整柜/品牌商/返单/$5000+ | 完整四层+策略推演+定制话术+分支预演 |
+| A级 | 小批发商/试单/$200-5000 | 四层判断+卡点诊断+话术 |
+| B级 | 个人买家/<$200/信息不足 | 一行判断+一句话术（需回应具体问题） |
+
+### 关键规则
+- 每次对话分析 ≤5-6 个客户
+- 钩子推荐前必须查 hooks-library.md，❌ 禁用
+- deep_scrape 数据需交叉验证（DOM串位风险）
+- 涉及工厂信息先读档案原文
+- 分类前过滤 OKKI 系统提示
+
+---
+
+## 进度
+
+| Phase | 状态 |
+|-------|------|
+| 1. 知识库构建 | ✅ 8 个文件完成 |
+| 2. 分析引擎 | ✅ SP V3（四层+S/A/B+10阶段） |
+| 3. 数据采集 | ✅ 一键同步脚本就绪 |
+| 4. 报告系统 | ✅ P0-P4 五梯队报告 |
+| 5. 持续运营 | 🔄 定期同步+逐批分析 |

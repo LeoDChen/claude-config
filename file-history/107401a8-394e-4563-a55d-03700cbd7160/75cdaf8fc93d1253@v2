@@ -1,0 +1,203 @@
+/**
+ * 小满CRM — 每周巡检报告生成器
+ *
+ * 扫描 7 天以上未互动的客户，按国家/品类分群，生成批量激活方案。
+ * 每周一运行。
+ *
+ * 用法: node generate-weekly-report.mjs
+ */
+
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SNAPSHOT_DIR = join(DATA_DIR, 'snapshots');
+const REPORTS_DIR = join(__dirname, '..', 'reports');
+
+if (!existsSync(REPORTS_DIR)) mkdirSync(REPORTS_DIR, { recursive: true });
+
+// 已知客户国家映射（从之前的爬取数据中提取）
+const KNOWN_COUNTRIES = {
+  'TheodoraAdelaide Mahe': '科特迪瓦',
+  'amer ly': '伊拉克',
+  'rehema kiseyu': '坦桑尼亚',
+  'fernande Pochette': '美国/沙特',
+  'Jemima Piema': '美国',
+  'Cindy Nadal': '法国',
+  'Ahmed Darrat': '利比亚',
+  'Susuanna ParkerAdentwi': '加纳',
+  'Aula Alsaad': '阿拉伯国家',
+  'Krisgel Igros': '菲律宾',
+  'zainab Babesets': '伊拉克',
+  'Amal Alamhrooqi': '阿曼',
+  'Regina Kabanda': '非洲',
+  'maimouna cisse': '法语非洲'
+};
+
+function analyzeDormant(snapshot) {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const dormant7d = [];
+  const dormant30d = [];
+  const active = [];
+
+  for (const c of snapshot.customers) {
+    // 从时间戳判断最后互动时间
+    const timeStr = c.lastTime;
+    if (!timeStr) {
+      dormant30d.push(c);
+      continue;
+    }
+
+    // 解析时间戳 (格式可能是 "04-28" 或 "04-28 15:30")
+    const parts = timeStr.match(/(\d{1,2})[-:\/](\d{1,2})/);
+    if (!parts) {
+      dormant30d.push(c);
+      continue;
+    }
+
+    const month = parseInt(parts[1]);
+    const day = parseInt(parts[2]);
+    const lastDate = new Date(now.getFullYear(), month - 1, day);
+
+    if (lastDate < thirtyDaysAgo) {
+      dormant30d.push(c);
+    } else if (lastDate < sevenDaysAgo) {
+      dormant7d.push(c);
+    } else {
+      active.push(c);
+    }
+  }
+
+  return { dormant7d, dormant30d, active };
+}
+
+function generateMarkdown(snapshot, analysis) {
+  const { dormant7d, dormant30d, active } = analysis;
+  const dateStr = new Date().toISOString().substring(0, 10);
+
+  // 按国家分群
+  const byCountry = {};
+  for (const c of [...dormant7d, ...dormant30d]) {
+    const country = KNOWN_COUNTRIES[c.name] || '未知';
+    if (!byCountry[country]) byCountry[country] = [];
+    byCountry[country].push(c);
+  }
+
+  let md = `# 小星星外贸每周巡检报告 — ${dateStr}
+
+> 自动生成 | 数据源：小满CRM | 快照时间：${snapshot.capturedAt}
+> 总客户：${snapshot.totalCustomers} | 活跃：${active.length} | 休眠7天+：${dormant7d.length} | 休眠30天+：${dormant30d.length}
+
+---
+
+## 📊 客户健康度
+
+| 状态 | 人数 | 占比 |
+|------|------|------|
+| 🟢 活跃（7天内互动） | ${active.length} | ${(active.length / snapshot.totalCustomers * 100).toFixed(0)}% |
+| 🟡 短期休眠（7-30天） | ${dormant7d.length} | ${(dormant7d.length / snapshot.totalCustomers * 100).toFixed(0)}% |
+| 🔴 长期休眠（30天+） | ${dormant30d.length} | ${(dormant30d.length / snapshot.totalCustomers * 100).toFixed(0)}% |
+
+---
+
+## 🟡 短期休眠客户 — 批量激活策略 (${dormant7d.length}人)
+
+### 按国家/区域分群
+
+`;
+
+  for (const [country, customers] of Object.entries(byCountry)) {
+    const shortTerm = customers.filter(c => dormant7d.some(d => d.name === c.name));
+    if (shortTerm.length === 0) continue;
+
+    md += `#### ${country} (${shortTerm.length}人)\n\n`;
+    md += `| 客户 | 最后消息 | 推荐钩子 |\n`;
+    md += `|------|---------|----------|\n`;
+
+    for (const c of shortTerm) {
+      const hook = country.includes('中东') || country.includes('伊拉克') || country.includes('阿曼')
+        ? '帮宝适奥运背书 + 面料对比'
+        : country.includes('非洲')
+          ? '小批量试单方案 + 面料样布'
+          : '产线实拍 + 畅销款推荐';
+
+      md += `| ${c.name} | ${c.lastMessageSnippet?.substring(0, 40) || '-'} | ${hook} |\n`;
+    }
+    md += '\n';
+
+    // 批量激活话术模板
+    md += `**批量激活话术模板（${country}）**：\n\n`;
+    md += `> 发时翻译成${country.includes('法国') || country.includes('科特迪瓦') ? '法语' : '英语'}\n\n`;
+
+    if (country.includes('中东') || country.includes('伊拉克') || country.includes('阿曼')) {
+      md += `"Hi {name}, just checking in — we've been producing some kids' sets for Gulf clients recently using the same pre-washed combed cotton. The feedback on fabric quality has been great. Want me to send you a couple of production line photos from this week's batch?"\n\n`;
+    } else if (country.includes('非洲')) {
+      md += `"Hi {name}, hope business is going well. We've put together a small trial order option — 12-20 pieces mixed styles, same FOB pricing. It's a low-risk way to test the market. Want me to send you the details?"\n\n`;
+    } else {
+      md += `"Hi {name}, just touching base — we've updated our fabric library with some new patterns for this season. If you're planning your next order, I can send over a few photos of what's running on the production line right now."\n\n`;
+    }
+  }
+
+  // ==================== 长期休眠 ====================
+  md += `---
+
+## 🔴 长期休眠客户 (${dormant30d.length}人)
+
+`;
+
+  if (dormant30d.length > 0) {
+    md += `| 客户 | 最后消息 | 建议动作 |
+|------|---------|----------|
+`;
+    for (const c of dormant30d.slice(0, 15)) {
+      md += `| ${c.name} | ${c.lastMessageSnippet?.substring(0, 40) || '-'} | 发送新品推荐/节日问候/清仓特价 |\n`;
+    }
+    if (dormant30d.length > 15) {
+      md += `| ... | +${dormant30d.length - 15}人 | 同上 |\n`;
+    }
+  }
+
+  md += `\n**长期休眠客户通用策略**：不追单，只定期推送价值内容（新品图/产线实况/行业趋势）。每月1次，保持存在感即可。\n\n`;
+
+  md += `---
+
+*本报告由 AI外贸顾问系统自动生成 | ${new Date().toISOString()}*
+`;
+
+  return md;
+}
+
+function main() {
+  // 找最新快照
+  const files = readdirSync(SNAPSHOT_DIR)
+    .filter(f => f.startsWith('snapshot_') && f.endsWith('.json'))
+    .sort()
+    .reverse();
+
+  if (files.length === 0) {
+    console.error('无快照数据。请先运行 node daily-check.mjs');
+    process.exit(1);
+  }
+
+  console.log('[weekly] 加载最新快照...');
+  const snapshot = JSON.parse(readFileSync(join(SNAPSHOT_DIR, files[0]), 'utf-8'));
+
+  console.log('[weekly] 分析客户活跃度...');
+  const analysis = analyzeDormant(snapshot);
+
+  console.log(`  活跃: ${analysis.active.length} | 休眠7d: ${analysis.dormant7d.length} | 休眠30d+: ${analysis.dormant30d.length}`);
+
+  const markdown = generateMarkdown(snapshot, analysis);
+  const dateStr = new Date().toISOString().substring(0, 10);
+  const outputPath = join(REPORTS_DIR, `每周巡检_${dateStr}.md`);
+
+  writeFileSync(outputPath, markdown);
+  console.log(`[weekly] 每周巡检报告已生成: ${outputPath}`);
+}
+
+main();

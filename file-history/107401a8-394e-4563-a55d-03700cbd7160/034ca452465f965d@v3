@@ -1,0 +1,69 @@
+# AI外贸顾问系统 — 项目重启
+
+**创建日期**：2026-04-29  
+**当前阶段**：Phase 1 完成（知识库），即将进入 Phase 2（分析引擎）
+
+---
+
+## 项目目标
+
+把 Claude Code 打造为专属外贸军师——自动监控 300+ 小满客户，进行专业诊断，生成可执行的话术和策略。
+
+## 核心文件位置
+
+### 方案文件
+`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+
+### 知识库（5个文件）
+```
+D:\ClaudeWorkspace\08_客户跟进\knowledge\
+├── factory.md              ← 工厂硬实力/品牌背书/技术/品类
+├── business-rules.md       ← 修正版商务规则（付款/MOQ/BSCI表述）
+├── value-translation.md    ← 卖点体感翻译表
+├── market-psychology.md    ← 区域客户决策心理
+└── hooks-library.md        ← 钩子素材库（7类钩子×素材现状×话术）
+```
+
+### 客户数据
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\data\       ← TM对话+邮件+分类
+D:\ClaudeWorkspace\08_客户跟进\Okki\scripts\     ← 采集+分类+报告脚本
+```
+
+### 工厂背景
+```
+D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt
+```
+
+---
+
+## 新对话重启提示词
+
+复制以下内容发给 CC 即可恢复项目：
+
+---
+
+> 我正在做一个 AI 外贸顾问系统项目。请先读取以下文件了解项目全貌：
+> 
+> 1. 方案文件：`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+> 2. 知识库目录：`D:\ClaudeWorkspace\08_客户跟进\knowledge\`（5个文件全部读取）
+> 3. 工厂背景：`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+> 4. 客户数据目录：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\`
+> 
+> 读取完毕后告诉我当前项目状态和下一步该做什么。
+
+---
+
+## 当前进度
+
+| 阶段 | 状态 | 备注 |
+|------|------|------|
+| Phase 1：知识库构建 | ✅ 完成 | 6个文件（含hooks-library + system-prompt） |
+| Phase 2：分析引擎 | ✅ 完成 | 2客户测试通过（azaan ss 8.5/10, amer ly 8/10），DeepSeek评审通过 |
+| Phase 3：数据采集升级 | ⏳ 待进行 | 增量快照模式 |
+| Phase 4：报告系统 | ⏳ 待进行 | P0/P1/P2 |
+| Phase 5：持续优化 | ⏳ 待进行 | 素材+知识+双AI迭代 |
+
+## 讨论记录
+
+第一轮方案讨论（含与DeepSeek协作）：桌面 `0101.txt`

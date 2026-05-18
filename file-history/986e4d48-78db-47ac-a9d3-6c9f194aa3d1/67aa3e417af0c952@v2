@@ -1,0 +1,350 @@
+/**
+ * 阶段0：数据预处理脚本
+ * 输入：data/extracted_*.json 或 data/*全量客户分类.json（CDP 抓取原始数据）
+ * 输出：data/cleaned_<timestamp>.json
+ *
+ * 处理内容：
+ * - 检测 latestMessageContent 是否系统消息 → 标记并尝试替换
+ * - 检测最后消息是否表情/单字 → 标记 needLookback
+ * - 统计消息数 → 标记 needFullRead（≥10 条）
+ * - 正则扫描产品代码和地址关键词 → 标记 hasProductSelection / hasAddress
+ * - 计算沉默天数
+ * - 统计消息方向（如有消息列表数据）
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+
+// ====== 系统消息模式（来自 business-rules.md） ======
+const SYSTEM_MSG_PATTERNS = [
+  /automatic reception will no longer intervene/i,
+  /自动接待将不再触发/,
+  /Marco大模型翻译/,
+  /阿里国际Marco大模型翻译/,
+  /买家有流失风险/,
+  /Buyer has churn risk/,
+  /一旦离开平台发生纠纷或欺诈/,
+  /由于您介入该会话/,
+  /Due to your intervention in this session/,
+  /AI给您生成了一条回复建议/,
+  /反馈/,
+  /You have a visitor\. Follow up with them as soon as possible\./i,
+  /This buyer has been pre-screened and has a clear request/i,
+  /Since you have read the conversation/i,
+];
+
+// ====== 表情/单字模式 ======
+const EMOJI_SINGLE_PATTERNS = [
+  /^[\u{1F000}-\u{1FFFF}]+$/u,
+  /^[\u{2600}-\u{27BF}]+$/u,
+  /^[\u{FE00}-\u{FEFF}]+$/u,
+  /^[\u{2702}-\u{27B0}]+$/u,
+  /^[\u{1F600}-\u{1F64F}]+$/u,
+  /^[\u{1F300}-\u{1F5FF}]+$/u,
+  /^[\u{1F680}-\u{1F6FF}]+$/u,
+  /^[\u{1F900}-\u{1F9FF}]+$/u,
+  /^(ok|okay|yes|no|hi|hello|hey|thanks|thx|ty|bye|good|nice|wow)$/i,
+  /^[\u{1F600}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2700}-\u{27BF}]+$/u,
+  /^\[图片\]$/, /^\[商品\]$/, /^\[表情\]$/,
+];
+
+// ====== 产品代码模式 ======
+const PRODUCT_CODE_RE = /(?:CO|PO|BO|SO|MO|SKU)[-_\s]?\d{2,4}/gi;
+
+// ====== 地址关键词 ======
+const ADDRESS_KEYWORDS = [
+  /address/i, /shipping/i, /delivery/i, /地址/, /收货/, /运送/,
+  /street/i, /city/i, /country/i, /zip/i, /postal/i,
+  /cameroon/i, /nigeria/i, /kenya/i, /ghana/i, /tanzania/i, /uganda/i, /zambia/i,
+  /saudi/i, /uae/i, /dubai/i, /egypt/i, /sudan/i, /morocco/i, /algeria/i,
+  /colombia/i, /brazil/i, /mexico/i, /peru/i, /chile/i,
+  /cotonou/i, /lagos/i, /nairobi/i, /doha/i, /riyadh/i, /jeddah/i,
+  /port/i, /airport/i, /seaport/i, /via /, /to /,
+];
+
+// ====== 工具函数 ======
+
+function isSystemMessage(text) {
+  if (!text || typeof text !== 'string') return false;
+  if (text.trim().length === 0) return false;
+  return SYSTEM_MSG_PATTERNS.some((p) => p.test(text));
+}
+
+function isEmojiOrSingleWord(text) {
+  if (!text || typeof text !== 'string') return false;
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return true;
+  if (trimmed.length <= 3) return true;
+  return EMOJI_SINGLE_PATTERNS.some((p) => p.test(trimmed));
+}
+
+function scanProductCodes(text) {
+  if (!text || typeof text !== 'string') return [];
+  const matches = text.match(PRODUCT_CODE_RE) || [];
+  return [...new Set(matches.map((m) => m.toUpperCase()))];
+}
+
+function scanAddressKeywords(text) {
+  if (!text || typeof text !== 'string') return false;
+  return ADDRESS_KEYWORDS.some((re) => re.test(text));
+}
+
+function calcSilenceDays(lastContactTime) {
+  if (!lastContactTime) return 999;
+  const now = Date.now();
+  const ts = typeof lastContactTime === 'number' ? lastContactTime : new Date(lastContactTime).getTime();
+  if (isNaN(ts)) return 999;
+  return Math.floor((now - ts) / 86400000);
+}
+
+function calcMessageDirection(messages) {
+  if (!Array.isArray(messages) || messages.length === 0) return null;
+  let sent = 0;
+  let received = 0;
+  for (const msg of messages) {
+    if (msg.side === 'sent' || msg.latestMessageType === 'send') sent++;
+    else if (msg.side === 'received' || msg.latestMessageType === 'received') received++;
+  }
+  const total = sent + received;
+  return {
+    total,
+    sent,
+    received,
+    ratioFromUs: total > 0 ? (sent / total) : 0,
+  };
+}
+
+function findLatestRealMessage(messages) {
+  if (!Array.isArray(messages)) return null;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    const text = msg.text || msg.latestMessageContent || '';
+    if (!isSystemMessage(text)) return msg;
+  }
+  return null;
+}
+
+// ====== 主处理函数 ======
+
+function getCustomersFromData(data) {
+  if (Array.isArray(data)) return data;
+  if (data.customers) return data.customers;
+  if (data.p0p1) return data.p0p1;
+  if (data.results) return data.results;
+  return [];
+}
+
+function processCustomer(customer) {
+  const entry = { ...customer };
+
+  // ====== 字段标准化（兼容extract_cdp和全量客户分类两种格式） ======
+  // extract_cdp 格式：{ name, timeStr, isUnread, message, daysAgo, ... }
+  // 全量客户分类格式：{ name, latestMessageContent, lastContactTime, latestMessageType, ... }
+  if (!entry.latestMessageContent && entry.message) {
+    entry.latestMessageContent = entry.message;
+  }
+  if (!entry.latestMessageType) {
+    // 从message方向推断：有unreadCount/msgFromCustomer推断
+    entry.latestMessageType = entry.isUnread ? 'received' : 'send';
+  }
+  if (!entry.lastContactTime && !entry.latestMessageTime) {
+    // extract_cdp的timeStr是"HH:MM"或"YYYY-M-D"格式
+    if (entry.timeStr) {
+      if (entry.timeStr.includes(':')) {
+        // 今天的时间 → 用当前时间
+        entry.lastContactTime = Date.now();
+      } else {
+        entry.lastContactTime = new Date(entry.timeStr).getTime();
+      }
+    }
+  }
+  // 如果extract_cdp已经计算了daysAgo，优先使用
+  if (entry.daysAgo !== undefined && !entry._precomputedSilence) {
+    entry._precomputedSilence = entry.daysAgo;
+  }
+  const flags = {};
+  const issues = [];
+
+  const rawMsg = entry.latestMessageContent || '';
+  const isSys = isSystemMessage(rawMsg);
+
+  // 1. 系统消息检测
+  flags.isLatestSystemMsg = isSys;
+  if (isSys) {
+    issues.push('latestMessageContent 是系统消息');
+    // 尝试从消息列表中找真实消息
+    if (Array.isArray(entry.messages)) {
+      const real = findLatestRealMessage(entry.messages);
+      if (real) {
+        entry._replacedMessageContent = real.text || real.latestMessageContent || '';
+        entry._replacedFromIndex = entry.messages.indexOf(real);
+        flags.latestMsgReplaced = true;
+      }
+    }
+  }
+
+  // 2. 表情/单字检测
+  const effectiveMsg = flags.latestMsgReplaced ? entry._replacedMessageContent : rawMsg;
+  if (isEmojiOrSingleWord(effectiveMsg)) {
+    flags.needLookback = true;
+    issues.push('最后一条有效消息是表情/单字，需往前看');
+  }
+
+  // 3. 消息数统计
+  const msgCount = entry.messageCount || (Array.isArray(entry.messages) ? entry.messages.length : 0);
+  entry._computedMessageCount = msgCount;
+  if (msgCount >= 10) {
+    flags.needFullRead = true;
+    issues.push(`消息数 ${msgCount} ≥ 10，必须逐条读取`);
+  }
+
+  // 4. 产品代码扫描
+  const scanTargets = [effectiveMsg];
+  if (Array.isArray(entry.messages)) {
+    for (const m of entry.messages) {
+      scanTargets.push(m.text || '');
+    }
+  }
+  const allCodes = [];
+  for (const t of scanTargets) {
+    allCodes.push(...scanProductCodes(t));
+  }
+  const uniqueCodes = [...new Set(allCodes)];
+  if (uniqueCodes.length > 0) {
+    flags.hasProductSelection = true;
+    entry._productCodes = uniqueCodes;
+  }
+
+  // 5. 地址关键词扫描
+  if (scanAddressKeywords(effectiveMsg) || (Array.isArray(entry.messages) && entry.messages.some((m) => scanAddressKeywords(m.text || '')))) {
+    flags.hasAddress = true;
+  }
+
+  // 6. 沉默天数（优先使用extract_cdp预计算的值）
+  if (entry._precomputedSilence !== undefined) {
+    entry._silenceDays = entry._precomputedSilence;
+  } else {
+    const lastTime = entry.lastContactTime || entry.latestMessageTime;
+    entry._silenceDays = calcSilenceDays(lastTime);
+  }
+
+  // 7. 消息方向
+  if (Array.isArray(entry.messages)) {
+    const dir = calcMessageDirection(entry.messages);
+    if (dir) {
+      entry._messageDirection = dir;
+    }
+  } else if (entry.latestMessageType) {
+    entry._messageDirection = {
+      total: msgCount || 1,
+      latestDirection: entry.latestMessageType,
+    };
+  }
+
+  // 8. 合并标记
+  entry._flags = flags;
+  entry._issues = issues;
+
+  return entry;
+}
+
+function processAll(data) {
+  const customers = getCustomersFromData(data);
+  const cleaned = customers.map(processCustomer);
+
+  const stats = {
+    total: cleaned.length,
+    systemMsgDetected: cleaned.filter((c) => c._flags.isLatestSystemMsg).length,
+    needLookback: cleaned.filter((c) => c._flags.needLookback).length,
+    needFullRead: cleaned.filter((c) => c._flags.needFullRead).length,
+    hasProductSelection: cleaned.filter((c) => c._flags.hasProductSelection).length,
+    hasAddress: cleaned.filter((c) => c._flags.hasAddress).length,
+    hasIssues: cleaned.filter((c) => c._issues.length > 0).length,
+    silentOver90Days: cleaned.filter((c) => c._silenceDays > 90).length,
+    silentOver30Days: cleaned.filter((c) => c._silenceDays > 30).length,
+  };
+
+  return {
+    processedAt: new Date().toISOString(),
+    source: data.capturedAt || data.scrapedAt || 'unknown',
+    stats,
+    customers: cleaned,
+  };
+}
+
+// ====== CLI入口 ======
+
+function findLatestInput() {
+  const files = fs.readdirSync(DATA_DIR).filter((f) => f.endsWith('.json'));
+  const candidates = [];
+
+  for (const f of files) {
+    const fullPath = path.join(DATA_DIR, f);
+    try {
+      const stat = fs.statSync(fullPath);
+      if (stat.size > 1000) {
+        // 优先全量客户分类，其次 extracted
+        if (f.includes('全量客户分类')) {
+          candidates.push({ file: f, mtime: stat.mtimeMs, priority: 10 });
+        } else if (f.startsWith('extracted_')) {
+          candidates.push({ file: f, mtime: stat.mtimeMs, priority: 5 });
+        }
+      }
+    } catch (_) { /* skip */ }
+  }
+
+  candidates.sort((a, b) => b.priority - a.priority || b.mtime - a.mtime);
+  return candidates[0]?.file || null;
+}
+
+function main() {
+  const inputArg = process.argv[2];
+  let inputFile;
+
+  if (inputArg) {
+    inputFile = path.resolve(inputArg);
+  } else {
+    const latest = findLatestInput();
+    if (!latest) {
+      console.error('未找到输入数据文件。请指定文件路径：node preprocess_cdp.js <data-file>');
+      process.exit(1);
+    }
+    inputFile = path.join(DATA_DIR, latest);
+  }
+
+  if (!fs.existsSync(inputFile)) {
+    console.error(`文件不存在: ${inputFile}`);
+    process.exit(1);
+  }
+
+  console.log(`读取: ${path.basename(inputFile)}`);
+  const raw = JSON.parse(fs.readFileSync(inputFile, 'utf-8'));
+  const result = processAll(raw);
+
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const outFile = path.join(DATA_DIR, `cleaned_${ts}.json`);
+  fs.writeFileSync(outFile, JSON.stringify(result, null, 2), 'utf-8');
+
+  console.log(`输出: ${path.basename(outFile)}`);
+  console.log(`统计: ${result.stats.total} 个客户`);
+  console.log(`  系统消息检测: ${result.stats.systemMsgDetected}`);
+  console.log(`  需要往前看: ${result.stats.needLookback}`);
+  console.log(`  需要完整阅读(≥10条): ${result.stats.needFullRead}`);
+  console.log(`  有产品选择: ${result.stats.hasProductSelection}`);
+  console.log(`  有地址信息: ${result.stats.hasAddress}`);
+  console.log(`  有问题标记: ${result.stats.hasIssues}`);
+  console.log(`  沉默超90天: ${result.stats.silentOver90Days}`);
+  console.log(`  沉默超30天: ${result.stats.silentOver30Days}`);
+
+  if (result.stats.hasIssues > 0) {
+    const issueList = result.customers.filter((c) => c._issues.length > 0);
+    console.log(`\n标记有问题的客户（前10）:`);
+    for (const c of issueList.slice(0, 10)) {
+      console.log(`  - ${c.name}: ${c._issues.join('; ')}`);
+    }
+  }
+}
+
+main();

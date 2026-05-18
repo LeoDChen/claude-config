@@ -1,0 +1,270 @@
+// Phase 1 v4: 原生 WebSocket 连 CDP，零依赖
+// 直接 attach 到 onetalk.alibaba.com iframe target
+
+const fs = require('fs');
+// Node.js 22+ 内置 WebSocket
+
+const CAPTURED = [];
+let msgId = 0;
+
+function send(ws, method, params = {}) {
+    const id = ++msgId;
+    ws.send(JSON.stringify({ id, method, params }));
+    return id;
+}
+
+function log(msg) { console.log(msg); }
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    // 1. 获取所有 CDP targets
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    log(`共 ${targets.length} 个 targets:`);
+    for (const t of targets) {
+        log(`  [${t.type}] ${t.title?.substring(0, 60) || '(no title)'}`);
+        if (t.type === 'iframe') {
+            log(`    URL: ${t.url?.substring(0, 150)}`);
+        }
+    }
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+
+    if (!onetalk) {
+        log('\n找不到 onetalk iframe');
+        process.exit(1);
+    }
+
+    log(`\n目标: ${onetalk.id}`);
+    log(`WebSocket: ${onetalk.webSocketDebuggerUrl}\n`);
+
+    // 2. 连接 WebSocket (Node 原生 API)
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+
+    const pendingResponses = new Map();
+    const events = [];
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pendingResponses.has(msg.id)) {
+            pendingResponses.get(msg.id)(msg.result);
+            pendingResponses.delete(msg.id);
+        }
+        if (msg.method) {
+            events.push(msg);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = send(ws, method, params);
+            pendingResponses.set(id, resolve);
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+    log('WebSocket 已连接\n');
+
+    // 3. 启用 domains
+    await cmd('Network.enable');
+    await cmd('Runtime.enable');
+    await cmd('Page.enable');
+    await cmd('DOM.enable');
+    log('Domains 已启用\n');
+
+    // 4. 探测页面
+    log('=== 页面探测 ===\n');
+
+    const probeResult = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify({
+                url: location.href,
+                title: document.title,
+                readyState: document.readyState,
+                bodyChildren: document.body ? document.body.children.length : 0,
+                totalElements: document.querySelectorAll('*').length
+            })
+        `,
+        returnByValue: true
+    });
+
+    log('页面信息:', probeResult.result?.value);
+
+    // 找联系人列表结构
+    const structureResult = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var result = {};
+
+                // vue-recycle-scroller
+                var vrs = document.querySelectorAll('.vue-recycle-scroller, [class*="recycle"]');
+                result.recycleScrollers = [];
+                for (var i = 0; i < vrs.length; i++) {
+                    var el = vrs[i];
+                    result.recycleScrollers.push({
+                        tag: el.tagName,
+                        cls: (el.className?.baseVal || el.className || '').substring(0, 80),
+                        children: el.children.length,
+                        firstChildText: el.children[0]?.textContent?.trim().substring(0, 60) || ''
+                    });
+                }
+
+                // ul lists
+                var uls = document.querySelectorAll('ul');
+                result.ulLists = [];
+                for (var j = 0; j < uls.length; j++) {
+                    var ul = uls[j];
+                    var lis = ul.querySelectorAll(':scope > li');
+                    if (lis.length >= 2) {
+                        var texts = [];
+                        for (var k = 0; k < Math.min(5, lis.length); k++) {
+                            texts.push(lis[k].textContent?.trim().substring(0, 50) || '');
+                        }
+                        result.ulLists.push({
+                            liCount: lis.length,
+                            samples: texts
+                        });
+                    }
+                }
+
+                // role-based items
+                var listItems = document.querySelectorAll('[role="listitem"], [role="option"]');
+                result.roleItems = listItems.length;
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+
+    const structure = JSON.parse(structureResult.result?.value || '{}');
+    log('结构:', JSON.stringify(structure, null, 2));
+
+    // 5. 点击联系人
+    log('\n=== 点击联系人 ===\n');
+
+    // 先试 recycle scroller item
+    const click1 = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var items = document.querySelectorAll('.vue-recycle-scroller__item-view');
+                if (items.length === 0) {
+                    items = document.querySelectorAll('[class*="recycle"] [class*="item"]');
+                }
+                if (items.length > 0) {
+                    for (var i = 0; i < items.length; i++) {
+                        var t = items[i].textContent?.trim() || '';
+                        if (t.length > 1) {
+                            items[i].click();
+                            return 'clicked: ' + t.substring(0, 50);
+                        }
+                    }
+                }
+                return 'no recycle items';
+            })()
+        `,
+        returnByValue: true
+    });
+    log('策略1 (recycle):', click1.result?.value);
+
+    // 再试 ul > li
+    const click2 = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var uls = document.querySelectorAll('ul');
+                for (var i = 0; i < uls.length; i++) {
+                    var lis = uls[i].querySelectorAll(':scope > li');
+                    for (var j = 0; j < lis.length; j++) {
+                        var t = lis[j].textContent?.trim() || '';
+                        if (t.length > 2 && lis[j].offsetHeight > 15) {
+                            lis[j].click();
+                            return 'clicked ul>li[' + j + ']: ' + t.substring(0, 50);
+                        }
+                    }
+                }
+                return 'no ul>li found';
+            })()
+        `,
+        returnByValue: true
+    });
+    log('策略2 (ul>li):', click2.result?.value);
+
+    // 6. 等待
+    log('\n等待 10 秒...');
+    await new Promise(r => setTimeout(r, 10000));
+
+    // 7. 分析
+    log('\n' + '='.repeat(70));
+    log('结果分析');
+    log('='.repeat(70));
+
+    const reqsByType = {};
+    for (const evt of events) {
+        if (evt.method === 'Network.requestWillBeSent') {
+            const url = evt.params.request.url;
+            let cat = 'other';
+            if (url.includes('mtop')) cat = 'MTOP';
+            else if (url.includes('acs.h.alibaba')) cat = 'ACS';
+            else if (url.includes('message') || url.includes('im.')) cat = 'MESSAGE';
+            else if (url.includes('chat')) cat = 'CHAT';
+            else if (url.includes('contact')) cat = 'CONTACT';
+            else if (url.includes('history')) cat = 'HISTORY';
+            else if (url.match(/\.(js|css|png|jpg|gif|svg|woff2?|ico|ttf)/)) cat = 'static';
+
+            if (!reqsByType[cat]) reqsByType[cat] = [];
+            reqsByType[cat].push({
+                url: url,
+                method: evt.params.request.method,
+                postData: evt.params.request.postData
+            });
+        }
+    }
+
+    const total = Object.values(reqsByType).reduce((s, a) => s + a.length, 0);
+    log(`总请求: ${total}`);
+
+    for (const cat of ['MTOP', 'ACS', 'MESSAGE', 'CHAT', 'CONTACT', 'HISTORY']) {
+        if (reqsByType[cat]) {
+            log(`\n--- ${cat} (${reqsByType[cat].length}) ---`);
+            for (const r of reqsByType[cat]) {
+                log(`  ${r.method} ${r.url.substring(0, 200)}`);
+                if (r.postData) log(`    Payload: ${r.postData.substring(0, 300)}`);
+            }
+        }
+    }
+
+    if (!reqsByType.MTOP && !reqsByType.ACS && !reqsByType.MESSAGE && !reqsByType.CHAT) {
+        log('\n未捕获到聊天API请求');
+        const others = reqsByType.other || [];
+        log(`其他请求 (${others.length}):`);
+        for (const r of others.slice(0, 30)) {
+            log(`  ${r.method} ${r.url.substring(0, 200)}`);
+            if (r.postData) log(`    ${r.postData.substring(0, 200)}`);
+        }
+    }
+
+    fs.writeFileSync(
+        'd:/ClaudeWorkspace/08_客户跟进/Okki/data/phase1_events.json',
+        JSON.stringify(reqsByType, null, 2)
+    );
+    log('\n已保存');
+
+    ws.close();
+    log('完成');
+})();

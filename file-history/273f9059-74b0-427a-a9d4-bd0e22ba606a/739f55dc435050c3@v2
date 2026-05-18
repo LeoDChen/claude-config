@@ -1,0 +1,251 @@
+/**
+ * 零风险深抓 — 侧边栏DOM点击，不跳转URL
+ * 用法: node deep-scrape-dom.mjs [人数]
+ * 默认20个最新客户
+ */
+import { chromium } from 'playwright';
+import { writeFileSync, readFileSync, readdirSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+const LIMIT = parseInt(process.argv[2]) || 20;
+const CLICK_DELAY = 3500;  // ms between clicks (longer to allow chat scroll)
+const SYS = [/automatic reception/i,/由于您介入/i,/Marco大模型/i,/买家有流失/i,/AI给您生成/i,/建议查看/i,/一旦离开平台/i,/反馈/,/系统自动发送/];
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, page, talkFrame };
+}
+
+// 滚动侧边栏直到加载全部会话
+async function scrollSidebarFull(talkFrame) {
+  console.log('[1/4] 滚动侧边栏加载全部会话...');
+  const result = await talkFrame.evaluate(() => {
+    const list = document.querySelector('.seller-conversation-list') ||
+      document.querySelector('.conversation-list-content') ||
+      document.querySelector('.im-conversation-list-container');
+    if (!list) return { total: 0, error: 'no list container' };
+
+    let lastCount = 0, stable = 0;
+    const maxScrolls = 100;
+    for (let i = 0; i < maxScrolls; i++) {
+      list.scrollTop += 800;
+      const items = document.querySelectorAll('.contact-item-container');
+      if (items.length === lastCount) {
+        stable++;
+        if (stable >= 5) break;
+      } else {
+        stable = 0;
+        lastCount = items.length;
+      }
+    }
+    list.scrollTop = 0; // 回到顶部
+    return { total: lastCount };
+  });
+  await new Promise(r => setTimeout(r, 500));
+  console.log(`   侧边栏加载完成: ${result.total} 个会话`);
+  return result.total;
+}
+
+// 获取侧边栏会话列表
+async function getConvList(talkFrame) {
+  return talkFrame.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map((el, idx) => {
+      const right = el.querySelector('.contact-right');
+      const nameText = right ? (right.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 35).trim();
+      return { index: idx, name, el };
+    });
+  });
+}
+
+// 点击侧边栏会话，等待聊天面板更新
+async function clickConv(talkFrame, index) {
+  // 点击
+  await talkFrame.evaluate((idx) => {
+    const items = document.querySelectorAll('.contact-item-container');
+    if (items[idx]) {
+      items[idx].scrollIntoView({ block: 'center' });
+      items[idx].click();
+    }
+  }, index);
+
+  // 等待消息加载
+  await new Promise(r => setTimeout(r, CLICK_DELAY));
+
+  // 检查是否加载成功
+  try {
+    await talkFrame.waitForFunction(() => {
+      const msgs = document.querySelectorAll('.message-item, .msg-item, [class*="message"]');
+      return msgs.length > 0;
+    }, { timeout: 3000 });
+  } catch (e) {
+    // 可能没有消息或加载慢，继续
+  }
+  await new Promise(r => setTimeout(r, 800));
+}
+
+// 滚动聊天面板加载历史消息
+async function scrollChatHistory(talkFrame) {
+  await talkFrame.evaluate(async () => {
+    const container = document.querySelector('.message-flow-container') ||
+                     document.querySelector('[class*="message-flow"]') ||
+                     document.querySelector('.messenger-content-container');
+    if (!container) return;
+    for (let i = 0; i < 12; i++) {
+      container.scrollTop = 0;
+      await new Promise(r => setTimeout(r, 800));
+    }
+  });
+}
+
+// 提取当前聊天面板的消息（移植自 deep-scrape-api.mjs）
+async function extractMessages(talkFrame) {
+  return talkFrame.evaluate(() => {
+    const systemPatterns = [
+      /由于您介入该会话/, /自动接待将不再触发/,
+      /在Alibaba\.com平台聊天和交易/, /享受安全保障/,
+      /请勿在站外沟通或交易/, /该买家在站外/,
+      /买家尚未在平台完成身份验证/, /注意交易安全/,
+      /跟进提醒/, /以上内容由阿里翻译提供/,
+      /自动接待对话轮次已达上限/,
+    ];
+
+    const result = [];
+    const items = document.querySelectorAll('.message-item-wrapper');
+    items.forEach(el => {
+      const isRight = el.classList.contains('item-right');
+      const side = isRight ? 'sent' : 'received';
+
+      // 消息正文
+      const textDiv = el.querySelector('.session-rich-content');
+      let text = textDiv ? (textDiv.textContent || '').trim() : '';
+
+      if (!text) {
+        const contentDiv = el.querySelector('.user-content');
+        if (contentDiv) {
+          const clone = contentDiv.cloneNode(true);
+          clone.querySelectorAll('.message-flow-menu-box, .session-translate, .session-avatar, .item-base-info').forEach(n => n.remove());
+          text = (clone.textContent || '').trim();
+        }
+      }
+
+      if (systemPatterns.some(p => p.test(text))) return;
+      if (!text || text.length < 2) return;
+
+      text = text.replace(/\s+/g, ' ').trim();
+      result.push({ side, text });
+    });
+    return result;
+  });
+}
+
+// 筛选系统消息
+function filterSys(msgs) {
+  return msgs.filter(m => m.text && m.text.length > 3 && !SYS.some(p => p.test(m.text)));
+}
+
+async function main() {
+  const { talkFrame } = await connect();
+  console.log('[0/4] 已连接 TM 页面\n');
+
+  // 1. 滚动加载全部
+  await scrollSidebarFull(talkFrame);
+
+  // 2. 获取会话列表
+  console.log('[2/4] 获取会话列表...');
+  const convList = await getConvList(talkFrame);
+  console.log(`   DOM 中有 ${convList.length} 个会话`);
+
+  // 3. 从最新分类数据中取客户
+  console.log('[3/4] 选择目标客户...');
+  const files = readdirSync(DATA_DIR).filter(f => f.startsWith('2026-') && f.includes('全量客户分类')).sort().reverse();
+  const classified = JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf8'));
+
+  // 取P0+P1+P2中最近联系的客户
+  const candidates = classified.customers
+    .filter(c => c.priority === 'P0' || c.priority === 'P1' || c.priority === 'P2')
+    .sort((a, b) => (b.lastContactTime || 0) - (a.lastContactTime || 0))
+    .slice(0, LIMIT);
+
+  console.log(`   目标: ${candidates.length} 个客户 (P0/P1/P2中最近联系)`);
+
+  // 4. 逐个点击抓取
+  console.log(`[4/4] 逐个抓取 (间隔 ${CLICK_DELAY}ms)...`);
+
+  // 先刷新会话列表
+  const nameToIdx = {};
+  convList.forEach(c => { nameToIdx[c.name] = c.index; });
+
+  function findIndex(name) {
+    if (nameToIdx[name] !== undefined) return nameToIdx[name];
+    for (const c of convList) {
+      const dn = c.name.toLowerCase().trim();
+      const tn = name.toLowerCase().trim();
+      if (dn === tn || dn.includes(tn) || tn.includes(dn)) return c.index;
+      const dp = dn.split(/\s+/)[0];
+      const tp = tn.split(/\s+/)[0];
+      if (dp === tp) return c.index;
+    }
+    return -1;
+  }
+
+  const results = [];
+  let success = 0, skipped = 0;
+
+  for (let i = 0; i < candidates.length; i++) {
+    const c = candidates[i];
+    const idx = findIndex(c.name);
+
+    if (idx < 0) {
+      console.log(`  [${i + 1}/${candidates.length}] ${c.name} — DOM中未找到，跳过`);
+      skipped++;
+      continue;
+    }
+
+    process.stdout.write(`  [${i + 1}/${candidates.length}] ${c.name} (${c.countryCode})... `);
+
+    try {
+      await clickConv(talkFrame, idx);
+      await scrollChatHistory(talkFrame);  // 滚动加载历史消息
+      const msgs = await extractMessages(talkFrame);
+      const real = filterSys(msgs);
+      results.push({ name: c.name, country: c.countryCode, priority: c.priority, messageCount: real.length, messages: real });
+      console.log(`✅ ${real.length}条消息`);
+      success++;
+    } catch (e) {
+      console.log(`❌ ${e.message}`);
+      skipped++;
+    }
+
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  // 保存
+  const now = new Date();
+  const ts = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const outFile = join(DATA_DIR, `deep_scrape_dom_${ts}.json`);
+  writeFileSync(outFile, JSON.stringify({
+    scrapedAt: now.toISOString(),
+    method: 'dom-click-no-navigation',
+    targeted: candidates.length,
+    success,
+    skipped,
+    results,
+  }, null, 2));
+
+  console.log(`\n✅ 完成: ${success}/${candidates.length} 成功, ${skipped} 跳过`);
+  console.log(`   零页面跳转, 零风险`);
+  console.log(`   已保存: ${outFile}`);
+}
+
+main().catch(err => { console.error('错误:', err.message); process.exit(1); });

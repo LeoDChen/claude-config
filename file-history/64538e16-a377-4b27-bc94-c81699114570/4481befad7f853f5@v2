@@ -1,0 +1,240 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+// ----- helpers -----
+
+const SYSTEM_MSG_PATTERNS = [
+  /automatic reception will no longer intervene/i,
+  /自动接待将不再触发/,
+  /Marco大模型翻译/,
+  /阿里国际Marco大模型翻译/,
+  /买家有流失风险/,
+  /Buyer has churn risk/,
+  /一旦离开平台发生纠纷或欺诈/,
+  /由于您介入该会话/,
+  /Due to your intervention in this session/,
+  /AI给您生成了一条回复建议/,
+  /You have a visitor\. Follow up/,
+  /This buyer has been pre-screened/,
+  /反馈/,
+];
+
+function isSystemMessage(text) {
+  if (!text) return true;
+  return SYSTEM_MSG_PATTERNS.some((p) => p.test(text));
+}
+
+function toTs(ts) {
+  if (!ts) return 0;
+  if (typeof ts === 'number') return ts < 1e12 ? ts : ts;
+  return new Date(ts).getTime();
+}
+
+// ----- main -----
+
+(async () => {
+  let browser;
+  try {
+    browser = await chromium.connectOverCDP(CDP_URL);
+  } catch (e) {
+    console.log('❌ CDP连接失败');
+    process.exit(1);
+  }
+
+  const context = browser.contexts()[0];
+  const page = await context.newPage();
+
+  // ---- step 1: load onetalk ----
+  console.log('加载 onetalk...');
+  await page.goto(
+    'https://onetalk.alibaba.com/message/weblitePWA.htm?relevanceAccountId=285526143&from=xiaoman',
+    { waitUntil: 'networkidle', timeout: 20000 }
+  ).catch(() => {});
+  await page.waitForTimeout(5000);
+
+  // ---- step 2: extract contact list from DOM ----
+  console.log('提取联系人DOM...');
+  const contacts = await page.evaluate(() => {
+    const results = [];
+
+    // Find all contact items - the onetalk sidebar has a virtual list
+    // Each item is a div with specific structure
+    const allEls = document.querySelectorAll('*');
+    const contactItems = new Set();
+
+    // Strategy: find all elements whose textContent includes a known pattern
+    // like "[未读]" or "[已读]" or time patterns like "HH:MM"
+    for (const el of allEls) {
+      const text = el.textContent || '';
+      // Check if this looks like a contact card (has name + time + message)
+      const hasUnreadTag = text.includes('[未读]') || text.includes('[已读]');
+      const hasTimePattern = /\d{1,2}:\d{2}/.test(text);
+      const hasDatePattern = /\d{4}-\d{1,2}-\d{1,2}/.test(text);
+      if ((hasUnreadTag || hasTimePattern || hasDatePattern) && el.children.length > 2) {
+        contactItems.add(el);
+      }
+    }
+
+    for (const item of contactItems) {
+      try {
+        const fullText = item.textContent || '';
+        const innerHTML = item.innerHTML || '';
+
+        // Extract name (first text node or first child's text)
+        const nameEl = item.querySelector('[class*=name], [class*=title], [class*=nick]');
+        let name = '';
+        if (nameEl) {
+          name = nameEl.textContent.trim();
+        } else {
+          // Try to extract name from first line of text
+          const lines = fullText.split('\n').filter(l => l.trim());
+          name = lines[0] || '';
+        }
+
+        // Clean name
+        name = name.replace(/[未读][已读]/, '').trim();
+
+        // Extract message content
+        let msg = '';
+        const msgEl = item.querySelector('[class*=msg], [class*=content], [class*=preview], [class*=summary]');
+        if (msgEl) {
+          msg = msgEl.textContent.trim();
+        } else {
+          // Get from text after name/time
+          const parts = fullText.split(/[未读]|[已读]/);
+          if (parts.length > 1) {
+            msg = parts[parts.length - 1].trim();
+          }
+        }
+
+        // Detect unread
+        const isUnread = fullText.includes('[未读]');
+
+        // Detect if this is a system message
+        const isSystem = /automatic reception|自动接待|Marco大模型|买家有流失|纠纷或欺诈|介入该会话|intervene in this session/i.test(msg);
+
+        // Extract time
+        let timeStr = '';
+        const timeMatch = fullText.match(/(\d{1,2}:\d{2})/);
+        const dateMatch = fullText.match(/(\d{4}-\d{1,2}-\d{1,2})/);
+        if (timeMatch) timeStr = timeMatch[1];
+        if (dateMatch) timeStr = dateMatch[1];
+
+        // Extract tags/keywords
+        const tags = [];
+        if (fullText.includes('待回复')) tags.push('待回复');
+        if (fullText.includes('待跟进')) tags.push('待跟进');
+
+        results.push({
+          name,
+          latestMessageContent: msg,
+          isUnread,
+          isSystemMessage: isSystem,
+          timeStr,
+          tags,
+          domText: fullText.substring(0, 500),
+        });
+      } catch (e) {
+        // skip malformed items
+      }
+    }
+
+    return results;
+  });
+
+  console.log(`DOM联系人: ${contacts.length}人`);
+
+  // Deduplicate by name
+  const seen = new Set();
+  const unique = [];
+  for (const c of contacts) {
+    if (!c.name || c.name.length < 1 || seen.has(c.name)) continue;
+    seen.add(c.name);
+    unique.push(c);
+  }
+  console.log(`去重后: ${unique.length}人`);
+
+  // ---- step 3: classify ----
+  const now = Date.now();
+  for (const c of unique) {
+    // Estimate recency from time string
+    let daysAgo = 99;
+    if (c.timeStr) {
+      if (c.timeStr.includes(':')) {
+        // Today's time like "11:37"
+        daysAgo = 0;
+      } else if (c.timeStr.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
+        const d = new Date(c.timeStr);
+        daysAgo = Math.round((now - d.getTime()) / 86400000);
+      }
+    }
+    c.daysAgo = daysAgo;
+
+    if (c.isSystemMessage) {
+      c.priority = 'P2';
+      c.tier = 'C';
+      c.reasons = ['系统消息'];
+    } else if (c.isUnread) {
+      c.priority = 'P0';
+      c.tier = 'S';
+      c.reasons = ['有未读消息'];
+    } else if (daysAgo <= 1) {
+      c.priority = 'P0';
+      c.tier = 'A';
+      c.reasons = ['今日活跃'];
+    } else if (daysAgo <= 3) {
+      c.priority = 'P1';
+      c.tier = 'A';
+      c.reasons = ['3天内活跃'];
+    } else if (daysAgo <= 7) {
+      c.priority = 'P1';
+      c.tier = 'B';
+      c.reasons = ['7天内活跃'];
+    } else if (daysAgo <= 30) {
+      c.priority = 'P2';
+      c.tier = 'C';
+      c.reasons = ['30天内互动'];
+    } else {
+      c.priority = 'P3';
+      c.tier = 'D';
+      c.reasons = ['超30天'];
+    }
+  }
+
+  // ---- step 4: save ----
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+
+  const p0p1 = unique.filter((c) => c.priority === 'P0' || c.priority === 'P1');
+
+  const output = {
+    capturedAt: new Date().toISOString(),
+    method: 'cdp_v3_dom',
+    stats: {
+      total: unique.length,
+      p0: unique.filter((c) => c.priority === 'P0').length,
+      p1: unique.filter((c) => c.priority === 'P1').length,
+      unread: unique.filter((c) => c.isUnread).length,
+      system: unique.filter((c) => c.isSystemMessage).length,
+    },
+    p0p1,
+    all: unique,
+  };
+
+  fs.writeFileSync(path.join(DATA_DIR, `extracted_${ts}.json`), JSON.stringify(output, null, 2));
+  fs.writeFileSync(path.join(DATA_DIR, `p0p1_${ts}.json`), JSON.stringify(p0p1, null, 2));
+
+  console.log(`\n=== 完成 ===`);
+  console.log(`全量: ${unique.length}人`);
+  console.log(`P0: ${output.stats.p0} | P1: ${output.stats.p1} | 未读: ${output.stats.unread} | 系统消息: ${output.stats.system}`);
+  console.log(`文件: extracted_${ts}.json`);
+
+  await page.close().catch(() => {});
+  await browser.close().catch(() => {});
+})().catch((err) => {
+  console.error('错误:', err.message);
+  process.exit(1);
+});

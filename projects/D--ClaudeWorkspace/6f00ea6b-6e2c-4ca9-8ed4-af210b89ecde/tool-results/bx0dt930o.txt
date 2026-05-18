@@ -1,0 +1,1000 @@
+Hijacking WebSocket.prototype.send...
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] ====== getTagRelation,  Object
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 没有检测到 window.WEB_VITALS_PERF_UBA_KEY
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] ==== messenger indexedDB connect failed! ====
+  [CONSOLE] ==== indexedDB error ====:  db connect timeout!
+  [CONSOLE] single-spa minified message #1: See https://single-spa.js.org/error/?code=1
+  [CONSOLE] singleSpa.start() has not been called, 5000ms after single-spa was loaded. Before start() is called, apps can be declared and loaded, but not bootstrapped or mounted. See https://github.com/CanopyTax/single-spa/blob/master/docs/single-spa-api.md#start
+  [CONSOLE] ==== indexedDB error ====:  db connect timeout!
+  [CONSOLE] %csdk-conversationService %c===主动查询到会话 %o%c +36s color: #228B22 color: inherit Object color: #228B22 2026-05-05 20:46:43
+  [CONSOLE] %cchat-model %cbaasMessageNew%c +0ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:46:43
+  [CONSOLE] %cchat-model %c新消息属于非当前会话暂不拉取消息, 新消息所属cid %s, 当前cid %s%c +0ms color: #228B22 color: inherit 1507582644648-2500000853693#11011@icbu 1507608087396-2500000853693#11011@icbu color: #228B22 2026-05-05 20:46:43
+  [CONSOLE] %csdk-conversationService %c===主动查询到会话 %o%c +2ms color: #228B22 color: inherit Object color: #228B22 2026-05-05 20:46:43
+  [CONSOLE] %cchat-model %c==== 补偿contact ====%c +0ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:46:43
+  [CONSOLE] %cchat-model %c当前联系人%s 不是新消息联系人 %s , 执行clean buildItems 操作%c +0ms color: #228B22 color: inherit 1574657961 1549280402 color: #228B22 2026-05-05 20:46:43
+  [CONSOLE] ==== PaaSConversationExtChange ==== Object
+  [CONSOLE] ====event PaaSConversationExtChange Object
+  [CONSOLE] %cBaasDataManager %c选中会话%c +2m color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:04
+  [CONSOLE] %conConversationChange %c当前会话%c +2m color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:04
+  [CONSOLE] ====event paas.conversation.clearRedPoint Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2m color: #228B22 color: inherit 1549280402 Array(20) color: #228B22 2026-05-05 20:48:04
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:04
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +154ms color: #228B22 color: inherit 1549280402 MC1IDX16zJnH6NLcs2GFuJZzwOvfmdzyJkQkFaVgTONhzw8lM6zzKchSFiwUo5_WnAajth4 color: #228B22 2026-05-05 20:48:04
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:04
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +118ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:04
+  [CONSOLE] %csdk-messageService %cfetchMessages callback to updateMessageToRead%c +1ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:48:04
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +2m color: #872657 color: inherit color: #872657 "messageIds=4098669844344.PNM" 2026-05-05 20:48:04
+  [CONSOLE] %cchat-service %cfetch messages result%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:04
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +282ms color: #228B22 color: inherit 1549280402 Array(20) color: #228B22 2026-05-05 20:48:04
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +13s color: #228B22 color: inherit color: #228B22 1507637510273-2500000853693#11011@icbu 2026-05-05 20:48:17
+  [CONSOLE] %conConversationChange %c当前会话%c +13s color: #228B22 color: inherit color: #228B22 1507637510273-2500000853693#11011@icbu 2026-05-05 20:48:17
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +12s color: #228B22 color: inherit 1603977561 Array(20) color: #228B22 2026-05-05 20:48:17
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +12s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:17
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +145ms color: #228B22 color: inherit 1603977561 MC1IDX1abzlYcca8UkSNmW2StPMDLuyG6piyHm8cdQ8tJIB5rI-wRsAeh4FbC3072Wr2fAU color: #228B22 2026-05-05 20:48:17
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +12s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:17
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +163ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:17
+  [CONSOLE] %cchat-service %cfetch messages result%c +12s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:17
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +320ms color: #228B22 color: inherit 1603977561 Array(20) color: #228B22 2026-05-05 20:48:17
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +1s color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:18
+  [CONSOLE] %conConversationChange %c当前会话%c +1s color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:18
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +1s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:18
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +145ms color: #228B22 color: inherit 1549280402 MC1IDX16zJnH6NLcs2GFuJZzwOvfmdzyJkQkFaVgTONhzw8lM6zzKchSFiwUo5_WnAajth4 color: #228B22 2026-05-05 20:48:18
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +1s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:18
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +126ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:18
+  [CONSOLE] %cchat-service %cfetch messages result%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:18
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2s color: #228B22 color: inherit 1549280402 Array(20) color: #228B22 2026-05-05 20:48:18
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +14s color: #228B22 color: inherit 1549280402 Array(21) color: #228B22 2026-05-05 20:48:33
+  [CONSOLE] read chunk nr 1 of 1
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %csendUIMessages params:%c +15s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:33
+  [CONSOLE] %csdk-messageService %clocalCallback%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:48:33
+  [CONSOLE] ==== sass-sdk: sendMessageBase ==== Object
+  [CONSOLE] %csdk-messageService %cmessageSend success%c +161ms color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:34
+  [CONSOLE] %cchat-model %cbaasMessageSendCallback%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:34
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +813ms color: #228B22 color: inherit 1549280402 Array(21) color: #228B22 2026-05-05 20:48:34
+  [CONSOLE] ==== PaaSConversationExtChange ==== Object
+  [CONSOLE] ====event PaaSConversationExtChange Object
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +22s color: #228B22 color: inherit 1549280402 MC1IDX16zJnH6NLcs2GFuJZzwOvfmdzyJkQkFaVgTONhzw8lM6zzKchSFiwUo5_WnAajth4 color: #228B22 2026-05-05 20:48:41
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +7s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:41
+  [CONSOLE] %csdk-messageService %cmessage result%c +92ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:41
+  [CONSOLE] %cchat-service %cfetch messages result%c +22s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:41
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +7s color: #228B22 color: inherit 1549280402 Array(40) color: #228B22 2026-05-05 20:48:41
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +5s color: #228B22 color: inherit 1549280402 Array(41) color: #228B22 2026-05-05 20:48:46
+  [CONSOLE] read chunk nr 1 of 1
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %csendUIMessages params:%c +6s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:46
+  [CONSOLE] %csdk-messageService %clocalCallback%c +1ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:48:46
+  [CONSOLE] ==== sass-sdk: sendMessageBase ==== Object
+  [CONSOLE] %csdk-messageService %cmessageSend success%c +242ms color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:47
+  [CONSOLE] %cchat-model %cbaasMessageSendCallback%c +13s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:47
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +779ms color: #228B22 color: inherit 1549280402 Array(41) color: #228B22 2026-05-05 20:48:47
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +4s color: #228B22 color: inherit 1549280402 Array(42) color: #228B22 2026-05-05 20:48:51
+  [CONSOLE] read chunk nr 1 of 1
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %csendUIMessages params:%c +5s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:51
+  [CONSOLE] %csdk-messageService %clocalCallback%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:48:51
+  [CONSOLE] ==== sass-sdk: sendMessageBase ==== Object
+  [CONSOLE] %csdk-messageService %cmessageSend success%c +141ms color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:51
+  [CONSOLE] %cchat-model %cbaasMessageSendCallback%c +5s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:51
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +630ms color: #228B22 color: inherit 1549280402 Array(42) color: #228B22 2026-05-05 20:48:51
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] updateInputStatus %o errorRes undefined
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %csendUIMessages params:%c +7s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:58
+  [CONSOLE] %csdk-messageService %clocalCallback%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:48:58
+  [CONSOLE] ==== sass-sdk: sendMessageBase ==== Object
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +7s color: #228B22 color: inherit 1549280402 Array(43) color: #228B22 2026-05-05 20:48:58
+  [CONSOLE] %csdk-messageService %cmessageSend success%c +152ms color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:48:59
+  [CONSOLE] %cchat-model %cbaasMessageSendCallback%c +7s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:48:59
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +152ms color: #228B22 color: inherit 1549280402 Array(43) color: #228B22 2026-05-05 20:48:59
+  [CONSOLE] updateInputStatus %o errorRes undefined
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4091436788253.PNM 1507582644648-2500000853693#11011@icbu 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(65) color: #ff8800 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4091436788253.PNM 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +1ms color: #ff8800 color: inherit color: #ff8800 4097147300800.PNM 1507582644648-2500000853693#11011@icbu 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(65) color: #ff8800 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4097147300800.PNM 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4091436783252.PNM 1507582644648-2500000853693#11011@icbu 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(65) color: #ff8800 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4091436783252.PNM 2026-05-05 20:49:06
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +7s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:49:06
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +1ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:49:06
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +1ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +48ms color: #ff8800 color: inherit color: #ff8800 4097135377064.PNM 1507582644648-2500000853693#11011@icbu 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(65) color: #ff8800 2026-05-05 20:49:06
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4097135377064.PNM 2026-05-05 20:49:06
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +46ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:49:06
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +2m color: #228B22 color: inherit color: #228B22 2034027314980-2500000853693#11011@icbu 2026-05-05 20:50:32
+  [CONSOLE] %conConversationChange %c当前会话%c +2m color: #228B22 color: inherit color: #228B22 2034027314980-2500000853693#11011@icbu 2026-05-05 20:50:32
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2m color: #228B22 color: inherit 1661862607 Array(18) color: #228B22 2026-05-05 20:50:32
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:32
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +157ms color: #228B22 color: inherit 1661862607 MC1IDX1fNvRf2_s1NPuxbNmxexhrDGSy9rB0xkWyKRIl8oXWKxHlesx4eby7G93Lj6xhmXa color: #228B22 2026-05-05 20:50:33
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:33
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +138ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:33
+  [CONSOLE] %csdk-messageService %cfetchMessages callback to updateMessageToRead%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:50:33
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +2m color: #872657 color: inherit color: #872657 "messageIds=4090268966989.PNM" 2026-05-05 20:50:33
+  [CONSOLE] %cchat-service %cfetch messages result%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:33
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +303ms color: #228B22 color: inherit 1661862607 Array(18) color: #228B22 2026-05-05 20:50:33
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +2s color: #228B22 color: inherit color: #228B22 133766781722-2500000853693#11011@icbu 2026-05-05 20:50:34
+  [CONSOLE] %conConversationChange %c当前会话%c +2s color: #228B22 color: inherit color: #228B22 133766781722-2500000853693#11011@icbu 2026-05-05 20:50:34
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:34
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +67ms color: #228B22 color: inherit 1058539185 MC1IDX1n4W85vYjguBeMGJoVdnADnbft7IBoB5JBMDs9EneiGxDz7GSMvU-2WbMgqXft0LE color: #228B22 2026-05-05 20:50:34
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:34
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +67ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:34
+  [CONSOLE] %csdk-messageService %cfetchMessages callback to updateMessageToRead%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:50:34
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +2s color: #872657 color: inherit color: #872657 "messageIds=4092177504634.PNM" 2026-05-05 20:50:34
+  [CONSOLE] %cchat-service %cfetch messages result%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:34
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2s color: #228B22 color: inherit 1058539185 Array(13) color: #228B22 2026-05-05 20:50:34
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +248ms color: #228B22 color: inherit 1058539185 MC1IDX1n4W85vYjguBeMGJoVdnADnbft7IBoB5JBMDs9EneiGxDz7GSMvU-2WbMgqXft0LE color: #228B22 2026-05-05 20:50:35
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +181ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:35
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] %csdk-messageService %cmessage result%c +71ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:35
+  [CONSOLE] %csdk-messageService %cfetchMessages callback to updateMessageToRead%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:50:35
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +252ms color: #872657 color: inherit color: #872657 "messageIds=4092177504634.PNM" 2026-05-05 20:50:35
+  [CONSOLE] %cchat-service %cfetch messages result%c +251ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:35
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +252ms color: #228B22 color: inherit 1058539185 Array(13) color: #228B22 2026-05-05 20:50:35
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] __innerRenderCard return because of container is null Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] %cBaasDataManager %c选中会话%c +1s color: #228B22 color: inherit color: #228B22 2500000853693-4500080834051#11011@icbu 2026-05-05 20:50:36
+  [CONSOLE] %conConversationChange %c当前会话%c +1s color: #228B22 color: inherit color: #228B22 2500000853693-4500080834051#11011@icbu 2026-05-05 20:50:36
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +1s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +60ms color: #228B22 color: inherit 1760257569 MC1IDX1Yi7pGow2-Yg_4WbS13KO_tyj2IbBNuPs7Qmy3PaL94a16cA-wcwK5KrdcqxtIasw color: #228B22 2026-05-05 20:50:36
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +1s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +85ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] %cchat-service %cfetch messages result%c +1s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +1s color: #228B22 color: inherit 1760257569 Array(20) color: #228B22 2026-05-05 20:50:36
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +286ms color: #228B22 color: inherit 1760257569 MC1IDX1Yi7pGow2-Yg_4WbS13KO_tyj2IbBNuPs7Qmy3PaL94a16cA-wcwK5KrdcqxtIasw color: #228B22 2026-05-05 20:50:36
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +199ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] %csdk-messageService %cmessage result%c +78ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] %cchat-service %cfetch messages result%c +277ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:50:36
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +277ms color: #228B22 color: inherit 1760257569 Array(20) color: #228B22 2026-05-05 20:50:36
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +32s color: #228B22 color: inherit color: #228B22 133187906578-2500000853693#11011@icbu 2026-05-05 20:51:08
+  [CONSOLE] %conConversationChange %c当前会话%c +32s color: #228B22 color: inherit color: #228B22 133187906578-2500000853693#11011@icbu 2026-05-05 20:51:08
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +32s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +67ms color: #228B22 color: inherit 189844338 MC1IDX1chfkhsdlcpk6h6wVqu7uBJgrpLk06KAKSgKbTusL8I39qRGcrCyD3NAFstvY6Rve color: #228B22 2026-05-05 20:51:08
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +32s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +65ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] %cchat-service %cfetch messages result%c +32s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +32s color: #228B22 color: inherit 189844338 Array(4) color: #228B22 2026-05-05 20:51:08
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +241ms color: #228B22 color: inherit 189844338 MC1IDX1chfkhsdlcpk6h6wVqu7uBJgrpLk06KAKSgKbTusL8I39qRGcrCyD3NAFstvY6Rve color: #228B22 2026-05-05 20:51:08
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +177ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +66ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] %cchat-service %cfetch messages result%c +243ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:08
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +244ms color: #228B22 color: inherit 189844338 Array(4) color: #228B22 2026-05-05 20:51:08
+  [CONSOLE] Error
+  [CONSOLE] __innerRenderCard return because of container is null Object
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] %cBaasDataManager %c选中会话%c +3s color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:51:11
+  [CONSOLE] %conConversationChange %c当前会话%c +3s color: #228B22 color: inherit color: #228B22 1507582644648-2500000853693#11011@icbu 2026-05-05 20:51:11
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:11
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +121ms color: #228B22 color: inherit 1549280402 MC1IDX16zJnH6NLcs2GFuJZzwOvfmdzyJkQkFaVgTONhzw8lM6zzKchSFiwUo5_WnAajth4 color: #228B22 2026-05-05 20:51:11
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:11
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +107ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:11
+  [CONSOLE] %cchat-service %cfetch messages result%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:11
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2s color: #228B22 color: inherit 1549280402 Array(20) color: #228B22 2026-05-05 20:51:11
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] %cBaasDataManager %c选中会话%c +1s color: #228B22 color: inherit color: #228B22 133756334970-2500000853693#11011@icbu 2026-05-05 20:51:12
+  [CONSOLE] %conConversationChange %c当前会话%c +1s color: #228B22 color: inherit color: #228B22 133756334970-2500000853693#11011@icbu 2026-05-05 20:51:12
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +729ms color: #228B22 color: inherit 1049225359 Array(20) color: #228B22 2026-05-05 20:51:12
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +842ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:12
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +120ms color: #228B22 color: inherit 1049225359 MC1IDX19X57zebQ8U-Ib-2WtUFmx4O4zXB3ynzgruXlI5j5E8v9RZv2Y-1xwpv5L2_l_3fV color: #228B22 2026-05-05 20:51:12
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +856ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:12
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +128ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:12
+  [CONSOLE] %csdk-messageService %cfetchMessages callback to updateMessageToRead%c +1ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:51:12
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +37s color: #872657 color: inherit color: #872657 "messageIds=4085458360227.PNM" 2026-05-05 20:51:12
+  [CONSOLE] %cchat-service %cfetch messages result%c +984ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:12
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +256ms color: #228B22 color: inherit 1049225359 Array(20) color: #228B22 2026-05-05 20:51:12
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +34s color: #228B22 color: inherit color: #228B22 2500000853693-4500035685274#11011@icbu 2026-05-05 20:51:46
+  [CONSOLE] %conConversationChange %c当前会话%c +34s color: #228B22 color: inherit color: #228B22 2500000853693-4500035685274#11011@icbu 2026-05-05 20:51:46
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +34s color: #228B22 color: inherit 1715715064 Array(20) color: #228B22 2026-05-05 20:51:46
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +34s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:46
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +131ms color: #228B22 color: inherit 1715715064 MC1IDX1mePW2K7m-IAJfUgi03Irzf-ydljrUj43IBKHVqdL3mwJRKtCXI2wcv9xytnPFydz color: #228B22 2026-05-05 20:51:46
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +34s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:46
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +146ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:46
+  [CONSOLE] %cchat-service %cfetch messages result%c +34s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:51:46
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +285ms color: #228B22 color: inherit 1715715064 Array(20) color: #228B22 2026-05-05 20:51:46
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +9m color: #228B22 color: inherit 0 color: #228B22 2026-05-05 20:55:22
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +3m color: #228B22 color: inherit 1 color: #228B22 2026-05-05 20:57:59
+  [CONSOLE] %csdk-messageService %cfetchMessages params%c +0ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:00
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +303ms color: #228B22 color: inherit 2 color: #228B22 2026-05-05 20:58:00
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +1ms color: #228B22 color: inherit 3 color: #228B22 2026-05-05 20:58:00
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-service %cfetch messages result%c +6m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:00
+  [CONSOLE] %csdk-authService %c[icbu]获得token成功%c +12m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:00
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +367ms color: #228B22 color: inherit 4 color: #228B22 2026-05-05 20:58:00
+  [CONSOLE] ====event websocketConnected
+  [CONSOLE] authConnect then 
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +6m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:00
+  [CONSOLE] %csdk-messageService %cmessage result%c +47ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:00
+  [CONSOLE] %cchat-service %cfetch messages result%c +452ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:00
+  [CONSOLE] %csdk-conversationService %cpass conversation pagination result%c +11m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:01
+  [CONSOLE] %ctrack %cgetMsgTypeEnumByCardTypeError%c +7m color: #872657 color: inherit color: #872657 "cardType=2106&params=%5Bobject%20Object%5D" 2026-05-05 20:58:01
+  [CONSOLE] %csdk-conversationService %cpass conversation filter result%c +2ms color: #228B22 color: inherit color: #228B22 Array(99) 2026-05-05 20:58:01
+  [CONSOLE] ====== getTagRelation,  Object
+  [CONSOLE] %cBaasDataManager %c选中会话%c +6m color: #228B22 color: inherit color: #228B22 1507637510273-2500000853693#11011@icbu 2026-05-05 20:58:03
+  [CONSOLE] %conConversationChange %c当前会话%c +6m color: #228B22 color: inherit color: #228B22 1507637510273-2500000853693#11011@icbu 2026-05-05 20:58:03
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +6m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:03
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +136ms color: #228B22 color: inherit 1603977561 MC1IDX12WgB3HIHMsNYk8nLmJMEA1u9W7GJ2j64MAzwsqxD92tgfOpnVKFpg3Wfs3zvxCmM color: #228B22 2026-05-05 20:58:03
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +3s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:03
+  [CONSOLE] ====event paas.conversation.clearRedPoint Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +142ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:03
+  [CONSOLE] %csdk-messageService %cfetchMessages callback to updateMessageToRead%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:58:03
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +2s color: #872657 color: inherit color: #872657 "messageIds=4091444661193.PNM" 2026-05-05 20:58:03
+  [CONSOLE] %cchat-service %cfetch messages result%c +3s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:03
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +6m color: #228B22 color: inherit 1603977561 Array(20) color: #228B22 2026-05-05 20:58:03
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] updateInputStatus %o errorRes undefined
+  [CONSOLE] %csdk-messageService %csendUIMessages params:%c +25s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:29
+  [CONSOLE] %csdk-messageService %clocalCallback%c +0ms color: #228B22 color: inherit color: #228B22 Array(1) 2026-05-05 20:58:29
+  [CONSOLE] ==== sass-sdk: sendMessageBase ==== Object
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +25s color: #228B22 color: inherit 1603977561 Array(21) color: #228B22 2026-05-05 20:58:29
+  [CONSOLE] %csdk-messageService %cmessageSend success%c +185ms color: #228B22 color: inherit color: #228B22 1507637510273-2500000853693#11011@icbu 2026-05-05 20:58:29
+  [CONSOLE] %cchat-model %cbaasMessageSendCallback%c +9m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:29
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +184ms color: #228B22 color: inherit 1603977561 Array(21) color: #228B22 2026-05-05 20:58:29
+  [CONSOLE] ==== PaaSConversationExtChange ==== Object
+  [CONSOLE] ====event PaaSConversationExtChange Object
+  [CONSOLE] updateInputStatus %o errorRes undefined
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +10m color: #ff8800 color: inherit color: #ff8800 4088118188308.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:58:41
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:58:41
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4088118188308.PNM 2026-05-05 20:58:41
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +13s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:58:41
+  [CONSOLE] %cchat-model %cbaasMessageNew%c +27s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:09
+  [CONSOLE] %ctrack %cupdateMessageToRead%c +1m color: #872657 color: inherit color: #872657 "messageIds=4091432907525.PNM%2C4091444661193.PNM" 2026-05-05 20:59:09
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +40s color: #228B22 color: inherit 1603977561 Array(22) color: #228B22 2026-05-05 20:59:09
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] ==== PaaSConversationExtChange ==== Object
+  [CONSOLE] ====event PaaSConversationExtChange Object
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +41s color: #ff8800 color: inherit color: #ff8800 4098313953124.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:23
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:23
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4098313953124.PNM 2026-05-05 20:59:23
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +14s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:23
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +2s color: #ff8800 color: inherit color: #ff8800 4098323616698.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:24
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:24
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4098323616698.PNM 2026-05-05 20:59:24
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4098309874753.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:24
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:24
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4098309874753.PNM 2026-05-05 20:59:24
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:24
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +1ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:24
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +2s color: #ff8800 color: inherit color: #ff8800 4096735228921.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:26
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:26
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4096735228921.PNM 2026-05-05 20:59:26
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:26
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +42ms color: #ff8800 color: inherit color: #ff8800 4098309873431.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:26
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:26
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4098309873431.PNM 2026-05-05 20:59:26
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +41ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:26
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +788ms color: #ff8800 color: inherit color: #ff8800 4096737090309.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:27
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:27
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4096737090309.PNM 2026-05-05 20:59:27
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +1ms color: #ff8800 color: inherit color: #ff8800 4096729171971.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:27
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:27
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4096729171971.PNM 2026-05-05 20:59:27
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +789ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:27
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +1ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:27
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +786ms color: #ff8800 color: inherit color: #ff8800 4091072767649.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:28
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:28
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4091072767649.PNM 2026-05-05 20:59:28
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +785ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:28
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +356ms color: #ff8800 color: inherit color: #ff8800 4087004457464.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:28
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:28
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4087004457464.PNM 2026-05-05 20:59:28
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +356ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:28
+  [CONSOLE] %conMessageReadToSenderList %conMessageReaderToSender%c +846ms color: #ff8800 color: inherit color: #ff8800 4087018077511.PNM 1507637510273-2500000853693#11011@icbu 2026-05-05 20:59:29
+  [CONSOLE] %conMessageReadToSenderList %ccache list %o%c +0ms color: #ff8800 color: inherit Array(42) color: #ff8800 2026-05-05 20:59:29
+  [CONSOLE] %conMessageReadToSenderList %cemit onMessageReaderToSender%c +0ms color: #ff8800 color: inherit color: #ff8800 4087018077511.PNM 2026-05-05 20:59:29
+  [CONSOLE] %cchat-model %cbaasMessageReadStatus%c +846ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:29
+  [CONSOLE] %cBaasDataManager %c选中会话%c +2m color: #228B22 color: inherit color: #228B22 2034012960891-2500000853693#11011@icbu 2026-05-05 20:59:40
+  [CONSOLE] %conConversationChange %c当前会话%c +2m color: #228B22 color: inherit color: #228B22 2034012960891-2500000853693#11011@icbu 2026-05-05 20:59:40
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +31s color: #228B22 color: inherit 1646622228 Array(20) color: #228B22 2026-05-05 20:59:40
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:40
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +145ms color: #228B22 color: inherit 1646622228 MC1IDX1ppZ2-sSm8QQy3gXBTDuP-tv7BbDaybEzyo_GjKVCqiYmw42v0I6JvHIgyWWqjg0f color: #228B22 2026-05-05 20:59:40
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +1m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:40
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +129ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:40
+  [CONSOLE] %cchat-service %cfetch messages result%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:40
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +282ms color: #228B22 color: inherit 1646622228 Array(20) color: #228B22 2026-05-05 20:59:40
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +2s color: #228B22 color: inherit color: #228B22 2500000853693-4500035685274#11011@icbu 2026-05-05 20:59:41
+  [CONSOLE] %conConversationChange %c当前会话%c +2s color: #228B22 color: inherit color: #228B22 2500000853693-4500035685274#11011@icbu 2026-05-05 20:59:41
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:41
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +137ms color: #228B22 color: inherit 1715715064 MC1IDX1mePW2K7m-IAJfUgi03Irzf-ydljrUj43IBKHVqdL3mwJRKtCXI2wcv9xytnPFydz color: #228B22 2026-05-05 20:59:41
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:41
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +131ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:42
+  [CONSOLE] %cchat-service %cfetch messages result%c +2s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 20:59:42
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2s color: #228B22 color: inherit 1715715064 Array(20) color: #228B22 2026-05-05 20:59:42
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cBaasDataManager %c选中会话%c +2m color: #228B22 color: inherit color: #228B22 2034012960891-2500000853693#11011@icbu 2026-05-05 21:01:54
+  [CONSOLE] %conConversationChange %c当前会话%c +2m color: #228B22 color: inherit color: #228B22 2034012960891-2500000853693#11011@icbu 2026-05-05 21:01:54
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:01:54
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +146ms color: #228B22 color: inherit 1646622228 MC1IDX1ppZ2-sSm8QQy3gXBTDuP-tv7BbDaybEzyo_GjKVCqiYmw42v0I6JvHIgyWWqjg0f color: #228B22 2026-05-05 21:01:54
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:01:54
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +126ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:01:54
+  [CONSOLE] %cchat-service %cfetch messages result%c +2m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:01:54
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2m color: #228B22 color: inherit 1646622228 Array(20) color: #228B22 2026-05-05 21:01:54
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +5m color: #228B22 color: inherit 1 color: #228B22 2026-05-05 21:03:22
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +250ms color: #228B22 color: inherit 2 color: #228B22 2026-05-05 21:03:23
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +1ms color: #228B22 color: inherit 3 color: #228B22 2026-05-05 21:03:23
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-authService %c[icbu]获得token成功%c +5m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:03:23
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +129ms color: #228B22 color: inherit 0 color: #228B22 2026-05-05 21:03:23
+  [CONSOLE] %cbaasListener %cPaaSConnectionChanged 连接状态 %o%c +35ms color: #228B22 color: inherit 4 color: #228B22 2026-05-05 21:03:23
+  [CONSOLE] ====event websocketConnected
+  [CONSOLE] authConnect then 
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +1m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:03:23
+  [CONSOLE] %csdk-messageService %cmessage result%c +47ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:03:23
+  [CONSOLE] %cchat-service %cfetch messages result%c +1m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:03:23
+  [CONSOLE] %csdk-conversationService %cpass conversation pagination result%c +5m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:03:23
+  [CONSOLE] %ctrack %cgetMsgTypeEnumByCardTypeError%c +4m color: #872657 color: inherit color: #872657 "cardType=2106&params=%5Bobject%20Object%5D" 2026-05-05 21:03:23
+  [CONSOLE] %csdk-conversationService %cpass conversation filter result%c +4ms color: #228B22 color: inherit color: #228B22 Array(99) 2026-05-05 21:03:23
+  [CONSOLE] ====== getTagRelation,  Object
+  [CONSOLE] %cBaasDataManager %c选中会话%c +6m color: #228B22 color: inherit color: #228B22 2500000853693-3500017223847#11011@icbu 2026-05-05 21:08:01
+  [CONSOLE] %conConversationChange %c当前会话%c +6m color: #228B22 color: inherit color: #228B22 2500000853693-3500017223847#11011@icbu 2026-05-05 21:08:01
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +6m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:01
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +71ms color: #228B22 color: inherit 7080158045 MC1IDX1bwvHafNYdtzSF-6CbzZOhxLhRlajJueaFdCStyVloOrLgje5hIsemkZzETTPRecF color: #228B22 2026-05-05 21:08:01
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +5m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:01
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +81ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:01
+  [CONSOLE] %cchat-service %cfetch messages result%c +5m color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:01
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +6m color: #228B22 color: inherit 7080158045 Array(20) color: #228B22 2026-05-05 21:08:01
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +378ms color: #228B22 color: inherit 7080158045 MC1IDX1bwvHafNYdtzSF-6CbzZOhxLhRlajJueaFdCStyVloOrLgje5hIsemkZzETTPRecF color: #228B22 2026-05-05 21:08:02
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +297ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:02
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +93ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:02
+  [CONSOLE] %cchat-service %cfetch messages result%c +389ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:02
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +390ms color: #228B22 color: inherit 7080158045 Array(20) color: #228B22 2026-05-05 21:08:02
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] ==== goldlog error ==== TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'SVGSVGElement'
+    |     property '__reactFiber$sa1x0e2mw4' -> object with constructor 'Ls'
+    --- property 'stateNode' closes the circle
+    at JSON.stringify (<anonymous>)
+    at 
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +2s color: #228B22 color: inherit 7080158045 Array(21) color: #228B22 2026-05-05 21:08:04
+  [CONSOLE] %cBaasDataManager %c选中会话%c +4s color: #228B22 color: inherit color: #228B22 2500000853693-4500046370107#11011@icbu 2026-05-05 21:08:05
+  [CONSOLE] %conConversationChange %c当前会话%c +4s color: #228B22 color: inherit color: #228B22 2500000853693-4500046370107#11011@icbu 2026-05-05 21:08:05
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %cactiveConversation%c +3s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +67ms color: #228B22 color: inherit 1726898725 MC1IDX17SrdLHWiJVOvO5V27k2WP2zXIlM0Uo1F7cmLCbca6vexOt27hERhATCvBlv0KmO8 color: #228B22 2026-05-05 21:08:05
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +3s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +78ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] %cchat-service %cfetch messages result%c +3s color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +744ms color: #228B22 color: inherit 1726898725 Array(20) color: #228B22 2026-05-05 21:08:05
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] [aliCrm::NameSpaceBox] props Object
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %cchat-container %c拉取消息前判断 accountId %s, accountIdEncrypt %s%c +352ms color: #228B22 color: inherit 1726898725 MC1IDX17SrdLHWiJVOvO5V27k2WP2zXIlM0Uo1F7cmLCbca6vexOt27hERhATCvBlv0KmO8 color: #228B22 2026-05-05 21:08:05
+  [CONSOLE] %csdk-messageService %cpaas fetchMessages params%c +275ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] %csdk-messageService %cmessage result%c +82ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] %cchat-service %cfetch messages result%c +357ms color: #228B22 color: inherit color: #228B22 Object 2026-05-05 21:08:05
+  [CONSOLE] %cstore-helper %ccache list for %s , list is %o%c +358ms color: #228B22 color: inherit 1726898725 Array(20) color: #228B22 2026-05-05 21:08:05
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] 替换puck生效
+  [CONSOLE] 替换puck生效
+  [CONSOLE] Error
+  [CONSOLE] Error
+  [CONSOLE] Error
+Hijack setup: {"hooked":true,"readyState":"not yet"}
+
+Waiting for next heartbeat (up to 30s)...
+  [CONSOLE] [HIJACK] Captured WebSocket instance!
+  [CONSOLE] [HIJACK] URL: wss://wss-icbu.dingtalk.com/
+  [CONSOLE] [HIJACK] readyState: 1
+  [CONSOLE] [HIJACK] protocol: 
+  [CONSOLE] [HIJACK] extensions: 
+WS state: {"url":"wss://wss-icbu.dingtalk.com/","readyState":1,"protocol":"","binaryType":"blob"}
+
+=== WebSocket captured! Sending test LWP request ===
+Test CID: 133756334970-2500000853693#11011@icbu
+Sending LWP: {"lwp":"/r/MessageManager/listUserMessages","headers":{"mid":"1777986931468 0"},"body":["133756334970-2500000853693#11011@icbu",false,9007199254740991,20,false]}
+After send: {"wsUrl":"wss://wss-icbu.dingtalk.com/","readyState":1}

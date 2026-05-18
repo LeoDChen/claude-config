@@ -1,0 +1,6 @@
+node_modules/
+.claude历史归档/
+package-lock.json
+.claude/rules/typescript/
+.claude/rules/web/
+.claude/rules/zh/

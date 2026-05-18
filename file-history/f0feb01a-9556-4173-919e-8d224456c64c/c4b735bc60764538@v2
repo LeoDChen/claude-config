@@ -1,0 +1,30 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-04
+> 用途：跨会话持久化项目状态，新会话开始时 Claude Code 先读此文件。
+
+## 当前阶段
+
+客户跟进分析（日常）
+
+## 上次决定
+
+- CDP 连接用户已有 Chrome，纯本地读数据，零风险
+- 输出格式：四梯队（今天/48h/本周/按需）
+- 话术默认中文可复制版
+
+## 活跃客户/事项
+
+（每次分析后更新）
+
+## 待解决 Blocker
+
+（如有，记录在此）
+
+## 关键数据文件
+
+- 最新全量分类：`data/` 下取最新 `*_全量客户分类.json`
+- 分析框架：`knowledge/system-prompt.md`（必须先读）
+- 判断规则：`knowledge/business-rules.md`
+- 工厂信息：`knowledge/factory.md`
+- 安全说明：`knowledge/security.md`

@@ -1,0 +1,323 @@
+// 点击 TM 联系人恢复 WebSocket 连接
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+    await cmd('Network.enable');
+
+    // === 1. 查看左侧联系人面板的完整 DOM 结构 ===
+    console.log('=== 左侧面板联系人结构 ===\n');
+
+    const leftPanel = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                // 找左侧联系人列表容器
+                var containers = document.querySelectorAll('.seller-conversation-list, .im-conversation-list-container, .conversation-list-content, .messenger-left-container');
+                var result = [];
+
+                for (var i = 0; i < containers.length; i++) {
+                    var c = containers[i];
+                    var cls = (c.className || '').toString().substring(0, 80);
+                    var innerHTML = c.innerHTML.substring(0, 3000);
+
+                    // 找所有可点击的联系人条目
+                    var clickableChildren = [];
+                    var children = c.querySelectorAll('[class*="conversation"], [class*="contact"], [class*="tree-node"]');
+                    for (var j = 0; j < Math.min(10, children.length); j++) {
+                        var child = children[j];
+                        clickableChildren.push({
+                            tag: child.tagName,
+                            cls: (child.className || '').toString().substring(0, 60),
+                            text: (child.textContent || '').trim().substring(0, 50)
+                        });
+                    }
+
+                    result.push({
+                        cls: cls,
+                        childCount: c.children.length,
+                        clickable: clickableChildren
+                    });
+                }
+
+                // 也看看 tree node 的结构
+                var treeNodes = document.querySelectorAll('.im-next-tree-node');
+                var treeInfo = [];
+                for (var k = 0; k < treeNodes.length; k++) {
+                    var tn = treeNodes[k];
+                    treeInfo.push({
+                        text: (tn.textContent || '').trim().substring(0, 60),
+                        cls: (tn.className || '').toString().substring(0, 40),
+                        kids: tn.children.length
+                    });
+                }
+                result.push({ treeNodes: treeInfo });
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(leftPanel.result?.value || '(无)');
+
+    // === 2. 展开 "Ungroup" 节点 ===
+    console.log('\n=== 展开 Ungroup 节点 ===\n');
+
+    const expandGroup = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 找 Ungroup 节点并点击展开
+                var nodes = document.querySelectorAll('.im-next-tree-node');
+                for (var i = 0; i < nodes.length; i++) {
+                    var text = nodes[i].textContent || '';
+                    if (text.includes('Ungroup') || text.includes('ungroup')) {
+                        // 找展开箭头
+                        var arrow = nodes[i].querySelector('.im-next-tree-switcher, [class*="arrow"], [class*="switch"], [class*="expand"]');
+                        if (arrow) arrow.click();
+                        nodes[i].click();
+                        return 'clicked Ungroup node: ' + text.trim().substring(0, 50);
+                    }
+                }
+                return 'Ungroup node not found';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(expandGroup.result?.value || '(无)');
+
+    await new Promise(r => setTimeout(r, 1500));
+
+    // === 3. 展开后重新看联系人列表 ===
+    console.log('\n=== 展开后的联系人 ===\n');
+
+    const contactsAfter = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var nodes = document.querySelectorAll('.im-next-tree-node');
+                var info = [];
+                for (var i = 0; i < nodes.length; i++) {
+                    var n = nodes[i];
+                    info.push({
+                        text: (n.textContent || '').trim().substring(0, 80),
+                        cls: (n.className || '').toString().substring(0, 60)
+                    });
+                }
+
+                // 也看所有 li 元素
+                var lis = document.querySelectorAll('li');
+                var liTexts = [];
+                for (var j = 0; j < Math.min(20, lis.length); j++) {
+                    var t = (lis[j].textContent || '').trim();
+                    if (t.length > 1) liTexts.push(t.substring(0, 60));
+                }
+
+                return { treeNodes: info, lis: liTexts };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(contactsAfter.result?.value || '(无)');
+
+    // === 4. 尝试点击一个具体的会话（使用 __conversationListFullData__ 里的数据） ===
+    console.log('\n=== 尝试进入会话 ===\n');
+
+    const enterConv = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 用 SDK 的 ConversationService 进入一个会话
+                var fullData = window.__conversationListFullData__;
+                if (!fullData || !fullData[0]) return 'no data';
+
+                // 找一个有消息的非置顶会话
+                var target = null;
+                for (var i = 0; i < fullData.length; i++) {
+                    if (fullData[i].latestMessage && fullData[i].latestMessage.content && !fullData[i].stayTop) {
+                        target = fullData[i];
+                        break;
+                    }
+                }
+                if (!target) target = fullData[0];
+
+                var convSvc = window._imsdk.getConversationService();
+                try {
+                    convSvc.enterConversationByCCode({
+                        ccode: target.cid,
+                        dataCallback: function() {}
+                    });
+                    return 'entered conversation: ' + (target.contact && target.contact.name) + ' (' + target.cid + ')';
+                } catch(e) {
+                    return 'error: ' + (e.message || String(e));
+                }
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(enterConv.result?.value || '(无)');
+
+    await new Promise(r => setTimeout(r, 3000));
+
+    // === 5. 检查连接状态 ===
+    console.log('\n=== 连接状态检查 ===\n');
+
+    const status = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var auth = window._imsdk.getAuthService();
+                return {
+                    isLogin: auth.isLogin(),
+                    nick: auth.getLoginNick(),
+                    uid: auth.getLoginUid()
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log('认证状态:', status.result?.value);
+
+    // === 6. 尝试获取消息 ===
+    console.log('\n=== 拉取消息（连接恢复后）===\n');
+
+    const msgs = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var fullData = window.__conversationListFullData__;
+                    if (!fullData || !fullData[0]) { resolve('no data'); return; }
+
+                    var msgSvc = window._imsdk.getMessageService();
+                    msgSvc.listMessageWithConversationCodeForHistory({
+                        conversationCode: fullData[0].cid,
+                        count: 5,
+                        dataCallback: function(result) {
+                            var data = result.data || [];
+                            resolve(JSON.stringify({
+                                success: true,
+                                count: data.length,
+                                hasMore: result.hasMore,
+                                first: data[0] ? JSON.stringify(data[0]).substring(0, 500) : null,
+                                all: data.slice(0,3).map(function(m) {
+                                    return {
+                                        content: (m.content||'').substring(0, 100),
+                                        time: m.sendTime,
+                                        type: m.msgType || m.imMessageType
+                                    };
+                                })
+                            }));
+                        },
+                        errorCallBack: function(err) {
+                            resolve(JSON.stringify({ error: err && (err.message||err.err||JSON.stringify(err)) }));
+                        }
+                    });
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msgs.result?.value || '(无)');
+
+    // === 7. 尝试 reconnect ===
+    console.log('\n=== 尝试 reConnect ===\n');
+
+    const reconnect = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var auth = window._imsdk.getAuthService();
+                    try {
+                        auth.reConnect();
+                    } catch(e) {}
+
+                    setTimeout(function() {
+                        resolve(JSON.stringify({
+                            isLogin: auth.isLogin(),
+                            nick: auth.getLoginNick()
+                        }));
+                    }, 5000);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log('reConnect 后:', reconnect.result?.value);
+
+    // === 8. 再试消息 ===
+    console.log('\n=== reConnect 后再拉消息 ===\n');
+
+    const msgs2 = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var fullData = window.__conversationListFullData__;
+                    if (!fullData || !fullData[0]) { resolve('no data'); return; }
+
+                    var msgSvc = window._imsdk.getMessageService();
+                    msgSvc.listMessageWithConversationCodeForHistory({
+                        conversationCode: fullData[0].cid,
+                        count: 5,
+                        dataCallback: function(result) {
+                            resolve(JSON.stringify({
+                                count: (result.data||[]).length,
+                                hasMore: result.hasMore
+                            }));
+                        },
+                        errorCallBack: function(err) {
+                            resolve(JSON.stringify({ error: err && (err.message||err.err||String(err)).substring(0,200) }));
+                        }
+                    });
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msgs2.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

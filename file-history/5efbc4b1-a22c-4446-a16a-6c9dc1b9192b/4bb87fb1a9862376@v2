@@ -1,0 +1,165 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = {};
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val !== null && val !== undefined) {
+          try { results[response.id] = JSON.parse(val); } catch(e) { results[response.id] = val; }
+        }
+      }
+      // Log console messages for our hijack logs
+      if (response.method === 'Runtime.consoleAPICalled') {
+        const args = (response.params.args || []).map(a => a.value || a.description || '').join(' ');
+        console.log('  [CONSOLE]', args.substring(0, 300));
+      }
+    } catch (e) {}
+  });
+
+  // Enable console capture
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 0, method: 'Runtime.enable', params: {} })
+  });
+
+  // Hijack WebSocket send to capture the instance
+  // Then use it to send LWP messages
+  const hijackExpr = `
+    (function() {
+      // Store reference to the WebSocket instance
+      window.__hijackedWs = null;
+
+      // Save original send
+      var originalSend = WebSocket.prototype.send;
+
+      // Override send to capture 'this' (the WebSocket instance)
+      WebSocket.prototype.send = function(data) {
+        // Capture the WebSocket instance
+        if (!window.__hijackedWs) {
+          window.__hijackedWs = this;
+          console.log('[HIJACK] Captured WebSocket instance!');
+          console.log('[HIJACK] URL:', this.url);
+          console.log('[HIJACK] readyState:', this.readyState);
+          console.log('[HIJACK] protocol:', this.protocol);
+          console.log('[HIJACK] extensions:', this.extensions);
+        }
+        // Call original send
+        return originalSend.call(this, data);
+      };
+
+      return JSON.stringify({ hooked: true, readyState: window.__hijackedWs ? window.__hijackedWs.readyState : 'not yet' });
+    })()
+  `;
+
+  console.log('Hijacking WebSocket.prototype.send...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: hijackExpr } })
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  console.log('Hijack setup:', JSON.stringify(results[1]));
+
+  // Now wait for the next heartbeat to trigger send and capture the WS
+  console.log('\nWaiting for next heartbeat (up to 30s)...');
+  await new Promise(r => setTimeout(r, 15000));
+
+  // Check if we captured the WebSocket
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: {
+      expression: `(function(){var ws=window.__hijackedWs;if(!ws)return'not captured yet';return JSON.stringify({url:ws.url,readyState:ws.readyState,protocol:ws.protocol,binaryType:ws.binaryType})})()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  console.log('WS state:', JSON.stringify(results[2]));
+
+  // If captured, try sending LWP through it!
+  if (results[2] && results[2].url) {
+    console.log('\n=== WebSocket captured! Sending test LWP request ===');
+    const testCidExpr = `
+      (function() {
+        var convs = window.__conversationListFullData__;
+        var c = convs.find(function(x) { return x.latestMessage && x.latestMessage.content; });
+        window.__testCid = c ? c.cid : null;
+        return JSON.stringify({ cid: window.__testCid, name: c ? c.name : null });
+      })()
+    `;
+    await client.send('Target.sendMessageToTarget', {
+      sessionId,
+      message: JSON.stringify({ id: 3, method: 'Runtime.evaluate', params: { expression: testCidExpr } })
+    });
+    await new Promise(r => setTimeout(r, 1000));
+    const cid = results[3]?.cid;
+    console.log('Test CID:', cid);
+
+    if (cid) {
+      // Send LWP listUserMessages request
+      const mid = Date.now() + ' 0';
+      const lwpMsg = JSON.stringify({
+        lwp: '/r/MessageManager/listUserMessages',
+        headers: { mid: mid },
+        body: [cid, false, 9007199254740991, 20, false]
+      });
+
+      console.log('Sending LWP:', lwpMsg.substring(0, 200));
+
+      await client.send('Target.sendMessageToTarget', {
+        sessionId,
+        message: JSON.stringify({ id: 4, method: 'Runtime.evaluate', params: {
+          expression: `(function(){var ws=window.__hijackedWs;if(!ws)return'no ws';try{ws.send('${lwpMsg.replace(/'/g, "\\'")}');return'sent'}catch(e){return'error: '+e.message}})()`
+        }})
+      });
+      await new Promise(r => setTimeout(r, 5000));
+
+      // Check if we got a response by checking updated message cache
+      await client.send('Target.sendMessageToTarget', {
+        sessionId,
+        message: JSON.stringify({ id: 5, method: 'Runtime.evaluate', params: {
+          expression: `(function(){var ws=window.__hijackedWs;return JSON.stringify({wsUrl:ws?ws.url:'null',readyState:ws?ws.readyState:'null'})})()`
+        }})
+      });
+      await new Promise(r => setTimeout(r, 2000));
+      console.log('After send:', JSON.stringify(results[5]));
+    }
+  } else {
+    console.log('\nWebSocket not captured yet. The heartbeat interval might be long.');
+    console.log('Checking if there is a way to force a send...');
+
+    // Try to force a heartbeat by triggering the SDK
+    await client.send('Target.sendMessageToTarget', {
+      sessionId,
+      message: JSON.stringify({ id: 6, method: 'Runtime.evaluate', params: {
+        expression: `(async function(){var auth=window._imBaaSSDK.getAuthService();try{await auth.reConnect();return'reconnected'}catch(e){return'error: '+e.message}})()`,
+        awaitPromise: true
+      }})
+    });
+    await new Promise(r => setTimeout(r, 10000));
+
+    await client.send('Target.sendMessageToTarget', {
+      sessionId,
+      message: JSON.stringify({ id: 7, method: 'Runtime.evaluate', params: {
+        expression: `(function(){var ws=window.__hijackedWs;return JSON.stringify({captured:!!ws,url:ws?ws.url:'null',readyState:ws?ws.readyState:'null'})})()`
+      }})
+    });
+    await new Promise(r => setTimeout(r, 2000));
+    console.log('After reconnect:', JSON.stringify(results[7]));
+  }
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

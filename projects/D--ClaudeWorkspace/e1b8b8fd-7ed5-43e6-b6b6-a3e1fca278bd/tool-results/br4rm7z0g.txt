@@ -1,0 +1,819 @@
+warning: in the working copy of '.agents/plugins/marketplace.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.mcp.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'AGENTS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CLAUDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PLUGIN_SCHEMA_NOTES.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/code-explorer.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/code-reviewer.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/doc-updater.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/docs-lookup.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/planner.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/security-reviewer.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'agents/silent-failure-hunter.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'commands/checkpoint.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'commands/context-budget.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'commands/plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'commands/prompt-optimize.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'commands/resume-session.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'commands/save-session.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'config.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ecc/install-state.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hooks/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'hooks/hooks.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'marketplace.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'mcp-configs/mcp-servers.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugin.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/installed_plugins.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/known_marketplaces.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.claude-plugin/marketplace.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.claude-plugin/plugin.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/references/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/references/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/codex_hook_adapter.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/post-tool-use.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/post_tool_use.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/pre-tool-use.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/pre_tool_use.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/session-start.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/stop.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/stop.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/user-prompt-submit.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/references/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/references/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/prompts/planning-with-files.prompt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks.windows.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/post-tool-use.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/post-tool-use.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/pre-tool-use.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/pre-tool-use.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/stop.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/stop.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/user-prompt-submit.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/user-prompt-submit.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/references.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/after-tool.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/before-model.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/before-tool.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/session-end.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/session-start.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/settings.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/references/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/references/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/planning-with-files.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/agent-stop.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/agent-stop.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/error-occurred.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/error-occurred.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/post-tool-use.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/post-tool-use.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/pre-tool-use.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/pre-tool-use.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/session-start.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/session-start.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/workflows/skill-optimize-apply.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/workflows/skill-review.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/commands/plan-status.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/commands/plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/constants.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/hook_state.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/hooks.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/paths.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/planning_files.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/plugin.yaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/tools.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/check-continue.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/sync-ide-folders.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/analytics_findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/analytics_task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/bootstrap.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/bootstrap.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/planning-context.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/references/manus-principles.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/references/planning-rules.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/references/planning-templates.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/hooks.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/references/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/references/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/CITATION.cff', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/CONTRIBUTORS.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/LICENSE', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/MIGRATION.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-ar.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-de.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-es.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-zh.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/start.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/status.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/adal.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/antigravity.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/article-v2.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/article.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/boxlite.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/codebuddy.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/codex.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/continue.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/copilot.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/cursor.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/evals.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/factory.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/gemini.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/hermes.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/installation.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/kilocode.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/kiro.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/mastra.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/openclaw.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/opencode.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/pi-agent.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/quickstart.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/troubleshooting.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/windows.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/workflow.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/examples/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/examples/boxlite/README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/examples/boxlite/quickstart.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/check-continue.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/sync-ide-folders.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/examples.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/reference.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/check-complete.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/check-complete.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/init-session.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/init-session.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/session-catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/analytics_findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/analytics_task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/findings.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/task_plan.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_clear_recovery.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_codex_hooks.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_hermes_adapter.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_path_fix.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_script_permissions.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_session_catchup.py', LF will be replaced by CRLF the next time Git touches it
+warning: adding embedded git repository: plugins/marketplaces/claude-plugins-official.bak
+hint: You've added another git repository inside your current repository.
+hint: Clones of the outer repository will not contain the contents of
+hint: the embedded repository and will not know how to obtain it.
+hint: If you meant to add a submodule, use:
+hint:
+hint: 	git submodule add <url> plugins/marketplaces/claude-plugins-official.bak
+hint:
+hint: If you added this path by mistake, you can remove it from the
+hint: index with:
+hint:
+hint: 	git rm --cached plugins/marketplaces/claude-plugins-official.bak
+hint:
+hint: See "git help submodule" for more information.
+hint: Disable this message with "git config set advice.addEmbeddedRepo false"
+warning: adding embedded git repository: plugins/marketplaces/thedotmack
+warning: in the working copy of 'scripts/backup-session.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/auto-tmux-dev.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/block-no-verify.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/check-console-log.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/check-hook-enabled.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/config-protection.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/cost-tracker.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/design-quality-check.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/desktop-notify.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/doc-file-warning.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/evaluate-session.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/gateguard-fact-force.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/governance-capture.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/mcp-health-check.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/plugin-hook-bootstrap.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-bash-build-complete.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-bash-command-log.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-bash-pr-created.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-edit-accumulator.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-edit-console-warn.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-edit-format.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/post-edit-typecheck.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/pre-bash-commit-quality.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/pre-bash-dev-server-block.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/pre-bash-git-push-reminder.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/pre-bash-tmux-reminder.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/pre-compact.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/pre-write-doc-warn.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/quality-gate.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/run-with-flags-shell.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/run-with-flags.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/session-activity-tracker.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/session-end-marker.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/session-end.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/session-start-bootstrap.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/session-start.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/stop-format-typecheck.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/hooks/suggest-compact.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/agent-compress.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/ecc_dashboard_runtime.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/hook-flags.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/inspection.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-executor.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-lifecycle.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-manifests.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-state.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/antigravity-project.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/claude-home.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/codebuddy-project.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/codex-home.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/cursor-project.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/gemini-project.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/helpers.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/opencode-home.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install-targets/registry.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install/apply.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install/config.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install/request.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/install/runtime.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/mcp-config.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/observer-sessions.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/orchestration-session.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/package-manager.d.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/package-manager.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/project-detect.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/resolve-ecc-root.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/resolve-formatter.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-adapters/canonical-session.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-adapters/claude-history.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-adapters/dmux-tmux.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-adapters/registry.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-aliases.d.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-aliases.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-manager.d.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/session-manager.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/shell-split.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-evolution/dashboard.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-evolution/health.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-evolution/index.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-evolution/provenance.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-evolution/tracker.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-evolution/versioning.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-improvement/amendify.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-improvement/evaluate.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-improvement/health.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/skill-improvement/observations.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/state-store/index.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/state-store/migrations.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/state-store/queries.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/state-store/schema.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/tmux-worktree-orchestrator.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/utils.d.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/lib/utils.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/orchestrate-codex-worker.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/orchestrate-worktrees.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/orchestration-status.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/play_sound.ps1', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/setup-package-manager.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'scripts/sound_control.sh', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'session-data/2026-05-15-okki-classify-v3-session.tmp', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'session-data/2026-05-16-okki-status-brain-session-v2.tmp', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'session-data/2026-05-16-okki-status-brain-session.tmp', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'session-data/2026-05-17-soon-layer-arbiter-session.tmp', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'settings.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'settings.local.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'skills/deep-research/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'skills/knowledge-ops/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'skills/prompt-optimizer/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'skills/search-first/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'skills/token-budget-advisor/SKILL.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'statusline.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'the-security-guide.md', LF will be replaced by CRLF the next time Git touches it
+On branch main
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+	new file:   .agents/plugins/marketplace.json
+	new file:   .gitignore
+	new file:   .mcp.json
+	new file:   AGENTS.md
+	new file:   CLAUDE.md
+	new file:   PLUGIN_SCHEMA_NOTES.md
+	new file:   README.md
+	new file:   agents/code-explorer.md
+	new file:   agents/code-reviewer.md
+	new file:   agents/doc-updater.md
+	new file:   agents/docs-lookup.md
+	new file:   agents/planner.md
+	new file:   agents/security-reviewer.md
+	new file:   agents/silent-failure-hunter.md
+	new file:   commands/checkpoint.md
+	new file:   commands/context-budget.md
+	new file:   commands/plan.md
+	new file:   commands/prompt-optimize.md
+	new file:   commands/resume-session.md
+	new file:   commands/save-session.md
+	new file:   config.json
+	new file:   ecc/install-state.json
+	new file:   hooks/README.md
+	new file:   hooks/hooks.json
+	new file:   marketplace.json
+	new file:   mcp-configs/mcp-servers.json
+	new file:   plugin.json
+	new file:   plugins/installed_plugins.json
+	new file:   plugins/known_marketplaces.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.claude-plugin/marketplace.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.claude-plugin/plugin.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/references/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/references/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codebuddy/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/codex_hook_adapter.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/post-tool-use.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/post_tool_use.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/pre-tool-use.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/pre_tool_use.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/session-start.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/stop.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/stop.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/hooks/user-prompt-submit.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/references/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/references/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.codex/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/prompts/planning-with-files.prompt
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.continue/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks.windows.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/post-tool-use.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/post-tool-use.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/pre-tool-use.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/pre-tool-use.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/stop.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/stop.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/user-prompt-submit.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/hooks/user-prompt-submit.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.cursor/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/references.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.factory/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/after-tool.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/before-model.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/before-tool.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/session-end.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/hooks/session-start.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/settings.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/references/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/references/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gemini/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/planning-with-files.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/agent-stop.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/agent-stop.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/error-occurred.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/error-occurred.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/post-tool-use.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/post-tool-use.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/pre-tool-use.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/pre-tool-use.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/session-start.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/hooks/scripts/session-start.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/workflows/skill-optimize-apply.yml
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.github/workflows/skill-review.yml
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.gitignore
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/commands/plan-status.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/commands/plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/__init__.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/constants.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/hook_state.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/hooks.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/paths.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/planning_files.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/plugin.yaml
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/plugins/planning-with-files/tools.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/check-continue.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/scripts/sync-ide-folders.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/analytics_findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/analytics_task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.hermes/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/bootstrap.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/bootstrap.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/planning-context.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/assets/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/references/manus-principles.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/references/planning-rules.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.kiro/skills/planning-with-files/references/planning-templates.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/hooks.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/references/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/references/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.mastracode/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.opencode/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/README.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/package.json
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/.pi/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/CHANGELOG.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/CITATION.cff
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/CONTRIBUTORS.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/LICENSE
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/MIGRATION.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/README.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-ar.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-de.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-es.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan-zh.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/start.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/commands/status.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/adal.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/antigravity.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/article-v2.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/article.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/boxlite.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/codebuddy.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/codex.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/continue.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/copilot.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/cursor.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/evals.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/factory.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/gemini.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/hermes.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/installation.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/kilocode.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/kiro.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/mastra.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/openclaw.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/opencode.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/pi-agent.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/quickstart.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/troubleshooting.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/windows.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/docs/workflow.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/examples/README.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/examples/boxlite/README.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/examples/boxlite/quickstart.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/media/banner.png
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/check-continue.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/scripts/sync-ide-folders.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files-zh/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/SKILL.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/examples.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/reference.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/check-complete.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/check-complete.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/init-session.ps1
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/init-session.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/scripts/session-catchup.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/skills/planning-with-files/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/analytics_findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/analytics_task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/findings.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/progress.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/templates/task_plan.md
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/__pycache__/test_session_catchup.cpython-314-pytest-9.0.3.pyc
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/__pycache__/test_session_catchup.cpython-314.pyc
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_clear_recovery.sh
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_codex_hooks.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_hermes_adapter.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_path_fix.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_script_permissions.py
+	new file:   plugins/marketplaces/OthmanAdi-planning-with-files-41a8b15/tests/test_session_catchup.py
+	new file:   plugins/marketplaces/claude-plugins-official.bak
+	new file:   plugins/marketplaces/thedotmack
+	new file:   scripts/backup-session.js
+	new file:   scripts/hooks/auto-tmux-dev.js
+	new file:   scripts/hooks/block-no-verify.js
+	new file:   scripts/hooks/check-console-log.js
+	new file:   scripts/hooks/check-hook-enabled.js
+	new file:   scripts/hooks/config-protection.js
+	new file:   scripts/hooks/cost-tracker.js
+	new file:   scripts/hooks/design-quality-check.js
+	new file:   scripts/hooks/desktop-notify.js
+	new file:   scripts/hooks/doc-file-warning.js
+	new file:   scripts/hooks/evaluate-session.js
+	new file:   scripts/hooks/gateguard-fact-force.js
+	new file:   scripts/hooks/governance-capture.js
+	new file:   scripts/hooks/mcp-health-check.js
+	new file:   scripts/hooks/plugin-hook-bootstrap.js
+	new file:   scripts/hooks/post-bash-build-complete.js
+	new file:   scripts/hooks/post-bash-command-log.js
+	new file:   scripts/hooks/post-bash-pr-created.js
+	new file:   scripts/hooks/post-edit-accumulator.js
+	new file:   scripts/hooks/post-edit-console-warn.js
+	new file:   scripts/hooks/post-edit-format.js
+	new file:   scripts/hooks/post-edit-typecheck.js
+	new file:   scripts/hooks/pre-bash-commit-quality.js
+	new file:   scripts/hooks/pre-bash-dev-server-block.js
+	new file:   scripts/hooks/pre-bash-git-push-reminder.js
+	new file:   scripts/hooks/pre-bash-tmux-reminder.js
+	new file:   scripts/hooks/pre-compact.js
+	new file:   scripts/hooks/pre-write-doc-warn.js
+	new file:   scripts/hooks/quality-gate.js
+	new file:   scripts/hooks/run-with-flags-shell.sh
+	new file:   scripts/hooks/run-with-flags.js
+	new file:   scripts/hooks/session-activity-tracker.js
+	new file:   scripts/hooks/session-end-marker.js
+	new file:   scripts/hooks/session-end.js
+	new file:   scripts/hooks/session-start-bootstrap.js
+	new file:   scripts/hooks/session-start.js
+	new file:   scripts/hooks/stop-format-typecheck.js
+	new file:   scripts/hooks/suggest-compact.js
+	new file:   scripts/lib/agent-compress.js
+	new file:   scripts/lib/ecc_dashboard_runtime.py
+	new file:   scripts/lib/hook-flags.js
+	new file:   scripts/lib/inspection.js
+	new file:   scripts/lib/install-executor.js
+	new file:   scripts/lib/install-lifecycle.js
+	new file:   scripts/lib/install-manifests.js
+	new file:   scripts/lib/install-state.js
+	new file:   scripts/lib/install-targets/antigravity-project.js
+	new file:   scripts/lib/install-targets/claude-home.js
+	new file:   scripts/lib/install-targets/codebuddy-project.js
+	new file:   scripts/lib/install-targets/codex-home.js
+	new file:   scripts/lib/install-targets/cursor-project.js
+	new file:   scripts/lib/install-targets/gemini-project.js
+	new file:   scripts/lib/install-targets/helpers.js
+	new file:   scripts/lib/install-targets/opencode-home.js
+	new file:   scripts/lib/install-targets/registry.js
+	new file:   scripts/lib/install/apply.js
+	new file:   scripts/lib/install/config.js
+	new file:   scripts/lib/install/request.js
+	new file:   scripts/lib/install/runtime.js
+	new file:   scripts/lib/mcp-config.js
+	new file:   scripts/lib/observer-sessions.js
+	new file:   scripts/lib/orchestration-session.js
+	new file:   scripts/lib/package-manager.d.ts
+	new file:   scripts/lib/package-manager.js
+	new file:   scripts/lib/project-detect.js
+	new file:   scripts/lib/resolve-ecc-root.js
+	new file:   scripts/lib/resolve-formatter.js
+	new file:   scripts/lib/session-adapters/canonical-session.js
+	new file:   scripts/lib/session-adapters/claude-history.js
+	new file:   scripts/lib/session-adapters/dmux-tmux.js
+	new file:   scripts/lib/session-adapters/registry.js
+	new file:   scripts/lib/session-aliases.d.ts
+	new file:   scripts/lib/session-aliases.js
+	new file:   scripts/lib/session-manager.d.ts
+	new file:   scripts/lib/session-manager.js
+	new file:   scripts/lib/shell-split.js
+	new file:   scripts/lib/skill-evolution/dashboard.js
+	new file:   scripts/lib/skill-evolution/health.js
+	new file:   scripts/lib/skill-evolution/index.js
+	new file:   scripts/lib/skill-evolution/provenance.js
+	new file:   scripts/lib/skill-evolution/tracker.js
+	new file:   scripts/lib/skill-evolution/versioning.js
+	new file:   scripts/lib/skill-improvement/amendify.js
+	new file:   scripts/lib/skill-improvement/evaluate.js
+	new file:   scripts/lib/skill-improvement/health.js
+	new file:   scripts/lib/skill-improvement/observations.js
+	new file:   scripts/lib/state-store/index.js
+	new file:   scripts/lib/state-store/migrations.js
+	new file:   scripts/lib/state-store/queries.js
+	new file:   scripts/lib/state-store/schema.js
+	new file:   scripts/lib/tmux-worktree-orchestrator.js
+	new file:   scripts/lib/utils.d.ts
+	new file:   scripts/lib/utils.js
+	new file:   scripts/orchestrate-codex-worker.sh
+	new file:   scripts/orchestrate-worktrees.js
+	new file:   scripts/orchestration-status.js
+	new file:   scripts/play_sound.ps1
+	new file:   scripts/setup-package-manager.js
+	new file:   scripts/sound_control.sh
+	new file:   session-data/2026-05-15-okki-classify-v3-session.tmp
+	new file:   session-data/2026-05-16-okki-status-brain-session-v2.tmp
+	new file:   session-data/2026-05-16-okki-status-brain-session.tmp
+	new file:   session-data/2026-05-17-soon-layer-arbiter-session.tmp
+	new file:   settings.json
+	new file:   settings.local.json
+	new file:   skills/deep-research/SKILL.md
+	new file:   skills/knowledge-ops/SKILL.md
+	new file:   skills/prompt-optimizer/SKILL.md
+	new file:   skills/search-first/SKILL.md
+	new file:   skills/token-budget-advisor/SKILL.md
+	new file:   sound_config.json
+	new file:   statusline.js
+	new file:   tasks/5247b30f-9107-475d-90c5-c7dc3d2e6608/.highwatermark
+	new file:   tasks/5247b30f-9107-475d-90c5-c7dc3d2e6608/.lock
+	new file:   test_cc_link.txt
+	new file:   test_write_ok
+	new file:   the-security-guide.md
+

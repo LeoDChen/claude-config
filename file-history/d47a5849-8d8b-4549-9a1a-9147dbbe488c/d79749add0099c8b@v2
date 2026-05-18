@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code + CC-Switch + DeepSeek 安装指南</title>
+<style>
+  :root {
+    --primary: #6C47FF;
+    --bg: #f8f9fb;
+    --card: #fff;
+    --text: #2d3748;
+    --muted: #718096;
+    --border: #e2e8f0;
+    --accent: #F0E7FF;
+    --warn: #FFF5E6;
+    --warn-border: #FFE4B5;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    padding: 40px 20px;
+  }
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 48px 20px 40px;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, #6C47FF 0%, #8B6FFF 100%);
+    border-radius: 20px;
+    color: #fff;
+  }
+  .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+  .header .sub { font-size: 0.95rem; opacity: 0.85; }
+
+  /* Step cards */
+  .step {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 32px 36px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    color: var(--primary);
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+  }
+  .step h2 { font-size: 1.25rem; margin-bottom: 12px; }
+
+  /* Typography */
+  ol { padding-left: 20px; margin: 8px 0; }
+  ol li { margin-bottom: 6px; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  ul li { margin-bottom: 6px; }
+  p { margin: 8px 0; }
+
+  /* Code blocks */
+  code {
+    background: #f1f3f8;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-family: "Fira Code", "Cascadia Code", "Source Code Pro", Consolas, monospace;
+    font-size: 0.88em;
+    color: #5534d9;
+  }
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-family: "Fira Code", "Cascadia Code", "Source Code Pro", Consolas, monospace;
+    font-size: 0.9rem;
+    margin: 12px 0;
+    overflow-x: auto;
+  }
+
+  /* Bold highlight */
+  strong { color: #4a1dd4; }
+
+  /* Links */
+  a { color: var(--primary); text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+
+  /* Alert box */
+  .alert {
+    background: var(--warn);
+    border: 1px solid var(--warn-border);
+    border-left: 4px solid #E8A838;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin: 16px 0;
+    font-size: 0.93rem;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.93rem;
+  }
+  th {
+    background: var(--accent);
+    color: var(--primary);
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 700;
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* Checklist style */
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding: 4px 0; }
+  .checklist li::before { content: "☐"; margin-right: 10px; color: var(--primary); font-weight: bold; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    background: var(--accent);
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+  <h1>Claude Code + CC-Switch + DeepSeek</h1>
+  <p class="sub">Windows 安装指南（小白友好版）</p>
+  <p class="sub" style="font-size:0.85rem; margin-top:4px;">零基础用户 · 不依赖 Anthropic 官方模型 · 通过 CC-Switch 接入 DeepSeek</p>
+</div>
+
+<!-- 前置提醒 -->
+<div class="step">
+  <div class="step-num">0</div>
+  <h2>前置提醒：云壳系统</h2>
+  <p>如果朋友笔记本上装有<b>"云壳系统"</b>，安装前先确认：</p>
+  <div class="alert">
+    <b>云壳可能是公司 IT 装的终端安全管理软件</b>，可能会拦截安装或 API 请求。<br>
+    建议先咨询公司 IT：是否允许自己装 VS Code 和外部软件。
+  </div>
+</div>
+
+<!-- Step 1 -->
+<div class="step">
+  <div class="step-num">1</div>
+  <h2>安装 Node.js <span class="badge">必须</span></h2>
+  <p>Claude Code 依赖 Node.js 运行。</p>
+  <ol>
+    <li>浏览器打开 <a href="https://nodejs.org" target="_blank">https://nodejs.org</a></li>
+    <li>点左边 <b>LTS</b> 按钮下载（v24.x 版本）</li>
+    <li>双击下载的 <code>.msi</code> 安装</li>
+    <li><b>关键步骤：</b>安装过程中的 "Custom Setup" 页面，确保 <b>"Add to PATH"</b> 选中（点一下选 "Will be installed on local hard drive"）</li>
+    <li>其余全部 Next，完成</li>
+  </ol>
+  <p><b>验证：</b>按 <code>Win+R</code>，输入 <code>cmd</code> 回车，输入：</p>
+  <div class="code-block">node --version</div>
+  <p>显示 <code>v24.x.x</code> 即成功。</p>
+</div>
+
+<!-- Step 2 -->
+<div class="step">
+  <div class="step-num">2</div>
+  <h2>安装 VS Code</h2>
+  <ol>
+    <li>打开 <a href="https://code.visualstudio.com" target="_blank">https://code.visualstudio.com</a></li>
+    <li>点击 <b>"Download for Windows"</b></li>
+    <li>安装时建议勾选右键菜单选项</li>
+  </ol>
+</div>
+
+<!-- Step 3 -->
+<div class="step">
+  <div class="step-num">3</div>
+  <h2>安装 Claude Code 扩展</h2>
+  <ol>
+    <li>打开 VS Code，点左侧<b>扩展图标</b>（四个方块）</li>
+    <li>搜索 <b>"Claude Code"</b></li>
+    <li>找到发布者 <b>Anthropic</b> 的，点 <b>Install</b></li>
+    <li>安装后左侧出现 Claude Code 图标</li>
+  </ol>
+</div>
+
+<!-- Step 4 -->
+<div class="step">
+  <div class="step-num">4</div>
+  <h2>注册 DeepSeek 并获取 API Key</h2>
+  <ol>
+    <li>打开 <a href="https://platform.deepseek.com" target="_blank">https://platform.deepseek.com</a></li>
+    <li>注册账号（手机号即可，国内直接访问）</li>
+    <li>登录后进控制台，点左侧 <b>"API Keys"</b></li>
+    <li>点 <b>"创建 API Key"</b>，命名（如 <code>claude-code</code>）</li>
+    <li><b>立即复制保存！</b>Key 只显示一次</li>
+    <li>充值（最低 10 元，非常便宜，几块钱用很久）</li>
+  </ol>
+</div>
+
+<!-- Step 5 -->
+<div class="step">
+  <div class="step-num">5</div>
+  <h2>安装 CC-Switch <span class="badge">模型切换</span></h2>
+  <p>CC-Switch 是桌面工具，负责把 Claude Code 从 Claude 切换为 DeepSeek。</p>
+  <p><b>下载文件：</b><code>CC-Switch-Setup.msi</code></p>
+  <p>
+    <a href="https://github.com/farion1231/cc-switch/releases" target="_blank">GitHub Releases</a>
+    &nbsp;|&nbsp;
+    GitHub 打不开？用加速站：
+    <a href="https://gh-proxy.com/https://github.com/farion1231/cc-switch/releases" target="_blank">gh-proxy.com</a>
+  </p>
+  <p>下载后双击安装，桌面会出现图标。</p>
+</div>
+
+<!-- Step 6 -->
+<div class="step">
+  <div class="step-num">6</div>
+  <h2>在 CC-Switch 中添加 DeepSeek</h2>
+  <ol>
+    <li>打开 CC-Switch，点右上角 <b>＋</b> 按钮</li>
+    <li><b>"预设"</b> 下拉框选择 <b>DeepSeek</b>（端点自动填充 <code>https://api.deepseek.com</code>）</li>
+    <li><b>"API Key"</b> 栏粘贴 Step 4 获取的 Key</li>
+    <li>点击 <b>"添加"</b></li>
+  </ol>
+</div>
+
+<!-- Step 7 -->
+<div class="step">
+  <div class="step-num">7</div>
+  <h2>启用 DeepSeek 并启动 Claude Code</h2>
+  <ol>
+    <li>CC-Switch 主界面，点 DeepSeek 卡片的 <b>"启用"</b></li>
+    <li>回到 VS Code，点左侧 Claude Code 图标</li>
+    <li>在输入框测试：</li>
+  </ol>
+  <div class="code-block">你好，请简单介绍一下自己</div>
+  <p>回复正常即配置成功。</p>
+</div>
+
+<!-- Step 8 -->
+<div class="step">
+  <div class="step-num">8</div>
+  <h2>日常使用</h2>
+  <ul class="checklist">
+    <li>确保 CC-Switch 在运行（系统托盘有图标）</li>
+    <li>确认当前启用的是 DeepSeek</li>
+    <li>打开 VS Code，正常使用 Claude Code</li>
+  </ul>
+  <p style="margin-top:12px;"><b>切换模型：</b>CC-Switch 中点击对应卡片即可切换；Claude Code 中可用 <code>/model deepseek-chat</code>。</p>
+</div>
+
+<!-- 常见问题 -->
+<div class="step">
+  <div class="step-num">?</div>
+  <h2>常见问题</h2>
+  <table>
+    <thead>
+      <tr><th>问题</th><th>解决</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Claude Code 图标没出现</td><td>完全关闭 VS Code 再重开</td></tr>
+      <tr><td>提示 "Node.js not found"</td><td>重装 Node.js，确保勾选 "Add to PATH"</td></tr>
+      <tr><td>CC-Switch 启用后没反应</td><td>检查 DeepSeek Key 是否正确、是否有余额</td></tr>
+      <tr><td>GitHub 下载太慢/打不开</td><td>用 gh-proxy 加速站，或让朋友帮忙传</td></tr>
+      <tr><td>DeepSeek 回复质量不够好</td><td>切换 <code>deepseek-reasoner</code>（推理增强版）</td></tr>
+      <tr><td>公司网络能否访问 API</td><td>DeepSeek 是国内服务，一般不被墙，但公司内网可能有限制</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">整理于 2026.05 · 有问题随时问</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+# OKKI 全量数据抓取 & AI 分析 — 操作手册
+
+## 架构概览
+
+```
+第1步: API 批量抓取 (10-15分钟, 独立会话A)
+  └─→ data/customers/{company_id}.json × 346
+      每个文件包含: 客户元数据 + 邮件记录 + 详情字段
+
+第2步: TM 聊天探索 (手动辅助, 独立会话B)
+  └─→ 找到阿里TM聊天API或DOM提取方案
+  └─→ data/customers/{company_id}_chat.json × N
+
+第3步: 分批 AI 分析 (独立会话C-H, 每批20-30人)
+  └─→ data/analysis/{company_id}_analysis.json × 346
+  └─→ data/analysis/batch_N_summary.json × 12-18
+
+第4步: 汇总报告 (独立会话I)
+  └─→ reports/全量分析报告_{date}.docx
+```
+
+## 第1步: API 批量抓取
+
+### 启动
+```bash
+# 1. 关闭所有 Chrome
+# 2. 启动带 CDP 的 Chrome 并登录 OKKI
+"C:/Users/Administrator/AppData/Local/Google/Chrome/Application/chrome.exe" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="C:\tmp\cdp_session_v3" \
+  https://crm.xiaoman.cn/
+
+# 3. 在 Chrome 中登录 OKKI
+
+# 4. 运行全量抓取
+cd d:\ClaudeWorkspace\08_客户跟进\Okki
+node scripts/scrape_api_batch.js
+
+# 5. 增量抓取（后续使用）
+node scripts/scrape_api_batch.js --since 2026-05-06
+```
+
+### 产出
+- `data/customers/{company_id}.json` — 每个客户一个文件
+- `data/scrape_state.json` — 抓取状态（用于增量）
+- 每个文件结构:
+  ```json
+  {
+    "company_id": "...",
+    "name": "...",
+    "scrapedAt": "...",
+    "listData": { level, status, source, country, score, orderCount, orderAmount, ... },
+    "trails": { total, tabList, items: [{ type, typeName, data: { mail详情 }, commentList }] },
+    "detail": { field_name: value, ... }
+  }
+  ```
+
+## 第2步: TM 聊天探索
+
+### 目标
+找到阿里 TM 聊天消息的获取方式。优先级顺序：
+1. 阿里 MTOP API (acs.h.alibaba.com)
+2. CDP 网络拦截 (iframe内请求)
+3. DOM 文本提取 (iframe内消息元素)
+
+### 运行
+```bash
+# 确保在 TM 沟通页面上
+node scripts/explore_tm_network.js
+# 在 15 秒内点击一个聊天联系人
+```
+
+### 如果探索成功
+修改 `scrape_tm_chat.js`，加入自动翻页和批量抓取逻辑。
+
+### 如果探索失败
+退而求其次方案：
+- 对于已有数据的客户，客户列表中的 `last_remark_trail` 摘要 + 邮件记录已足够做初步分析
+- TM 聊天可通过手动截图/复制粘贴补充（仅限高优先级客户）
+
+## 第3步: 分批 AI 分析
+
+### 原理
+每批 20-30 个客户，独立会话处理，避免上下文撑爆。
+
+### 启动指令（新会话）
+```
+继续OKKI数据分析。先读STATE.md和knowledge/下文件。
+
+阶段2: 分批AI分析
+- 数据文件: data/customers/ 下按批次取 20-30 个文件
+- 分析维度: 客户意向判断 → 沟通阶段 → 卡点识别 → 回复方案建议
+- 输出: data/analysis/{company_id}_analysis.json
+- 批次汇总: data/analysis/batch_N_summary.json
+```
+
+### 分析维度
+每个客户输出:
+1. **意向等级**: 基于对话内容重新评估 (A/B/C/D/E)
+2. **当前阶段**: 询盘→报价→议价→样品→订单→售后
+3. **关键卡点**: 价格/起订量/运费/产品匹配/决策人
+4. **下一步行动**: 具体话术建议 (中文+英文)
+5. **紧急性**: P0/P1/P2/P3
+
+## 第4步: 汇总报告
+
+### 运行
+```bash
+node scripts/generate_report.js
+```
+
+### 产出
+- `reports/全量分析报告_{date}.docx`
+- 客户分级分布图
+- P0 优先行动清单
+- 市场/国家分析
+
+## 会话规划
+
+| 会话 | 内容 | 预计耗时 | 是否需用户在场 |
+|------|------|----------|----------------|
+| A | API 批量抓取 346 人 | 10-15分钟 | 仅启动时需要登录 |
+| B | TM 聊天探索 | 5分钟 | 需要（点击聊天） |
+| C-H | 分批 AI 分析 (6批×50人) | 每批10分钟 | 否 |
+| I | 汇总报告生成 | 5分钟 | 否 |
+
+## API 参考
+
+### 已验证的 API
+| API | 方法 | 参数 | 返回 |
+|-----|------|------|------|
+| `customerV3Read/companyList` | POST url-encoded | curPage, pageSize, show_field_key, user_num[], sort_scene, show_all, swarm_id | 客户列表+元数据 |
+| `customerRead/trailList` | POST url-encoded | company_id, page, pageSize | 邮件跟进记录 |
+| `customerV2Read/detail` | POST url-encoded | company_id | 客户详情字段值 |
+
+### 待探索的 API
+- 阿里 MTOP: `mtop.alibaba.icbu.contact.list.get` — 联系人列表
+- 阿里 MTOP: 聊天消息API — 待发现
+- OKKI: `mailRead/*` — 邮件内容详情
+- OKKI: `aiAgentRead/ConversationHistory` — AI对话历史

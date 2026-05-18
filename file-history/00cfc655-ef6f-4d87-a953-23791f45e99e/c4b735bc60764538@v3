@@ -1,0 +1,91 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 18:20
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**数据抓取方案设计：两条 CDP 路径均确认不可用。已转向 Chrome DevTools Network 面板手动复制。**
+
+## 待办优先级
+
+1. **🔥 定位API端点**：用户用 Chrome F12 → Network → 过滤 `customer` → 刷新"全部客户"页面 → 复制客户列表请求的 cURL
+2. **编写直接HTTP调用脚本**：基于 cURL 中的 Cookie/Headers/Endpoint，写 Node.js 脚本直接调 OKKI API 拉全量数据
+3. **阶段2全量版**：用全量432人跑AI分类
+4. **搭建定时抓取**：确保数据定期更新
+
+## 本次会话进展（5/5）
+
+### CDP路径最终结论
+
+**两条路径均宣告不可行：**
+
+| 路径 | 状态 | 根因 |
+|------|------|------|
+| `--remote-debugging-port=9222` | ❌ 不监听 | Chrome 147.0.7727.138 接受参数但不绑定端口，无 DevToolsActivePort |
+| `--remote-debugging-pipe` | ❌ 不支持 | 报错 `Remote debugging pipe file descriptors are not open`（Windows 平台限制） |
+
+### Console注入尝试
+
+- `scripts/inject_intercept.js` (v1) — URL过滤太窄，没捕获到
+- `scripts/inject_intercept.js` (v2) — 捕获到聊天API但客户列表API不触发（SPA缓存/Service Worker拦截）
+- `scripts/inject_intercept.js` (v3) — 添加 PerformanceObserver，但用户操作流程复杂未成功
+- **根因**：OKKI CRM 是 SPA，Service Worker 在拦截层之下处理请求，fetch/XHR 拦截器可能漏掉。Console脚本每次刷新消失，操作繁琐。
+
+### 当前方案（最简单可靠）
+
+用户手动操作 Chrome DevTools Network 面板：
+
+1. 打开 Chrome，登录 crm.xiaoman.cn
+2. **F12 → Network 标签 → 勾选 Preserve log → Filter 输入 `customer`**
+3. 导航到 **"全部客户"** 页面
+4. 查找包含客户列表数据的请求（参考URL：`/crm/customer/list`）
+5. **右键该请求 → Copy → Copy as cURL**
+6. 将 cURL 内容发送给 Claude Code
+
+拿到完整 cURL 后，可提取：
+- 精确的 API endpoint URL
+- 认证 Cookie/Token
+- 请求参数（分页、排序等）
+
+然后编写纯 HTTP 调用的 Node.js 脚本，不需要浏览器、CDP、Playwright。
+
+### Profile 信息
+
+- `Profile 4` = **云超数码**（OKKI登录用）
+- User Data: `%LOCALAPPDATA%\Google\Chrome\User Data`
+
+### 新增工具文件
+
+- `scripts/test_pipe.js` — pipe模式测试（exit code 13，Windows不支持）
+- `scripts/test_pipe_clean.js` — pipe模式清洁环境测试（确认报错）
+- `scripts/extract_playwright.js` — Playwright方案（未使用，有安全风险）
+- `scripts/inject_intercept.js` — Console注入v3（可用但操作繁琐）
+
+### 关键发现
+
+- Chrome 无策略（GPO）阻止 DevTools
+- Profile 4 的 Preferences 文件完整，Cookie 持久化在磁盘
+- Service Worker 可能在 fetch/XHR 拦截层之下处理请求，导致 Console 拦截器漏掉关键 API
+
+## 已完成
+
+- `scripts/preprocess_cdp.js` — 阶段0 ✅
+- `scripts/classify_rules.js` — 阶段1 ✅
+- `scripts/classify_ai.js` — 阶段2 ✅（21人版）
+- `scripts/generate_report.js` — 阶段5 ✅
+
+## 下次启动指令
+
+> 继续OKKI CRM数据抓取方案。先读STATE.md和knowledge/下四个文件。
+> CDP和pipe路径均已确认不可行（Chrome 147.x + Win10）。
+> 下一步：用户需在Chrome F12 Network面板中、在"全部客户"页面过滤 `customer` 请求，复制cURL。
+> 拿到cURL后立即提取endpoint+cookie，编写纯HTTP调用脚本直接拉全量432人数据。
+> Profile 4 = 云超数码。
+
+## 关键数据文件
+
+- 设计文档：`DESIGN.md`
+- 全量432人（5/3快照）：`data/2026-05-03T01-19-12_全量客户分类.json`
+- 注入v3脚本：`scripts/inject_intercept.js`
+- 已废弃：`scripts/diagnose_api.js`（依赖CDP）、`scripts/test_pipe.js`（pipe不支持）

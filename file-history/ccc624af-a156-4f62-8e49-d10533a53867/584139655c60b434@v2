@@ -1,0 +1,76 @@
+/**
+ * 测试：CSS 强制渲染方案
+ * 注入 CSS 禁用虚拟滚动 → 看侧边栏能显示多少项
+ */
+import { chromium } from 'playwright';
+
+const CDP_URL = 'http://127.0.0.1:9222';
+
+async function main() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) { console.log('未找到小满页面'); return; }
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) { console.log('未找到聊天 iframe'); return; }
+
+  // Step 1: 当前 DOM 数量
+  const before = await talkFrame.evaluate(() =>
+    document.querySelectorAll('.contact-item-container').length
+  );
+  console.log('注入前 DOM 项数:', before);
+
+  // Step 2: 注入 CSS 强制渲染
+  await talkFrame.evaluate(() => {
+    const containers = [
+      '.seller-conversation-list',
+      '.conversation-list-content',
+      '.im-conversation-list-container',
+      '[class*="conversation-list"]',
+      '[class*="contact-list"]',
+    ];
+    for (const sel of containers) {
+      const el = document.querySelector(sel);
+      if (el) {
+        el.style.setProperty('height', 'auto', 'important');
+        el.style.setProperty('max-height', 'none', 'important');
+        el.style.setProperty('overflow', 'visible', 'important');
+        el.style.setProperty('contain', 'none', 'important');
+        // 也改所有父级
+        let p = el.parentElement;
+        for (let i = 0; i < 10 && p; i++) {
+          p.style.setProperty('height', 'auto', 'important');
+          p.style.setProperty('max-height', 'none', 'important');
+          p.style.setProperty('overflow', 'visible', 'important');
+          p.style.setProperty('contain', 'none', 'important');
+          p = p.parentElement;
+        }
+      }
+    }
+    // 额外：去掉所有 contain 属性（虚拟滚动的核心）
+    document.querySelectorAll('*').forEach(el => {
+      const style = getComputedStyle(el);
+      if (style.contain !== 'none' && style.contain !== 'strict') {
+        // 不强制全改，可能太慢
+      }
+    });
+  });
+
+  // Step 3: 等渲染
+  await new Promise(r => setTimeout(r, 1500));
+
+  // Step 4: 注入后 DOM 数量
+  const after = await talkFrame.evaluate(() =>
+    document.querySelectorAll('.contact-item-container').length
+  );
+  console.log('注入后 DOM 项数:', after);
+  console.log('增加:', after - before);
+
+  if (after > 50) {
+    console.log('✅ CSS 方案有效！可以从 ' + before + ' → ' + after);
+  } else {
+    console.log('❌ CSS 方案无效，虚拟滚动不是纯 CSS 实现，需试网络拦截方案');
+  }
+}
+
+main().catch(e => console.error(e.message));

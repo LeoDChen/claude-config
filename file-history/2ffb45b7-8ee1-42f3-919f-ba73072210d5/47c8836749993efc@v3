@@ -1,0 +1,45 @@
+# OKKI 一键同步脚本
+
+## 设计目标
+
+一个命令 `node scripts/sync_okki.js`，自动处理所有状态：
+
+```
+你刚开机、Chrome没开、没登录 → 脚本自动启动Chrome → 等你登录 → 自动导航 → 抓取
+你Chrome开着、已登录OKKI   → 脚本连CDP → 找到TM页面 → 直接抓取
+你登录了但不在TM页面       → 脚本自动导航到TM → 等iframe加载 → 抓取
+```
+
+## 脚本逻辑
+
+```
+sync_okki.js:
+  1. 检测 CDP 9222 端口是否可用
+     → 可用: 连CDP, 找已有OKKI页面
+     → 不可用: launchPersistentContext(Profile 4), 启动Chrome
+  2. 导航到 crm.xiaoman.cn
+  3. 检测登录状态 (URL是否含login)
+     → 未登录: 提示用户登录, 轮询等待
+     → 已登录: 继续
+  4. 导航到 crm.xiaoman.cn/im/ (TM消息页)
+  5. 等待 onetalk iframe 加载 (轮询 page.frames())
+  6. 从 iframe 提取 window.__conversationListFullData__
+  7. 保存为 tm_conversations_latest.json
+  8. 对比 5/5 数据 → 找出变化的会话 (latestMessage不同 或 lastContactTime更新)
+  9. 对变化会话 → CDP attach iframe → 装LWP收发器 → 拉全量消息
+  10. 更新 chat_history/{cid}.json
+  11. 输出变化摘要, 更新 STATE.md
+```
+
+## 数据交付物
+
+新对话分析需要：
+- `tm_conversations_latest.json` — 最新全部会话元数据
+- `data/chat_history/*.json` — 已增量更新的聊天历史
+- `STATE.md` — 含最新同步时间、变化摘要
+
+## 本次对话待办
+
+- [ ] 写 `scripts/sync_okki.js`
+- [ ] 运行并完成同步
+- [ ] 更新 STATE.md

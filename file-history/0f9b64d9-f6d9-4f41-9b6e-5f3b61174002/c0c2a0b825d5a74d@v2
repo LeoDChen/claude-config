@@ -1,0 +1,72 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+
+  // Attach directly to iframe with its own CDP session
+  const iframeSession = await client.send('Target.attachToTarget', {
+    targetId: ot.targetId,
+    flatten: false
+  });
+
+  // Create a new CDP session specifically for the iframe
+  const sessionClient = await browser.contexts()[0].pages()[0].context().newCDPSession(
+    browser.contexts()[0].pages()[0]
+  );
+
+  let allReqs = [];
+
+  // Listen to events from sendMessageToTarget responses
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== iframeSession.sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.method && response.method.startsWith('Network.')) {
+        allReqs.push({ method: response.method, data: JSON.stringify(response.params).substring(0, 300) });
+      }
+    } catch (e) {}
+  });
+
+  // Enable Network on iframe
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: iframeSession.sessionId,
+    message: JSON.stringify({ id: 100, method: 'Network.enable', params: {} })
+  });
+
+  // Also try enabling via Runtime.evaluate to check if we're connected
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: iframeSession.sessionId,
+    message: JSON.stringify({ id: 101, method: 'Runtime.evaluate', params: { expression: '"CDP_OK"' } })
+  });
+
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Check if Runtime.evaluate worked
+  let hasResult = false;
+  client.on('Target.receivedMessageFromTarget', (msg2) => {
+    if (msg2.sessionId === iframeSession.sessionId) {
+      try {
+        const r = JSON.parse(msg2.message);
+        if (r.id === 101 && r.result) {
+          console.log('CDP connection verified: ' + r.result.result?.value);
+          hasResult = true;
+        }
+      } catch (e) {}
+    }
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  console.log('Runtime eval worked: ' + hasResult);
+
+  console.log('NOW click a contact in TM page! Waiting 10 seconds...');
+  await new Promise(r => setTimeout(r, 10000));
+
+  console.log('Network events captured: ' + allReqs.length);
+  allReqs.slice(0, 30).forEach(r => console.log(JSON.stringify(r)));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

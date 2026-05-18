@@ -1,0 +1,497 @@
+const fs = require('fs');
+const path = require('path');
+
+const s1 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 's1_classification.json'), 'utf8'));
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const NOW = Date.now();
+const DAY = 86400000;
+const OUR_UID = '2500000853693@icbu';
+
+// ── 工具函数 ──
+const SYS_PATTERNS = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+  '当前买家首次给您发消息', 'AI给您生成',
+];
+function isSys(c) { const t = c && c.text && c.text.content || ''; if (!t.trim()) return true; for (const p of SYS_PATTERNS) if (t.includes(p)) return true; return false; }
+function getText(c) { return c && c.text && c.text.content || ''; }
+
+const Q_PATTERNS = [/\?/, /(what|how|when|where|which|who|why|whom)/i, /(can you|could you|would you|will you|do you|is it|are you)/i, /(please.*(send|give|tell|quote|share|confirm|advise|provide|let me know))/i, /(i need|i want|i would like|i'm looking for|we need|we want|we are looking)/i, /[吗呢吧啊]/, /[？]/, /(价格|报价|多少钱|什么价)/, /(样品|sample|打样)/i, /(MOQ|起订量|最小.*量)/i, /(交期|delivery.*time|lead.*time)/i];
+function isQuestion(text) { if (!text || text.length < 3) return false; for (const p of Q_PATTERNS) if (p.test(text)) return true; return false; }
+
+function assessQuality(qText, rText) {
+  if (!rText || rText.trim().length === 0) return { q: '未回复', s: 0 };
+  const len = rText.trim().length;
+  if (/^(ok|okay|yes|no|thanks|thank you|got it|noted|well|sure|好的|收到|嗯|哦|知道了)[\s,.]*$/i.test(rText.trim()) || len < 15) return { q: '敷衍回复', s: 1 };
+  if (len < 50) return { q: '简短回复', s: 2 };
+  const qw = (qText || '').toLowerCase().replace(/[?？,.]/g, '').split(/\s+/).filter(w => w.length > 3);
+  const rl = rText.toLowerCase();
+  const m = qw.filter(w => rl.includes(w));
+  return (m.length / Math.max(qw.length, 1) >= 0.3 || len >= 100) ? { q: '充分回复', s: 3 } : { q: '简短回复', s: 2 };
+}
+
+// ── 生命周期判定 ──
+function determineLifecycle(e) {
+  const { hasPI, hasAddress, hasOrderSignal, hasPrice, hasSample, hasQuantity, realMsgs, customerMsgs, ourMsgs, daysAgo, lastCustomerMsgDays, questionUnanswered, lastCustQuestion } = e;
+  const fullText = ((e.latestOurMsg || '') + ' ' + (e.latestCustMsg || '') + ' ' + (e.lastCustQuestion || '')).toLowerCase();
+
+  // 售后：质量问题/投诉
+  if (/(problem|issue|damage|broken|wrong|defect|complain|refund|return|bad quality|poor quality|not good|有问题|坏的|退货|退款|投诉)/i.test(fullText)) return { stage: 8, label: '售后', icon: '🔧' };
+
+  // 订单执行中：付款确认+生产/发货讨论
+  if (hasPI && /(paid|payment.*done|deposit.*paid|生产|produc|ship.*out|on the way|tracking|dispatch)/i.test(fullText)) return { stage: 6, label: '订单执行中', icon: '📦' };
+
+  // 已签收
+  if (hasPI && /(received|arrived|delivered|got.*goods|收到.*货|签收)/i.test(fullText)) return { stage: 7, label: '已签收', icon: '✅' };
+
+  // PI已发
+  if (hasPI && daysAgo <= 14) return { stage: 5, label: 'PI已发', icon: '📄' };
+
+  // 谈判/样品
+  if ((hasPrice || hasSample) && hasQuantity && realMsgs >= 10 && daysAgo <= 7) return { stage: 4, label: '谈判/样品', icon: '🤝' };
+  if (hasSample && daysAgo <= 14 && realMsgs >= 5) return { stage: 4, label: '谈判/样品', icon: '🤝' };
+
+  // 报价已发
+  if (hasPrice && daysAgo <= 14) return { stage: 3, label: '报价已发', icon: '💰' };
+
+  // 待回复：客户有新消息未回
+  if (questionUnanswered || (customerMsgs > ourMsgs && lastCustomerMsgDays <= 1)) return { stage: 1, label: '待回复', icon: '🔴' };
+
+  // 初询沟通
+  if (realMsgs >= 1 && daysAgo <= 14) return { stage: 2, label: '初询沟通', icon: '📋' };
+
+  return { stage: 0, label: '待分类', icon: '❓' };
+}
+
+// ── 沉默副状态 ──
+function silenceLabel(days) {
+  if (days >= 90) return '沉淀(90d+)';
+  if (days >= 30) return '深度沉默(30-90d)';
+  if (days >= 14) return '长期沉默(14-30d)';
+  if (days >= 7) return '中期沉默(7-14d)';
+  if (days >= 3) return '短期沉默(3-7d)';
+  return '';
+}
+
+// ── 质量等级判定 ──
+function determineQuality(e) {
+  const fullText = ((e.latestOurMsg || '') + ' ' + (e.latestCustMsg || '') + ' ' + (e.lastCustQuestion || '') + ' ' + (e.latestOurMsg || '')).toLowerCase();
+
+  // S 级信号
+  const sSignals = [];
+  if (/(brand|odm|oem|logo|label|custom.*packag|hangtag|barcode|private.*label|own.*design)/i.test(fullText)) sSignals.push('品牌/ODM/定制包装');
+  if (/(amazon|walmart|shopify|retail.*chain|distributor.*network|wholesale.*channel)/i.test(fullText)) sSignals.push('分销渠道');
+  if (/(\d{4,}\s*(pcs|pieces|units|件)|\b[5-9]\d{2,3}\s*(pcs|pieces|units))/i.test(fullText)) sSignals.push('大批量');
+  if (/(website|store|shop|company.*name|business.*card)/i.test(fullText)) sSignals.push('公司资料');
+
+  // C/D 信号
+  const cSignals = [];
+  if (/(for myself|for my kid|for my baby|personal use|自用|送人|gift)/i.test(fullText)) cSignals.push('个人自用');
+  if (/(\b[1-2]?\d\s*(pcs|pieces|units|件)\b|just.*few|small.*quantity|少量)/i.test(fullText)) cSignals.push('极小量');
+
+  // D 信号
+  if (e.realMsgs <= 2 && e.customerMsgs === 0) return { grade: 'D', label: '无关/废弃', reason: '仅系统消息/无真实对话', auto: true };
+  if (/(adult|成人|men.*wear|not.*baby|not.*kid)/i.test(fullText) && !(/baby|kid|child|infant/i.test(fullText))) return { grade: 'D', label: '无关', reason: '品类不匹配', auto: true };
+
+  if (sSignals.length >= 2) return { grade: 'S', label: '战略客户', reason: sSignals.join('+'), auto: true };
+  if (sSignals.length >= 1) return { grade: 'A', label: '优质客户', reason: sSignals.join('+') + '(信号待验证)', auto: true };
+  if (cSignals.length >= 2) return { grade: 'C', label: '低价值', reason: cSignals.join('+'), auto: true };
+
+  // 有实质对话但信息不足 → B
+  if (e.realMsgs >= 5 && e.customerMsgs >= 2) return { grade: 'B', label: '普通客户', reason: '信息不足自动定B', auto: true };
+  if (e.hasPrice || e.hasSample || e.hasQuantity) return { grade: 'B', label: '普通客户', reason: '有实质讨论但规模未知', auto: true };
+
+  return { grade: 'B', label: '普通客户', reason: '信息不足默认B', auto: true };
+}
+
+// ── 主循环 ──
+const candidates = [...(s1.results[1] || []), ...(s1.results[2] || [])];
+console.log('处理 ' + candidates.length + ' 个 P1+P2 候选...\n');
+
+const enhanced = [];
+for (const c of candidates) {
+  const fid = c.cid ? c.cid.replace(/#/g, '_').replace(/@/g, '_') + '.json' : '';
+  const fp = path.join(chatDir, fid);
+
+  let msgCount = 0, customerMsgs = 0, ourMsgs = 0, sysMsgs = 0;
+  let hasPI = false, hasAddress = false, hasOrderSignal = false, hasPrice = false;
+  let hasSample = false, hasFreight = false, hasMOQ = false, hasQuantity = false;
+  let latestOurMsg = '', latestOurDate = '', latestCustMsg = '', latestCustDate = '';
+  let lastCustomerMsgDays = 9999;
+  let lastCustQuestion = '', lastCustQuestionDate = '', ourResponseQuality = 'N/A';
+  let responseGapDays = -1, questionUnanswered = false;
+
+  if (fs.existsSync(fp)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+      const msgs = data.messages || [];
+      msgCount = msgs.length;
+
+      for (const m of msgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const text = getText(msg.content);
+        const date = msg.createAt || '';
+        if (isSys(msg.content)) { sysMsgs++; continue; }
+
+        if (uid === OUR_UID) {
+          ourMsgs++; if (date > latestOurDate) { latestOurDate = date; latestOurMsg = text; }
+        } else if (uid) {
+          customerMsgs++;
+          if (date > latestCustDate) { latestCustDate = date; latestCustMsg = text; }
+          if (date) lastCustomerMsgDays = Math.min(lastCustomerMsgDays, Math.floor((NOW - new Date(date).getTime()) / DAY));
+        }
+
+        const lc = text.toLowerCase();
+        if (/pi|proforma\s*invoice|invoice\s*sent|付款|deposit|定金|tt\s|wire\s*transfer|bank\s*transfer/.test(lc + text)) hasPI = true;
+        if (/(address|地址|city|country|delivery\s*address|where.*ship|send.*to|destination)/.test(lc)) hasAddress = true;
+        if (/(place.*order|make.*order|confirm.*order|下单|order.*confirmed|want.*to.*order|proceed.*order|ready.*order)/.test(lc)) hasOrderSignal = true;
+        if (/(price|quotation|quote|报价|unit.*price|each.*cost)/.test(lc)) hasPrice = true;
+        if (/(sample|样品)/.test(lc)) hasSample = true;
+        if (/(freight|shipping|运费|物流|delivery|transport|courier|dhl|fedex)/.test(lc)) hasFreight = true;
+        if (/(moq|minimum.*order|最低.*数量|500.*piece|最小.*订单)/.test(lc)) hasMOQ = true;
+        if (/(quantity|数量|how.*many|pieces|pcs|units)/.test(lc)) hasQuantity = true;
+      }
+
+      // 找最后的客户提问
+      const sortedMsgs = [...msgs].filter(m => !isSys((m.message || m).content)).sort((a, b) => ((b.message || b).createAt || 0) - ((a.message || a).createAt || 0));
+      for (const m of sortedMsgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const text = getText(msg.content);
+        if (uid && uid !== OUR_UID && isQuestion(text)) { lastCustQuestion = text; lastCustQuestionDate = msg.createAt || ''; break; }
+      }
+
+      if (lastCustQuestion && lastCustQuestionDate) {
+        const qTs = new Date(lastCustQuestionDate).getTime();
+        let respText = '', respDate = '';
+        for (const m of [...sortedMsgs].reverse()) {
+          const msg = m.message || m;
+          const ts = (msg.createAt || 0);
+          if ((msg.sender && msg.sender.uid) === OUR_UID && ts > qTs) { respText = getText(msg.content); respDate = msg.createAt || ''; break; }
+        }
+        if (respText) {
+          const gapH = (new Date(respDate).getTime() - qTs) / 3600000;
+          responseGapDays = Math.round(gapH / 24 * 10) / 10;
+          const a = assessQuality(lastCustQuestion, respText);
+          ourResponseQuality = a.q + ' (' + responseGapDays + 'd)';
+        } else {
+          ourResponseQuality = '未回复';
+          responseGapDays = Math.round((NOW - qTs) / DAY * 10) / 10;
+          questionUnanswered = true;
+        }
+      }
+    } catch (e) { /* skip corrupt */ }
+  }
+
+  const realMsgs = customerMsgs + ourMsgs;
+  const cRatio = realMsgs > 0 ? Math.round(customerMsgs / realMsgs * 100) : 0;
+  const country = c.country || '';
+  const coreMarkets = ['SD', 'EG', 'CD', 'ZM', 'CI', 'SA', 'AE'];
+  const isCore = coreMarkets.includes(country);
+
+  const obj = {
+    name: c.name, country, isCore, daysAgo: c.daysAgo,
+    msgCount, customerMsgs, ourMsgs, sysMsgs, realMsgs, cRatio,
+    lastCustomerMsgDays: lastCustomerMsgDays === 9999 ? '-' : lastCustomerMsgDays,
+    latestOurMsg: latestOurMsg.substring(0, 100), latestCustMsg: latestCustMsg.substring(0, 100),
+    hasPI, hasAddress, hasOrderSignal, hasPrice, hasSample, hasFreight, hasMOQ, hasQuantity,
+    lastCustQuestion: lastCustQuestion.substring(0, 200), ourResponseQuality, responseGapDays, questionUnanswered,
+    cid: c.cid, filename: fid,
+  };
+
+  // 双轴分类
+  const lc = determineLifecycle(obj);
+  const ql = determineQuality(obj);
+  const sil = silenceLabel(obj.lastCustomerMsgDays === '-' ? 999 : obj.lastCustomerMsgDays);
+
+  obj.stage = lc.stage;
+  obj.stageLabel = lc.label;
+  obj.stageIcon = lc.icon;
+  obj.grade = ql.grade;
+  obj.gradeLabel = ql.label;
+  obj.gradeReason = ql.reason;
+  obj.gradeAuto = ql.auto;
+  obj.silenceState = sil;
+
+  // 行动信号
+  const signals = [];
+  if (questionUnanswered) signals.push('提问未回复');
+  if (ourResponseQuality.startsWith('敷衍回复') && obj.daysAgo < 3) signals.push('敷衍回复需补救');
+  if (responseGapDays > 3 && questionUnanswered) signals.push('超3天未回');
+  if (ql.grade === 'S' || ql.grade === 'A') signals.push(ql.grade + '级客户');
+  if (sil && obj.stage >= 1 && obj.stage <= 5) signals.push(sil);
+  obj.actionSignals = signals;
+
+  enhanced.push(obj);
+}
+
+// ── 按紧急度排序 ──
+const urgencyOrder = { '待回复': 0, 'PI已发': 1, '谈判/样品': 2, '报价已发': 3, '初询沟通': 4, '订单执行中': 5, '已签收': 6, '售后': 7, '待分类': 8 };
+enhanced.sort((a, b) => (urgencyOrder[a.stageLabel] || 9) - (urgencyOrder[b.stageLabel] || 9) || a.daysAgo - b.daysAgo);
+
+// ── 控制台输出 ──
+const byStage = {};
+for (const e of enhanced) {
+  const k = e.stageLabel;
+  if (!byStage[k]) byStage[k] = [];
+  byStage[k].push(e);
+}
+for (const [stage, items] of Object.entries(byStage)) {
+  console.log('── ' + (items[0].stageIcon || '') + ' ' + stage + ': ' + items.length + '人 ──');
+  for (const e of items) {
+    const flags = [];
+    if (e.grade === 'S' || e.grade === 'A') flags.push(e.grade);
+    if (e.isCore) flags.push('★');
+    if (e.questionUnanswered) flags.push('⚠未回');
+    const flagStr = flags.length > 0 ? ' [' + flags.join(' ') + ']' : '';
+    console.log('  ' + String(e.daysAgo).padStart(2) + 'd | ' + (e.country || '??').padEnd(2) + ' | ' + e.name.padEnd(28) + ' | ' + e.grade + '/' + e.stageLabel + flagStr);
+    if (e.lastCustQuestion) {
+      console.log('    ❓ ' + e.lastCustQuestion.substring(0, 80));
+      console.log('    💬 ' + e.ourResponseQuality + (e.silenceState ? ' | ' + e.silenceState : ''));
+    }
+  }
+  console.log('');
+}
+
+// 统计
+const gCount = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+const urgents = enhanced.filter(e => e.stageLabel === '待回复' || e.questionUnanswered);
+for (const e of enhanced) gCount[e.grade] = (gCount[e.grade] || 0) + 1;
+console.log('=== 双轴汇总 ===');
+console.log('质量: S=' + gCount.S + ' A=' + gCount.A + ' B=' + gCount.B + ' C=' + gCount.C + ' D=' + gCount.D);
+console.log('需立即行动: ' + urgents.length + '人 | 提问未回: ' + enhanced.filter(e => e.questionUnanswered).length + '人');
+console.log('总活跃: ' + enhanced.length + ' (来自 ' + (s1.results[1] || []).length + ' P1 + ' + (s1.results[2] || []).length + ' P2)\n');
+
+fs.writeFileSync(path.join(__dirname, '..', 'data', 's1_enhanced.json'), JSON.stringify(enhanced, null, 2));
+console.log('已保存 data/s1_enhanced.json');
+
+// ── HTML 看板 ──
+generateDashboard(enhanced, urgents);
+
+function generateDashboard(data, urgents) {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const timeStr = now.toLocaleString('zh-CN');
+
+  const byStage = {}; for (const e of data) { const k = e.stageLabel; if (!byStage[k]) byStage[k] = []; byStage[k].push(e); }
+
+  const signals = data.filter(e => e.actionSignals.length > 0).sort((a, b) => a.actionSignals.length - b.actionSignals.length).reverse();
+
+  const gradeColors = { S: '#8b0000', A: '#c0392b', B: '#2c3e50', C: '#7f8c8d', D: '#bdc3c7' };
+  const stageColors = { '待回复': '#e74c3c', 'PI已发': '#e67e22', '谈判/样品': '#f39c12', '报价已发': '#3498db', '初询沟通': '#27ae60', '订单执行中': '#9b59b6', '已签收': '#2ecc71', '售后': '#e74c3c' };
+
+  const cardData = [
+    { label: '待回复', num: urgents.length, color: '#e74c3c' },
+    { label: 'S/A级客户', num: gCount.S + gCount.A, color: '#c0392b' },
+    { label: '提问未回', num: enhanced.filter(e => e.questionUnanswered).length, color: '#e67e22' },
+    { label: '待处理信号', num: signals.length, color: '#d35400' },
+    { label: '活跃总数', num: data.length, color: '#2c3e50' },
+  ];
+
+  const stageRows = ['待回复', 'PI已发', '谈判/样品', '报价已发', '初询沟通'].map(s =>
+    (byStage[s] || []).map(e => `
+      <tr>
+        <td><span class="stage-dot" style="background:${stageColors[s] || '#888'}"></span> ${s}</td>
+        <td><b>${e.name}</b></td>
+        <td>${e.country || '??'}${e.isCore ? ' ★' : ''}</td>
+        <td><span class="grade-badge" style="background:${gradeColors[e.grade] || '#888'}">${e.grade}</span> ${e.gradeLabel}</td>
+        <td>${e.daysAgo}d前</td>
+        <td>${e.lastCustomerMsgDays === '-' ? '-' : e.lastCustomerMsgDays + 'd'}</td>
+        <td class="q-preview" title="${(e.lastCustQuestion || '').replace(/"/g, '&quot;')}">${(e.lastCustQuestion || '-').substring(0, 50)}</td>
+        <td>${e.questionUnanswered ? '<span class="tag danger">未回复</span>' : e.ourResponseQuality.startsWith('敷衍') ? '<span class="tag warn">' + e.ourResponseQuality + '</span>' : e.ourResponseQuality.startsWith('简短') ? '<span class="tag info">' + e.ourResponseQuality + '</span>' : '<span class="tag ok">' + e.ourResponseQuality + '</span>'}</td>
+        <td>${e.responseGapDays >= 0 ? (e.responseGapDays > 3 ? '<b class="num-danger">' + e.responseGapDays + 'd</b>' : e.responseGapDays + 'd') : '-'}</td>
+        <td>${e.silenceState || '-'}</td>
+      </tr>`).join('')
+  ).join('');
+
+  const signalItems = signals.slice(0, 15).map((e, i) => `
+    <div class="signal-item ${e.questionUnanswered ? 'critical' : 'warn'}">
+      <div class="signal-header">
+        <span class="signal-name">${i + 1}. ${e.name} <small>(${e.country || '??'})</small></span>
+        <span><span class="grade-badge" style="background:${gradeColors[e.grade] || '#888'}">${e.grade}</span> <span class="stage-tag" style="background:${stageColors[e.stageLabel] || '#888'}">${e.stageIcon} ${e.stageLabel}</span></span>
+      </div>
+      <div class="signal-reason">${e.actionSignals.map(s => '<span class="tag danger">' + s + '</span>').join(' ')}</div>
+      ${e.lastCustQuestion ? '<div class="signal-q">❓ ' + e.lastCustQuestion.substring(0, 100) + '</div>' : ''}
+      <div class="signal-meta">回复质量: ${e.ourResponseQuality} | 静默: ${e.lastCustomerMsgDays === '-' ? 'N/A' : e.lastCustomerMsgDays + 'd'} | 消息: ${e.realMsgs}条</div>
+    </div>
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小星星 OKKI 客户看板 — ${today}</title>
+<style>
+  :root { --red: #e74c3c; --orange: #e67e22; --blue: #3498db; --green: #27ae60; --dark: #2c3e50; --gray: #95a5a6; --bg: #f5f6fa; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background: var(--bg); color: #333; line-height: 1.5; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .topbar h1 { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .topbar h1 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); display: inline-block; }
+  .topbar .meta { color: var(--gray); font-size: 13px; text-align: right; }
+  .topbar .meta span { display: block; }
+
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center; }
+  .card .num { font-size: 36px; font-weight: 800; }
+  .card .lbl { font-size: 13px; color: #666; margin-top: 4px; }
+
+  .panel { background: #fff; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
+  .panel-hd { padding: 16px 20px; font-weight: 700; font-size: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+  .panel-hd.red { background: #fff5f5; color: #c0392b; }
+  .panel-hd.orange { background: #fffaf5; color: #d35400; }
+  .panel-bd { padding: 16px 20px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8f9fa; padding: 10px 10px; text-align: left; font-weight: 600; border-bottom: 2px solid #e9ecef; white-space: nowrap; color: #555; font-size: 12px; }
+  td { padding: 9px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  tr:hover td { background: #fafbfc; }
+
+  .stage-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .grade-badge { color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+  .stage-tag { color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 11px; }
+  .tag { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+  .tag.danger { background: #ffe0e0; color: #c0392b; }
+  .tag.warn { background: #fff3cd; color: #856404; }
+  .tag.info { background: #d1ecf1; color: #0c5460; }
+  .tag.ok { background: #d4edda; color: #155724; }
+  .q-preview { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #888; }
+  .num-danger { color: #e74c3c; }
+
+  .signal-item { padding: 14px 16px; margin: 8px 0; border-left: 4px solid #e67e22; background: #fffdf0; border-radius: 0 6px 6px 0; }
+  .signal-item.critical { border-left-color: #e74c3c; background: #fff5f5; }
+  .signal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-weight: 600; }
+  .signal-reason { margin-bottom: 4px; }
+  .signal-q { font-size: 12px; color: #999; font-style: italic; margin: 4px 0; }
+  .signal-meta { font-size: 12px; color: #888; }
+
+  .matrix { display: grid; grid-template-columns: 120px repeat(5, 1fr); gap: 1px; background: #e9ecef; border: 1px solid #e9ecef; border-radius: 6px; overflow: hidden; font-size: 13px; }
+  .matrix > * { background: #fff; padding: 10px 8px; text-align: center; }
+  .matrix .mhd { background: #f8f9fa; font-weight: 600; }
+
+  .popup-btn { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: var(--red); color: #fff; border: none;
+    border-radius: 50px; padding: 14px 24px; font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(231,76,60,0.4); transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+  .popup-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(231,76,60,0.5); }
+  .popup-btn .cnt { background: #fff; color: var(--red); border-radius: 20px; padding: 2px 10px; font-size: 14px; }
+
+  .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99999; justify-content: center; align-items: center; }
+  .modal.show { display: flex; }
+  .modal-box { background: #fff; border-radius: 12px; width: 750px; max-width: 94vw; max-height: 82vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.3); }
+  .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #eee; font-weight: 700; font-size: 16px; position: sticky; top: 0; background: #fff; border-radius: 12px 12px 0 0; }
+  .modal-close { cursor: pointer; font-size: 26px; color: #bbb; border: none; background: none; padding: 0 6px; }
+  .modal-close:hover { color: #333; }
+  .modal-bd { padding: 20px 24px; }
+
+  .tip { font-size: 12px; color: #999; padding: 10px; background: #f8f9fa; border-radius: 4px; margin-top: 16px; }
+
+  @media (max-width: 768px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .matrix { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="topbar">
+  <h1><span class="dot"></span>小星星 OKKI 客户看板</h1>
+  <div class="meta"><span>${today}</span><span>生成于 ${timeStr}</span></div>
+</div>
+
+<div class="cards">
+  ${cardData.map(c => '<div class="card"><div class="num" style="color:' + c.color + '">' + c.num + '</div><div class="lbl">' + c.label + '</div></div>').join('')}
+</div>
+
+${signals.length > 0 ? `
+<div class="panel">
+  <div class="panel-hd orange">⚡ 行动信号 — ${signals.length} 个客户需关注</div>
+  <div class="panel-bd">${signalItems}</div>
+</div>
+` : ''}
+
+<div class="panel">
+  <div class="panel-hd red">📋 客户分类详情 (双轴: 生命周期 × 质量等级)</div>
+  <div class="panel-bd" style="overflow-x:auto;">
+    <table>
+      <thead><tr><th>阶段</th><th>客户</th><th>国家</th><th>质量</th><th>距今</th><th>客户静默</th><th>最后提问</th><th>回复质量</th><th>间隔</th><th>沉默状态</th></tr></thead>
+      <tbody>${stageRows}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-hd">📐 双轴矩阵 (阶段 × 等级)</div>
+  <div class="panel-bd">
+    <div class="matrix">
+      <div class="mhd">阶段 \\ 等级</div>
+      <div class="mhd">S</div><div class="mhd">A</div><div class="mhd">B</div><div class="mhd">C</div><div class="mhd">D</div>
+      ${['待回复', '初询沟通', '报价已发', '谈判/样品', 'PI已发', '订单执行中', '已签收', '售后'].map(s => {
+        const items = byStage[s] || [];
+        const grades = { S: [], A: [], B: [], C: [], D: [] };
+        for (const e of items) grades[e.grade].push(e);
+        return '<div>' + s + '</div>' + ['S', 'A', 'B', 'C', 'D'].map(g => '<div>' + (grades[g].length || '-') + '</div>').join('');
+      }).join('')}
+    </div>
+  </div>
+</div>
+
+<div class="tip">
+  💡 <b>分类体系：</b>双轴模型 v2 — 生命周期(8阶段+沉默副状态) × 质量等级(S/A/B/C/D)。质量等级为自动判定，标注"auto"的需人工确认。
+  提问检测：英文问号/what/how/can you等 + 中文吗/呢/？/报价/样品等。回复质量：未回复 / 敷衍(<15字) / 简短(15-50字) / 充分(≥50字)。
+</div>
+
+</div>
+
+<button class="popup-btn" onclick="document.getElementById('modal').classList.add('show')">
+  ⚡ 信号速览 <span class="cnt">${signals.length}</span>
+</button>
+
+<div id="modal" class="modal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <span>⚡ 行动信号速览 — ${signals.length} 个待处理</span>
+      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-bd">
+      ${signals.length === 0 ? '<p style="color:#888;text-align:center;">✅ 当前无紧急行动信号</p>' : ''}
+      ${signals.map((e, i) => {
+        let advice = '';
+        if (e.questionUnanswered) advice = '24h内必须回复客户提问';
+        else if (e.ourResponseQuality.startsWith('敷衍回复')) advice = '补充详细信息或发送产品目录补救';
+        else if (e.responseGapDays > 3) advice = '回复间隔过长，立即联系确认需求';
+        else if (e.silenceState) advice = '客户进入' + e.silenceState + '，按策略触达';
+        else advice = '查看详情，评估下一步';
+        return '<div class="signal-item ' + (e.questionUnanswered ? 'critical' : 'warn') + '">'
+          + '<div class="signal-header"><span>' + (i + 1) + '. ' + e.name + ' (' + (e.country || '??') + ')</span>'
+          + '<span><span class="grade-badge" style="background:' + (gradeColors[e.grade] || '#888') + '">' + e.grade + '</span> ' + e.stageLabel + '</span></div>'
+          + '<div class="signal-reason">' + e.actionSignals.map(s => '<span class="tag danger">' + s + '</span>').join(' ') + '</div>'
+          + '<div class="action-detail">📌 ' + advice + '</div>'
+          + (e.lastCustQuestion ? '<div class="signal-q">❓ ' + e.lastCustQuestion.substring(0, 120) + '</div>' : '')
+          + '<div class="signal-meta">💬 ' + e.ourResponseQuality + ' | 静默: ' + (e.lastCustomerMsgDays === '-' ? 'N/A' : e.lastCustomerMsgDays + 'd') + ' | ' + e.realMsgs + '条消息</div>'
+          + '</div>';
+      }).join('')}
+      <div class="tip">按 <b>ESC</b> 或点击背景关闭</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modal').classList.remove('show'); });
+</script>
+
+</body>
+</html>`;
+
+  const outPath = path.join(__dirname, '..', 'output', 'action_signals_' + today + '.html');
+  fs.writeFileSync(outPath, html, 'utf-8');
+  console.log('弹窗看板 → ' + outPath);
+}

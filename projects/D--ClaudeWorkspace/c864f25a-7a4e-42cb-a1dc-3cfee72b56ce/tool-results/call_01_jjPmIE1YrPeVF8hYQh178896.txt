@@ -1,0 +1,252 @@
+d:\ClaudeWorkspace\.claude\AGENTS.md:26:| refactor-cleaner | Dead code cleanup | Code maintenance |
+d:\ClaudeWorkspace\.claude\hooks\README.md:69:| **Session end marker** | `SessionEnd` | Lifecycle marker and cleanup log |
+d:\ClaudeWorkspace\.claude\commands\checkpoint.md:13:1. Run `/verify quick` to ensure current state is clean
+d:\ClaudeWorkspace\.claude\the-security-guide.md:39:Simon Willison's lethal trifecta framing is still the cleanest way to think about this: private data, untrusted content, and external communication. Once all three live in the same runtime, prompt injection stops being funny and starts becoming data exfiltration.
+d:\ClaudeWorkspace\.claude\the-security-guide.md:97:Some of the cleaner numbers worth keeping in your head:
+d:\ClaudeWorkspace\.claude\the-security-guide.md:198:![LGTM comparison — The file looks clean to a human. The model still sees the hidden instructions](./assets/images/security/sanitization.png)
+d:\ClaudeWorkspace\.claude\the-security-guide.md:230:That separation matters. One agent can parse a document in a restricted environment. Another agent, with stronger approvals, can act only on the cleaned summary. Same workflow; much safer.
+d:\ClaudeWorkspace\.claude\the-security-guide.md:275:OWASP's language around least privilege maps cleanly to agents, but I prefer thinking about it as least agency. Only give the agent the minimum room to maneuver that the task actually needs.
+d:\ClaudeWorkspace\.claude\the-security-guide.md:310:Know the difference between graceful and hard kills. `SIGTERM` gives the process a chance to clean up. `SIGKILL` stops it immediately. Both matter.
+d:\ClaudeWorkspace\.claude\.agents\skills\agent-sort\SKILL.md:19:- A repo has drifted into the wrong language, rule, or hook set and needs cleanup
+d:\ClaudeWorkspace\.claude\.agents\skills\agent-sort\SKILL.md:188:If the next step is overlap cleanup or catalog review, hand off to:
+d:\ClaudeWorkspace\.claude\commands\eval.md:21:- Support the same user intents as before: define, check, report, list, and cleanup.
+d:\ClaudeWorkspace\.claude\commands\flutter-review.md:23:4. **`flutter analyze` is clean** — fix analyzer warnings before review
+d:\ClaudeWorkspace\.claude\commands\go-test.md:210:    t.Cleanup(func() { db.Close() })
+d:\ClaudeWorkspace\.claude\agents\cpp-build-resolver.md:61:cmake --build build --clean-first
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:128:# Clean and regenerate all files
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:129:dart run build_runner clean
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:142:# Clean Android build cache
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:143:cd android && ./gradlew clean && cd ..
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:146:flutter clean
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:161:# Clean iOS build
+d:\ClaudeWorkspace\.claude\agents\dart-build-resolver.md:162:flutter clean && cd ios && pod deintegrate && pod install && cd ..
+d:\ClaudeWorkspace\.claude\agents\build-error-resolver.md:106:- Code needs refactoring → use `refactor-cleaner`
+d:\ClaudeWorkspace\.claude\commands\multi-execute.md:218:3. **Refactor and Clean**:
+d:\ClaudeWorkspace\.claude\agents\go-reviewer.md:21:- **Path traversal**: User-controlled file paths without `filepath.Clean` + prefix check
+d:\ClaudeWorkspace\.claude\agents\security-reviewer.md:43:9. **Known Vulnerabilities** — Dependencies up to date? npm audit clean?
+d:\ClaudeWorkspace\.claude\agents\go-build-resolver.md:65:go clean -modcache && go mod download  # Fix checksum issues
+d:\ClaudeWorkspace\.claude\agents\kotlin-reviewer.md:3:description: Kotlin and Android/KMP code reviewer. Reviews Kotlin code for idiomatic patterns, coroutine safety, Compose best practices, clean architecture violations, and common Android pitfalls.
+d:\ClaudeWorkspace\.claude\agents\kotlin-reviewer.md:14:- Enforce clean architecture module boundaries
+d:\ClaudeWorkspace\.claude\agents\gan-generator.md:21:5. **Commit between iterations** — Use git so the Evaluator can see clean diffs.
+d:\ClaudeWorkspace\.claude\agents\gan-generator.md:86:- Express/FastAPI with clean route structure
+d:\ClaudeWorkspace\.claude\agents\gan-generator.md:92:- Clean file structure — no 1000-line files
+d:\ClaudeWorkspace\.claude\agents\gan-planner.md:32:- **Color palette**: [specific colors, not "modern" or "clean"]
+d:\ClaudeWorkspace\.claude\.agents\skills\api-design\SKILL.md:376:**Pros:** Clean URLs
+d:\ClaudeWorkspace\.claude\agents\kotlin-build-resolver.md:66:./gradlew clean && rm -rf .gradle/build-cache/
+d:\ClaudeWorkspace\.claude\agents\refactor-cleaner.md:2:name: refactor-cleaner
+d:\ClaudeWorkspace\.claude\agents\refactor-cleaner.md:3:description: Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it.
+d:\ClaudeWorkspace\.claude\agents\refactor-cleaner.md:8:# Refactor & Dead Code Cleaner
+d:\ClaudeWorkspace\.claude\agents\refactor-cleaner.md:10:You are an expert refactoring specialist focused on code cleanup and consolidation. Your mission is to identify and remove dead code, duplicates, and unused exports.
+d:\ClaudeWorkspace\.claude\agents\refactor-cleaner.md:16:3. **Dependency Cleanup** -- Remove unused packages and imports
+d:\ClaudeWorkspace\.claude\agents\flutter-reviewer.md:3:description: Flutter and Dart code reviewer. Reviews Flutter code for widget best practices, state management patterns, Dart idioms, performance pitfalls, accessibility, and clean architecture violations. Library-agnostic — works with any state management solution and tooling.
+d:\ClaudeWorkspace\.claude\agents\flutter-reviewer.md:61:Adapt to the project's chosen architecture (Clean Architecture, MVVM, feature-first, etc.):
+d:\ClaudeWorkspace\.claude\agents\flutter-reviewer.md:142:- **Unclosed `StreamController`** / **`Timer` not cancelled** — Must be cleaned up in `dispose()`
+d:\ClaudeWorkspace\.claude\.agents\skills\video-editing\SKILL.md:225:- **Captions**: auto-generated, then manually cleaned
+d:\ClaudeWorkspace\.claude\agents\java-build-resolver.md:70:./mvnw clean install -U
+d:\ClaudeWorkspace\.claude\agents\java-build-resolver.md:99:./gradlew clean && rm -rf .gradle/build-cache/
+d:\ClaudeWorkspace\.claude\commands\prp-pr.md:32:| Clean working directory | No uncommitted changes | Warn: "You have uncommitted changes. Commit or stash first. Use `/prp-commit` to commit." |
+d:\ClaudeWorkspace\.claude\commands\prp-implement.md:85:| On main, clean working tree | Create feature branch: `git checkout -b feat/{plan-name}` |
+d:\ClaudeWorkspace\.claude\commands\prp-implement.md:340:4. Continue only when clean
+d:\ClaudeWorkspace\.claude\commands\prp-implement.md:352:4. Continue only when clean
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:19:6. **Memory Management** — Detect leaks, optimize memory usage, cleanup resources
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:259:// BAD: Event listener without cleanup
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:262:  // Missing cleanup!
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:265:// GOOD: Clean up event listeners
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:271:// BAD: Timer without cleanup
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:274:  // Missing cleanup!
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:277:// GOOD: Clean up timers
+d:\ClaudeWorkspace\.claude\agents\performance-optimizer.md:431:| Memory usage growing | Check for leaks, review useEffect cleanup |
+d:\ClaudeWorkspace\.claude\commands\refactor-clean.md:1:# Refactor Clean
+d:\ClaudeWorkspace\.claude\commands\refactor-clean.md:64:Dead Code Cleanup
+d:\ClaudeWorkspace\.claude\commands\refactor-clean.md:80:- **Don't refactor while cleaning** — Separate concerns (clean first, refactor later)
+d:\ClaudeWorkspace\.claude\.agents\skills\content-engine\SKILL.md:3:description: Create platform-native content systems for X, LinkedIn, TikTok, YouTube, newsletters, and repurposed multi-platform campaigns. Use when the user wants social posts, threads, scripts, content calendars, or one source asset adapted cleanly across platforms.
+d:\ClaudeWorkspace\.claude\agents\opensource-sanitizer.md:124:# If > 1, history was not cleaned — FAIL
+d:\ClaudeWorkspace\.claude\commands\rust-test.md:288:- Use `?` in tests that return `Result` for cleaner output
+d:\ClaudeWorkspace\.claude\agents\opensource-forker.md:3:description: Fork any project for open-sourcing. Copies files, strips secrets and credentials (20+ patterns), replaces internal references with placeholders, generates .env.example, and cleans git history. First stage of the opensource-pipeline skill.
+d:\ClaudeWorkspace\.claude\agents\opensource-forker.md:10:You fork private/internal projects into clean, open-source-ready copies. You are the first stage of the open-source pipeline.
+d:\ClaudeWorkspace\.claude\agents\opensource-forker.md:134:### Step 6: Clean Git History
+d:\ClaudeWorkspace\.claude\.agents\skills\investor-outreach\SKILL.md:65:- day 10 to 12: final follow-up with a clean close
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\CHANGELOG.md:232:  - Replaced manual `sys.argv` parsing with `argparse` — `--help` now exits cleanly with usage information
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\CHANGELOG.md:863:  - Cleaner, more maintainable frontmatter
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\examples\README.md:227:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\examples\README.md:264:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\examples\README.md:409:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\examples\README.md:555:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\.agents\skills\investor-materials\SKILL.md:61:- state what the company does in one clean sentence
+d:\ClaudeWorkspace\.claude\.agents\skills\investor-materials\SKILL.md:71:- clean layer-by-layer revenue logic
+d:\ClaudeWorkspace\.claude\.agents\skills\investor-materials\SKILL.md:86:- revenue math that does not sum cleanly
+d:\ClaudeWorkspace\.claude\.agents\skills\frontend-slides\STYLE_PRESETS.md:197:- Vibe: clean, bold, agency-polished
+d:\ClaudeWorkspace\.claude\.agents\skills\frontend-slides\STYLE_PRESETS.md:261:- Vibe: developer-focused, hacker-clean
+d:\ClaudeWorkspace\.claude\.agents\skills\frontend-slides\STYLE_PRESETS.md:294:| Professional / Corporate | subtle 200-300ms transitions, clean slides |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.mastracode\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.mastracode\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.gemini\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.gemini\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.cursor\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.cursor\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.pi\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.pi\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.codex\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.codex\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\troubleshooting.md:15:### Solution 1: Clean reinstall (Recommended)
+d:\ClaudeWorkspace\.claude\.agents\skills\tdd-workflow\SKILL.md:396:9. **Clean Up After Tests** - No side effects
+d:\ClaudeWorkspace\.claude\.agents\skills\frontend-design\SKILL.md:50:Do not mix directions casually. Choose one and execute it cleanly.
+d:\ClaudeWorkspace\.claude\.agents\skills\security-review\SKILL.md:202:  const clean = DOMPurify.sanitize(html, {
+d:\ClaudeWorkspace\.claude\.agents\skills\security-review\SKILL.md:206:  return <div dangerouslySetInnerHTML={{ __html: clean }} />
+d:\ClaudeWorkspace\.claude\.agents\skills\security-review\SKILL.md:419:- [ ] No known vulnerabilities (npm audit clean)
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\openclaw.md:44:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\openclaw.md:62:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\mastra.md:29:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\mastra.md:51:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\factory.md:27:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\factory.md:45:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\codex.md:40:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\codex.md:64:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\README.md:42:| [openclaw-github-repo-commander](https://github.com/wd041216-bit/openclaw-github-repo-commander) | [@wd041216-bit](https://github.com/wd041216-bit) | 7-stage GitHub repo audit, optimization, and cleanup workflow for OpenClaw |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\codebuddy.md:27:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\codebuddy.md:45:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\boxlite.md:99:    # Clean up when done
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\boxlite.md:100:    await ClaudeBox.cleanup_session("auth-feature", remove_workspace=True)
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\article.md:150:For users: the skill is cleaner, more secure, and now formally verified. The 3-file workflow is validated across 5 diverse task types by blind independent agents.
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.opencode\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.opencode\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\antigravity.md:27:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\antigravity.md:45:# Clean up
+d:\ClaudeWorkspace\.claude\skills\compose-multiplatform-patterns\SKILL.md:298:See skill: `android-clean-architecture` for module structure and layering.
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.kiro\skills\planning-with-files\assets\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.kiro\skills\planning-with-files\assets\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\skills\android-clean-architecture\SKILL.md:2:name: android-clean-architecture
+d:\ClaudeWorkspace\.claude\skills\android-clean-architecture\SKILL.md:3:description: Clean Architecture patterns for Android and Kotlin Multiplatform projects — module structure, dependency rules, UseCases, Repositories, and data layer patterns.
+d:\ClaudeWorkspace\.claude\skills\android-clean-architecture\SKILL.md:7:# Android Clean Architecture
+d:\ClaudeWorkspace\.claude\skills\android-clean-architecture\SKILL.md:9:Clean Architecture patterns for Android and KMP projects. Covers module boundaries, dependency inversion, UseCase/Repository patterns, and data layer design with Room, SQLDelight, and Ktor.
+d:\ClaudeWorkspace\.claude\skills\android-clean-architecture\SKILL.md:53:Each UseCase represents one business operation. Use `operator fun invoke` for clean call sites:
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.factory\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.factory\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.codebuddy\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.codebuddy\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\skills\ai-regression-testing\SKILL.md:367:| Error state leakage | Assert state cleanup on error |  Medium |
+d:\ClaudeWorkspace\.claude\skills\agent-sort\SKILL.md:19:- A repo has drifted into the wrong language, rule, or hook set and needs cleanup
+d:\ClaudeWorkspace\.claude\skills\agent-sort\SKILL.md:188:If the next step is overlap cleanup or catalog review, hand off to:
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.hermes\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.hermes\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\skills\ai-first-engineering\SKILL.md:41:- decompose ambiguous work cleanly
+d:\ClaudeWorkspace\.claude\skills\carrier-relationship-management\SKILL.md:87:- **Award and implementation:** Award in waves — primary carriers first, then secondary. Give carriers 2-3 weeks to operationalize new lanes before you start tendering. Run a 30-day parallel period where old and new routing guides overlap. Cut over cleanly.
+d:\ClaudeWorkspace\.claude\skills\b2b-visual-design\SKILL.md:59:Scene: baby clothing products in a clean nursery setting
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:23:- Adding quality gates and cleanup passes to autonomous workflows
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:35:| [De-Sloppify Pattern](#5-the-de-sloppify-pattern) | Add-on | Quality cleanup after any Implementer step |
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:59:# Step 2: De-sloppify (cleanup pass)
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:60:claude -p "Review all files changed by the previous commit. Remove any unnecessary type tests, overly defensive checks, or testing of language features (e.g., testing that TypeScript generics work). Keep real business logic tests. Run the test suite after cleanup."
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:73:3. **Negative instructions are dangerous** — Don't say "don't test type systems." Instead, add a separate cleanup step (see [De-Sloppify Pattern](#5-the-de-sloppify-pattern)).
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:319:**An add-on pattern for any loop.** Add a dedicated cleanup/refactor step after each Implementer step.
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:338:Instead of constraining the Implementer, let it be thorough. Then add a focused cleanup agent:
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:344:# Step 2: De-sloppify (separate context, focused cleanup)
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:352:Keep all business logic tests. Run the test suite after cleanup to ensure nothing breaks."
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:363:  claude -p "Cleanup pass: review changes, remove test/code slop, run tests."
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:567:1. **Sequential Pipeline + De-Sloppify** — The most common combination. Every implement step gets a cleanup pass.
+d:\ClaudeWorkspace\.claude\skills\autonomous-loops\SKILL.md:594:4. **Negative instructions instead of cleanup passes** — Don't say "don't do X." Add a separate pass that removes X.
+d:\ClaudeWorkspace\.claude\skills\api-design\SKILL.md:376:**Pros:** Clean URLs
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\rules\zh\agents.md:16:| refactor-cleaner | 死代码清理 | 代码维护 |
+d:\ClaudeWorkspace\.claude\skills\brainstorming\visual-companion.md:48:**Note:** Pass the project root as `--project-dir` so mockups persist in `.superpowers/brainstorm/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.superpowers/` to `.gitignore` if it's not already there.
+d:\ClaudeWorkspace\.claude\skills\brainstorming\visual-companion.md:143:      <p>Clean, focused reading experience</p>
+d:\ClaudeWorkspace\.claude\skills\brainstorming\visual-companion.md:276:## Cleaning Up
+d:\ClaudeWorkspace\.claude\skills\customer-billing-ops\SKILL.md:41:### 1. Identify the customer cleanly
+d:\ClaudeWorkspace\.claude\skills\docker-patterns\SKILL.md:324:# Clean up
+d:\ClaudeWorkspace\.claude\rules\web\design-quality.md:37:1. Pick a specific style direction. Avoid vague defaults like "clean minimal".
+d:\ClaudeWorkspace\.claude\skills\kotlin-coroutines-flows\SKILL.md:199:### Cleanup with try/finally
+d:\ClaudeWorkspace\.claude\skills\kotlin-coroutines-flows\SKILL.md:284:See skill: `android-clean-architecture` for where coroutines fit in layers.
+d:\ClaudeWorkspace\.claude\skills\cpp-testing\SKILL.md:29:- **TDD loop**: red → green → refactor (tests first, minimal fix, then cleanups).
+d:\ClaudeWorkspace\.claude\skills\cpp-testing\SKILL.md:42:3. **REFACTOR**: clean up while tests stay green
+d:\ClaudeWorkspace\.claude\skills\cpp-testing\SKILL.md:269:- Make temp directories unique per test and always clean them.
+d:\ClaudeWorkspace\.claude\skills\cpp-testing\SKILL.md:292:- **Using fixed temp paths** → Generate unique temp directories per test and clean them.
+d:\ClaudeWorkspace\.claude\skills\writing-skills\SKILL.md:204:- Synonyms: "timeout/hang/freeze", "cleanup/teardown/afterEach"
+d:\ClaudeWorkspace\.claude\skills\django-tdd\SKILL.md:292:            product.full_clean()
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\skills\planning-with-files\templates\findings.md:29:    - Python's argparse module supports subcommands for clean CLI design
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\skills\planning-with-files\templates\findings.md:43:    | argparse with subcommands | Clean CLI: python todo.py add "task" |
+d:\ClaudeWorkspace\.claude\skills\council\SKILL.md:172:- keep the Skeptic as clean as possible to preserve anti-anchoring value
+d:\ClaudeWorkspace\.claude\rules\perl\security.md:25:    my $clean = $1;
+d:\ClaudeWorkspace\.claude\skills\deployment-patterns\SKILL.md:57:**Pros:** Instant rollback (switch back to blue), clean cutover
+d:\ClaudeWorkspace\.claude\skills\content-engine\SKILL.md:3:description: Create platform-native content systems for X, LinkedIn, TikTok, YouTube, newsletters, and repurposed multi-platform campaigns. Use when the user wants social posts, threads, scripts, content calendars, or one source asset adapted cleanly across platforms.
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\README.md:42:| [openclaw-github-repo-commander](https://github.com/wd041216-bit/openclaw-github-repo-commander) | [@wd041216-bit](https://github.com/wd041216-bit) | 7-stage GitHub repo audit, optimization, and cleanup workflow for OpenClaw |
+d:\ClaudeWorkspace\.claude\skills\workspace-surface-audit\SKILL.md:103:   - tools exist, but ECC lacks a clean operator skill
+d:\ClaudeWorkspace\.claude\skills\connections-optimizer\SKILL.md:3:description: Reorganize the user's X and LinkedIn network with review-first pruning, add/follow recommendations, and channel-specific warm outreach drafted in the user's real voice. Use when the user wants to clean up following lists, grow toward current priorities, or rebalance a social graph around higher-signal relationships.
+d:\ClaudeWorkspace\.claude\skills\connections-optimizer\SKILL.md:13:- X following cleanup and expansion
+d:\ClaudeWorkspace\.claude\skills\connections-optimizer\SKILL.md:24:- the user says "clean up my network", "who should I unfollow", "who should I follow", "who should I reconnect with"
+d:\ClaudeWorkspace\.claude\skills\investor-outreach\SKILL.md:65:- day 10 to 12: final follow-up with a clean close
+d:\ClaudeWorkspace\.claude\rules\kotlin\patterns.md:146:See skill: `android-clean-architecture` for module and layer patterns.
+d:\ClaudeWorkspace\.claude\skills\dart-flutter-patterns\SKILL.md:3:description: Production-ready Dart and Flutter patterns covering null safety, immutable state, async composition, widget architecture, popular state management frameworks (BLoC, Riverpod, Provider), GoRouter navigation, Dio networking, Freezed code generation, and clean architecture.
+d:\ClaudeWorkspace\.claude\skills\visa-doc-translate\SKILL.md:97:- Use clean, professional formatting
+d:\ClaudeWorkspace\.claude\skills\configure-ecc\SKILL.md:321:Clean up the cloned repository from `/tmp`:
+d:\ClaudeWorkspace\.claude\rules\dart\patterns.md:207:## Clean Architecture Layer Boundaries
+d:\ClaudeWorkspace\.claude\skills\investor-materials\SKILL.md:61:- state what the company does in one clean sentence
+d:\ClaudeWorkspace\.claude\skills\investor-materials\SKILL.md:71:- clean layer-by-layer revenue logic
+d:\ClaudeWorkspace\.claude\skills\investor-materials\SKILL.md:86:- revenue math that does not sum cleanly
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\examples\README.md:227:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\examples\README.md:264:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\examples\README.md:409:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\examples\README.md:555:| argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+d:\ClaudeWorkspace\.claude\skills\customs-trade-compliance\SKILL.md:178:2. **Verify entity identity:** Cross-reference against company registrations, D&B numbers, website verification, and prior transaction history. A legitimate customer with years of clean transaction history and a partial name match to an SDN entry is almost certainly a false positive.
+d:\ClaudeWorkspace\.claude\skills\inventory-demand-planning\SKILL.md:37:1. Collect demand signals (POS sell-through, orders, shipments) and cleanse outliers
+d:\ClaudeWorkspace\.claude\skills\inventory-demand-planning\SKILL.md:58:**Seasonal Decomposition (STL, classical, X-13ARIMA-SEATS):** When you need to isolate trend, seasonal, and residual components separately. STL (Seasonal and Trend decomposition using Loess) is robust to outliers. Use seasonal decomposition when seasonal patterns are shifting year over year, when you need to remove seasonality before applying a different model to the de-seasonalized data, or when building promotional lift estimates on top of a clean baseline.
+d:\ClaudeWorkspace\.claude\skills\frontend-design\SKILL.md:50:Do not mix directions casually. Choose one and execute it cleanly.
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:3:description: Operate across Google Drive, Docs, Sheets, and Slides as one workflow surface for plans, trackers, decks, and shared documents. Use when the user needs to find, summarize, edit, migrate, or clean up Google Workspace assets without dropping to raw tool calls.
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:15:- Cleaning or restructuring a shared spreadsheet
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:25:- Google Slides for decks, imports, template migration, and cleanup
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:48:- detect whether the task is local cleanup or structural surgery
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:56:- For Slides: distinguish content edits from visual cleanup or template migration
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:60:### 4. Keep the working system clean
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:87:- archive / merge / duplicate cleanup / next file to update
+d:\ClaudeWorkspace\.claude\skills\google-workspace-ops\SKILL.md:93:- "Clean up this customer spreadsheet and show me the churn-risk rows"
+d:\ClaudeWorkspace\.claude\skills\golang-testing\SKILL.md:235:    // Cleanup when test finishes
+d:\ClaudeWorkspace\.claude\skills\golang-testing\SKILL.md:236:    t.Cleanup(func() {
+d:\ClaudeWorkspace\.claude\skills\golang-testing\SKILL.md:267:    // Create temp directory - automatically cleaned up
+d:\ClaudeWorkspace\.claude\skills\golang-testing\SKILL.md:689:- Clean up resources with `t.Cleanup()`
+d:\ClaudeWorkspace\.claude\skills\frontend-slides\STYLE_PRESETS.md:197:- Vibe: clean, bold, agency-polished
+d:\ClaudeWorkspace\.claude\skills\frontend-slides\STYLE_PRESETS.md:261:- Vibe: developer-focused, hacker-clean
+d:\ClaudeWorkspace\.claude\skills\frontend-slides\STYLE_PRESETS.md:294:| Professional / Corporate | subtle 200-300ms transitions, clean slides |
+d:\ClaudeWorkspace\.claude\skills\finance-billing-ops\SKILL.md:127:- customer-impact and broader pricing/product conclusions are separated cleanly
+d:\ClaudeWorkspace\.claude\skills\email-ops\SKILL.md:35:- do not delete uncertain business mail during cleanup
+d:\ClaudeWorkspace\.claude\skills\golang-patterns\SKILL.md:171:_ = writer.Close() // Best-effort cleanup, error logged elsewhere
+d:\ClaudeWorkspace\.claude\skills\ecc-tools-cost-audit\SKILL.md:19:- `customer-billing-ops` when repo behavior and customer-impact math must be separated cleanly
+d:\ClaudeWorkspace\.claude\skills\production-scheduling\SKILL.md:68:**Colour/size sequencing:** In painting, coating, printing, and textile operations, sequence jobs from light to dark, small to large, or simple to complex to minimize cleaning between runs. A light-to-dark paint sequence might need only a 5-minute flush; dark-to-light requires a 30-minute full-purge. Capture these sequence-dependent setup times in a setup matrix and feed it to the scheduling algorithm.
+d:\ClaudeWorkspace\.claude\skills\videodb\reference\capture.md:51:13. **Stop WebSocket listener** after receiving the export event. Use `kill $(cat /tmp/videodb_ws_pid)` to cleanly terminate it.
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\troubleshooting.md:15:### Solution 1: Clean reinstall (Recommended)
+d:\ClaudeWorkspace\.claude\skills\videodb\reference\capture-reference.md:287:| `await client.shutdown()` | `None` | Clean up client resources |
+d:\ClaudeWorkspace\.claude\skills\laravel-verification\SKILL.md:22:- Linting/static analysis should be clean before running full tests and coverage.
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\openclaw.md:44:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\openclaw.md:62:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\mastra.md:29:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\mastra.md:51:# Clean up
+d:\ClaudeWorkspace\.claude\skills\video-editing\SKILL.md:225:- **Captions**: auto-generated, then manually cleaned
+d:\ClaudeWorkspace\.claude\skills\laravel-tdd\SKILL.md:159:- Use `RefreshDatabase` for clean state
+d:\ClaudeWorkspace\.claude\skills\manim-video\SKILL.md:3:description: Build reusable Manim explainers for technical concepts, graphs, system diagrams, and product walkthroughs, then hand off to the wider ECC video stack if needed. Use when the user wants a clean animated explainer rather than a generic talking-head script.
+d:\ClaudeWorkspace\.claude\skills\manim-video\SKILL.md:63:- export one clean thumbnail frame that reads at social size
+d:\ClaudeWorkspace\.claude\skills\kotlin-testing\SKILL.md:642:        // cleanup
+d:\ClaudeWorkspace\.claude\skills\kotlin-testing\SKILL.md:824:**Remember**: Tests are documentation. They show how your Kotlin code is meant to be used. Use Kotest's expressive matchers to make tests readable and MockK for clean mocking of dependencies.
+d:\ClaudeWorkspace\.claude\skills\perl-testing\SKILL.md:128:- Subtests with cleaner scoping
+d:\ClaudeWorkspace\.claude\skills\perl-testing\SKILL.md:299:    my $dir = tempdir(CLEANUP => 1);
+d:\ClaudeWorkspace\.claude\skills\perl-testing\SKILL.md:307:    # Teardown happens automatically (CLEANUP => 1)
+d:\ClaudeWorkspace\.claude\skills\perl-patterns\SKILL.md:185:use namespace::autoclean;
+d:\ClaudeWorkspace\.claude\skills\perl-patterns\SKILL.md:504:**Remember**: Modern Perl is clean, readable, and safe. Let `use v5.36` handle the boilerplate, use Moo for objects, and prefer CPAN's battle-tested modules over hand-rolled solutions.
+d:\ClaudeWorkspace\.claude\skills\kotlin-patterns\SKILL.md:358:### Cancellation and Cleanup
+d:\ClaudeWorkspace\.claude\skills\kotlin-patterns\SKILL.md:369:// Good: Cleanup with try/finally
+d:\ClaudeWorkspace\.claude\skills\kotlin-patterns\SKILL.md:660:| `let`/`apply`/`also`/`run`/`with` | Scope functions for clean code |
+d:\ClaudeWorkspace\.claude\skills\plankton-code-quality\SKILL.md:42:└─ Exit 0 if clean, Exit 2 if violations remain (reported to main agent)
+d:\ClaudeWorkspace\.claude\skills\logistics-exception-management\SKILL.md:58:- **Shortage:** Piece count discrepancy at delivery. Count at the tailgate — never sign clean BOL if count is off. Distinguish driver count vs warehouse count conflicts. OS&D (Over, Short & Damage) report required.
+d:\ClaudeWorkspace\.claude\skills\logistics-exception-management\SKILL.md:81:- **Documentation required:** Original BOL (showing clean tender), delivery receipt (showing exception), commercial invoice (proving value), inspection report, photographs, repair estimates or replacement quotes, packaging specifications.
+d:\ClaudeWorkspace\.claude\skills\logistics-exception-management\SKILL.md:149:2. **Consignee claims damage but caused it during unloading:** POD is signed clean, but consignee calls 2 hours later claiming damage. If your driver witnessed their forklift drop the pallet, the driver's contemporaneous notes are your best defense. Without that, concealed damage claim against you is likely.
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\factory.md:27:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\factory.md:45:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\codex.md:40:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\codex.md:64:# Clean up
+d:\ClaudeWorkspace\.claude\skills\rust-testing\SKILL.md:463:- Use `?` in tests that return `Result` for cleaner error output
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\codebuddy.md:27:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\codebuddy.md:45:# Clean up
+d:\ClaudeWorkspace\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\boxlite.md:99:    # Clean up when done
+
+[Showing results with pagination = limit: 250]

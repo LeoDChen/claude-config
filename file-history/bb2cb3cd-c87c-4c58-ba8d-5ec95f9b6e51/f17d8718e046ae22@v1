@@ -1,0 +1,18 @@
+{
+    "claudeCode.preferredLocation": "panel",
+    "chat.mcp.gallery.enabled": true
+}
+"claudeCode.environmentVariables": [
+    {
+        "name": "ANTHROPIC_BASE_URL",
+        "value": "https://api.deepseek.com/anthropic"
+    },
+    {
+        "name": "ANTHROPIC_AUTH_TOKEN",
+        "value": "sk-d1d59a89a1634db8842b980f95c1e571"
+    },
+    {
+        "name": "ANTHROPIC_MODEL",
+        "value": "deepseek-chat"
+    }
+]

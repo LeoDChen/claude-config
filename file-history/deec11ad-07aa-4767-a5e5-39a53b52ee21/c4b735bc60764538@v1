@@ -1,0 +1,39 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-04 16:00
+> 用途：跨会话持久化项目状态，新会话开始时 Claude Code 先读此文件。
+
+## 当前阶段
+
+**设计已完成，待实施** — 完整设计文档见 `DESIGN.md`。
+
+## 本次重规划成果
+
+- 完整设计文档：`DESIGN.md`
+- 确定了五梯队优先级模型（P0-付款/售后、P0-高意向、P1、P2、P3、P4）
+- 确定了五阶段流水线（预处理脚本 → 规则引擎 → AI 分类+人审 → 深度分析 → Word 战报）
+- 确定了质量保障体系（7 道关卡）
+- 确定了输出格式：Word 文档（Node.js docx 包生成）
+- 确定了分批执行策略（阶段 2 和阶段 3-5 分两次会话，阶段 3 每组 5-8 人分批）
+
+## 下次启动提示词
+
+> 我在做小星星工厂的 OKKI CRM 客户分析项目。先读 DESIGN.md（完整设计）、knowledge/ 下四个文件、STATE.md。然后按照 DESIGN.md 的五阶段流水线开始实施。先从阶段 0 数据预处理脚本开始。
+
+## 待实现
+
+1. `scripts/preprocess_cdp.js` — 阶段 0 数据预处理脚本
+2. `scripts/classify_rules.js` — 阶段 1 规则引擎预分类
+3. `scripts/generate_report.js` — 阶段 5 Word 战报生成
+4. knowledge/ 补充外贸专业框架调研
+5. 全量首次运行（分类 → 审核 → 深度分析 → 战报）
+
+## 关键数据文件
+
+- 设计文档：`DESIGN.md`（新会话必须先读）
+- 分析框架：`knowledge/system-prompt.md`
+- 判断规则：`knowledge/business-rules.md`
+- 工厂信息：`knowledge/factory.md`
+- 安全说明：`knowledge/security.md`
+- 最新抓取数据：`data/extracted_2026-05-04T05-05-12-860Z.json`
+- 最新 P0P1 数据：`data/p0p1_2026-05-04T05-05-12-860Z.json`

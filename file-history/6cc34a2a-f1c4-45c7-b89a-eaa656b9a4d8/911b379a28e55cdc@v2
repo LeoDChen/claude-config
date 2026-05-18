@@ -1,0 +1,202 @@
+// Phase 1: 探索 iMSDK 对象
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 探索 _imsdk ===
+    console.log('=== _imsdk 探索 ===\n');
+
+    const sdkKeys = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var sdk = window._imsdk;
+                if (!sdk) return { error: '_imsdk not found' };
+
+                var result = {
+                    type: typeof sdk,
+                    constructor: sdk.constructor?.name || 'unknown',
+                };
+
+                // 递归列出第一层自有属性（不深入）
+                var props = [];
+                for (var key in sdk) {
+                    if (sdk.hasOwnProperty(key)) {
+                        try {
+                            var val = sdk[key];
+                            var t = typeof val;
+                            var desc = t;
+                            if (t === 'function') desc = 'function(' + (val.length || 0) + ' params)';
+                            else if (t === 'object' && val !== null) {
+                                if (Array.isArray(val)) desc = 'array[' + val.length + ']';
+                                else desc = 'object{' + Object.keys(val).slice(0, 5).join(',') + '}';
+                            }
+                            else if (t === 'string') desc = 'string(' + val.substring(0, 40) + ')';
+                            else desc = t + ': ' + String(val).substring(0, 40);
+                            props.push({ key: key, type: t, desc: desc });
+                        } catch(e) {
+                            props.push({ key: key, error: e.message });
+                        }
+                    }
+                }
+                result.props = props;
+                result.propCount = props.length;
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(sdkKeys.result?.value || '(无)');
+
+    // === 看 _imsdk 的原型方法 ===
+    console.log('\n=== _imsdk 原型方法 ===\n');
+
+    const protoMethods = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var sdk = window._imsdk;
+                if (!sdk) return { error: 'not found' };
+
+                var methods = [];
+                var obj = sdk;
+                while (obj) {
+                    var proto = Object.getPrototypeOf(obj);
+                    if (!proto) break;
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name !== 'constructor' && typeof proto[name] === 'function') {
+                            methods.push(name + '(' + proto[name].length + ')');
+                        }
+                    }
+                    obj = proto;
+                }
+                return methods;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(protoMethods.result?.value || '(无)');
+
+    // === 如果有 _imBaaSSDK 也看看 ===
+    console.log('\n=== _imBaaSSDK 探索 ===\n');
+
+    const baasKeys = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var sdk = window._imBaaSSDK;
+                if (!sdk) return { error: 'not found' };
+
+                var props = {};
+                for (var key in sdk) {
+                    if (sdk.hasOwnProperty(key)) {
+                        try {
+                            var val = sdk[key];
+                            var t = typeof val;
+                            props[key] = t === 'function' ? 'function(' + val.length + ')' :
+                                         t === 'object' ? (Array.isArray(val) ? 'array[' + val.length + ']' : 'object') :
+                                         t + ': ' + String(val).substring(0, 40);
+                        } catch(e) {
+                            props[key] = 'error';
+                        }
+                    }
+                }
+                return props;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(baasKeys.result?.value || '(无)');
+
+    // === 再刷一下页面看有没有 MTOP API 用于消息查询 ===
+    console.log('\n=== 页面刷新后再查 MTOP 请求 ===\n');
+
+    // 先注入 fetch 拦截
+    await cmd('Runtime.evaluate', {
+        expression: `
+            window.__phase1Log = [];
+            var origFetch = window.fetch;
+            window.fetch = function() {
+                var url = arguments[0];
+                if (typeof url === 'string') {
+                    window.__phase1Log.push({url: url, method: arguments[1]?.method || 'GET', body: arguments[1]?.body});
+                } else if (url && url.url) {
+                    window.__phase1Log.push({url: url.url, method: url.method || 'GET', body: url.body});
+                }
+                return origFetch.apply(this, arguments);
+            };
+            window.__phase1Log = []; // reset
+        `
+    });
+
+    await cmd('Page.reload');
+    console.log('已刷新, 等待 10 秒...');
+    await new Promise(r => setTimeout(r, 10000));
+
+    const fetchLogs = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((window.__phase1Log || []).filter(function(e) {
+                return !e.url.match(/\.(js|css|png|jpg|gif|svg|woff2?|ico|ttf)/i);
+            }))
+        `,
+        returnByValue: true
+    });
+    console.log('Fetch 拦截到的 API 请求:');
+    console.log(fetchLogs.result?.value || '(无)');
+
+    // 保存
+    await cmd('Runtime.evaluate', {
+        expression: `
+            window.__phase1LogStr = JSON.stringify((window.__phase1Log || []));
+        `
+    });
+
+    ws.close();
+    console.log('\n完成');
+})();

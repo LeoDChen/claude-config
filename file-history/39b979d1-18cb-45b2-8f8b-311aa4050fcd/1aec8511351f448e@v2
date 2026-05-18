@@ -1,0 +1,66 @@
+const { spawn } = require('child_process');
+const path = require('path');
+const os = require('os');
+const fs = require('fs');
+
+const CHROME_EXE = path.join(process.env.LOCALAPPDATA, 'Google', 'Chrome', 'Application', 'chrome.exe');
+
+// Use a temp directory to avoid any profile/lock issues
+const tmpDir = path.join(os.tmpdir(), 'chrome-pipe-test-' + Date.now());
+fs.mkdirSync(tmpDir, { recursive: true });
+
+console.log('临时目录:', tmpDir);
+console.log('启动 Chrome --remote-debugging-pipe (干净环境)...');
+
+const chrome = spawn(CHROME_EXE, [
+  `--user-data-dir=${tmpDir}`,
+  '--remote-debugging-pipe',
+  '--no-first-run',
+  '--no-default-browser-check',
+  '--no-sandbox',
+  'about:blank',
+], {
+  stdio: ['pipe', 'pipe', 'pipe'],
+  env: { ...process.env },
+});
+
+let started = false;
+let stderrOutput = '';
+
+chrome.stdout.on('data', (data) => {
+  if (!started) {
+    started = true;
+    console.log(`✅ Pipe 模式生效！收到CDP消息 (${data.length} 字节):`);
+    console.log(data.toString().substring(0, 500));
+  }
+});
+
+chrome.stderr.on('data', (data) => {
+  stderrOutput += data.toString();
+});
+
+chrome.on('error', (err) => {
+  console.log('进程错误:', err.message);
+});
+
+setTimeout(() => {
+  if (started) {
+    console.log('\n✅✅ --remote-debugging-pipe 在当前Chrome版本上工作正常！');
+  } else {
+    console.log('\n❌ Pipe 模式也未工作。Stderr (最后500字):');
+    console.log(stderrOutput.substring(stderrOutput.length - 500));
+  }
+  chrome.kill();
+  // Cleanup tmp dir
+  try { fs.rmSync(tmpDir, { recursive: true }); } catch(e) {}
+  process.exit(started ? 0 : 1);
+}, 8000);
+
+chrome.on('close', (code) => {
+  console.log(`Chrome 退出, code=${code}`);
+  if (!started) {
+    console.log('完整 Stderr:');
+    console.log(stderrOutput.substring(0, 2000));
+    process.exit(1);
+  }
+});

@@ -1,0 +1,151 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = {};
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val !== null && val !== undefined) {
+          try { results[response.id] = JSON.parse(val); } catch(e) { results[response.id] = val; }
+        }
+      }
+    } catch (e) {}
+  });
+
+  // Search for WebSocket URL, LWP endpoint, and connection config in the page
+  const expr = `
+    (function() {
+      var r = {};
+
+      // 1. Check URL params (page URL may contain WS endpoint info)
+      r.pageUrl = location.href.substring(0, 200);
+
+      // 2. Search localStorage for connection config
+      var storageKeys = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (key.toLowerCase().indexOf('socket') >= 0 ||
+            key.toLowerCase().indexOf('ws') >= 0 ||
+            key.toLowerCase().indexOf('lwp') >= 0 ||
+            key.toLowerCase().indexOf('paas') >= 0 ||
+            key.toLowerCase().indexOf('connect') >= 0 ||
+            key.toLowerCase().indexOf('config') >= 0) {
+          storageKeys.push(key);
+        }
+      }
+      r.relevantStorageKeys = storageKeys;
+
+      // 3. Search all window variables for WebSocket URLs (string values)
+      var wsUrlPattern = /wss?:\\/\\/[^\\s,;"'}]+/;
+      var foundUrls = [];
+      var checkedKeys = ['__BB_PARAMS__', '__BB', '__baxia__', '__appVersions', '__DBConvConnectionStatus__'];
+
+      checkedKeys.forEach(function(k) {
+        if (window[k] !== undefined) {
+          try {
+            var str = JSON.stringify(window[k]);
+            if (str.length < 1000) {
+              r[k] = str;
+            } else {
+              r[k] = str.substring(0, 500) + '...(truncated)';
+            }
+            var matches = str.match(/wss?:\\/\\/[^\\s"',;}]+/g);
+            if (matches) foundUrls = foundUrls.concat(matches);
+          } catch(e) {
+            r[k] = 'error: ' + e.message;
+          }
+        }
+      });
+
+      // 4. Also search the SDK for any URL-like strings in config
+      var imsdk = window._imsdk;
+      var originSdk = imsdk.getOriginSdk();
+      try {
+        var str = JSON.stringify(originSdk);
+        var matches = str.match(/wss?:\\/\\/[^\\s"',;}]+/g);
+        if (matches) foundUrls = foundUrls.concat(matches);
+      } catch(e) {}
+
+      // 5. Check if there's a global config object
+      if (window.__KONG_MICRO_SERVICES__) {
+        r.kongMicroServices = JSON.stringify(window.__KONG_MICRO_SERVICES__).substring(0, 500);
+      }
+      if (window.__LINX_MICRO_SERVICES__) {
+        r.linxMicroServices = JSON.stringify(window.__LINX_MICRO_SERVICES__).substring(0, 500);
+      }
+
+      // 6. Search entire window namespace for config with ws/wss URLs
+      var allWindowUrls = [];
+      for (var k in window) {
+        try {
+          if (typeof window[k] === 'string' && window[k].match(/^wss?:\\/\\//)) {
+            allWindowUrls.push(k + '=' + window[k].substring(0, 150));
+          }
+        } catch(e) {}
+      }
+      r.windowStringUrls = allWindowUrls.slice(0, 20);
+
+      // 7. Look in sessionStorage
+      r.sessionKeys = [];
+      try {
+        for (var i = 0; i < sessionStorage.length; i++) {
+          var k = sessionStorage.key(i);
+          if (k.toLowerCase().indexOf('socket') >= 0 ||
+              k.toLowerCase().indexOf('ws') >= 0 ||
+              k.toLowerCase().indexOf('config') >= 0) {
+            r.sessionKeys.push(k);
+          }
+        }
+      } catch(e) {}
+
+      // 8. Check navigator.sendBeacon or fetch for ws URL
+      // 9. Check the SDK's auth service for server info
+      var baaS = window._imBaaSSDK;
+      var authSvc = baaS.getAuthService();
+      if (authSvc) {
+        // Try to get the server URL from auth
+        ['getServerUrl', 'getWsUrl', 'getConnectionUrl', 'getHost', 'getServer', 'serverUrl', 'wsUrl'].forEach(function(prop) {
+          try {
+            if (typeof authSvc[prop] === 'function') {
+              r['authSvc.' + prop + '()'] = authSvc[prop]();
+            } else if (authSvc[prop] !== undefined) {
+              r['authSvc.' + prop] = authSvc[prop];
+            }
+          } catch(e) {}
+        });
+      }
+
+      // 10. Look for WebSocket prototype hook or wrapper
+      r.OriginalWebSocket = typeof window.OriginalWebSocket;
+      r.WebSocketConstructor = WebSocket.toString().substring(0, 200);
+
+      r.foundWsUrls = foundUrls.slice(0, 20);
+
+      return JSON.stringify(r, null, 2);
+    })()
+  `;
+
+  console.log('Searching for WebSocket URL and config...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: expr } })
+  });
+
+  await new Promise(r => setTimeout(r, 5000));
+  console.log(JSON.stringify(results[1], null, 2));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

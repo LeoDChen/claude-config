@@ -1,0 +1,168 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  console.log('onetalk iframe found, attaching...');
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  const expr = `
+    (function() {
+      var r = {};
+
+      // 1. Check the real connection state through SDK event bus
+      var imsdk = window._imsdk;
+      if (imsdk) {
+        var authSvc = imsdk.getAuthService();
+        r.authService = {
+          isLogin: authSvc ? authSvc.isLogin() : null,
+          connectionStatus: authSvc ? authSvc.connectionStatus : null,
+          loginUid: authSvc ? authSvc.getLoginUid() : null
+        };
+
+        // Check if there's an internal connection
+        var connSvc = imsdk.getConnectionService ? imsdk.getConnectionService() : null;
+        if (connSvc) {
+          var connKeys = [];
+          for (var k in connSvc) {
+            if (typeof connSvc[k] !== 'function') connKeys.push(k + ':' + typeof connSvc[k]);
+          }
+          r.connectionService = { props: connKeys.slice(0, 20) };
+        }
+      }
+
+      // 2. Search for ALL WebSocket instances in the page
+      // WebSocket constructor might have been wrapped by the SDK
+      var wsOrig = window.__originalWebSocket || WebSocket;
+      r.webSocketNative = typeof wsOrig;
+
+      // Try to find WebSocket instances registered on the page
+      var wsInstances = [];
+      // Check common SDK storage patterns
+      var searchTargets = [
+        { name: 'window._imBaaSSDK', obj: window._imBaaSSDK },
+        { name: 'window._imsdk', obj: window._imsdk },
+        { name: 'window.__socket__', obj: window.__socket__ },
+        { name: 'window.__ws__', obj: window.__ws__ },
+        { name: 'window.__connection__', obj: window.__connection__ }
+      ];
+
+      searchTargets.forEach(function(t) {
+        if (!t.obj) { r[t.name] = 'undefined'; return; }
+        var keys = Object.keys(t.obj).filter(function(k) {
+          return typeof t.obj[k] !== 'function';
+        });
+        r[t.name] = { keys: keys.slice(0, 30) };
+
+        // Deep search for WebSocket-like properties
+        keys.forEach(function(k) {
+          var v = t.obj[k];
+          if (v && typeof v === 'object' && v.constructor) {
+            var ctorName = v.constructor.name;
+            if (ctorName === 'WebSocket' || ctorName.includes('Socket') || ctorName.includes('Connection')) {
+              wsInstances.push({ source: t.name + '.' + k, type: ctorName, url: v.url || 'N/A', readyState: v.readyState });
+            }
+          }
+        });
+      });
+
+      // 3. Also search all properties (enumerable + non-enumerable via trial)
+      // Try to find _connection, _socket, _ws, _transport in the SDK
+      if (window._imBaaSSDK) {
+        var baaSProto = Object.getPrototypeOf(window._imBaaSSDK);
+        var baaSProtoKeys = [];
+        for (var k in baaSProto) baaSProtoKeys.push(k);
+        r.baaSProtoKeys = baaSProtoKeys.slice(0, 40);
+
+        // Try common internal property names
+        ['_connection', '_ws', '_socket', '_transport', '_client', '_channel', 'connection', 'socket', 'ws', 'transport'].forEach(function(prop) {
+          if (window._imBaaSSDK[prop]) {
+            wsInstances.push({ source: '_imBaaSSDK.' + prop, type: typeof window._imBaaSSDK[prop] });
+          }
+        });
+      }
+
+      if (window._imsdk) {
+        // Deep dive into _imsdk internals
+        var imsdkAllKeys = [];
+        var obj = window._imsdk;
+        for (var k in obj) imsdkAllKeys.push(k);
+
+        // Also check non-enumerable via Object.getOwnPropertyNames
+        try {
+          var ownKeys = Object.getOwnPropertyNames(obj);
+          r.imsdkOwnKeys = ownKeys.slice(0, 50);
+        } catch(e) {}
+
+        // Search for WebSocket in nested objects
+        ['_connection', '_ws', '_socket', '_transport', '_channel', '_client', '_imManager', '_chatManager'].forEach(function(prop) {
+          if (obj[prop] !== undefined) {
+            var v = obj[prop];
+            r['imsdk.' + prop] = { type: typeof v, constructor: v && v.constructor ? v.constructor.name : 'N/A' };
+            if (v && typeof v === 'object') {
+              var subKeys = Object.keys(v).slice(0, 20);
+              r['imsdk.' + prop + '.keys'] = subKeys;
+            }
+          }
+        });
+      }
+
+      r.wsInstances = wsInstances;
+
+      // 4. Try to hook WebSocket constructor to find existing instances
+      // If SDK uses a wrapper, look for it
+      if (window.WebSocket) {
+        r.wsProto = {
+          CONNECTING: WebSocket.CONNECTING,
+          OPEN: WebSocket.OPEN,
+          CLOSING: WebSocket.CLOSING,
+          CLOSED: WebSocket.CLOSED
+        };
+      }
+
+      // 5. Check if there's any global event emitter or message bus we can tap into
+      r.hasMessageBus = !!window.__messageBus__;
+      r.hasEventEmitter = !!window.__eventEmitter__;
+
+      return JSON.stringify(r, null, 2);
+    })()
+  `;
+
+  console.log('Deep diagnostic of SDK internals...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 5000));
+
+  if (results.length > 0) {
+    console.log(results[0].val);
+  } else {
+    console.log('No response received');
+  }
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

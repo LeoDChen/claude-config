@@ -1,0 +1,182 @@
+/**
+ * OKKI 交易 → 销售订单 同步脚本 v2
+ * 针对 Vue 虚拟滚动列表结构重写选择器
+ * 用法：node scripts/sync_orders.js
+ */
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const CDP_URL = 'http://localhost:9222';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+async function main() {
+  let browser, page;
+
+  // CDP 连接
+  let useCdp = false;
+  try {
+    const http = require('http');
+    const cdpOk = await new Promise(r => {
+      http.get('http://127.0.0.1:9222/json/version', res => r(true)).on('error', () => r(false));
+    });
+    if (cdpOk) {
+      browser = await chromium.connectOverCDP(CDP_URL);
+      const pages = browser.contexts()[0].pages();
+      page = pages[0];
+      useCdp = true;
+      log('CDP 已连接');
+    }
+  } catch (e) {}
+
+  if (!useCdp) {
+    log('启动 Chrome...');
+    browser = await chromium.launchPersistentContext(PROFILE, {
+      channel: 'chrome', headless: false,
+      viewport: { width: 1440, height: 900 },
+      args: ['--remote-debugging-port=9222'],
+    });
+    page = await browser.newPage();
+  }
+
+  // 导航到订单页
+  log('导航到销售订单页...');
+  await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 2000));
+
+  // 等登录
+  if (page.url().includes('login')) {
+    log('请登录 OKKI...');
+    const startTime = Date.now();
+    while (page.url().includes('login')) {
+      await new Promise(r => setTimeout(r, 2000));
+      if (Date.now() - startTime > 5 * 60 * 1000) {
+        log('登录超时');
+        await browser.close();
+        return;
+      }
+    }
+    log('已登录，重新导航...');
+    await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 3000));
+  }
+
+  log('当前 URL: ' + page.url());
+
+  // 先切换到"全部"tab（确保看到所有订单）
+  try {
+    await page.evaluate(() => {
+      const tabs = document.querySelectorAll('.okki-tabs-nav-list > div, [class*=tab]');
+      for (const t of tabs) {
+        if (t.textContent?.includes('全部')) { t.click(); break; }
+      }
+    });
+    await new Promise(r => setTimeout(r, 2000));
+  } catch (e) {}
+
+  // 提取当前页订单数据
+  function extractPageOrders() {
+    return page.evaluate(() => {
+      const result = [];
+      const rows = document.querySelectorAll('.row-item-level-1, .row-item-level-0');
+      rows.forEach(row => {
+        if (row.classList.contains('row-item__title')) return;
+        const cells = row.querySelectorAll('.cell');
+        if (cells.length < 6) return;
+        const texts = Array.from(cells).map(cell => {
+          const inner = cell.querySelector('.cell-inner');
+          return (inner || cell).textContent?.trim() || '';
+        });
+        // cells: [行号, 订单号, 更新日期, 订单金额, 客户, 订单状态, ERP状态]
+        if (texts.length >= 6 && texts[1]) {
+          result.push({
+            orderNo: texts[1] || '',
+            orderDate: texts[2] || '',
+            amount: texts[3] || '',
+            customer: texts[4] || '',
+            status: texts[5] || '',
+            erpStatus: texts[6] || '',
+          });
+        }
+      });
+      return result;
+    });
+  }
+
+  // 提取第1页
+  log('提取第1页...');
+  let orders = await extractPageOrders();
+  log(`  第1页: ${orders.length} 条`);
+
+  // 翻页
+  for (let pg = 2; pg <= 5; pg++) {
+    const hasNext = await page.evaluate(() => {
+      const nextBtn = document.querySelector('.el-pagination__next:not(.disabled), .okki-pagination__next:not(.disabled), [class*=pagination] li:last-child:not(.disabled), .el-pager li:not(.active)');
+      // 找页码按钮
+      const pageBtns = document.querySelectorAll('.el-pager li, [class*=pager] li, [class*=pagination] [class*=page]:not([class*=prev]):not([class*=next])');
+      for (const btn of pageBtns) {
+        const n = parseInt(btn.textContent?.trim());
+        if (n === pg) return true;
+      }
+      // fallback: 找下一页按钮
+      const next = document.querySelector('.el-pagination__next:not(.disabled), [class*=pagination] [class*=next]:not([class*=disabled]), .btn-next:not(.disabled)');
+      return !!next;
+    });
+
+    if (!hasNext) break;
+
+    log(`  翻到第${pg}页...`);
+    await page.evaluate((pgNum) => {
+      // 尝试点击页码
+      const pageBtns = document.querySelectorAll('.el-pager li, [class*=pager] li, [class*=pagination] [class*=page]');
+      for (const btn of pageBtns) {
+        if (btn.textContent?.trim() === String(pgNum)) { btn.click(); return; }
+      }
+      // fallback: 点下一页
+      const next = document.querySelector('.el-pagination__next:not(.disabled), [class*=pagination] [class*=next]:not([class*=disabled]), .btn-next:not(.disabled)');
+      if (next) next.click();
+    }, pg);
+    await new Promise(r => setTimeout(r, 3000));
+
+    const pageOrders = await extractPageOrders();
+    log(`  第${pg}页: ${pageOrders.length} 条`);
+    orders = orders.concat(pageOrders);
+  }
+
+  log(`共提取 ${orders.length} 条订单`);
+
+  // 保存
+  const outPath = path.join(DATA_DIR, 'orders_latest.json');
+  const output = {
+    exportedAt: new Date().toISOString(),
+    total: orders.length,
+    orders,
+  };
+  fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
+  log(`已保存: ${outPath}`);
+
+  // 统计
+  const statusCounts = {};
+  for (const o of orders) {
+    statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+  }
+  log('订单状态统计:');
+  for (const [k, v] of Object.entries(statusCounts)) {
+    log(`  ${k}: ${v}`);
+  }
+
+  // 交易成功的客户名单
+  const delivered = orders.filter(o => o.status === '交易成功');
+  log(`\n交易成功客户 (${delivered.length}人):`);
+  for (const o of delivered) {
+    log(`  ${o.customer} | ${o.amount} | ${o.orderDate}`);
+  }
+
+  await browser.close();
+  log('完成');
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

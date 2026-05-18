@@ -1,0 +1,130 @@
+# Claude Code + CC-Switch + DeepSeek 安装指南（小白版）
+
+适用：Windows 10/11，零基础用户，无法使用 Anthropic 官方模型，通过 CC-Switch 接入 DeepSeek。
+
+---
+
+## 前置提醒：云壳系统
+
+朋友笔记本上有"云壳系统"的话，安装前先确认：
+- **如果云壳是公司 IT 装的终端安全管理软件**，可能会拦截安装或 API 请求
+- **建议让朋友问一下公司 IT**：是否允许自己装 VS Code 和外部软件
+
+---
+
+## Step 1: 安装 Node.js（必须）
+
+Claude Code 依赖 Node.js 运行。
+
+1. 浏览器打开 https://nodejs.org
+2. 点左边的 **LTS** 按钮下载（v24.x 版本）
+3. 双击下载的 `.msi` 文件安装
+4. **关键步骤**：安装过程中有一个页面叫 "Custom Setup"，确保 **"Add to PATH"** 前面是选中状态（点一下选 "Will be installed on local hard drive"）
+5. 其余步骤全部 Next，完成
+6. **验证**：按 `Win+R`，输入 `cmd` 回车，在黑色窗口输入：
+   ```
+   node --version
+   ```
+   显示 `v24.x.x` 就说明装好了。
+
+---
+
+## Step 2: 安装 VS Code
+
+1. 浏览器打开 https://code.visualstudio.com
+2. 点蓝色大按钮 **"Download for Windows"**
+3. 双击安装包，建议勾选：
+   - "Add "Open with Code" action to Windows Explorer file context menu"
+   - "Add "Open with Code" action to Windows Explorer directory context menu"
+4. 完成安装
+
+---
+
+## Step 3: 安装 Claude Code 扩展
+
+1. 打开 VS Code
+2. 点击左侧 **扩展图标**（四个方块）
+3. 搜索 **"Claude Code"**
+4. 找到发布者 **Anthropic** 的 Claude Code，点 **Install**
+5. 安装后左侧会出现 Claude Code 图标
+
+---
+
+## Step 4: 注册 DeepSeek 并获取 API Key
+
+Claude Code 本身需要模型才能工作。你用不了 Anthropic 官方模型，所以用 DeepSeek 替代。
+
+1. 浏览器打开 https://platform.deepseek.com
+2. 注册账号（手机号即可，国内直接访问）
+3. 登录后进入控制台，点击左侧 **"API Keys"**
+4. 点 **"创建 API Key"**，输入一个名称（如 `claude-code`）
+5. **立即复制保存这个 Key！** 只显示一次
+6. 充值（最低可充 10 元，DeepSeek 非常便宜，几块钱能用很久）
+
+---
+
+## Step 5: 安装 CC-Switch（模型切换工具）
+
+CC-Switch 是一个桌面工具，负责把 Claude Code 的底层模型从 Claude 切换成 DeepSeek。
+
+**下载地址**（选一个能打开的）：
+- GitHub Releases: https://github.com/farion1231/cc-switch/releases
+- 下载文件：**`CC-Switch-Setup.msi`**（Windows 安装版）
+
+如果 GitHub 打不开，试试这个加速站：
+- https://gh-proxy.com/https://github.com/farion1231/cc-switch/releases
+
+1. 双击 `CC-Switch-Setup.msi` 安装
+2. 安装完成后启动 CC-Switch（桌面会有图标）
+
+---
+
+## Step 6: 在 CC-Switch 中添加 DeepSeek
+
+1. 打开 CC-Switch 主界面
+2. 点击右上角 **＋** 按钮
+3. 在 **"预设"** 下拉框中选择 **DeepSeek**
+   - 端点地址会自动填充为 `https://api.deepseek.com`
+4. 在 **"API Key"** 栏粘贴 Step 4 获取的 DeepSeek Key
+5. 点击 **"添加"** 完成
+
+---
+
+## Step 7: 启用 DeepSeek 并启动 Claude Code
+
+1. 在 CC-Switch 主界面，点击 DeepSeek 卡片上的 **"启用"** 按钮
+2. CC-Switch 会自动修改 Claude Code 的配置，将其指向 DeepSeek
+3. 回到 VS Code，点击左侧 Claude Code 图标
+4. CC-Switch 可能会提示你进行首次配置，按提示操作即可
+5. 在 Claude Code 输入框里输入测试问题：
+   ```
+   你好，请简单介绍一下自己
+   ```
+6. 如果回复正常，说明配置成功！
+
+---
+
+## Step 8: 日常使用
+
+之后每次要用 Claude Code 时：
+1. 确保 CC-Switch 在运行（系统托盘有图标）
+2. 确认当前启用的是 DeepSeek
+3. 打开 VS Code，正常使用 Claude Code
+
+**模型切换**：
+- CC-Switch 支持切换不同模型（DeepSeek V3 / R1 等）
+- 在 CC-Switch 中点击对应卡片切换即可
+- Claude Code 中也可以用 `/model deepseek-chat` 切换
+
+---
+
+## 常见问题
+
+| 问题 | 解决 |
+|------|------|
+| Claude Code 图标没出现 | 完全关闭 VS Code 再重开 |
+| 提示 "Node.js not found" | 重装 Node.js，确保勾选 "Add to PATH" |
+| CC-Switch 启用后 Claude Code 没反应 | 检查 DeepSeek Key 是否正确，检查 Key 里有没有余额 |
+| GitHub 下载 CC-Switch 太慢/打不开 | 用 gh-proxy 加速站，或让朋友帮忙下载传给你 |
+| DeepSeek 回复质量不够好 | 在 CC-Switch 里切换 `deepseek-reasoner`（推理增强版）试试 |
+| 公司网络能否访问 api.deepseek.com | DeepSeek 是国内服务，一般不会被墙，但公司内网可能有限制 |

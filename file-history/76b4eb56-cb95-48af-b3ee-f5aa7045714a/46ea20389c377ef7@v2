@@ -1,0 +1,107 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  const expr = `
+    (async function() {
+      var results = {};
+      var convs = window.__conversationListFullData__;
+      var c = convs[0];
+
+      // Try 1: getChatMessageListExtra.htm with conversation code
+      try {
+        var fd = new URLSearchParams();
+        fd.append('conversationCode', c.cid);
+        var r = await fetch('https://onetalk.alibaba.com/message/getChatMessageListExtra.htm', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: fd.toString()
+        });
+        results.getChatMsgListExtra1 = { status: r.status, text: (await r.text()).substring(0, 500) };
+      } catch(e) {
+        results.getChatMsgListExtra1 = { err: e.message };
+      }
+
+      // Try 2: getChatMessageListExtra.htm with different params
+      try {
+        var fd = new URLSearchParams();
+        fd.append('conversationCodes', c.cid);
+        var r = await fetch('https://onetalk.alibaba.com/message/getChatMessageListExtra.htm', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: fd.toString()
+        });
+        results.getChatMsgListExtra2 = { status: r.status, text: (await r.text()).substring(0, 500) };
+      } catch(e) {
+        results.getChatMsgListExtra2 = { err: e.message };
+      }
+
+      // Try 3: listRecentConversationContactDetail (the one that works)
+      try {
+        var fd = new URLSearchParams();
+        fd.append('conversationCode', c.cid);
+        var r = await fetch('https://onetalk.alibaba.com/message/listRecentConversationContactDetail.htm', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: fd.toString()
+        });
+        results.contactDetail = { status: r.status, text: (await r.text()).substring(0, 500) };
+      } catch(e) {
+        results.contactDetail = { err: e.message };
+      }
+
+      // Try 4: chatRelation/getChatRelationEvent
+      try {
+        var fd = new URLSearchParams();
+        fd.append('conversationCode', c.cid);
+        var r = await fetch('https://onetalk.alibaba.com/chatRelation/getChatRelationEvent.htm', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: fd.toString()
+        });
+        results.chatRelationEvent = { status: r.status, text: (await r.text()).substring(0, 500) };
+      } catch(e) {
+        results.chatRelationEvent = { err: e.message };
+      }
+
+      return JSON.stringify(results);
+    })()
+  `;
+
+  console.log('Testing discovered API endpoints...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr, awaitPromise: true }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 15000));
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

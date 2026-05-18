@@ -1,0 +1,192 @@
+const fs = require('fs');
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType } = require('docx');
+
+// ========== 工具函数 ==========
+function headerCell(text, width, color = '1a5276') {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    shading: { type: ShadingType.SOLID, color },
+    children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: 'FFFFFF', size: 20, font: 'Microsoft YaHei' })], spacing: { before: 30, after: 30 } })],
+  });
+}
+
+function cell(text, width, opts = {}) {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    children: [new Paragraph({ children: [new TextRun({ text: String(text), size: 19, font: 'Microsoft YaHei', ...opts })], spacing: { before: 25, after: 25 } })],
+  });
+}
+
+function redCell(text, width) {
+  return cell(`🔴 ${text}`, width, { color: 'c0392b', bold: true });
+}
+
+function warnCell(text, width) {
+  return cell(`⚠️ ${text}`, width, { color: 'e67e22' });
+}
+
+function heading(text, level) {
+  const sizes = { 1: 32, 2: 26, 3: 22 };
+  return new Paragraph({ heading: level, children: [new TextRun({ text, bold: true, font: 'Microsoft YaHei', size: sizes[level] || 22 })], spacing: { before: 200, after: 100 } });
+}
+
+function para(text, opts = {}) {
+  return new Paragraph({ children: [new TextRun({ text, size: 21, font: 'Microsoft YaHei', ...opts })], spacing: { before: 60, after: 60 } });
+}
+
+function redPara(text) {
+  return para(text, { color: 'c0392b', bold: true });
+}
+
+function makeTable(headers, rows, colWidths) {
+  const hdrRow = new TableRow({ children: headers.map((h, i) => headerCell(h, colWidths[i])) });
+  const dataRows = rows.map(row => new TableRow({ children: row.map((c, i) => {
+    if (typeof c === 'object' && c._isRed) return redCell(c.text, colWidths[i]);
+    if (typeof c === 'object' && c._isWarn) return warnCell(c.text, colWidths[i]);
+    return cell(c, colWidths[i]);
+  }) }));
+  return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [hdrRow, ...dataRows] });
+}
+
+function red(text) { return { text, _isRed: true }; }
+function warn(text) { return { text, _isWarn: true }; }
+
+// ========== 数据 ==========
+const payWait = [
+  ['Aloh Voma', 'US', '批发商', '物流中', '0d "发签收单给我"', '货已发佛山仓→喀麦隆，跟进签收+索要反馈+引导复购'],
+  ['ali Amjid', 'ZA', '个人买家', '待付款', '1d "Ok"', '16件¥510，Ok后未付。温和提醒付款'],
+  ['Christabel Kanunsha', 'ZM★', '个人买家', '待付款', '2d "i have sent the pics"', '$7.70(2件)，2天未付。确认收到图片+温和提醒'],
+  ['arshavin amoah', 'GH', '个人买家', red('待付款'), '18d 地址信息', red('未付款！货在工厂未发。18天无回复。需确认是否还要')],
+  ['WELE Mounia', 'TG', '批发商(老客)', '选款中', '2d "a part sa..."', '老客户复购信号，发全部目录+跟进选款'],
+];
+
+const negotiating = [
+  ['Inderpreet kaur', 'US', '品牌买家', '谈判中', '0d "花型已有其他供应商做"', '16 CFR认证+花型确认。承诺给报价但还没给'],
+  ['Keinjol Tata', 'IN', red('品牌/ODM'), red('谈判中'), red('3d "你什么职位"'), red('我方未履约：承诺mockup+报价"明天给"，只回了"我是经理"')],
+  ['Christine Muwela', 'ZM★', '批发商', red('谈判中'), '5d "粉色衬衫白领粉裙"', red('5天前说"明天查库存"未兑现')],
+  ['Brian Robert Ocholi', 'KE', '批发商', '谈判中', '4d "同款还是混款?"', '我们回"可以选款"没给具体选项'],
+  ['Asma Noor', 'PK', '批发商', warn('报价已发5d'), '6d "Yeah sure"', warn('报价$68.7(7件×$3.10+$47运费)，5天无回复=危险线')],
+  ['Sara Dibes', 'LB', '批发商', warn('PI已发6d'), '6d "yes please"', warn('6天未付，已读不回=可能在犹豫价格')],
+  ['Abdulrhman alal', 'OM', '批发商', '初询', '7d "Can you send..."', '我方延迟回复(2.5天)，已含apology。客户4.5天未回'],
+  ['Ernestina Afriyie', 'GH', '不明', '模板后沉默', '1d "How much is this"', '模板回复无效，应直接给价格区间+MOQ'],
+];
+
+const demoted = [
+  ['jonathan aston', 'GH', '批发商', '报价已发', '1d "I need 200 pcs"', '维持P0。$536报价，仅3条客户消息，可能只是随口问价'],
+  ['Esther Chola', 'ZM★', '→降P2', red('降级'), '1条产品卡片', red('仅自动询盘卡片，无有效对话，降为P2')],
+  ['rehema kiseyu', 'TZ', '→降P2', red('降级'), '0条客户消息', red('8条单向推送，客户从未回复，降为P2')],
+  ['Mumtaz Aziz', 'TZ', '→降P3', red('降级'), '33天前', red('客户33天无回复，已放弃，降为P3')],
+  ['Mona almuharraqy', 'BH', '关系型', '维持P0', '2d 握手表情', '关系型客户，不逼单，维持关系节奏'],
+  ['yoselyn Rodriguez', 'US', '→降P2', red('降级'), '6d "卖女装吗"', red('品类不匹配：客户要女装，我们做婴童，降为P2')],
+];
+
+const p1High = [
+  ['Rosette Ngoy', 'CD★', '批发商', '谈判中', '"Oui j\'ai transitaires"（有货代），核心市场，法语'],
+  ['Hakim Ezat', 'SA★', '批发商', '报价已发', '$78.4 DDP报价7天，客户说"فى انتظارك"（等你）'],
+  ['Marcos Kuyu', 'CD★', '批发商', '初询', '给了5色100cm，卡在缺地址'],
+  ['diego vargas', 'ES', '批发商', '谈判中', '40条消息63%客户发言，高互动不要放弃'],
+  ['Clara ElAssaad', 'FR', '不明', '初询', '2-4岁童装精准需求，法语对话'],
+  ['Begimai Akymbekova', 'US', '不明', '初询', '俄语客户，4件已给地址，缺报价'],
+];
+
+// ========== 构建文档 ==========
+const children = [];
+
+// 封面
+children.push(new Paragraph({ spacing: { before: 2000 } }));
+children.push(new Paragraph({ heading: HeadingLevel.TITLE, alignment: 'center', children: [new TextRun({ text: 'OKKI 客户阶段归类报告', bold: true, font: 'Microsoft YaHei', size: 48, color: '1a5276' })], spacing: { after: 200 } }));
+children.push(new Paragraph({ alignment: 'center', children: [new TextRun({ text: '2026年5月9日（星期五）', font: 'Microsoft YaHei', size: 28, color: '7f8c8d' })], spacing: { after: 100 } }));
+children.push(new Paragraph({ alignment: 'center', children: [new TextRun({ text: '小星星服饰工厂 · 阿里巴巴国际站 · OKKI CRM', font: 'Microsoft YaHei', size: 24, color: '95a5a6' })], spacing: { after: 200 } }));
+children.push(new Paragraph({ alignment: 'center', children: [new TextRun({ text: '仅含阶段+类型归类，不含深度话术', font: 'Microsoft YaHei', size: 22, color: 'e67e22', italics: true })], spacing: { after: 200 } }));
+children.push(new Paragraph({ alignment: 'center', spacing: { after: 100 } }));
+children.push(para('工作流：第一阶段（本次）→ 只出阶段+客户类型 | 第二阶段（后续）→ 用户挑人 → 独立对话深度分析'));
+
+// === 全局状态 ===
+children.push(heading('一、全局状态', 1));
+const statusRows = [
+  ['总会话', '466'],
+  ['7d活跃', '43（latestMessage全部我方；实际27人回复293条）'],
+  ['24h活跃', '6（含2条系统自动消息）'],
+  ['P0', '19 → 修正后16（降2个P2 + 1个P3 + 1个P2品类不匹配）'],
+  ['P1高潜', '6人值得用户挑人深挖'],
+];
+children.push(makeTable(['指标', '数值'], statusRows, [25, 75]));
+
+// === 待付款/待发货 ===
+children.push(heading('二、待付款 / 待发货（5人）', 1));
+children.push(makeTable(
+  ['客户', '国家', '类型', '阶段', '最后客户消息', '注意'],
+  payWait,
+  [12, 6, 10, 8, 18, 46]
+));
+
+// === 谈判中 ===
+children.push(heading('三、谈判中·活跃（8人）', 1));
+children.push(makeTable(
+  ['客户', '国家', '类型', '阶段', '最后客户消息', '卡点'],
+  negotiating,
+  [12, 6, 10, 8, 18, 46]
+));
+
+// === 需调整 ===
+children.push(heading('四、经 chat_history 验证后调整（6人）', 1));
+children.push(makeTable(
+  ['客户', '国家', '类型', '阶段', '最后客户消息', '调整原因'],
+  demoted,
+  [12, 7, 10, 10, 18, 43]
+));
+
+// === P1 高潜 ===
+children.push(heading('五、P1 高潜（用户可挑人深度分析）', 1));
+children.push(makeTable(
+  ['客户', '国家', '类型', '阶段', '信号'],
+  p1High,
+  [14, 7, 10, 10, 59]
+));
+
+// === 修正汇总 ===
+children.push(heading('六、分类修正汇总', 1));
+const fixRows = [
+  ['Keinjol Tata', '谈判中', '谈判中（加注：我方未履约）', '承诺mockup+报价"明天给"但没给'],
+  ['Christine Muwela', '4d未兑现', '5d未兑现', '实际已过5天'],
+  ['Esther Chola', 'P0', '降P2', '仅1条自动询盘卡片'],
+  ['rehema kiseyu', 'P0', '降P2', '0客户消息，8条单向推送'],
+  ['Mumtaz Aziz', 'P0', '降P3', '33天无客户消息'],
+  ['yoselyn Rodriguez', 'P0', '降P2', '品类不匹配'],
+  ['arshavin amoah', '货在仓库', '货在工厂（未付款未发货）', '上次描述错误'],
+  ['Asma Noor', '$75.21', '$68.7', '从chat_history原文核对修正'],
+];
+children.push(makeTable(['客户', '原分类', '修正', '原因'], fixRows, [16, 14, 22, 48]));
+
+// === 自检记录 ===
+children.push(heading('七、自检记录（对照9条教训）', 1));
+const checkRows = [
+  ['1. 卡点诊断先查基础事实', '✅', '抽样读5人chat_history原文验证'],
+  ['2. 关系型客户不逼单', '✅', 'Mona标注关系型，不做催促建议'],
+  ['3. 不替用户做商业决策', '✅', '只给框架，不填具体金额'],
+  ['4. 高价值不机械按算法', '✅', 'Keinjol品牌ODM维持P0'],
+  ['5. 沉默穷举根因', '⚠️', '本次只做分类，深度分析留独立对话'],
+  ['6. 报价从源数据核对', '✅', 'Asma报价已修正为$68.7'],
+  ['7. 已读不回心理分析', '⚠️', '本次只标注，深度留独立对话'],
+  ['8. 延迟回复致歉', '✅', 'Abdulrhman原文中已含apology'],
+  ['9. 重复强调=焦虑点', '✅', 'Aloh标注运输标记焦虑信号'],
+];
+children.push(makeTable(['教训', '状态', '本次执行'], checkRows, [28, 8, 64]));
+
+// === 页脚 ===
+children.push(new Paragraph({ spacing: { before: 400 } }));
+children.push(para('下一步：用户从以上19人中挑选需要深度分析的客户 → 新对话独立分析。', { color: '2980b9', bold: true, size: 22 }));
+
+// ========== 输出 ==========
+const doc = new Document({
+  sections: [{
+    properties: { page: { margin: { top: 800, bottom: 800, left: 1000, right: 1000 } } },
+    children,
+  }],
+});
+
+Packer.toBuffer(doc).then(buf => {
+  const outPath = 'reports/客户阶段归类_2026-05-09.docx';
+  fs.writeFileSync(outPath, buf);
+  console.log('Word report generated: ' + outPath + ' (' + (buf.length / 1024).toFixed(1) + ' KB)');
+});

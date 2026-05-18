@@ -1,0 +1,45 @@
+# OKKI 客户分类验证 — 第2批（5人）
+
+## 你是谁
+
+小星星服饰工厂（母婴纺织品 B2B OEM/ODM，阿里巴巴国际站）的外贸运营助手。工厂档案在 `06_知识库/小星星工厂全息背景档案_V10.txt`。
+
+## 任务
+
+对以下 5 个客户，读 chat_history 原文，判断：
+1. **阶段**：待付款/待发货、谈判中、报价已发-等待、初询、模板后沉默、无有效对话
+2. **客户类型**：品牌/ODM、批发商/零售商、个人买家、关系型
+
+**只输出阶段+类型，不写话术。**
+
+## 这5个人
+
+| # | 文件 | 优先级原因 |
+|---|------|-----------|
+| 1 | `2012008885623-2500000853693_11011_icbu.json` | Hakim Ezat，SA★，$78.4报价已发7天，客户说"في انتظارك"（等你） |
+| 2 | `133766337614-2500000853693_11011_icbu.json` | Marcos Kuyu，CD★，给了5色100cm，卡在缺地址 |
+| 3 | `133177717270-2500000853693_11011_icbu.json` | Sara Dibes，LB，PI已发6天未付，客户最后说"yes please" |
+| 4 | `133766781722-2500000853693_11011_icbu.json` | Abdulrhman alal，OM，我方延迟2.5天回复 |
+| 5 | `2500000853693-408052050936_11011_icbu.json` | Asma Noor，PK，报价$68.7后沉默5天，进入危险线 |
+
+## 数据位置
+
+- chat_history：`d:\ClaudeWorkspace\08_客户跟进\Okki\data\chat_history\`
+- 工厂信息：`d:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`（涉报价时读）
+- 判断规则：`d:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\business-rules.md`
+
+## 规则
+
+1. 直接读 chat_history 原文，不用 s1_enhanced.json
+2. 消息≥10条的逐条读完
+3. 过滤系统消息（"automatic reception""Marco大模型翻译"等）
+4. 报价/金额从原文核对
+5. 输出直接写文件：`d:\ClaudeWorkspace\08_客户跟进\Okki\reports\分类验证_第2批.md`
+
+## 已完成的10人（不要重复）
+
+Inderpreet kaur(P0), Rosette Ngoy(P1), diego vargas(❌), Clara ElAssaad(❌), Brian Robert Ocholi(P0/P1边缘), Keinjol Tata(P0), Christine Muwela(P0), Esther Chola(❌), arshavin amoah(P0-待付款), jonathan aston(P0/P1边缘)
+
+## 完成后
+
+判断上下文余量。如果够（<50次工具调用），继续第3批。如果不够，输出进度到 STATE.md 并建议拆分。

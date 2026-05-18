@@ -1,0 +1,76 @@
+# CC+OB 配置瘦身 V3 — 执行记录
+
+> 执行日期：2026-05-10 | 依据：[CC+OB协作系统_配置瘦身审核文档_V3.md](D:\ClaudeWorkspace\99_系统文件\CC+OB协作系统_配置瘦身审核文档_V3.md)
+
+---
+
+## 执行结果总览
+
+| 组件 | 层级 | 删除前 | 删除后 | 删除数 |
+|------|------|--------|--------|--------|
+| Rules | 全局 | 8 目录+1文件 | **0** | 全清 |
+| Rules | 项目 | 15 目录 | **1 文件** (operations-rules.md) | 14 目录 |
+| Skills | 全局 | 159 | **14** | 145 |
+| Skills | 项目 | 166 | **21** | 145 |
+| Commands | 全局 | 87 | **15** | 72 |
+| Commands | 项目 | 88 | **15** | 73 |
+| Agents | 全局 | 48 | **7** | 41 |
+| Agents | 项目 | 48 | **7** | 41 |
+| CLAUDE.md | 全局 | 100 行 | **26 行** | 74 行 |
+| CLAUDE.md | 项目 | 35 行 | **24 行** | 指针化改造 |
+
+---
+
+## 保留清单
+
+### Skills（22个：14全局 + 8项目独有）
+
+**业务核心（9）**：p4p-optimization, inquiry-analysis, customer-pitch, b2b-visual-design, copywriting, product-listing, order-followup, logistics, office-tools
+
+**手动层工具（7）**：brainstorming, grill-me, writing-plans, to-prd, writing-skills, systematic-debugging, using-superpowers
+
+**通用辅助（4）**：deep-research, search-first, knowledge-ops, claude-code-guide（内置）
+
+**OKKI新增（2）**：token-budget-advisor, prompt-optimizer
+
+### Commands（15）
+
+p4p, inquiry, pitch, design, copy, product, order, logistics, docs, prompt-optimize, context-budget, plan, checkpoint, save-session, resume-session
+
+### Agents（7+1）
+
+code-explorer, code-reviewer, security-reviewer, docs-lookup, silent-failure-hunter, doc-updater, planner, general-purpose（内置）
+
+### Rules（仅项目层1个）
+
+operations-rules.md
+
+---
+
+## 决策框架
+
+### 删除标准
+- 全部编程语言专用 skills/commands/agents（cpp, go, rust, python, java, kotlin, swift, dart, perl, php, csharp 等）
+- 全部行业专用（healthcare, defi, energy, customs, investor 等）
+- 不用的 ECC 运维工具（ecc-tools-cost-audit, finance-billing-ops, email-ops 等）
+- 全局 rules 全部清空，项目 rules 仅保留阿里巴巴运营规则
+
+### 保留标准
+- 直接支撑 B2B 外贸运营的 9 大业务 skill
+- OKKI 项目暴露的 10+ 痛点对应的手动工具
+- 通用辅助：调研、知识管理、搜索优先、token 预算
+
+### 全局 vs 项目分工
+- **全局 CLAUDE.md**：交互原则 + 自检 + 语言 + 文件输出规则（跨项目通用）
+- **项目 CLAUDE.md**：工厂档案路径、目标市场、场景路由、业务命令（本项目专属）
+- **项目 skills**：保留全局没有的 8 个手动层工具
+
+---
+
+## 同步机制
+
+后续增删改遵循：
+1. 跨项目通用 → 全局层
+2. 项目专属 → 项目 .claude/
+3. 修改前先查两层的当前状态，避免重复
+4. 所有删除操作先备份到 `backups/` 目录

@@ -1,0 +1,263 @@
+/**
+ * 客户状态清单 — Word 文档生成器
+ * 只列状态不打方案，用户按需挑客户做深度分析
+ * 用法: node gen-status-report.mjs
+ */
+
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, HeadingLevel, AlignmentType, WidthType, BorderStyle, ShadingType } from 'docx';
+import { writeFileSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import os from 'os';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const DESKTOP = join(os.homedir(), 'Desktop');
+
+// ============ 系统提示过滤 ============
+const SYSTEM_PATTERNS = [
+  /automatic reception will no longer intervene/i,
+  /由于您介入该会话/i,
+  /You have a visitor/i,
+  /买家有流失风险/i,
+  /AI给您生成了一条回复建议/i,
+  /建议查看买家特征/i,
+  /阿里国际Marco大模型翻译/i,
+  /买家首次给您发消息/i,
+  /pre-screened.*clear request/i,
+  /一旦离开平台发生纠纷或遭遇欺诈/i,
+  /反馈/,
+];
+
+function isSystemMsg(msg) {
+  if (!msg) return false;
+  return SYSTEM_PATTERNS.some(p => p.test(msg));
+}
+
+// ============ 数据加载 ============
+function loadLatest(prefix) {
+  const files = readdirSync(DATA_DIR).filter(f => f.startsWith(prefix) && f.endsWith('.json')).sort().reverse();
+  if (files.length === 0) throw new Error('未找到 ' + prefix + ' 数据');
+  return JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf8'));
+}
+
+// ============ 加载深抓数据（真实对话） ============
+function loadDeepScrapeMessages() {
+  const files = readdirSync(DATA_DIR).filter(f => f.startsWith('deep_scrape_v7_') && f.endsWith('.json')).sort().reverse();
+  if (files.length === 0) return {};
+  const ds = JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf8'));
+  const map = {};
+  for (const r of (ds.results || [])) {
+    const msgs = (r.messages || []).filter(m => m.text && m.text.length > 3);
+    const realMsgs = msgs.filter(m => !isSystemMsg(m.text || ''));
+    const last = realMsgs.length > 0 ? realMsgs.slice(-2) : msgs.slice(-2);
+    map[r.name] = last.map(m => (m.side === 'received' ? '←' : '→') + ': ' + (m.text || '').substring(0, 120)).join('  ');
+  }
+  return map;
+}
+
+function daysAgo(ts) {
+  if (!ts) return '?';
+  const d = Math.round((Date.now() - ts) / 86400000);
+  return d === 0 ? '今天' : d + '天前';
+}
+
+// ============ 分类逻辑 ============
+function classify(c) {
+  const msg = (c.latestMessageContent || '').trim();
+  const msgLow = msg.toLowerCase();
+  const da = daysAgo(c.lastContactTime);
+  const isUnread = c.isUnread || c.unreadCount > 0;
+  const isFromUs = c.latestMessageType === 'send';
+  const fromCust = c.msgFromCustomer === true;
+
+  // 排除系统提示后的有效客户消息
+  const realCustMsg = fromCust && !isSystemMsg(msg) && msg.length > 3;
+  const realOurMsg = isFromUs && !isSystemMsg(msg) && msg.length > 3;
+
+  // 关键词
+  const hi = /hello|hi\b|how are you|bonjour|hola| salut\b/i.test(msgLow);
+  const price = /price|quote|cost|how much|报价|价格|\$[0-9]|usd|dollar|كم|сколько|cuánto/i.test(msgLow);
+  const sample = /sample|muestra|échantillon|样品|试用|试单|test order/i.test(msgLow);
+  const payment = /payment|pay|deposit|付款|pago|paiement|دفع|transfer|pi\b|proforma/i.test(msgLow);
+  const shipping = /ship|delivery|envío|livraison|物流|dhl|fedex|freight|shipping cost|快递|海运/i.test(msgLow);
+  const complaint = /complaint|return|refund|damage|defect|wrong|quality issue|退换|退款|投诉|破损|纠纷|欺诈/i.test(msgLow);
+  const order = /order|place|confirm|下单|采购/i.test(msgLow);
+
+  // === P0: 有未读消息 ===
+  if (isUnread && realCustMsg) {
+    return { cat: 'A', label: '有未读消息·需回复', emoji: '📩', desc: '客户发了消息，你还没看/没回' };
+  }
+  if (isUnread) {
+    return { cat: 'A2', label: '有未读消息', emoji: '📩', desc: '有未读消息（消息可能不是客户发的）' };
+  }
+
+  // === 售后/投诉（必须是客户发来的，不能是我们说的"refundable sample fee"之类） ===
+  if (complaint && realCustMsg) {
+    return { cat: 'I', label: '售后/投诉·待处理', emoji: '⚠️', desc: '客户发起退换货/质量/纠纷' };
+  }
+
+  // === 客户问了价格 → 待报价 ===
+  if (realCustMsg && price) {
+    return { cat: 'C', label: '客户询价·待报价', emoji: '📋', desc: '客户问了价格，还没正式报价' };
+  }
+
+  // === 我们报了价，客户没回 ===
+  if (realOurMsg && price) {
+    if (c.priority === 'P0' || c.priority === 'P1') return { cat: 'D', label: '报价已发·待跟进', emoji: '⏳', desc: '报了价，客户还没回复' };
+    return { cat: 'K', label: '旧报价·已沉寂', emoji: '⚪', desc: '报过价但很久没互动' };
+  }
+
+  // === 样品阶段 ===
+  if (sample && realCustMsg) {
+    return { cat: 'S', label: '客户要样品·待处理', emoji: '📦', desc: '客户问了样品事宜' };
+  }
+
+  // === 付款相关 ===
+  if (payment && realOurMsg) {
+    return { cat: 'F', label: '待付款', emoji: '💰', desc: 'PI/付款信息已发，等付款' };
+  }
+
+  // === 物流/发货 ===
+  if (shipping && realOurMsg) {
+    return { cat: 'G', label: '物流中', emoji: '🚚', desc: '讨论了发货/运费/物流' };
+  }
+
+  // === 客户近期有消息但意图不明 ===
+  if (realCustMsg && (c.priority === 'P0' || c.priority === 'P1')) {
+    return { cat: 'J', label: '客户有消息·需读', emoji: '🔵', desc: '客户发了消息，需看内容判断' };
+  }
+
+  // === P0/P1 近期互动 ===
+  if (c.priority === 'P0' || c.priority === 'P1') {
+    return { cat: 'H', label: '近期活跃·维持跟进', emoji: '🟢', desc: '近期有互动，保持推进' };
+  }
+
+  // === P2 待回访 ===
+  if (c.priority === 'P2') {
+    return { cat: 'P2', label: '待回访', emoji: '🔵', desc: '超期未联系，需定时回访' };
+  }
+
+  return { cat: 'Z', label: '待激活', emoji: '⚪', desc: '低互动/新线索' };
+}
+
+// ============ 主流程 ============
+async function main() {
+  console.log('[状态报告] 读取最新数据...');
+  const data = loadLatest('2026-');
+  const realMsgs = loadDeepScrapeMessages();
+  console.log(`   ${data.stats.total} 客户, P0:${data.stats.P0} P1:${data.stats.P1} P2:${data.stats.P2} P3:${data.stats.P3}`);
+  console.log(`   深抓消息: ${Object.keys(realMsgs).length} 个客户有真实对话`);
+
+  // 分类
+  const groups = {};
+  for (const c of data.customers) {
+    const result = classify(c);
+    if (!groups[result.cat]) groups[result.cat] = { ...result, items: [] };
+    groups[result.cat].items.push(c);
+  }
+
+  // 排序
+  const order = ['A', 'A2', 'I', 'C', 'D', 'S', 'F', 'G', 'H', 'J', 'P2', 'Z'];
+  const sorted = order.filter(k => groups[k]).map(k => groups[k]);
+
+  // 生成 Word
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN');
+  const sections = [];
+
+  // 标题
+  const children = [
+    new Paragraph({
+      children: [new TextRun({ text: '小满 OKKI 客户状态清单', bold: true, size: 44, color: '16213E', font: 'Microsoft YaHei' })],
+      alignment: AlignmentType.CENTER, spacing: { after: 100 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: `数据采集：${dateStr}  ·  共 ${data.stats.total} 个客户  ·  仅列状态，不打方案`, size: 20, color: '636E72', font: 'Microsoft YaHei' })],
+      alignment: AlignmentType.CENTER, spacing: { after: 400 },
+    }),
+    // 摘要
+    new Paragraph({
+      children: [new TextRun({ text: `📩 未读: ${groups.A?groups.A.items.length:0}  ·  ⚠️ 售后: ${groups.I?groups.I.items.length:0}  ·  📋 待报价: ${groups.C?groups.C.items.length:0}  ·  ⏳ 报价已发: ${groups.D?groups.D.items.length:0}  ·  💰 待付款: ${groups.F?groups.F.items.length:0}  ·  🚚 物流中: ${groups.G?groups.G.items.length:0}  ·  🔵 待回访: ${(groups.P2?groups.P2.items.length:0)+(groups.J?groups.J.items.length:0)}  ·  ⚪ 待激活: ${groups.Z?groups.Z.items.length:0}`, size: 18, color: '636E72', font: 'Microsoft YaHei' })],
+      alignment: AlignmentType.CENTER, spacing: { after: 300 },
+    }),
+  ];
+
+  // 每个分类
+  for (const g of sorted) {
+    if (g.items.length === 0) continue;
+
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: `${g.emoji} ${g.label}  (${g.items.length}人)`, bold: true, size: 24, color: '16213E', font: 'Microsoft YaHei' })],
+        spacing: { before: 300, after: 60 },
+        border: { bottom: { color: 'E94560', size: 2, space: 1 } },
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: g.desc, size: 16, color: '888888', font: 'Microsoft YaHei', italics: true })],
+        spacing: { after: 120 },
+      })
+    );
+
+    // 表格
+    const headerRow = new TableRow({
+      children: ['客户名', '国家', '等级', '最后联系', '最新消息摘要'].map(text =>
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 16, color: 'FFFFFF', font: 'Microsoft YaHei' })], alignment: AlignmentType.CENTER })],
+          shading: { type: ShadingType.SOLID, color: '16213E' },
+          width: { size: text === '客户名' ? 22 : text === '最新消息摘要' ? 50 : 12, type: WidthType.PERCENTAGE },
+        })
+      ),
+    });
+
+    const rows = g.items.map(c => {
+      const rawMsg = (c.latestMessageContent || '').replace(/\n/g, ' ').substring(0, 80);
+      const dsMsg = realMsgs[c.name];
+      let displayMsg;
+      if (dsMsg) {
+        displayMsg = dsMsg.substring(0, 120);
+      } else if (isSystemMsg(c.latestMessageContent || '')) {
+        displayMsg = '[需深抓]';
+      } else {
+        displayMsg = rawMsg;
+      }
+      return new TableRow({
+        children: [
+          c.name || '?',
+          c.countryCode || '?',
+          c.buyerLevel || '?',
+          daysAgo(c.lastContactTime),
+          displayMsg || '(空)',
+        ].map((text, i) =>
+          new TableCell({
+            children: [new Paragraph({ children: [new TextRun({ text, size: 16, font: 'Microsoft YaHei' })], alignment: i < 4 ? AlignmentType.CENTER : AlignmentType.LEFT })],
+            width: { size: i === 0 ? 22 : i === 4 ? 50 : 12, type: WidthType.PERCENTAGE },
+          })
+        ),
+      });
+    });
+
+    children.push(new Table({ rows: [headerRow, ...rows], width: { size: 100, type: WidthType.PERCENTAGE } }));
+  }
+
+  // 尾部
+  children.push(
+    new Paragraph({ spacing: { before: 400 }, children: [] }),
+    new Paragraph({
+      children: [new TextRun({ text: '说明：只列客户状态，不打执行方案。选中具体客户后可针对性地做五步分析和执行方案。', size: 16, color: '888888', font: 'Microsoft YaHei', italics: true })],
+      alignment: AlignmentType.CENTER,
+    })
+  );
+
+  sections.push({ children });
+
+  const doc = new Document({ sections });
+  const buffer = await Packer.toBuffer(doc);
+  const ts = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const outPath = join(DESKTOP, `客户状态清单_${ts}.docx`);
+  writeFileSync(outPath, buffer);
+  console.log(`\n✅ 已生成: ${outPath}`);
+  console.log(`   包含 ${sorted.length} 个分类，共 ${data.stats.total} 个客户`);
+}
+
+main().catch(err => { console.error('错误:', err.message); process.exit(1); });

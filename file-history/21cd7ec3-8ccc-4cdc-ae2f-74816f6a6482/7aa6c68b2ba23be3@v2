@@ -1,0 +1,99 @@
+# OKKI 分类：脚本基线 + AI 边缘修正
+
+## 背景
+ai_classify.js v3 用纯规则引擎产出全量 465 人基线判定（10 阶段，活跃 118 / 搁置 340）。脚本解决了 80% 机械判定，但规则阈值面对边缘案例抓不准语义（"I'll discuss with my partner" vs "I'm not interested"）。
+
+## 目标
+脚本基线 + AI 审查 ~50 个边缘案例 → 修正 s3 → 输出看板和行动清单。同时建立学习闭环，避免重复修正。
+
+## 执行步骤
+
+### Step 0: 修脚本系统性问题（先修再跑基线，不放进 AI 队列）
+
+1. **修 `computeDirection()`** — `enhanced_classify.js:185-194`
+   - 删除硬编码 `return 'to_them'`
+   - 基于 `lastOurMsgDate` 和 `lastCustomerMsgDate` 真实比较
+   - 对 bucket 1 客户（无 snippet），用元数据中的时间戳比较
+
+2. **加幽灵账号过滤** — `ai_classify.js` correctGrade()
+   - 名单：Leon Scott Kennedy, Anne Shen, User name, (未知), d zm
+   - 这些直接 → D 级
+
+3. **修 SKILL.md 硬约束** — 确保每次 /okki 强制重跑基线
+   - 检查 s3 时间戳，不是今天的 → 拒绝复用
+
+### Step 1: 跑基线（已完成）
+ai_classify.js v3 已产出 s3_ai_judgments.json（465 条）。
+
+### Step 2: 筛选 AI 审查边缘案例
+
+**第 1 层（找边缘）**：静默 14-90d + 非终态 ∪ S/A 任意静默 → ~80 人
+
+**第 2 层（去噪）**：去掉 D 级、未成交、>90d 静默（S/A 保留）
+
+**第 3 层（可读性）**：满足以下任一条件：
+- snippet 总字符数 ≥ 500
+- S/A 级（不受字符限制）
+- 含审批/等待信号词：`wait|check with|discuss with|商量|确认一下|审批|partner|team|manager`
+- 含负面情绪信号：`disappointed|not what I expected|not happy|problem with quality|issue with|doesn't match`
+
+**第 4 层（分类进入 AI）**：
+| 类别 | 条件 |
+|------|------|
+| 高价值搁置 | S/A + 搁置 + 30-90d |
+| 活跃待确认 | 非搁置 + 30-90d 静默 |
+| 付款卡住 | 待付款 + >14d |
+| 负面信号 | 含失望/不满表达 |
+| 审批信号 | 含等待/商量表达（14-30d） |
+
+预计 ~50 人。
+
+### Step 3: AI 逐人审查
+
+对每个人读 snippet 原文，回答三个问题：
+1. 阶段对不对？需要修正吗？
+2. 优先级对不对？now / soon / idle 合理吗？
+3. 有没有脚本漏掉的信号？
+
+修正写入 s3，增加字段：
+```json
+{
+  "aiConfirmed": true,
+  "aiCorrection": "stage/priority修正说明"
+}
+```
+
+### Step 4: 输出修正日志
+
+写 `output/ai_corrections_2026-05-15.md`：
+- 每条修正：客户名、原判定 → 新判定、修正原因、触发信号词
+- 底部汇总：修正模式统计
+
+### Step 5: 检查系统性缺陷
+
+修正日志中同一类错误 ≥3 次 → 修 ai_classify.js 对应规则。
+
+### Step 6: 最终输出
+
+- 重跑 `enhanced_classify.js --dashboard-only` 生成看板
+- 从修正后 s3 生成 `actions_2026-05-15.md`
+- 更新 `STATE.md`（含 AI 修正统计和学习闭环记录）
+
+## 关键文件
+
+| 文件 | 操作 |
+|------|------|
+| `scripts/enhanced_classify.js:185-194` | 修 computeDirection() |
+| `scripts/ai_classify.js` | 加幽灵名单、加审批/负面信号检测 |
+| `data/s3_ai_judgments.json` | AI 修正覆写 |
+| `output/ai_corrections_2026-05-15.md` | 新建修正日志 |
+| `output/dashboard_2026-05-15.html` | 重新生成 |
+| `output/actions_2026-05-15.md` | 重新生成 |
+| `STATE.md` | 更新指标+学习闭环 |
+| `.claude/skills/okki/SKILL.md` | 加强制重跑基线约束 |
+
+## 验证
+- s3 中 AI 修正人数 ≈ 预估边缘人数
+- 修正日志中每条有具体信号词引用
+- 看板 HTML 可正常打开
+- 行动清单 NOW 人数合理（5-10 人）

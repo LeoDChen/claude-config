@@ -1,0 +1,57 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+
+  // Check if token changed
+  const tokenMatch = ot.url.match(/chatToken=([^&]+)/);
+  console.log('Token prefix: ' + (tokenMatch ? tokenMatch[1].substring(0, 30) : 'N/A') + '...');
+
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) { /* ignore */ }
+  });
+
+  // Check login status
+  const expr = `
+    (function() {
+      var s = window._imsdk;
+      var a = s ? s.getAuthService() : null;
+      return JSON.stringify({
+        imSdk: !!s,
+        imBaaS: !!window._imBaaSSDK,
+        isLogin: a ? a.isLogin() : null,
+        connectionStatus: a ? a.connectionStatus : null,
+        loginUid: a ? a.getLoginUid() : null,
+        convs: window.__conversationListFullData__ ? window.__conversationListFullData__.length : 0
+      });
+    })()
+  `;
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 3000));
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

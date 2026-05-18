@@ -1,0 +1,650 @@
+const fs = require('fs');
+const path = require('path');
+
+const s1 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 's1_classification.json'), 'utf8'));
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const NOW = Date.now();
+const DAY = 86400000;
+const OUR_UID = '2500000853693@icbu';
+
+const SYS_PATTERNS = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+  '当前买家首次给您发消息',
+];
+
+function isSys(content) {
+  const text = content && content.text && content.text.content || '';
+  if (!text.trim()) return true;
+  for (const p of SYS_PATTERNS) if (text.includes(p)) return true;
+  return false;
+}
+
+function getText(content) {
+  return content && content.text && content.text.content || '';
+}
+
+// ── 客户提问检测 ──
+const QUESTION_PATTERNS = [
+  /\?/,                                    // 问号
+  /(what|how|when|where|which|who|why|whom)/i,
+  /(can you|could you|would you|will you|do you|is it|are you|is there)/i,
+  /(please.*(send|give|tell|quote|share|confirm|advise|provide|let me know|explain|clarify))/i,
+  /(i need|i want|i would like|i'm looking for|we need|we want|we are looking)/i,
+  /[吗呢吧啊]/,                             // 中文提问
+  /[？]/,                                   // 中文问号
+  /(价格|报价|多少钱|什么价)/,
+  /(样品|sample|打样)/i,
+  /(MOQ|起订量|最小.*量)/i,
+  /(交期|delivery.*time|lead.*time)/i,
+];
+
+function isCustomerQuestion(text) {
+  if (!text || text.length < 3) return false;
+  for (const p of QUESTION_PATTERNS) {
+    if (p.test(text)) return true;
+  }
+  return false;
+}
+
+// ── 回复质量评估 ──
+function assessResponseQuality(questionText, responseText, gapHours) {
+  if (!responseText || responseText.trim().length === 0) return { quality: '未回复', score: 0 };
+
+  const respLen = responseText.trim().length;
+  const vaguePatterns = /^(ok|okay|yes|no|thanks|thank you|got it|noted|well|sure|好的|收到|嗯|哦|知道了)[\s,.]*$/i;
+
+  // 模糊/敷衍回复
+  if (vaguePatterns.test(responseText.trim()) || respLen < 15) {
+    return { quality: '敷衍回复', score: 1 };
+  }
+
+  // 简短回复 (15-50字)
+  if (respLen < 50) {
+    return { quality: '简短回复', score: 2 };
+  }
+
+  // 检查是否直接回应了问题关键词
+  const qWords = questionText.toLowerCase().replace(/[?？,.]/g, '').split(/\s+/).filter(w => w.length > 3);
+  const rLower = responseText.toLowerCase();
+  const matchedWords = qWords.filter(w => rLower.includes(w));
+  const relevanceRatio = qWords.length > 0 ? matchedWords.length / qWords.length : 0;
+
+  if (relevanceRatio >= 0.3 || respLen >= 100) {
+    return { quality: '充分回复', score: 3 };
+  }
+
+  return { quality: '简短回复', score: 2 };
+}
+
+// ── 处理所有 P1+P2 候选 ──
+const candidates = [...(s1.results[1]||[]), ...(s1.results[2]||[])];
+console.log('Processing ' + candidates.length + ' P1+P2 candidates...\n');
+
+const enhanced = [];
+
+for (const c of candidates) {
+  const cid = c.cid;
+  const filename = cid ? cid.replace(/#/g, '_').replace(/@/g, '_') + '.json' : '';
+  const filePath = path.join(chatDir, filename);
+
+  let msgCount = 0, customerMsgs = 0, ourMsgs = 0, sysMsgs = 0;
+  let hasPI = false, hasAddress = false, hasOrderSignal = false, hasPrice = false;
+  let hasSample = false, hasFreight = false, hasMOQ = false, hasQuantity = false;
+  let latestOurMsg = '', latestOurDate = '';
+  let latestCustMsg = '', latestCustDate = '';
+  let lastCustomerMsgDays = 9999;
+
+  // 新增：提问/回复分析
+  let lastCustQuestion = '';
+  let lastCustQuestionDate = '';
+  let ourResponseQuality = 'N/A';
+  let responseGapDays = -1;
+  let questionUnanswered = false;
+
+  if (fs.existsSync(filePath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const msgs = data.messages || [];
+      msgCount = msgs.length;
+
+      // 第一遍：基础统计
+      for (const m of msgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const content = msg.content;
+        const text = getText(content);
+        const date = msg.createAt || '';
+
+        if (isSys(content)) { sysMsgs++; continue; }
+
+        if (uid === OUR_UID) {
+          ourMsgs++;
+          if (date > latestOurDate) { latestOurDate = date; latestOurMsg = text; }
+        } else if (uid) {
+          customerMsgs++;
+          if (date > latestCustDate) { latestCustDate = date; latestCustMsg = text; }
+          if (date) {
+            const d = Math.floor((NOW - new Date(date).getTime()) / DAY);
+            lastCustomerMsgDays = Math.min(lastCustomerMsgDays, d);
+          }
+        }
+
+        const lc = text.toLowerCase();
+        if (/pi|proforma\s*invoice|invoice\s*sent/.test(lc)) hasPI = true;
+        if (/(付款|deposit|定金)/.test(text)) hasPI = true;
+        if (/(tt\s|wire\s*transfer|bank\s*transfer)/.test(lc)) hasPI = true;
+        if (/(address|地址|city|country|delivery\s*address|where.*ship|send.*to|destination)/.test(lc)) hasAddress = true;
+        if (/(place.*order|make.*order|confirm.*order|下单|order.*confirmed|want.*to.*order|proceed.*order|ready.*order)/.test(lc)) hasOrderSignal = true;
+        if (/(price|price|quotation|quote|报价|unit.*price|each.*cost)/.test(lc)) hasPrice = true;
+        if (/(sample|样品)/.test(lc)) hasSample = true;
+        if (/(freight|shipping|运费|物流|delivery|transport|courier|dhl|fedex)/.test(lc)) hasFreight = true;
+        if (/(moq|minimum.*order|最低.*数量|500.*piece|最小.*订单)/.test(lc)) hasMOQ = true;
+        if (/(quantity|数量|how.*many|pieces|pcs|units)/.test(lc)) hasQuantity = true;
+      }
+
+      // 第二遍：找最后一个客户提问 + 我们是否回复
+      // 从最新到最旧扫描客户消息，找第一个提问
+      const sortedMsgs = [...msgs]
+        .filter(m => {
+          const msg = m.message || m;
+          return !isSys(msg.content);
+        })
+        .sort((a, b) => {
+          const da = (a.message || a).createAt || 0;
+          const db = (b.message || b).createAt || 0;
+          return db - da; // 最新的在前
+        });
+
+      for (const m of sortedMsgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const text = getText(msg.content);
+        const date = msg.createAt || '';
+
+        if (uid && uid !== OUR_UID && isCustomerQuestion(text)) {
+          lastCustQuestion = text;
+          lastCustQuestionDate = date;
+          break;
+        }
+      }
+
+      // 找到了客户提问 → 分析回复
+      if (lastCustQuestion && lastCustQuestionDate) {
+        // 找提问之后的第一条我方回复
+        let ourFirstResponse = '';
+        let ourFirstResponseDate = '';
+        const qTs = new Date(lastCustQuestionDate).getTime();
+
+        for (const m of sortedMsgs.reverse()) { // 按时间正序
+          const msg = m.message || m;
+          const uid = msg.sender && msg.sender.uid || '';
+          const date = msg.createAt || '';
+          const ts = date ? new Date(date).getTime() : 0;
+
+          if (uid === OUR_UID && ts > qTs) {
+            ourFirstResponse = getText(msg.content);
+            ourFirstResponseDate = date;
+            break;
+          }
+        }
+
+        if (ourFirstResponse) {
+          const gapMs = new Date(ourFirstResponseDate).getTime() - qTs;
+          const gapHours = gapMs / 3600000;
+          responseGapDays = Math.round(gapHours / 24 * 10) / 10;
+
+          const assessment = assessResponseQuality(lastCustQuestion, ourFirstResponse, gapHours);
+          ourResponseQuality = assessment.quality + ' (' + responseGapDays + 'd)';
+          questionUnanswered = false;
+        } else {
+          ourResponseQuality = '未回复';
+          const gapMs = NOW - qTs;
+          responseGapDays = Math.round(gapMs / DAY * 10) / 10;
+          questionUnanswered = true;
+        }
+      }
+    } catch(e) {
+      // skip corrupted files
+    }
+  }
+
+  const realMsgs = customerMsgs + ourMsgs;
+  const daysAgo = c.daysAgo;
+  const country = c.country || '';
+  const coreMarkets = ['SD','EG','CD','ZM','CI','SA','AE'];
+  const isCore = coreMarkets.includes(country);
+  const cRatio = realMsgs > 0 ? Math.round(customerMsgs / realMsgs * 100) : 0;
+
+  let tier = c.priority;
+  const tierReason = [];
+
+  // ── P0 升级触发 ──
+  if (hasPI && hasAddress && daysAgo < 14 && realMsgs > 5) { tier = 0; tierReason.push('PI+地址已确认'); }
+  if (hasOrderSignal && daysAgo < 7 && realMsgs > 5) { tier = 0; tierReason.push('下单信号'); }
+  if (customerMsgs >= 3 && lastCustomerMsgDays <= 1 && ourMsgs === 0) { tier = 0; tierReason.push('客户多条新消息未回'); }
+  if (hasPrice && hasAddress && hasQuantity && daysAgo < 7) { tier = 0; tierReason.push('报价+地址+数量(近成交)'); }
+  if (customerMsgs >= 100 && daysAgo < 3) { tier = 0; tierReason.push('大量客户消息近期活跃'); }
+  if (realMsgs > 50 && daysAgo < 3 && customerMsgs > 20 && lastCustomerMsgDays <= 2) { tier = 0; tierReason.push('高频互动客户活跃'); }
+
+  // ── 【新】提问未回复升级 ──
+  if (questionUnanswered && responseGapDays > 0.5 && lastCustomerMsgDays <= 3) {
+    tier = 0;
+    tierReason.push('客户提问' + responseGapDays + '天未回复');
+  }
+  if (questionUnanswered && responseGapDays > 1 && lastCustomerMsgDays <= 7) {
+    tier = Math.min(tier, 0);
+    tierReason.push('提问超1天未回');
+  }
+
+  // ── P1 升级触发 ──
+  if (hasPI && daysAgo < 14) { tier = Math.min(tier, 1); tierReason.push('PI相关'); }
+  if (isCore && realMsgs > 10 && daysAgo < 5) { tier = Math.min(tier, 1); tierReason.push('核心市场活跃对话'); }
+  if (realMsgs > 20 && daysAgo < 5 && customerMsgs > 5) { tier = Math.min(tier, 1); tierReason.push('近期深度对话'); }
+  if (hasAddress && realMsgs > 5 && daysAgo < 7) { tier = Math.min(tier, 1); tierReason.push('地址已给'); }
+
+  // ── 【新】回复质量信号 ──
+  if (ourResponseQuality.startsWith('敷衍回复') && isCore && daysAgo < 3) {
+    tier = Math.min(tier, 1);
+    tierReason.push('核心市场敷衍回复需补救');
+  }
+  if (ourResponseQuality.startsWith('简短回复') && daysAgo < 2 && isCore) {
+    tier = Math.min(tier, 1);
+    tierReason.push('核心市场回复质量待提升');
+  }
+  if (responseGapDays > 3 && questionUnanswered && isCore) {
+    tier = Math.min(tier, 1);
+    tierReason.push('核心客户提问超3天未回');
+  }
+
+  // ── 降级 ──
+  if (realMsgs <= 2 && daysAgo > 7) { tier = Math.max(tier, c.priority + 1); tierReason.push('几乎无有效对话'); }
+
+  enhanced.push({
+    name: c.name,
+    country, isCore, daysAgo, tier,
+    tierName: 'P' + tier,
+    tierReason: tierReason.length > 0 ? tierReason.join(', ') : '元数据',
+    msgCount, customerMsgs, ourMsgs, sysMsgs, realMsgs, cRatio,
+    lastCustomerMsgDays: lastCustomerMsgDays === 9999 ? '-' : lastCustomerMsgDays,
+    latestOurMsg: latestOurMsg.substring(0, 100),
+    latestCustMsg: latestCustMsg.substring(0, 100),
+    hasPI, hasAddress, hasOrderSignal, hasPrice, hasSample, hasFreight, hasMOQ, hasQuantity,
+    // 新增字段
+    lastCustQuestion: lastCustQuestion.substring(0, 200),
+    ourResponseQuality,
+    responseGapDays,
+    questionUnanswered,
+    cid: c.cid, filename,
+  });
+}
+
+// ── 排序 ──
+enhanced.sort((a, b) => a.tier - b.tier || a.daysAgo - b.daysAgo);
+
+// ── 输出 ──
+const tiers = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+for (const e of enhanced) tiers[e.tier].push(e);
+
+for (let t = 0; t <= 4; t++) {
+  const items = tiers[t];
+  if (items.length === 0) continue;
+  console.log('=== P' + t + ': ' + items.length + ' people ===');
+  for (const e of items) {
+    const core = e.isCore ? '*' : ' ';
+    const sig = [];
+    if (e.hasPI) sig.push('PI');
+    if (e.hasAddress) sig.push('ADDR');
+    if (e.hasOrderSignal) sig.push('ORDER');
+    if (e.hasPrice) sig.push('PRICE');
+    if (e.hasSample) sig.push('SAMPLE');
+    if (e.hasQuantity) sig.push('QTY');
+    if (e.questionUnanswered) sig.push('⚠未回复');
+    const sigStr = sig.length > 0 ? ' [' + sig.join(',') + ']' : '';
+    const info = [
+      String(e.daysAgo).padStart(2) + 'd',
+      (e.country || '??').padEnd(2),
+      core,
+      e.name.padEnd(30),
+      't:' + String(e.msgCount).padStart(4),
+      'c:' + String(e.customerMsgs).padStart(4) + '/' + String(e.cRatio).padStart(2) + '%',
+      e.tierReason.substring(0, 40).padEnd(40),
+    ];
+    console.log('  ' + info.join(' | ') + sigStr);
+    if (e.latestCustMsg) {
+      console.log('    cust last: ' + String(e.lastCustomerMsgDays) + 'd ago > ' + e.latestCustMsg.substring(0, 80));
+    }
+    // 显示提问/回复信号
+    if (e.lastCustQuestion) {
+      console.log('    ❓ Q: ' + e.lastCustQuestion.substring(0, 80));
+      console.log('    💬 回复质量: ' + e.ourResponseQuality + ' | 间隔: ' + e.responseGapDays + 'd');
+    }
+  }
+  console.log('');
+}
+
+// ── 摘要 ──
+const tc = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+for (const e of enhanced) tc[e.tier]++;
+console.log('=== SUMMARY ===');
+console.log('P0:' + tc[0] + ' P1:' + tc[1] + ' P2:' + tc[2] + ' Total:' + enhanced.length);
+console.log('(from ' + (s1.results[1] || []).length + ' P1 + ' + (s1.results[2] || []).length + ' P2 metadata)');
+
+// 提问未回复统计
+const unanswered = enhanced.filter(e => e.questionUnanswered);
+const poorQuality = enhanced.filter(e => e.ourResponseQuality.startsWith('敷衍回复') || e.ourResponseQuality.startsWith('简短回复'));
+console.log('提问未回复: ' + unanswered.length + '人 | 回复质量待提升: ' + poorQuality.length + '人');
+
+fs.writeFileSync(
+  path.join(__dirname, '..', 'data', 's1_enhanced.json'),
+  JSON.stringify(enhanced, null, 2)
+);
+console.log('\nSaved to data/s1_enhanced.json');
+
+// ── 生成行动信号弹窗 HTML ──
+generateActionPopup(enhanced, unanswered, poorQuality);
+
+function generateActionPopup(enhanced, unanswered, poorQuality) {
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const nowStr = now.toLocaleString('zh-CN');
+
+  const tiers = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+  for (const e of enhanced) tiers[e.tier].push(e);
+
+  const dangerSignals = enhanced.filter(e =>
+    e.questionUnanswered ||
+    (e.ourResponseQuality.startsWith('敷衍回复') && e.daysAgo < 3) ||
+    e.responseGapDays > 3
+  );
+
+  const html = `<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 行动信号 — ${todayStr}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    padding: 24px; background: #f0f2f5; color: #333;
+  }
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  .header h1 { font-size: 22px; }
+  .header .time { color: #888; font-size: 13px; }
+
+  .summary-cards {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .card {
+    background: #fff; border-radius: 8px; padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); min-width: 130px; flex: 1;
+  }
+  .card .num { font-size: 32px; font-weight: 700; }
+  .card .label { font-size: 13px; color: #666; margin-top: 4px; }
+  .card.p0 .num { color: #e74c3c; }
+  .card.unanswered .num { color: #e67e22; }
+  .card.poor .num { color: #f39c12; }
+  .card.danger .num { color: #c0392b; }
+
+  .section {
+    background: #fff; border-radius: 8px; margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden;
+  }
+  .section-title {
+    padding: 14px 20px; font-weight: 600; font-size: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .section-title.p0 { background: #fff5f5; color: #c0392b; }
+  .section-title.p1 { background: #fffdf0; color: #d68910; }
+  .section-title.signal { background: #fff5f0; color: #e67e22; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 600;
+       border-bottom: 2px solid #eee; white-space: nowrap; color: #555; }
+  td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tr:hover td { background: #fafafa; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px;
+           font-size: 11px; font-weight: 600; }
+  .badge.danger { background: #ffe0e0; color: #c0392b; }
+  .badge.warn { background: #fff3cd; color: #856404; }
+  .badge.info { background: #d1ecf1; color: #0c5460; }
+  .badge.ok { background: #d4edda; color: #155724; }
+  .badge.p0-badge { background: #e74c3c; color: #fff; }
+  .badge.p1-badge { background: #e67e22; color: #fff; }
+
+  .msg-preview { font-size: 12px; color: #888; max-width: 300px;
+                 overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gap-highlight { color: #e74c3c; font-weight: 700; }
+
+  .popup-trigger {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: #e74c3c; color: #fff; border: none; border-radius: 50px;
+    padding: 14px 24px; font-size: 15px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(231,76,60,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .popup-trigger:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(231,76,60,0.45); }
+  .popup-trigger .count { background: #fff; color: #e74c3c; border-radius: 20px;
+                          padding: 2px 10px; font-size: 14px; }
+
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); z-index: 99999;
+    justify-content: center; align-items: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 12px; width: 800px; max-width: 92vw;
+    max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 24px; border-bottom: 1px solid #eee;
+    font-weight: 700; font-size: 17px; position: sticky; top: 0;
+    background: #fff; border-radius: 12px 12px 0 0; z-index: 10;
+  }
+  .modal-close {
+    cursor: pointer; font-size: 26px; color: #bbb; line-height: 1;
+    padding: 0 6px; border: none; background: none;
+  }
+  .modal-close:hover { color: #333; }
+  .modal-body { padding: 20px 24px; }
+
+  .action-item {
+    padding: 14px 16px; margin: 8px 0; border-left: 4px solid #e74c3c;
+    background: #fff5f5; border-radius: 0 6px 6px 0;
+  }
+  .action-item.warn { border-left-color: #e67e22; background: #fffdf0; }
+  .action-item .action-header {
+    font-weight: 600; margin-bottom: 6px;
+    display: flex; justify-content: space-between;
+  }
+  .action-item .action-detail { font-size: 13px; color: #555; }
+  .action-item .action-q { font-size: 12px; color: #999; margin-top: 4px;
+                           font-style: italic; }
+
+  .tip { font-size: 12px; color: #999; margin-top: 12px; padding: 10px;
+         background: #f8f9fa; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 OKKI 行动信号看板</h1>
+  <span class="time">生成于 ${nowStr}</span>
+</div>
+
+<div class="summary-cards">
+  <div class="card p0">
+    <div class="num">${tiers[0].length}</div>
+    <div class="label">🔴 P0 立即行动</div>
+  </div>
+  <div class="card unanswered">
+    <div class="num">${unanswered.length}</div>
+    <div class="label">⚠️ 客户提问未回复</div>
+  </div>
+  <div class="card poor">
+    <div class="num">${poorQuality.length}</div>
+    <div class="label">📝 回复质量待提升</div>
+  </div>
+  <div class="card danger">
+    <div class="num">${dangerSignals.length}</div>
+    <div class="label">🚨 有行动信号</div>
+  </div>
+  <div class="card">
+    <div class="num">${tiers[1].length}</div>
+    <div class="label">🟡 P1 本周跟进</div>
+  </div>
+</div>
+
+${dangerSignals.length > 0 ? `
+<div class="section">
+  <div class="section-title signal">🚨 行动信号 — 需立即处理 (${dangerSignals.length}人)</div>
+  <div style="padding: 16px 20px;">
+    ${dangerSignals.map(e => {
+      let advice = '';
+      let cls = 'action-item';
+      if (e.questionUnanswered) {
+        advice = '客户提问尚未回复，24h内必须回应。查看问题原文，针对性回复。';
+        cls += '';
+      } else if (e.ourResponseQuality.startsWith('敷衍回复')) {
+        advice = '上次回复过于简短/敷衍，建议补充详细信息或发送产品目录补救。';
+        cls += ' warn';
+      } else if (e.responseGapDays > 3) {
+        advice = '回复客户提问间隔超过3天，跟进时效差。需立即联系确认是否还有需求。';
+        cls += ' warn';
+      }
+      return '<div class="' + cls + '">'
+        + '<div class="action-header">'
+        + '<span>' + e.name + ' <small>(' + (e.country||'??') + ')</small></span>'
+        + '<span>' + (e.tier === 0 ? '<span class="badge p0-badge">P0</span>' : '<span class="badge p1-badge">P1</span>') + '</span>'
+        + '</div>'
+        + '<div class="action-detail">📌 ' + advice + '</div>'
+        + (e.lastCustQuestion ? '<div class="action-q">❓ 客户提问: ' + e.lastCustQuestion.substring(0, 100) + '</div>' : '')
+        + '<div class="action-detail" style="margin-top:4px;">回复质量: ' + e.ourResponseQuality + ' | 静默: ' + (e.lastCustomerMsgDays === '-' ? 'N/A' : e.lastCustomerMsgDays + 'd') + '</div>'
+        + '</div>';
+    }).join('\n    ')}
+  </div>
+</div>
+` : ''}
+
+${tiers[0].length > 0 ? `
+<div class="section">
+  <div class="section-title p0">🔴 P0 — 立即行动 (${tiers[0].length}人)</div>
+  <table>
+    <tr><th>客户</th><th>国家</th><th>静默</th><th>提问</th><th>回复质量</th><th>间隔</th><th>分类理由</th></tr>
+    ${tiers[0].map(e => `
+    <tr>
+      <td><b>${e.name}</b></td>
+      <td>${e.country||'??'}${e.isCore ? ' ★' : ''}</td>
+      <td>${e.lastCustomerMsgDays === '-' ? '-' : e.lastCustomerMsgDays + 'd'}</td>
+      <td><span class="msg-preview" title="${(e.lastCustQuestion||'').replace(/"/g, '&quot;')}">${(e.lastCustQuestion||'-').substring(0, 60)}</span></td>
+      <td>${e.ourResponseQuality === 'N/A' ? '<span class="badge info">N/A</span>'
+        : e.questionUnanswered ? '<span class="badge danger">未回复</span>'
+        : e.ourResponseQuality.startsWith('敷衍') ? '<span class="badge warn">' + e.ourResponseQuality + '</span>'
+        : e.ourResponseQuality.startsWith('简短') ? '<span class="badge warn">' + e.ourResponseQuality + '</span>'
+        : '<span class="badge ok">' + e.ourResponseQuality + '</span>'
+      }</td>
+      <td>${e.responseGapDays >= 0 ? '<span class="' + (e.responseGapDays > 3 ? 'gap-highlight' : '') + '">' + e.responseGapDays + 'd</span>' : '-'}</td>
+      <td>${e.tierReason}</td>
+    </tr>`).join('')}
+  </table>
+</div>
+` : ''}
+
+${tiers[1].length > 0 ? `
+<div class="section">
+  <div class="section-title p1">🟡 P1 — 本周跟进 (${tiers[1].length}人)</div>
+  <table>
+    <tr><th>客户</th><th>国家</th><th>静默</th><th>提问</th><th>回复质量</th><th>间隔</th><th>分类理由</th></tr>
+    ${tiers[1].slice(0, 20).map(e => `
+    <tr>
+      <td><b>${e.name}</b></td>
+      <td>${e.country||'??'}${e.isCore ? ' ★' : ''}</td>
+      <td>${e.lastCustomerMsgDays === '-' ? '-' : e.lastCustomerMsgDays + 'd'}</td>
+      <td><span class="msg-preview" title="${(e.lastCustQuestion||'').replace(/"/g, '&quot;')}">${(e.lastCustQuestion||'-').substring(0, 60)}</span></td>
+      <td>${e.ourResponseQuality === 'N/A' ? '<span class="badge info">N/A</span>'
+        : e.questionUnanswered ? '<span class="badge danger">未回复</span>'
+        : e.ourResponseQuality.startsWith('敷衍') ? '<span class="badge warn">' + e.ourResponseQuality + '</span>'
+        : e.ourResponseQuality.startsWith('简短') ? '<span class="badge warn">' + e.ourResponseQuality + '</span>'
+        : '<span class="badge ok">' + e.ourResponseQuality + '</span>'
+      }</td>
+      <td>${e.responseGapDays >= 0 ? '<span class="' + (e.responseGapDays > 3 ? 'gap-highlight' : '') + '">' + e.responseGapDays + 'd</span>' : '-'}</td>
+      <td>${e.tierReason}</td>
+    </tr>`).join('')}
+  </table>
+  ${tiers[1].length > 20 ? '<div style="padding:12px;color:#888;font-size:13px;">... 还有 ' + (tiers[1].length - 20) + ' 人，详见完整数据</div>' : ''}
+</div>
+` : ''}
+
+<div class="tip">
+  💡 <b>使用提示：</b>提问检测覆盖英文问号/what/how/where/can you等模式 + 中文吗/呢/？/报价/样品等。回复质量分四档：未回复 / 敷衍回复(<15字) / 简短回复(15-50字) / 充分回复(≥50字且有相关性)。ESC 关闭弹窗。
+</div>
+
+<!-- 浮动按钮触发弹窗 -->
+<button class="popup-trigger" onclick="document.getElementById('action-modal').classList.add('show')">
+  ⚡ 行动信号 <span class="count">${dangerSignals.length}</span>
+</button>
+
+<div id="action-modal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span>⚡ 行动信号速览 — ${dangerSignals.length} 个待处理</span>
+      <button class="modal-close" onclick="document.getElementById('action-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      ${dangerSignals.length === 0 ? '<p style="color:#888;">✅ 当前无紧急行动信号</p>' : ''}
+      ${dangerSignals.map((e, i) => {
+        let advice = '';
+        if (e.questionUnanswered) {
+          advice = '客户提问尚未回复，24h内必须回应';
+        } else if (e.ourResponseQuality.startsWith('敷衍回复')) {
+          advice = '上次回复过于简短/敷衍，建议补充详细信息或发送产品目录补救';
+        } else if (e.responseGapDays > 3) {
+          advice = '回复间隔超过3天，跟进时效差，需立即联系确认';
+        }
+        return '<div class="' + (e.questionUnanswered ? 'action-item' : 'action-item warn') + '">'
+          + '<div class="action-header">'
+          + '<span>' + (i + 1) + '. ' + e.name + ' <small>(' + (e.country||'??') + ')</small> | ' + e.tierName + '</span>'
+          + '<span style="font-size:12px;color:#888;">静默' + (e.lastCustomerMsgDays === '-' ? 'N/A' : e.lastCustomerMsgDays + 'd') + '</span>'
+          + '</div>'
+          + '<div class="action-detail">📌 ' + advice + '</div>'
+          + (e.lastCustQuestion ? '<div class="action-q">❓ 客户提问: ' + e.lastCustQuestion.substring(0, 120) + '</div>' : '')
+          + '<div class="action-detail" style="margin-top:4px;">💬 回复质量: ' + e.ourResponseQuality + '</div>'
+          + '</div>';
+      }).join('\n      ')}
+      <div class="tip" style="margin-top:16px;">
+        💡 按 <b>ESC</b> 或点击背景关闭此弹窗 | 点击右下角浮动按钮重新打开
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('action-modal').classList.remove('show');
+    }
+  });
+</script>
+
+</body>
+</html>`;
+
+  const outPath = path.join(__dirname, '..', 'output', 'action_signals_' + todayStr + '.html');
+  fs.writeFileSync(outPath, html, 'utf-8');
+  console.log('\n[DONE] 行动信号弹窗 → ' + outPath);
+  return outPath;
+}

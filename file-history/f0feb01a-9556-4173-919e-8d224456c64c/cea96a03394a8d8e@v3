@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [{
+      "hooks": [{
+        "type": "command",
+        "command": "node d:/ClaudeWorkspace/08_客户跟进/Okki/.claude/hooks/load-state.js"
+      }]
+    }],
+
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "node d:/ClaudeWorkspace/08_客户跟进/Okki/.claude/hooks/update-state.js"
+      }]
+    }]
+  }
+}

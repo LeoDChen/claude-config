@@ -1,0 +1,432 @@
+const fs = require('fs');
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType, PageBreak } = require('docx');
+
+// ========== 工具函数 ==========
+function headerCell(text, width, color = '1a5276') {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    shading: { type: ShadingType.SOLID, color },
+    children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: 'FFFFFF', size: 20, font: 'Microsoft YaHei' })], spacing: { before: 30, after: 30 } })],
+  });
+}
+
+function cell(text, width, opts = {}) {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    children: [new Paragraph({ children: [new TextRun({ text, size: 19, font: 'Microsoft YaHei', ...opts })], spacing: { before: 25, after: 25 } })],
+  });
+}
+
+function multiCell(lines, width) {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    children: lines.map(l => new Paragraph({ children: [new TextRun({ text: l, size: 18, font: 'Microsoft YaHei' })], spacing: { before: 20, after: 20 } })),
+  });
+}
+
+function heading(text, level) {
+  const sizes = { 1: 32, 2: 26, 3: 22 };
+  return new Paragraph({ heading: level, children: [new TextRun({ text, bold: true, font: 'Microsoft YaHei', size: sizes[level] || 22 })], spacing: { before: 200, after: 100 } });
+}
+
+function para(text, opts = {}) {
+  return new Paragraph({ children: [new TextRun({ text, size: 21, font: 'Microsoft YaHei', ...opts })], spacing: { before: 60, after: 60 } });
+}
+
+function redPara(text) {
+  return para(`⚠️ ${text}`, { color: 'c0392b', bold: true });
+}
+
+function scriptBox(scriptText) {
+  return new Paragraph({
+    children: [new TextRun({ text: scriptText, size: 20, font: 'Microsoft YaHei', italics: true, color: '2c3e50' })],
+    spacing: { before: 60, after: 60 },
+    border: { top: { style: BorderStyle.SINGLE, size: 2, color: '2980b9' }, bottom: { style: BorderStyle.SINGLE, size: 2, color: '2980b9' }, left: { style: BorderStyle.SINGLE, size: 2, color: '2980b9' }, right: { style: BorderStyle.SINGLE, size: 2, color: '2980b9' } },
+  });
+}
+
+function sectionHeader(text) {
+  return heading(text, 1);
+}
+
+// ========== 构建文档 ==========
+const children = [];
+
+// ========== 封面 ==========
+children.push(new Paragraph({ spacing: { before: 2000 } }));
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, alignment: 'center', children: [new TextRun({ text: 'OKKI 客户分析日报', bold: true, font: 'Microsoft YaHei', size: 48, color: '1a5276' })], spacing: { after: 200 } }));
+children.push(new Paragraph({ alignment: 'center', children: [new TextRun({ text: '2026年5月9日（星期五）', font: 'Microsoft YaHei', size: 28, color: '7f8c8d' })], spacing: { after: 100 } }));
+children.push(new Paragraph({ alignment: 'center', children: [new TextRun({ text: '小星星服饰工厂 · 阿里巴巴国际站', font: 'Microsoft YaHei', size: 24, color: '95a5a6' })], spacing: { after: 400 } }));
+
+// 核心数据摘要
+children.push(heading('今日数据速览', 2));
+const summaryRows = [
+  new TableRow({ children: [headerCell('指标', 25), headerCell('数值', 25), headerCell('指标', 25), headerCell('数值', 25)] }),
+  new TableRow({ children: [cell('数据同步时间', 25), cell('2026-05-09 02:07', 25), cell('总会话数', 25), cell('466', 25)] }),
+  new TableRow({ children: [cell('7日内活跃会话', 25), cell('43 个', 25), cell('7日内客户回复', 25), cell('293条 / 27人', 25)] }),
+  new TableRow({ children: [cell('P0 立即行动', 25), cell('19 人', 25), cell('P1 本周跟进', 25), cell('11 人（实6+重定3+降2）', 25)] }),
+  new TableRow({ children: [cell('P2 观察', 25), cell('7 人', 25), cell('P3/P4 低活/沉默', 25), cell('1 + 422 人', 25)] }),
+  new TableRow({ children: [cell('待付款客户', 25), cell('5 人', 25), cell('报价已发谈判中', 25), cell('8 人', 25)] }),
+];
+children.push(new Table({ rows: summaryRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 第一部分：Mona 深度分析 ==========
+children.push(sectionHeader('第一部分：Mona almuharraqy 深度分析'));
+children.push(para('客户来源国家：巴林（BH），阿拉伯语沟通，关系建立时间极长，互动频率极高但至今未转化。'));
+children.push(heading('数据总览', 2));
+const monaDataRows = [
+  new TableRow({ children: [headerCell('字段', 20), headerCell('内容', 80)] }),
+  new TableRow({ children: [cell('总消息数', 20), cell('1,000 条（全客户最高）', 80)] }),
+  new TableRow({ children: [cell('客户消息数', 20), cell('439 条（cRatio 51%）', 80)] }),
+  new TableRow({ children: [cell('我方消息数', 20), cell('418 条', 80)] }),
+  new TableRow({ children: [cell('系统消息', 20), cell('143 条', 80)] }),
+  new TableRow({ children: [cell('最后客户消息', 20), cell('2 天前："طيب"（好的）', 80)] }),
+  new TableRow({ children: [cell('最后我方消息', 20), cell('/:handshake.（握手表情）', 80)] }),
+  new TableRow({ children: [cell('当前阶段', 20), cell('PI已发+地址已确认+产品讨论中 → 未付款', 80)] }),
+  new TableRow({ children: [cell('已确认信息', 20), cell('PI ✓ | 地址 ✓ | 数量 ✓ | 价格 ✓ | 样品 ✓ | 运费 ✓ | MOQ ✓', 80)] }),
+];
+children.push(new Table({ rows: monaDataRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(heading('对话关键节点还原', 2));
+children.push(para('（基于最近50条消息的抽样分析）'));
+children.push(para('1. 产品讨论阶段 — 客户反复确认材质（"لماذا كمنتجات قطن" = 为什么是棉制品？），说明她对材质有疑虑，可能是比较了其他供应商的非纯棉产品。'));
+children.push(para('2. 物流跟进 — 客户主动联系了货运公司（"كلمت شركة الشحن قال قريب بتوصل" = 我联系了货运公司，他们说快到了）。这表明Mona已经开始做物流安排了，但这句话也可能是在回应我方之前的某个物流预期设定。'));
+children.push(para('3. 款式更新 — 客户提到"موديلات تجدد تنزل دائما"（新款一直有在下架更新），这可能意味着她在等新款式，或者觉得现有款式不够满意。'));
+children.push(para('4. 最后互动 — 我方发送"/:handshake."后，客户回了一个简短确认"طيب"（好的），但没有任何推进付款的动作。'));
+children.push(para('5. PI已发送 — 地址和数量均已在之前的对话中确认，但客户从未付款。'));
+
+children.push(heading('转化卡点诊断', 2));
+children.push(para('核心问题：不是"不想要"，而是"一直在犹豫比较"。Mona的439条客户消息表明她有极强的沟通意愿和对我们的高度信任，但反复的产品确认和物流追问表明她存在以下卡点：'));
+children.push(para('卡点1：材质/品质不放心 — "为什么是棉制品？"这个问题背后，可能是她在和其他供应商的混纺/化纤产品比较价格。纯棉成本高售价高，她作为巴林批发商可能终端市场对价格敏感。'));
+children.push(para('卡点2：款式更新焦虑 — "新款一直有在下架"意味着她担心下单后款式就过时了，或者她正在等待我们推出更多选择。这可能是我们频繁推新款但没给她"这批就是最新的"的确定感导致的。'));
+children.push(para('卡点3：决策链条不清晰 — 1000条消息中我方418条（占比42%），说明我们每次都回了，但这种"事事回应"的模式可能让Mona养成了"随时来聊但不决策"的习惯。她缺少一个明确的"截止时间"来推动付款。'));
+children.push(para('卡点4：缺少紧迫感 — 我方从未给她设定期限（如"这批面料有限"或"价格下周调整"）。所有对话都在无限等待她的决定。'));
+
+children.push(heading('下一步行动策略', 2));
+children.push(para('策略：从"无限等"转为"有期限的诚意"。核心思路是给Mona一个合情合理的决策截止点，同时消除她的品质顾虑。'));
+children.push(para('具体动作：'));
+children.push(para('① 今天发送品质保证说明 — 用图片+文字展示纯棉 vs 化纤的对比优势（透气性/安全性/婴儿适用），消解"为什么是棉"的疑虑。'));
+children.push(para('② 发送最终确认清单 — 把她之前确认过的所有信息（款式/尺码/数量/价格/运费/地址）做成一个清晰的订单确认清单发给她，末尾说"请在本周五前最终确认，我好为你锁定这批面料"。'));
+children.push(para('③ 给一个温和的时限 — "最近工厂订单较多，这批面料我先帮你预留到5月11日，过了这个日期价格可能会有调整。"'));
+children.push(para('④ 附上新的3-5款最热推荐 — 告诉她"这是本周最新生产的款式，你可以替换掉之前选的任何一款"。这样既回应了她对新款的关注，又推进了决策。'));
+
+children.push(heading('跟进话术（中文）', 2));
+children.push(para('发送语言：阿拉伯语（中文对照如下）', { bold: true }));
+children.push(scriptBox('【中文版】\nMona你好！我整理了一份你的订单确认清单：你选的款式和数量、到巴林的运费、以及总价都在这里了。关于你上次问的"为什么是棉制品"——我附了几张图片，纯棉对婴儿皮肤更好，透气不闷汗，中东夏天穿最合适。\n\n另外，最近工厂订单比较多，这批面料我可以帮你预留到5月11日，之后价格可能会根据面料行情调整。你之前选的那几款如果还想换，我顺便发了5款本周最新的热销款，你可以选换进去。\n\n你看这周五前给我最终确认就好！'));
+children.push(para(''));
+children.push(scriptBox('【阿拉伯语版（实际发送用）】\nمرحباً منى! قمت بتجهيز قائمة تأكيد طلبك — الموديلات والكميات والشحن إلى البحرين والسعر الإجمالي. بخصوص سؤالك "لماذا كمنتجات قطن" — أرفقت صور توضح أن القطن أفضل لبشرة الطفل، يسمح بالتهوية ولا يسبب التعرق، مناسب جداً لصيف الشرق الأوسط.\n\nبالمناسبة، المصنع مشغول حالياً، يمكنني حجز هذه الأقمشة لك حتى 11 مايو، بعدها قد تتغير الأسعار حسب سوق الأقمشة. إذا أردت تغيير أي موديل، أرسلت لك 5 موديلات جديدة من إنتاج هذا الأسبوع.\n\nأخبريني بقرارك النهائي قبل الجمعة!'));
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 第二部分：P0 汇总 ==========
+children.push(sectionHeader('第二部分：P0 客户汇总（19人）'));
+
+children.push(heading('P0 分类概览', 2));
+const p0CatRows = [
+  new TableRow({ children: [headerCell('子类', 20), headerCell('人数', 10), headerCell('客户列表', 70)] }),
+  new TableRow({ children: [cell('待付款/待发货', 20), cell('5', 10), cell('Aloh Voma(美→喀麦隆)、Christabel Kanunsha(赞比亚)、ali Amjid(南非)、WELE Mounia(多哥)、arshavin amoah(加纳)', 70)] }),
+  new TableRow({ children: [cell('报价已发/谈判中', 20), cell('8', 10), cell('Inderpreet kaur(美)、jonathan aston(加纳)、Keinjol Tata(印度)、Asma Noor(巴基斯坦)、Brian Robert Ocholi(肯尼亚)、Christine Muwela(赞比亚)、Sara Dibes(黎巴嫩)、rehema kiseyu(坦桑尼亚)', 70)] }),
+  new TableRow({ children: [cell('高频互动/复杂', 20), cell('3', 10), cell('Mona almuharraqy(巴林)、ali Amjid(南非)、yoselyn Rodriguez(美)', 70)] }),
+  new TableRow({ children: [cell('新会话/初询', 20), cell('3', 10), cell('Ernestina Afriyie(加纳)、Esther Chola(赞比亚)、Abdulrhman alal(阿曼)', 70)] }),
+];
+children.push(new Table({ rows: p0CatRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+// P0 关键客户详情
+children.push(heading('P0 关键客户详情与中文话术', 2));
+
+// 待付款
+children.push(heading('▎待付款/待发货（5人）', 3));
+
+children.push(heading('1. Aloh Voma | 美国→喀麦隆 | 已付款已发货', 3));
+children.push(para('25件童装套装，$3/pc，佛山货代→喀麦隆(Douala)。5/8已发货，预计3天到仓。'));
+children.push(para('下一步：跟进仓库签收→发收货凭证→索要质量反馈→推荐新款。'));
+children.push(scriptBox('【中文话术】\nAloh，你的订单25件童装已经发往佛山货代仓库了，预计3天内到仓，之后货代会安排发往喀麦隆Douala。收货后麻烦给我反馈一下品质和包装，如果满意的话我可以推荐一些新款供你下次补货参考！'));
+
+children.push(heading('2. Christabel Kanunsha | 赞比亚★ | 订单已创建等付款', 3));
+children.push(para('2件/$7.70，小单但核心市场客户。'));
+children.push(scriptBox('【中文话术】\nChristabel，你的订单（2件/$7.70）我已经创建好了。确认一下你要的款式和颜色都对吧？付款完成后我这边立即安排发货。如果有任何问题随时告诉我！'));
+
+children.push(heading('3. ali Amjid | 南非 | 选款完成等付款', 3));
+children.push(para('个人买家，234条消息选款马拉松，最终16件约¥510，深圳宝安货代。'));
+children.push(scriptBox('【中文话术】\nali你好！确认一下你最终选的这16件（约¥510），款式和尺码都对吗？确认后付款，我这边安排发到你深圳宝安的货代那里。这批货很快就能发出！'));
+
+children.push(heading('4. WELE Mounia | 多哥★ | 老客户复购', 3));
+children.push(para('首单30件(2月)已完成交付，5/5主动联系"还有别的吗？"，5/6确认收货满意。高价值老客户！'));
+children.push(scriptBox('【中文话术】\nWELE你好！很高兴收到你的消息说货收到了且满意。上次30件卖得怎么样？我们这几个月上了很多新款，我整理了一份适合西非市场的新品目录，发给你看看有没有想补的款。运费和上次一样走海运45天到多哥。'));
+
+children.push(heading('5. arshavin amoah | 加纳 | 兔礼盒已备好等付款', 3));
+children.push(para('3件兔礼盒，已备货完成，等付款即可发货。'));
+children.push(scriptBox('【中文话术】\narshavin，你的3件兔礼盒已经准备好了！确认付款后我这边立即发货。加纳最近很多客户在下单，这批面料有限，建议尽快确认以免断货。'));
+
+// 报价谈判中
+children.push(heading('▎报价已发/谈判中（8人核心）', 3));
+
+children.push(heading('6. Inderpreet kaur | 美国 | 16 CFR认证缺失', 3));
+children.push(para('美国儿童睡衣需 flammability 测试认证。已坦诚告知无此认证但可安排SGS/Intertek检测。客户在等样品。关键决策：是否投资做16 CFR认证？'));
+children.push(scriptBox('【中文话术】\nInderpreet，关于上次讨论的16 CFR认证问题——如果我们安排SGS做 flammability 测试，测试周期约7-10个工作日，费用约$300-500。这笔费用可以在首单满500件后退还。或者你也可以先从小批量试单开始，不涉及认证。你觉得哪个方案更合适？'));
+
+children.push(heading('7. Keinjol Tata | 印度 | 品牌ODM（Kinjolluxe）', 3));
+children.push(para('品牌方(Amit Saini)，500件首单，精品包装+条码(Amazon渠道)。客户已给全部信息，我们在等出mockup+正式报价。高价值潜在客户！'));
+children.push(scriptBox('【中文话术】\nAmit你好！我们已经完成了Kinjolluxe品牌的婴童服装设计初稿，包装方案也准备好了。500件的正式报价我整理好了，包括定制包装和条形码费用。你方便今天看的话我马上发过去。另外，你是准备上Amazon中东站还是印度站？不同站点对包装和标签要求不同，我可以针对性调整。'));
+
+children.push(heading('8. Christine Muwela | 赞比亚★ | 选款中——我方失误', 3));
+children.push(para('5/4客户要实物照，我们答应第二天拍但5天未跟进！核心市场客户，典型的"答应-遗忘"失误。'));
+children.push(scriptBox('【中文话术】\nChristine抱歉让你等了这么久！上次你要的粉色白领衬衫+粉色裙子的实物照，我已经拍了发给你。如果你对颜色满意的话，告诉我你要的数量，我马上帮你算运费。你是在赞比亚还是需要发到其他地方？'));
+
+children.push(heading('9. jonathan aston | 加纳 | 报价$536(200件)等地址', 3));
+children.push(scriptBox('【中文话术】\nJonathan，上次的报价$536（200件童装）你收到了吗？确认一下你的收货地址，我帮你算一下最终含运费的总额。如果有任何疑问关于价格或者产品，随时告诉我！'));
+
+children.push(heading('10. Asma Noor | 巴基斯坦 | 报价$75.21含运UK已发', 3));
+children.push(scriptBox('【中文话术】\nAsma，4月底发给你的报价（含运费$75.21到英国）收到了吗？如果你觉得哪个部分需要调整，或者想换款式/数量，直接告诉我，我重新算。'));
+
+children.push(heading('11. Brian Robert Ocholi | 肯尼亚 | 选款讨论中', 3));
+children.push(scriptBox('【中文话术】\nBrian，上次你选的那几款，确认最终要哪几个款式和颜色了吗？确认后我帮你算到肯尼亚的总费用。很多东非客户用蒙巴萨的货代，你有中国的货代吗？'));
+
+children.push(heading('12. Sara Dibes | 黎巴嫩 | PI相关', 3));
+children.push(scriptBox('【中文话术】\nSara，上次发的PI收到了吗？如果你已经安排付款了告诉我一声，我这边准备出货。如果有任何关于订单的问题，随时问我！'));
+
+children.push(heading('13. rehema kiseyu | 坦桑尼亚 | 询价中', 3));
+children.push(scriptBox('【中文话术】\nrehema，关于你询问的产品，我需要确认一下你要的数量和发到坦桑尼亚哪个城市，这样才能给你准确的报价。很多坦桑尼亚客户用达累斯萨拉姆的货代——你有中国的货代吗？'));
+
+// 新会话
+children.push(heading('▎新会话/初询（3人）', 3));
+
+children.push(heading('14. Ernestina Afriyie | 加纳 | 问了价格未继续', 3));
+children.push(scriptBox('【中文话术】\nErnestina，上次你问的价格我发了，不知道你看了吗？如果还需要的话，告诉我你要的数量和收货城市，我重新算一个含运费的总价给你。'));
+
+children.push(heading('15. Esther Chola | 赞比亚★ | 仅模板回复', 3));
+children.push(scriptBox('【中文话术】\nEsther你好！我们是帮宝适奥运礼盒的合作工厂，专门做婴童服装的OEM/ODM。你需要什么款式？告诉我要的数量和发到赞比亚哪个城市，我马上给你报价！'));
+
+children.push(heading('16. Abdulrhman alal | 阿曼 | 7天前最后消息', 3));
+children.push(scriptBox('【中文话术】\nAbdulrhman你好！上次你询价后我没有收到你的进一步消息。你还需要报价吗？如果需要的话告诉我数量和城市，我马上发给你。'));
+
+children.push(heading('▎需独立分析的高频客户（3人）', 3));
+children.push(para('17. Mona almuharraqy（巴林）→ 见第一部分深度分析'));
+children.push(para('18. ali Amjid（南非）→ 见待付款#3'));
+children.push(para('19. yoselyn Rodriguez（美国）→ 高满意度种子客户，首单$451但业务错配（她要女装我们是婴童）。需重新联系帮她对接女装工厂同时引导回童装。'));
+children.push(scriptBox('【中文话术（西班牙语实际发送）】\nyoselyn！上次你说要女装，我帮你问了我们合作的一家女装工厂，他们有现货。同时我们婴童这边也上了很多新款——你之前买的那些客户反馈怎么样？如果童装这边还需要补货，我可以把新款发给你看看。你两边的需求我都可以帮你对接！'));
+
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 第三部分：P1 汇总 ==========
+children.push(sectionHeader('第三部分：P1 客户汇总（17人 → 11人有效）'));
+
+children.push(para('P1原始17人，经深度分析后：6人值得跟进 + 3人需重新定位 + 2人应降级 + 6人伪P1（无客户消息，跳过不列）。'));
+
+children.push(heading('P1 值得跟进（6人）', 2));
+
+const p1Data = [
+  { name: 'Hakim Ezat', country: '沙特阿拉伯★', daysAgo: '7天', stage: '报价$78.40已发DDP吉达', action: '今天确认报价是否收到', script: 'Hakim你好！4月30号发给你的报价（5件儿童睡衣$78.40含FedEx到吉达）你收到了吗？有任何关于尺码或颜色的问题我可以帮你调整。' },
+  { name: 'Begimai Akymbekova', country: '美国（俄语）', daysAgo: '3天', stage: '地址已给+Express → 缺报价', action: '今天发完整报价', script: 'Begimai抱歉让你等了几天。你的4件90cm爬服完整报价如下：[价格]。Express到Kent, WA 98032的费用我也算好了。确认后付40%定金，1-3天发货。我们是帮宝适和迪士尼的合作工厂，品质你放心。' },
+  { name: 'Rosette Ngoy', country: '刚果民主共和国★', daysAgo: '2天', stage: '有中国货代+款式确认中', action: '今天确认产品图片是否本店', script: 'Rosette你好！你最后发的那张产品图片是我们店里的吗？如果是的话我马上给你价格。如果不是，麻烦你发一下你要的产品链接。你已经有中国货代了，物流会很简单——3-4件差不多1公斤。' },
+  { name: 'Marcos Kuyu', country: '刚果民主共和国★', daysAgo: '2天', stage: '5色100cm已发图 → 卡在地址', action: '不要求地址先给价格区间', script: 'Marcos谢谢你的图片！我确认了：5个颜色、100cm尺码。价格大约在$2.50-3.00/件（具体看数量）。货到刚果可以通过你的中国货代转运。你是发到刚果哪个城市？我先把产品实拍图发给你确认！' },
+  { name: 'amer ly', country: '伊拉克', daysAgo: '10天', stage: 'PI已发11天 → 等付款', action: '本周问清关帮助+提醒PI', script: 'amer你好！只是确认一下——4月28号的PI收到了吗？如果你第一次进口需要帮忙了解清关流程，我可以一步步给你讲。DAP伊拉克的清关其实不难，我给你梳理一下步骤。' },
+  { name: 'Djany Konzi', country: '刚果民主共和国★', daysAgo: '9天', stage: '数量+尺寸已确认 → 等客户发信息', action: '本周提醒"上次说发信息给我"', script: 'Djany你好！上次你说"等一下我发给你"，后来没有收到你的消息——你还需要4件（3-9个月尺码）的报价吗？告诉我发到哪个国家，我马上给你算好。' },
+];
+
+for (const p1 of p1Data) {
+  children.push(heading(`${p1.name} | ${p1.country} | ${p1.daysAgo}前`, 3));
+  children.push(para(`阶段：${p1.stage}`));
+  children.push(para(`下一步：${p1.action}`));
+  children.push(scriptBox(`【中文话术】\n${p1.script}`));
+  children.push(para(''));
+}
+
+children.push(heading('P1 需重新定位（3人）', 2));
+const p1Repos = [
+  { name: 'Mezna Alawfi', country: '阿曼', issue: '品类不匹配——客户要成人女性睡衣，我们做婴童', action: '诚实告知不做成人女装，如工厂能做再谈' },
+  { name: 'Alina Svinchuk', country: '英国', issue: '电商店主——模板问题杀死对话', action: '发0-3m婴儿睡衣实拍图+批发价格+UK物流方案' },
+  { name: 'Aula Alsaad', country: '伊拉克', issue: '37天无互动——已大概率找别家', action: '发送复活消息"300+新款设计更新"' },
+];
+const p1ReposRows = [new TableRow({ children: [headerCell('客户', 15), headerCell('国家', 10), headerCell('问题', 45), headerCell('行动', 30)] })];
+for (const r of p1Repos) {
+  p1ReposRows.push(new TableRow({ children: [cell(r.name, 15), cell(r.country, 10), cell(r.issue, 45), cell(r.action, 30)] }));
+}
+children.push(new Table({ rows: p1ReposRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(heading('P1 应降级（2人）', 2));
+children.push(para('diegos vargas（西班牙）→ P3：个人买家找品牌尾货，不匹配B2B模式'));
+children.push(para('Clara ElAssaad（法国）→ P2：模板问题杀死对话，可尝试复活但优先级低'));
+
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 第四部分：其他客户分类 ==========
+children.push(sectionHeader('第四部分：全客户五梯队分类总览'));
+
+const tierSummaryRows = [
+  new TableRow({ children: [headerCell('梯队', 10), headerCell('人数', 8), headerCell('定义', 30), headerCell('处理策略', 52)] }),
+  new TableRow({ children: [cell('P0', 10, { bold: true, color: 'c0392b' }), cell('19', 8), cell('立即行动：已付款/待付款/报价谈判/高活跃', 30), cell('今天必须跟进。每人有明确动作和话术。', 52)] }),
+  new TableRow({ children: [cell('P1', 10, { bold: true, color: 'e67e22' }), cell('11', 8), cell('本周跟进：有活跃对话但未进实质阶段', 30), cell('本周内跟进。6人真P1有明确动作，3人需重新定位。', 52)] }),
+  new TableRow({ children: [cell('P2', 10), cell('7', 8), cell('观察：近期有互动但无强信号', 30), cell('每两周轻量触达一次。不发报价不主动推。', 52)] }),
+  new TableRow({ children: [cell('P3', 10), cell('1', 8), cell('低活跃：已降级客户', 30), cell('不主动跟进。等待客户重新发起对话。', 52)] }),
+  new TableRow({ children: [cell('P4', 10), cell('422', 8), cell('沉默：超30天/仅系统消息/无有效对话', 30), cell('不投入时间。仅在客户重新活跃时重新评估。', 52)] }),
+  new TableRow({ children: [cell('合计', 10, { bold: true }), cell('466', 8, { bold: true }), cell('', 30), cell('', 52)] }),
+];
+children.push(new Table({ rows: tierSummaryRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(heading('核心市场客户分布', 2));
+children.push(para('以下为重点关注的核心市场（非洲+中东）活跃客户：'));
+const coreMktRows = [
+  new TableRow({ children: [headerCell('梯队', 8), headerCell('客户', 18), headerCell('国家', 12), headerCell('状态', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('Christabel Kanunsha', 18), cell('赞比亚★', 12), cell('订单已创建等付款 $7.70', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('WELE Mounia', 18), cell('多哥★', 12), cell('老客户复购——高价值', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('Christine Muwela', 18), cell('赞比亚★', 12), cell('选款中——我方失误5天未跟进', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('jonathan aston', 18), cell('加纳★', 12), cell('报价$536已发等地址', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('arshavin amoah', 18), cell('加纳★', 12), cell('兔礼盒已备好等付款', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('Sara Dibes', 18), cell('黎巴嫩', 12), cell('PI相关等确认', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('Abdulrhman alal', 18), cell('阿曼', 12), cell('7天前消息需确认', 62)] }),
+  new TableRow({ children: [cell('P0', 8), cell('Mona almuharraqy', 18), cell('巴林', 12), cell('1000条消息高频未转化——需破局', 62)] }),
+  new TableRow({ children: [cell('P1', 8), cell('Hakim Ezat', 18), cell('沙特★', 12), cell('$78.40报价7天未回复', 62)] }),
+  new TableRow({ children: [cell('P1', 8), cell('Rosette Ngoy', 18), cell('刚果★', 12), cell('有中国货代——高价值', 62)] }),
+  new TableRow({ children: [cell('P1', 8), cell('Marcos Kuyu', 18), cell('刚果★', 12), cell('5色100cm已发图卡地址', 62)] }),
+  new TableRow({ children: [cell('P1', 8), cell('Djany Konzi', 18), cell('刚果★', 12), cell('等客户发信息9天', 62)] }),
+];
+children.push(new Table({ rows: coreMktRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 第五部分：今日行动清单 ==========
+children.push(sectionHeader('第五部分：今日行动优先级清单'));
+
+children.push(heading('🔴 今天必须处理（5项）', 2));
+const todayRows = [
+  new TableRow({ children: [headerCell('优先级', 5), headerCell('客户', 15), headerCell('行动', 60), headerCell('时效', 20)] }),
+  new TableRow({ children: [cell('1', 5), cell('Christine Muwela', 15), cell('拍照实物图+报价——已拖5天', 60), cell('今天立即', 20)] }),
+  new TableRow({ children: [cell('2', 5), cell('Mona almuharraqy', 15), cell('发订单确认清单+面料品质说明+5款新品+温和时限(5/11)', 60), cell('今天', 20)] }),
+  new TableRow({ children: [cell('3', 5), cell('Hakim Ezat', 15), cell('确认$78.40报价是否收到——7天无回复', 60), cell('今天', 20)] }),
+  new TableRow({ children: [cell('4', 5), cell('Begimai Akymbekova', 15), cell('发完整报价(4件+Express WA)——缺报价3天', 60), cell('今天', 20)] }),
+  new TableRow({ children: [cell('5', 5), cell('Keinjol Tata', 15), cell('出设计mockup初稿+正式报价——品牌ODM 500件', 60), cell('今天', 20)] }),
+];
+children.push(new Table({ rows: todayRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(heading('🟡 本周内处理（8项）', 2));
+const weekRows = [
+  new TableRow({ children: [headerCell('客户', 18), headerCell('行动', 82)] }),
+  new TableRow({ children: [cell('WELE Mounia', 18), cell('整理法语版全品类目录+强调Disney/Pampers背书——老客户高价值', 82)] }),
+  new TableRow({ children: [cell('Christabel Kanunsha', 18), cell('提醒付款确认款式', 82)] }),
+  new TableRow({ children: [cell('ali Amjid', 18), cell('48h内提醒付款——16件¥510', 82)] }),
+  new TableRow({ children: [cell('amer ly', 18), cell('问清关帮助+温和提醒PI——10天无回复', 82)] }),
+  new TableRow({ children: [cell('Rosette Ngoy', 18), cell('确认产品图片是否本店+推报价', 82)] }),
+  new TableRow({ children: [cell('Marcos Kuyu', 18), cell('不要求地址先给5色100cm价格区间+产品确认图', 82)] }),
+  new TableRow({ children: [cell('Djany Konzi', 18), cell('提醒"上次说发信息给我"', 82)] }),
+  new TableRow({ children: [cell('Alina Svinchuk', 18), cell('发0-3m婴儿睡衣实拍图+批发价格+UK物流——电商店主', 82)] }),
+];
+children.push(new Table({ rows: weekRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(heading('⚪ 48h内轻触达（7项）', 2));
+const lightRows = [
+  new TableRow({ children: [headerCell('客户', 18), headerCell('行动', 82)] }),
+  new TableRow({ children: [cell('jonathan aston', 18), cell('温和跟进确认收到$536报价+要地址', 82)] }),
+  new TableRow({ children: [cell('Asma Noor', 18), cell('确认$75.21报价是否收到', 82)] }),
+  new TableRow({ children: [cell('arshavin amoah', 18), cell('催款发货——3件兔礼盒已备好', 82)] }),
+  new TableRow({ children: [cell('Ernestina Afriyie', 18), cell('温和跟进问是否需要报价——48h无回应→降级', 82)] }),
+  new TableRow({ children: [cell('Inderpreet kaur', 18), cell('确认花型可行性+报SGS测试费方案', 82)] }),
+  new TableRow({ children: [cell('Mezna Alawfi', 18), cell('诚实告知不做成人女装', 82)] }),
+  new TableRow({ children: [cell('Aula Alsaad', 18), cell('复活消息"300+新款更新"——37天低期望', 82)] }),
+];
+children.push(new Table({ rows: lightRows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+children.push(para(''));
+
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 第六部分：关键发现 ==========
+children.push(sectionHeader('第六部分：本期关键发现与策略建议'));
+
+children.push(heading('1. 三个核心市场客户失误需要挽回', 2));
+children.push(para('Christine Muwela（赞比亚★）5天未跟进——答应拍照没拍。这是最典型的"答应-遗忘"失误，核心市场客户不能这样丢。'));
+children.push(para('WELE Mounia（多哥★）老客户主动回头——这是最好的信号。必须用最快速度给她完整的法语版产品目录，巩固这个西非法语区种子客户。'));
+children.push(para('Hakim Ezat（沙特★）$78.40报价7天无回复——沙特客户通常决策快，7天不回可能是报价有问题或找到了替代方案。需要确认。'));
+
+children.push(heading('2. Mona转化破局策略', 2));
+children.push(para('Mona的1000条消息439条客户消息说明她对我们的信任度极高。问题不是"要不要买"而是"什么时候买"。需要从"无限聊天模式"切换到"有期限的决策模式"。关键动作：给一个合理的截止日期（5月11日面料预留期限）+ 发最终确认清单。'));
+
+children.push(heading('3. Keinjol Tata品牌ODM是最具潜力的单子', 2));
+children.push(para('印度品牌方Kinjolluxe，500件首单，全定制包装+条形码（准备上Amazon）。客户3天不回是因为我们在拖——mockup和报价一直没出。今天必须出初稿。这个客户的转化价值远超任何小单。'));
+
+children.push(heading('4. 16 CFR认证是结构性决策', 2));
+children.push(para('Inderpreet kaur的美国儿童睡衣询盘暴露了一个结构性问题：我们没有16 CFR flammability认证，无法合规进入美国儿童睡衣市场。如果要做这个市场，投资SGS检测（$300-500）是必要的。但需要先确认这个市场是否有足够的客户需求支撑。'));
+
+children.push(heading('5. 大量小单待收款需尽快闭环', 2));
+children.push(para('Christabel($7.70)、ali(~¥510)、arshavin(3件兔盒)都是小金额个人单。金额虽小但已投入了大量时间（特别是ali的234条消息）。尽快收款完成闭环，不要让这些时间成本沉没。'));
+
+children.push(heading('6. "模板问题杀死对话"模式反复出现', 2));
+children.push(para('P1分析中发现至少3个客户（Alina Svinchuk、Clara ElAssaad、Diego vargas）是因为我方在回答了客户问题后立刻切回模板化提问（"你是批发还是零售？""你的地址是什么？"）而沉默的。客户问具体问题时，先回答完再顺势推进，不要机械跳到模板问题。'));
+
+children.push(new Paragraph({ children: [new PageBreak()] }));
+
+// ========== 附录 ==========
+children.push(sectionHeader('附录：客户完整分类明细'));
+
+children.push(heading('P0 全名单（19人）', 2));
+const p0List = [
+  'Aloh Voma（美国→喀麦隆）| 已付已发货 | 跟进签收',
+  'Christabel Kanunsha（赞比亚★）| 等付款 | 提醒付款',
+  'ali Amjid（南非）| 选款完成等付款 | 催款',
+  'WELE Mounia（多哥★）| 老客户复购 | 发目录催新单',
+  'arshavin amoah（加纳★）| 备货完成等付款 | 催款发货',
+  'Inderpreet kaur（美国）| 16 CFR认证缺失 | 确认花型+报测试费',
+  'jonathan aston（加纳★）| 报价$536等地址 | 温和跟进',
+  'Keinjol Tata（印度）| 品牌ODM 500件 | 出mockup+报价',
+  'Asma Noor（巴基斯坦）| 报价$75.21已发 | 确认收到',
+  'Brian Robert Ocholi（肯尼亚）| 选款讨论中 | 确认款式+地址',
+  'Christine Muwela（赞比亚★）| 选款中-我方失误 | 拍照发图+报价',
+  'Sara Dibes（黎巴嫩）| PI相关 | 确认是否付款',
+  'rehema kiseyu（坦桑尼亚）| 询价中 | 确认数量和地址',
+  'Mona almuharraqy（巴林）| 1000条高频互动未转化 | 破局策略',
+  'yoselyn Rodriguez（美国）| 首单满意但业务错配 | 重新联系+对接女装',
+  'Ernestina Afriyie（加纳★）| 问了价格未继续 | 温和跟进',
+  'Esther Chola（赞比亚★）| 仅模板回复 | 确认数量地址',
+  'Abdulrhman alal（阿曼）| 7天前消息 | 确认是否还需要',
+];
+for (const item of p0List) {
+  children.push(para(`• ${item}`));
+}
+
+children.push(heading('P1 有效名单（11人）', 2));
+const p1List = [
+  'Hakim Ezat（沙特★）| 报价$78.40 7天 | 今天确认',
+  'Begimai Akymbekova（美国-俄语）| 缺报价3天 | 今天发报价',
+  'Rosette Ngoy（刚果★）| 有货代活跃中 | 今天确认图片',
+  'Marcos Kuyu（刚果★）| 5色100cm卡地址 | 改策略给价格区间',
+  'amer ly（伊拉克）| PI 10天 | 本周问清关',
+  'Djany Konzi（刚果★）| 等发信息9天 | 本周提醒',
+  'Mezna Alawfi（阿曼）| 品类不匹配 | 诚实告知（重定）',
+  'Alina Svinchuk（英国）| 电商店主 | 发实拍+批发方案（重定）',
+  'Aula Alsaad（伊拉克）| 37天沉默 | 复活消息（重定）',
+  'diegos vargas（西班牙）| → P3 个人买家 | 已降级',
+  'Clara ElAssaad（法国）| → P2 模板杀死 | 已降级',
+];
+for (const item of p1List) {
+  children.push(para(`• ${item}`));
+}
+
+children.push(heading('P2 观察名单（7人）', 2));
+children.push(para('每两周轻量触达，不发报价不主动推。具体名单见STATE.md。'));
+children.push(heading('P3 低活跃（1人）', 2));
+children.push(para('已降级客户，不主动跟进。'));
+children.push(heading('P4 沉默（422人）', 2));
+children.push(para('超30天无有效互动，不投入时间。'));
+
+children.push(para(''));
+children.push(para('——— 报告完 ———', { alignment: 'center', color: '95a5a6' }));
+children.push(para('生成时间：2026-05-09 | 数据来源：OKKI CRM 466会话 | 分析框架：五梯队分类+四层判断', { alignment: 'center', color: '95a5a6' }));
+
+// ========== 生成文档 ==========
+const doc = new Document({ sections: [{ properties: {}, children }] });
+Packer.toBuffer(doc).then(buffer => {
+  const outDir = 'd:\\ClaudeWorkspace\\08_客户跟进\\Okki\\reports';
+  const outPath = outDir + '\\客户分析日报_2026-05-09.docx';
+  fs.writeFileSync(outPath, buffer);
+  console.log('报告已生成: ' + outPath);
+}).catch(err => {
+  console.error('生成失败:', err);
+  process.exit(1);
+});

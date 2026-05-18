@@ -1,0 +1,63 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-04 16:00
+> 用途：跨会话持久化项目状态，新会话开始时 Claude Code 先读此文件。
+
+## 当前阶段
+
+**脚本就绪，待全量首次运行** — 三个核心脚本已创建并测试通过。
+
+## 已完成
+
+- `scripts/preprocess_cdp.js` — 阶段0 数据预处理脚本 ✅
+  - 系统消息检测/替换、表情单字检测(needLookback)、消息数统计(needFullRead)
+  - 产品代码扫描(CO-XX/PO-XX)、地址关键词检测
+  - 沉默天数计算、消息方向统计
+  - 已测试：432个客户，检测到62条系统消息、7条需往前看、93条有地址
+
+- `scripts/classify_rules.js` — 阶段1 规则引擎预分类 ✅
+  - 13条确定性规则：纯系统消息→P4、客户从未回复+超30天→P4、沉默90天+→P3等
+  - 升级/降级信号检测（下单/PI/付款/选款/地址 等关键词）
+  - 已测试：P0:4 / P1:13 / P2:100 / P3:4 / P4:311，确定性315，需AI复核117
+
+- `scripts/generate_report.js` — 阶段5 Word战报生成 ✅
+  - 使用 npm docx 包（v9.6.1，已安装于 workspace 根目录）
+  - 输出：总览统计表、自检清单、P0/P1完整分析、生命周期提醒、差异报告、附录
+  - P0红底表头、P1橙色、表格斑马纹、页眉页脚
+
+## 待完成
+
+1. **阶段2（新会话）**：AI 分类 + 证据摘要 + 置信度评分
+   - 输入：`data/classified_rules_*.json`
+   - 两遍法：metadata粗筛 → 逐条读对话内容修正
+   - 输出：全量P0-P4名单+证据链+两遍差异报告+自检清单
+   - 审核点：完成后暂停等用户确认
+
+2. **阶段3（新会话，阶段2确认后）**：P0+P1 深度分析
+   - 分批执行（每组5-8人），每批含背调+画像+阶段+卡点+行动+话术
+
+3. **阶段4**：全量生命周期监控（432人异常检测）
+
+4. **数据抓取**：用户需先运行 CDP 抓取获取最新数据
+   - SOP：chrome.exe --remote-debugging-port=9222 → node scripts/extract_cdp.js
+
+## 下次启动提示词
+
+> 我在做小星星工厂的 OKKI CRM 客户分析项目。先读 DESIGN.md、knowledge/ 下四个文件、STATE.md。
+> 三个脚本（preprocess_cdp.js / classify_rules.js / generate_report.js）已就绪。
+> 如果有今天新抓取的数据，先跑阶段0→1脚本。然后进入阶段2 AI分类（需人工审核）。
+
+## 关键数据文件
+
+- 设计文档：`DESIGN.md`（新会话必须先读）
+- 分析框架：`knowledge/system-prompt.md`
+- 判断规则：`knowledge/business-rules.md`
+- 工厂信息：`knowledge/factory.md`
+- 安全说明：`knowledge/security.md`
+- 最新全量数据：`data/2026-05-03T01-19-12_全量客户分类.json`（432人）
+- 最新抓取数据：`data/extracted_2026-05-04T05-05-12-860Z.json`（20人P0P1）
+- 预处理输出：`data/cleaned_2026-05-04T07-46-39.json`
+- 规则分类输出：`data/classified_rules_2026-05-04T07-48-48.json`
+- 预处理脚本：`scripts/preprocess_cdp.js`
+- 分类脚本：`scripts/classify_rules.js`
+- 报告脚本：`scripts/generate_report.js`

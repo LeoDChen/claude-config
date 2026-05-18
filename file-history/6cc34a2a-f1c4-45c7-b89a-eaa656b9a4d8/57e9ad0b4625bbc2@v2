@@ -1,0 +1,259 @@
+// 直接调 onetalk HTTP API + fetchMessages
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 获取第一个会话的详细信息 ===
+    const convInfo = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var data = window.__conversationListFullData__;
+                if (!data || !data[0]) return { error: 'no data' };
+                var c = data[0];
+                return {
+                    cid: c.cid,
+                    aliId: c.contact.aliId,
+                    accountId: c.contact.accountId,
+                    aliIdEncrypt: c.contact.aliIdEncrypt,
+                    accountIdEncrypt: c.contact.accountIdEncrypt,
+                    chatToken: c.chatToken ? c.chatToken.substring(0, 60) + '...' : null,
+                    name: c.contact.name,
+                    latestMsg: c.latestMessage ? c.latestMessage.content.substring(0, 80) : null
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log('会话信息:', convInfo.result?.value || '(无)');
+
+    // === 2. 调 listRecentConversationContactDetail.htm ===
+    console.log('\n=== listRecentConversationContactDetail ===\n');
+
+    const detailResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var data = window.__conversationListFullData__;
+                    var conv = data[0];
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'https://onetalk.alibaba.com/message/listRecentConversationContactDetail.htm', true);
+                    xhr.withCredentials = true;
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    var params = {
+                        contactEncryptAliIdList: [conv.contact.aliIdEncrypt],
+                        contactEncryptAccountIdList: [],
+                        chatTokens: conv.chatToken || ''
+                    };
+                    var body = 'params=' + encodeURIComponent(JSON.stringify(params));
+
+                    xhr.onload = function() {
+                        try {
+                            var json = JSON.parse(xhr.responseText);
+                            resolve(JSON.stringify({
+                                status: xhr.status,
+                                keys: Object.keys(json),
+                                data: json.data,
+                                code: json.code,
+                                detailKeys: json.data && json.data.contactDetailList && json.data.contactDetailList[0] ?
+                                    Object.keys(json.data.contactDetailList[0]) : [],
+                                sample: JSON.stringify(json).substring(0, 2000)
+                            }));
+                        } catch(e) {
+                            resolve(JSON.stringify({ status: xhr.status, text: xhr.responseText.substring(0, 500) }));
+                        }
+                    };
+                    xhr.send(body);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(detailResult.result?.value || '(无)');
+
+    // === 3. 测试各种 HTTP 消息 API（猜 URL） ===
+    console.log('\n=== HTTP 消息 API 穷举 ===\n');
+
+    const messagePaths = [
+        '/message/queryMessageHistory.json',
+        '/message/queryMsgHistory.json',
+        '/message/listPrevMessage.json',
+        '/message/listMessageByConversation.json',
+        '/message/getMsgHistory.json',
+        '/message/getMessageHistory.json',
+        '/message/getMessages.json',
+        '/message/queryMsgList.json',
+        '/message/listMsgByCid.json',
+        '/message/queryConversationMsg.json',
+        '/message/fetchMessage.json',
+        '/message/listHistoryMsg.json',
+        '/message/queryHistory.json'
+    ];
+
+    for (const path of messagePaths) {
+        const result = await cmd('Runtime.evaluate', {
+            expression: `
+                (function() {
+                    return new Promise(function(resolve) {
+                        var data = window.__conversationListFullData__;
+                        var conv = data[0];
+
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'https://onetalk.alibaba.com${path}', true);
+                        xhr.withCredentials = true;
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                        var body = 'params=' + encodeURIComponent(JSON.stringify({
+                            conversationCode: conv.cid,
+                            count: 5,
+                            sendTime: Date.now()
+                        }));
+
+                        xhr.onload = function() { resolve('${path}: ' + xhr.status); };
+                        xhr.onerror = function() { resolve('${path}: ERR'); };
+                        xhr.send(body);
+                    });
+                })()
+            `,
+            awaitPromise: true,
+            returnByValue: true
+        });
+        const status = result.result?.value || '';
+        if (!status.includes('404') && !status.includes('405') && !status.includes('ERR')) {
+            console.log('  ⭐', status);
+        }
+    }
+
+    // === 4. 尝试用 fetchMessages + 不同参数 ===
+    console.log('\n=== fetchMessages 参数测试 ===\n');
+
+    const fetchTest = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var data = window.__conversationListFullData__;
+                    var conv = data[0];
+                    var httpMsg = window._imBaaSSDK.getMessageServiceHttp();
+
+                    // 试不同参数格式
+                    var paramSets = [
+                        { conversationCode: conv.cid },
+                        { cid: conv.cid },
+                        { conversationCode: conv.cid, count: 10 },
+                        { cid: conv.cid, count: 10 },
+                        { conversationId: conv.cid },
+                        { params: JSON.stringify({ conversationCode: conv.cid, count: 10 }) }
+                    ];
+
+                    var results = [];
+                    var done = 0;
+
+                    function tryNext(idx) {
+                        if (idx >= paramSets.length) {
+                            resolve(JSON.stringify(results));
+                            return;
+                        }
+
+                        var p = paramSets[idx];
+                        try {
+                            var promise = httpMsg.fetchMessages(p);
+                            if (promise && promise.then) {
+                                promise.then(function(data) {
+                                    results.push({ idx: idx, params: JSON.stringify(p).substring(0,80), success: true, type: typeof data, keys: data ? Object.keys(data).slice(0,10) : [] });
+                                    tryNext(idx + 1);
+                                }).catch(function(err) {
+                                    results.push({ idx: idx, params: JSON.stringify(p).substring(0,80), error: (err&&err.message)||String(err) });
+                                    tryNext(idx + 1);
+                                });
+                            } else {
+                                results.push({ idx: idx, params: JSON.stringify(p).substring(0,80), directResult: typeof promise });
+                                tryNext(idx + 1);
+                            }
+                        } catch(e) {
+                            results.push({ idx: idx, params: JSON.stringify(p).substring(0,80), exception: e.message });
+                            tryNext(idx + 1);
+                        }
+                    }
+
+                    tryNext(0);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(fetchTest.result?.value || '(无)');
+
+    // === 5. 看 fetchMessages 原型上更多细节 ===
+    console.log('\n=== fetchMessages 调用链 ===\n');
+
+    const fetchChain = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var httpMsg = window._imBaaSSDK.getMessageServiceHttp();
+                var proto = Object.getPrototypeOf(httpMsg);
+
+                // proto 的 constructor 源码
+                var info = {
+                    protoConstructor: proto.constructor ? proto.constructor.toString().substring(0, 500) : 'none',
+                    protoFetch: proto.fetchMessages ? proto.fetchMessages.toString().substring(0, 500) : 'none'
+                };
+
+                return info;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(fetchChain.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

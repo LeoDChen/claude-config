@@ -1,0 +1,223 @@
+/**
+ * 规则引擎：从 s2 生成 s3_ai_judgments.json
+ * 基于 classification-rules.md 的阶段定义 + snippet 文本分析
+ *
+ * 用法：node scripts/gen_s3_rules.js
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const s2Path = path.join(__dirname, '..', 'data', 's2_ai_input.json');
+const s3Path = path.join(__dirname, '..', 'data', 's3_ai_judgments.json');
+
+const s2 = JSON.parse(fs.readFileSync(s2Path, 'utf8'));
+console.log(`读取 s2: ${s2.length} 条`);
+
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+// ── 阶段判定（基于 snippet 文本规则）──
+function determineStage(entry) {
+  const snippets = entry.snippet || [];
+  const allText = snippets.join('\n').toLowerCase();
+  const lastMsgs = snippets.slice(-6).join('\n').toLowerCase(); // 最近6条
+  const lastCustMsgs = snippets.filter(s => s.startsWith('[客户]')).slice(-3).join('\n').toLowerCase();
+  const lastOurMsgs = snippets.filter(s => s.startsWith('[我方]')).slice(-3).join('\n').toLowerCase();
+
+  const silence = entry.lastCustomerMsgDays;
+
+  // 终态：未成交（客户明确拒绝）
+  const rejectionPatterns = [
+    'not interested', 'found another', 'went with', 'too expensive',
+    '不再需要', '已经找到', '价格太高', '不感兴趣', '取消订单',
+    'cancel', 'sorry we', 'won\'t be proceeding', 'decided not to',
+    'pas intéressé', 'trop cher', 'annuler',
+  ];
+  const rejected = rejectionPatterns.some(p => lastCustMsgs.includes(p));
+  if (rejected && silence > 14) return { stage: '未成交', reason: '客户明确拒绝/放弃' };
+
+  // 售后
+  const afterSalesPatterns = [
+    'quality issue', 'defect', 'damaged', 'complaint', 'wrong item',
+    '质量问题', '破损', '投诉', '退换', '退款', 'refund',
+    'not as described', 'missing', 'stain', 'torn', 'broken',
+    'problème', 'défaut', 'remboursement',
+  ];
+  const isAfterSales = afterSalesPatterns.some(p => lastCustMsgs.includes(p) || lastOurMsgs.includes(p));
+  if (isAfterSales && silence < 30) return { stage: '售后', reason: '对话含质量/投诉信号' };
+
+  // 已签收
+  const deliveredPatterns = ['received', 'delivered', 'arrived', '收到', '已收', 'reçu', 'livré'];
+  const isDelivered = deliveredPatterns.some(p => lastCustMsgs.includes(p));
+  if (isDelivered && silence < 60) return { stage: '已签收', reason: '客户确认收货' };
+
+  // 已发货/在途
+  const shippedPatterns = [
+    'shipped', 'tracking', 'logistics', 'on the way', 'in transit',
+    '已发货', '物流', '在途', '运输中', '船期', '航班',
+    'tracking number', 'container', 'vessel', 'eta',
+    'expédié', 'suivi', 'en transit',
+  ];
+  const isShipped = shippedPatterns.some(p => lastOurMsgs.includes(p) || lastCustMsgs.includes(p));
+  if (isShipped && silence < 30) return { stage: '已发货/在途', reason: '对话含物流/发货信号' };
+
+  // 待付款（PI已发、等付款）
+  const pendingPaymentPatterns = [
+    'pi sent', 'proforma', 'invoice sent', 'make payment', 'deposit',
+    'PI已发', '付款', '定金', '打款', 'invoice', 'tt ',
+    'waiting for payment', 'bank transfer', 'swift',
+    'facture', 'paiement', 'acompte',
+  ];
+  const isPendingPayment = pendingPaymentPatterns.some(p => lastOurMsgs.includes(p) || lastMsgs.includes(p));
+  if (isPendingPayment && silence < 30) return { stage: '待付款', reason: 'PI已发/等待付款' };
+
+  // 谈判中（价格/数量/规格来回沟通）
+  const negotiationPatterns = [
+    'discount', 'cheaper', 'price', 'negotiate', 'best offer',
+    '折扣', '便宜', '价格', '报价', '最低', '数量', '规格',
+    'réduction', 'remise', 'prix', 'négocier',
+  ];
+  const hasPriceTalk = negotiationPatterns.some(p => lastMsgs.includes(p));
+  const isBackAndForth = (entry.customerMsgs || 0) >= 3 && (entry.ourMsgs || 0) >= 3;
+
+  if (hasPriceTalk && isBackAndForth && silence < 14) {
+    return { stage: '谈判中', reason: '价格/数量/规格来回沟通' };
+  }
+
+  // 报价已发（我方发了价格，等客户回应）
+  const quotePatterns = [
+    'quotation', 'quote', 'fob', '报价', '价格表', 'price list',
+    'offer', 'catalogue', 'catalog',
+    'devis', 'offre', 'catalogue',
+  ];
+  const hasQuote = quotePatterns.some(p => lastOurMsgs.includes(p));
+  if (hasQuote && silence < 30) return { stage: '报价已发', reason: '报价已发，等客户回应' };
+
+  // 待返单（已签收后的复购窗口）
+  const reorderPatterns = ['reorder', 'new order', '返单', 'restock', 'again'];
+  const isReorder = reorderPatterns.some(p => lastCustMsgs.includes(p));
+  if (isReorder && silence < 60) return { stage: '待返单', reason: '复购信号' };
+
+  // 待发货（款已到账，备货中）
+  const producingPatterns = ['production', 'producing', '备货', '生产中', '安排生产', '排单'];
+  const isProducing = producingPatterns.some(p => lastOurMsgs.includes(p));
+  if (isProducing && silence < 30) return { stage: '待发货', reason: '备货/生产中' };
+
+  // 长期沉默 → 搁置
+  if (silence > 30 && entry.customerMsgs <= 3) {
+    return { stage: '搁置', reason: `沉默${silence}天，互动浅，自然中断` };
+  }
+  if (silence > 90) {
+    return { stage: '搁置', reason: `深度沉默${silence}天` };
+  }
+
+  // 默认
+  if (entry.customerMsgs <= 1 && silence > 14) {
+    return { stage: '需求探索', reason: '浅互动，客户未深入' };
+  }
+  return { stage: '需求探索', reason: '需求沟通阶段' };
+}
+
+// ── 优先级判定 ──
+function determinePriority(stage, silence) {
+  // urgent 条件
+  if (stage === '待付款' && silence >= 3) return 'now';
+  if (stage === '售后') return 'now';
+  if (stage === '谈判中' && silence >= 3 && silence <= 7) return 'now';
+  if (stage === '报价已发' && silence >= 14 && silence <= 21) return 'now';
+  if (stage === '已发货/在途' && silence >= 7 && silence <= 14) return 'now';
+  if (silence === 0 && (stage === '需求探索' || stage === '谈判中')) return 'now';
+
+  // soon 条件
+  if (stage === '待付款' && silence < 3) return 'soon';
+  if (stage === '谈判中' && silence < 3) return 'soon';
+  if (stage === '报价已发' && silence >= 7 && silence < 14) return 'soon';
+  if (stage === '需求探索' && silence >= 3 && silence <= 7) return 'soon';
+  if (stage === '已发货/在途' && silence < 7) return 'soon';
+  if (stage === '已签收' && silence < 14) return 'soon';
+  if (stage === '待发货' && silence < 14) return 'soon';
+
+  return 'idle';
+}
+
+// ── 行动方向 ──
+function getActionHint(stage, silence, grade, name, entry) {
+  const d = silence;
+  const pref = d > 0 ? `⚠静默${d}天，` : '';
+
+  switch (stage) {
+    case '需求探索':
+      return d > 7 ? `${pref}问需求是否有进展` : `${pref}了解需求，推进报价`;
+    case '报价已发':
+      return d > 14 ? `${pref}换策略重联，发新品/行业信息` : `${pref}跟进报价反馈`;
+    case '谈判中':
+      return d > 7 ? `${pref}分析卡点，针对性破局` : `${pref}推动决策，解决疑虑`;
+    case '待付款':
+      return d > 3 ? `${pref}催付款，确认PI` : `${pref}提醒付款`;
+    case '待发货':
+      return d > 7 ? `${pref}同步生产进度` : `${pref}通知发货计划`;
+    case '已发货/在途':
+      return d > 7 ? `${pref}跟踪物流，提醒到港` : `${pref}发物流更新`;
+    case '已签收':
+      return `${pref}回访满意度，推动复购`;
+    case '售后':
+      return `${pref}优先处理投诉`;
+    case '待返单':
+      return `${pref}同步新品，争取返单`;
+    case '搁置':
+      return d > 90 ? `${pref}暂停触达，等新产品/新认证` : `${pref}直接问"上次那个案子还在推进吗？"`;
+    case '未成交':
+      return `${pref}换产品/新切入点重新激活`;
+    default:
+      return `${pref}了解需求`;
+  }
+}
+
+// ── 主流程 ──
+const results = [];
+const stats = { stage: {}, priority: {} };
+
+for (const entry of s2) {
+  const { stage, reason: stageReason } = determineStage(entry);
+  const silence = entry.lastCustomerMsgDays;
+  const priority = determinePriority(stage, silence);
+  const actionHint = getActionHint(stage, silence, entry.grade, entry.name, entry);
+
+  stats.stage[stage] = (stats.stage[stage] || 0) + 1;
+  stats.priority[priority] = (stats.priority[priority] || 0) + 1;
+
+  results.push({
+    name: entry.name,
+    cid: entry.cid,
+    country: entry.country,
+    stage: stage,
+    grade: entry.grade,
+    priority: priority,
+    actionHint: actionHint,
+    reason: stageReason,
+    confidence: 'certain',
+    // 以下供移动端报告使用
+    actionPriority: priority === 'now' ? 'urgent' : priority === 'soon' ? 'soon' : 'watch',
+    stageLabel: stage,
+    actionStatus: priority === 'now' ? '立即行动' : priority === 'soon' ? '尽快处理' : '观察',
+    actionText: actionHint,
+  });
+}
+
+fs.writeFileSync(s3Path, JSON.stringify(results, null, 2), 'utf8');
+log(`已生成 s3_ai_judgments.json: ${results.length} 条`);
+
+// 输出分布
+console.log('\n=== 阶段分布 ===');
+Object.entries(stats.stage).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => {
+  console.log(`  ${k}: ${v}`);
+});
+
+console.log('\n=== 优先级分布 ===');
+Object.entries(stats.priority).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => {
+  console.log(`  ${k}: ${v}`);
+});
+
+const urgent = results.filter(r => r.priority === 'now');
+const soon = results.filter(r => r.priority === 'soon');
+console.log(`\n🚨 需行动: urgent=${urgent.length}, soon=${soon.length}, 合计=${urgent.length + soon.length}`);

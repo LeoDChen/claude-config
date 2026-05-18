@@ -1,0 +1,80 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) { /* ignore */ }
+  });
+
+  // Step 1: pre-check
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: {
+      expression: '(function(){var a=window._imsdk.getAuthService();return JSON.stringify({step:"pre",isLogin:a.isLogin(),status:a.connectionStatus})})()'
+    }})
+  });
+  await new Promise(r => setTimeout(r, 1000));
+
+  // Step 2: Try reConnect with timeout
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: {
+      expression: `
+        new Promise(function(resolve) {
+          var a = window._imsdk.getAuthService();
+          var timeout = setTimeout(function() {
+            resolve(JSON.stringify({ step: "reconnect", result: "timeout", status: a.connectionStatus, isLogin: a.isLogin() }));
+          }, 8000);
+
+          try {
+            var p = a.reConnect();
+            if (p && p.then) {
+              p.then(function() {
+                clearTimeout(timeout);
+                resolve(JSON.stringify({ step: "reconnect", result: "ok", status: a.connectionStatus, isLogin: a.isLogin() }));
+              }).catch(function(e) {
+                clearTimeout(timeout);
+                resolve(JSON.stringify({ step: "reconnect", result: "rejected", err: e && e.message || String(e), status: a.connectionStatus, isLogin: a.isLogin() }));
+              });
+            } else {
+              clearTimeout(timeout);
+              resolve(JSON.stringify({ step: "reconnect", result: "no_promise", val: String(p) }));
+            }
+          } catch(e) {
+            clearTimeout(timeout);
+            resolve(JSON.stringify({ step: "reconnect", result: "threw", err: e.message }));
+          }
+        })
+      `,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 15000));
+
+  // Step 3: post-check
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 3, method: 'Runtime.evaluate', params: {
+      expression: '(function(){var a=window._imsdk.getAuthService();return JSON.stringify({step:"post",isLogin:a.isLogin(),status:a.connectionStatus})})()'
+    }})
+  });
+  await new Promise(r => setTimeout(r, 2000));
+
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

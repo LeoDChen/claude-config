@@ -1,0 +1,236 @@
+#!/usr/bin/env node
+/**
+ * chat_retrieve.js — 定点检索 OKKI 聊天记录
+ *
+ * 模式:
+ *   pointer  --mode=pointer --cid=<cid> --timestamps=ts1,ts2 --context=5
+ *            按时间戳定位消息，返回消息 + 上下文
+ *   search   --mode=search   --cid=<cid> --keyword="xxx" --context=3
+ *            按关键词搜索消息，返回匹配 + 上下文
+ *
+ * 输出: 纯文本到 stdout（供人阅读或 AI 消费）
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+// ── 参数解析 ──────────────────────────────────────────────
+const args = process.argv.slice(2);
+const getArg = (name) => {
+  const prefix = `--${name}=`;
+  const found = args.find((a) => a.startsWith(prefix));
+  return found ? found.slice(prefix.length) : null;
+};
+const hasArg = (name) => args.includes(`--${name}`);
+
+const mode = getArg("mode");
+const cid = getArg("cid");
+const keyword = getArg("keyword");
+const timestampsRaw = getArg("timestamps");
+const context = parseInt(getArg("context") || "3", 10);
+
+if (!mode || !cid) {
+  console.error("用法:");
+  console.error("  node chat_retrieve.js --mode=pointer --cid=<cid> --timestamps=ts1,ts2 [--context=5]");
+  console.error("  node chat_retrieve.js --mode=search   --cid=<cid> --keyword=<kw>  [--context=3]");
+  process.exit(1);
+}
+
+// ── 路径解析 ──────────────────────────────────────────────
+const DATA_DIR = path.resolve(__dirname, "..", "data");
+const CHAT_HISTORY_DIR = path.join(DATA_DIR, "chat_history");
+
+// cid 格式: {aliId}-{accountId}#11011@icbu
+// 文件名格式: {aliId}-{accountId}_11011_icbu.json
+function cidToFilename(cidStr) {
+  const match = cidStr.match(/^(.+)#(\d+)@(\w+)$/);
+  if (!match) return null;
+  const [, left, channel, platform] = match;
+  return `${left}_${channel}_${platform}.json`;
+}
+
+const filename = cidToFilename(cid);
+if (!filename) {
+  console.error(`无法解析 cid: ${cid}`);
+  process.exit(1);
+}
+
+const filepath = path.join(CHAT_HISTORY_DIR, filename);
+if (!fs.existsSync(filepath)) {
+  console.error(`聊天文件不存在: ${filepath}`);
+  console.error(`  cid: ${cid}`);
+  process.exit(1);
+}
+
+// ── 读取聊天记录 ──────────────────────────────────────────
+const raw = JSON.parse(fs.readFileSync(filepath, "utf-8"));
+const allMessages = raw.messages || [];
+
+// 过滤系统消息，只保留真实消息
+function isSystemMessage(msg) {
+  try {
+    return msg.message?.extension?.systemMessage === true ||
+           msg.message?.extension?.basicMessageInfo?.includes('"systemMessage":true');
+  } catch {
+    return false;
+  }
+}
+
+function getMessageText(msg) {
+  try {
+    return msg.message?.content?.text?.content || "";
+  } catch {
+    return "";
+  }
+}
+
+function getMessageTime(msg) {
+  try {
+    return msg.message?.createAt || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function getSenderTag(msg) {
+  try {
+    const uid = msg.message?.sender?.uid || "";
+    // 我方 uid 包含 "2500000853693"（accountId）
+    return uid.includes("2500000853693") ? "我" : "客";
+  } catch {
+    return "?";
+  }
+}
+
+function getMsgId(msg) {
+  try {
+    return msg.message?.messageId || "?";
+  } catch {
+    return "?";
+  }
+}
+
+// ── 辅助: 格式化时间 ──────────────────────────────────────
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// ── 辅助: 输出消息 ────────────────────────────────────────
+function formatMessage(msg) {
+  const ts = getMessageTime(msg);
+  const sender = getSenderTag(msg);
+  const text = getMessageText(msg);
+  const msgId = getMsgId(msg);
+  return `[${fmtTime(ts)}] [${sender}] (MsgID:${msgId})\n${text}`;
+}
+
+// ── 指针模式 ──────────────────────────────────────────────
+function runPointer() {
+  if (!timestampsRaw) {
+    console.error("pointer 模式需要 --timestamps=ts1,ts2,...");
+    process.exit(1);
+  }
+
+  const targets = timestampsRaw.split(",").map((t) => parseInt(t.trim(), 10));
+  const realMessages = allMessages.filter((m) => !isSystemMessage(m));
+
+  if (realMessages.length === 0) {
+    console.log(`客户: ${raw.name || cid}`);
+    console.log(`消息总数: ${allMessages.length} (无真实消息)`);
+    return;
+  }
+
+  console.log(`客户: ${raw.name || cid}`);
+  console.log(`消息总数: ${allMessages.length} (真实: ${realMessages.length})`);
+  console.log(`上下文窗口: ±${context} 条\n`);
+
+  for (const targetTs of targets) {
+    // 找最接近的消息索引
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < realMessages.length; i++) {
+      const dist = Math.abs(getMessageTime(realMessages[i]) - targetTs);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIdx = i;
+      }
+    }
+
+    const start = Math.max(0, bestIdx - context);
+    const end = Math.min(realMessages.length - 1, bestIdx + context);
+
+    console.log(`── 定位: ${fmtTime(targetTs)} → 最近消息 #${bestIdx + 1}/${realMessages.length} (偏移 ${bestDist > 0 ? (getMessageTime(realMessages[bestIdx]) > targetTs ? "+" : "-") + Math.round(bestDist / 1000 / 60) + "min" : "精确匹配"}) ──`);
+
+    for (let i = start; i <= end; i++) {
+      const marker = i === bestIdx ? ">>>" : "   ";
+      console.log(`${marker} ${formatMessage(realMessages[i])}`);
+      console.log("");
+    }
+  }
+}
+
+// ── 搜索模式 ──────────────────────────────────────────────
+function runSearch() {
+  if (!keyword) {
+    console.error("search 模式需要 --keyword=<关键词>");
+    process.exit(1);
+  }
+
+  const kwLower = keyword.toLowerCase();
+  const realMessages = allMessages.filter((m) => !isSystemMessage(m));
+
+  // 找所有匹配的消息索引
+  const matchIndices = [];
+  for (let i = 0; i < realMessages.length; i++) {
+    const text = getMessageText(realMessages[i]).toLowerCase();
+    if (text.includes(kwLower)) {
+      matchIndices.push(i);
+    }
+  }
+
+  console.log(`客户: ${raw.name || cid}`);
+  console.log(`消息总数: ${allMessages.length} (真实: ${realMessages.length})`);
+  console.log(`关键词: "${keyword}" → ${matchIndices.length} 条匹配\n`);
+
+  if (matchIndices.length === 0) {
+    console.log("未找到匹配消息。");
+    return;
+  }
+
+  // 合并重叠的上下文窗口
+  const windows = [];
+  for (const idx of matchIndices) {
+    const start = Math.max(0, idx - context);
+    const end = Math.min(realMessages.length - 1, idx + context);
+
+    if (windows.length > 0 && start <= windows[windows.length - 1].end + 1) {
+      // 合并到前一个窗口
+      windows[windows.length - 1].end = Math.max(windows[windows.length - 1].end, end);
+      windows[windows.length - 1].hits.push(idx);
+    } else {
+      windows.push({ start, end, hits: [idx] });
+    }
+  }
+
+  for (const win of windows) {
+    console.log(`── 匹配 ${win.hits.length} 条 (消息 #${win.start + 1}~#${win.end + 1}) ──`);
+    for (let i = win.start; i <= win.end; i++) {
+      const isHit = win.hits.includes(i);
+      const marker = isHit ? ">>>" : "   ";
+      console.log(`${marker} ${formatMessage(realMessages[i])}`);
+      console.log("");
+    }
+  }
+}
+
+// ── 执行 ──────────────────────────────────────────────────
+if (mode === "pointer") {
+  runPointer();
+} else if (mode === "search") {
+  runSearch();
+} else {
+  console.error(`未知模式: ${mode}。支持: pointer, search`);
+  process.exit(1);
+}

@@ -1,0 +1,49 @@
+<h2>客户质量分级 — 两套方案</h2>
+<p class="subtitle">质量 = 这个客户值不值得投入更多精力。独立于生命周期阶段。</p>
+
+<div class="section">
+  <h3>方案 A：四级 S / A / B / C（推荐）</h3>
+  <table>
+    <tr><th style="text-align:left;padding:8px;">等级</th><th style="text-align:left;padding:8px;">名称</th><th style="text-align:left;padding:8px;">判定标准</th><th style="text-align:left;padding:8px;">投入策略</th></tr>
+    <tr style="background:#fef2f2;"><td style="padding:8px;"><strong>S</strong></td><td style="padding:8px;">战略级</td><td style="padding:8px;font-size:14px;">品牌商/ODM + 首单≥500件 + 有渠道（Amazon/连锁店）+ 定制包装/条形码</td><td style="padding:8px;font-size:14px;">全力投入，深度维护</td></tr>
+    <tr style="background:#fff7ed;"><td style="padding:8px;"><strong>A</strong></td><td style="padding:8px;">优质</td><td style="padding:8px;font-size:14px;">批发商/零售商 + 明确批量需求 + 专业度高 + 核心市场（非洲/中东）</td><td style="padding:8px;font-size:14px;">积极跟进，定期回访</td></tr>
+    <tr style="background:#f9fafb;"><td style="padding:8px;"><strong>B</strong></td><td style="padding:8px;">普通</td><td style="padding:8px;font-size:14px;">小零售商 + 量不确定 + 非核心市场 + 需求模糊</td><td style="padding:8px;font-size:14px;">正常推进，不拔高</td></tr>
+    <tr style="background:#f9fafb;"><td style="padding:8px;"><strong>C</strong></td><td style="padding:8px;">低质</td><td style="padding:8px;font-size:14px;">个人买家/自用/送礼 + 极小量 + 非采购意图 + 品类不匹配</td><td style="padding:8px;font-size:14px;">快速处理，不投入</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>方案 B：五级 S / A / B / C / D</h3>
+  <p style="color:#94a3b8;">多一个 D 级专门放"一次性个人买家"和"品类不匹配"，让 C 级更纯净</p>
+  <table>
+    <tr><th style="text-align:left;padding:8px;">等级</th><th style="text-align:left;padding:8px;">判定</th></tr>
+    <tr><td style="padding:8px;"><strong>S</strong></td><td style="padding:8px;">品牌ODM + ≥500件 + 有渠道</td></tr>
+    <tr><td style="padding:8px;"><strong>A</strong></td><td style="padding:8px;">批发商 + 明确批量 + 专业</td></tr>
+    <tr><td style="padding:8px;"><strong>B</strong></td><td style="padding:8px;">小零售商 + 量模糊 + 初询</td></tr>
+    <tr><td style="padding:8px;"><strong>C</strong></td><td style="padding:8px;">个人买家/极小量/自用</td></tr>
+    <tr><td style="padding:8px;"><strong>D</strong></td><td style="padding:8px;">品类不匹配/非采购/仅系统消息/误入</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>S 级的判定标准（详细拆解）</h3>
+  <p style="color:#94a3b8;">满足以下 <strong>任意 2 条</strong> 即为 S 级：</p>
+  <table>
+    <tr><td style="padding:4px 10px;">1. 订购量 ≥ 500 件（或明确表达了该量级意向）</td></tr>
+    <tr><td style="padding:4px 10px;">2. 品牌商/ODM（自建品牌、定制包装、条形码、有线上/线下渠道）</td></tr>
+    <tr><td style="padding:4px 10px;">3. 规模大（公司采购、多店/连锁、年采购量级可见、团队采购而非个人）</td></tr>
+    <tr><td style="padding:4px 10px;">4. 定制需求（OEM/ODM，不是拿现货）</td></tr>
+    <tr><td style="padding:4px 10px;">5. 复购客户（已下过单，且首单 ≥ 500 件或多次小单累计 ≥ 1000 件）</td></tr>
+  </table>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>四级 S/A/B/C</h3><p>够用，简洁。D 级的"品类不匹配/仅系统消息"可以直接归 C</p></div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>五级 S/A/B/C/D</h3><p>更精细。C 是有真实需求但量小的，D 是完全不相关的</p></div>
+  </div>
+</div>

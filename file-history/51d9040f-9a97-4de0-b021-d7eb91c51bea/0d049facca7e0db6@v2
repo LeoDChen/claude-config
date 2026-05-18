@@ -1,0 +1,300 @@
+/**
+ * 全量客户特征提取脚本
+ *
+ * 读取 chat_history/ 下所有文件 + tm_conversations_latest.json，
+ * 提取每个客户的特征字段，输出到 data/s1_enhanced_full.json。
+ *
+ * 用法：node scripts/extract_features_full.js
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CHAT_DIR = path.join(DATA_DIR, 'chat_history');
+const OUR_UID = '2500000853693@icbu';
+const NOW = Date.now();
+
+// ===================== 系统消息判断 =====================
+
+const SYS_PATTERNS = [
+  '自动接待将不再触发',
+  'Marco大模型翻译',
+  '阿里国际Marco大模型翻译',
+  'Since you have read the conversation',
+  '买家有流失风险',
+  'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈',
+  '由于您介入该会话',
+  'Due to your intervention in this session',
+  'AI给您生成了一条回复建议',
+  'You have a visitor',
+  'This buyer has been pre-screened',
+  '反馈'
+];
+
+function isSystemByContent(text) {
+  if (!text) return false;
+  return SYS_PATTERNS.some(p => text.includes(p));
+}
+
+function isSystemByFlag(msg) {
+  try {
+    const ext = msg.extension || {};
+    const basic = ext.basicMessageInfo;
+    if (basic) {
+      const info = JSON.parse(basic);
+      if (info.systemMessage === true) return true;
+    }
+  } catch (e) { /* ignore parse errors */ }
+  return false;
+}
+
+function isSystem(msg) {
+  if (isSystemByFlag(msg)) return true;
+  // Only check text content for system patterns
+  const text = msg.content?.text?.content;
+  return isSystemByContent(text);
+}
+
+function isRealText(msg) {
+  // contentType 1 = text message with readable content
+  return msg.content?.contentType === 1 && msg.content?.text?.content;
+}
+
+function getTextContent(msg) {
+  return msg.content?.text?.content || '';
+}
+
+function isFromUs(msg) {
+  return msg.sender?.uid === OUR_UID;
+}
+
+function isFromCustomer(msg) {
+  const uid = msg.sender?.uid;
+  return uid && uid !== OUR_UID;
+}
+
+// ===================== 关键词检测 =====================
+
+const KEYWORDS = {
+  hasPI: [
+    /PI[^a-z]/i, /proforma\s*invoice/i, /形式发票/i,
+    /send.*invoice/i, /invoice.*send/i, /PI\s*(已发|已经|发了)/i
+  ],
+  hasAddress: [
+    /address/i, /地址/i, /delivery\s*(to|address)/i,
+    /zip\s*code/i, /postal\s*code/i, /\d{5,6}[\s,]+[A-Z]/,
+    /shipping\s*address/i, /收货地址/i
+  ],
+  hasOrderSignal: [
+    /place\s*(an?\s*)?order/i, /make\s*(an?\s*)?order/i,
+    /send\s*(me\s*)?PI/i, /下单/i, /сделаем\s*заказ/i,
+    /I\s*(will|want\s*to)\s*(buy|order|purchase)/i,
+    /ready\s*to\s*order/i, /proceed\s*(with|to)\s*order/i
+  ],
+  hasPrice: [
+    /\$\s*\d+[\d,.]*/i, /USD\s*\d+/i,
+    /price/i, /价格/i, /报价/i, /quotation/i,
+    /total\s*(cost|amount|price)/i, /unit\s*price/i,
+    /cost\s*(is|=)/i, /欧元/i, /euro/i
+  ],
+  hasSample: [
+    /sample/i, /样品/i, /样板/i, /打样/i
+  ],
+  hasFreight: [
+    /freight/i, /shipping/i, /运费/i, /DAP/i, /DDP/i, /FOB/i,
+    /CIF/i, /EXW/i, /物流/i, /delivery\s*cost/i, /transport/i
+  ],
+  hasMOQ: [
+    /MOQ/i, /minimum\s*order/i, /起订量/i, /最小起订/i,
+    /min\s*(order|qty|quantity)/i
+  ],
+  hasQuantity: [
+    /(\d+)\s*(pcs|pieces|件|个|set|sets)/i,
+    /quantity/i, /数量/i, /how\s*many/i,
+    /(\d+)\s*(container|carton)/i
+  ]
+};
+
+function detectKeywords(texts) {
+  const combined = texts.join(' ');
+  const result = {};
+  for (const [key, patterns] of Object.entries(KEYWORDS)) {
+    result[key] = patterns.some(p => p.test(combined));
+  }
+  return result;
+}
+
+// ===================== 单客户提取 =====================
+
+/**
+ * 从已解析的聊天记录提取特征
+ */
+function extractFromData(data, meta) {
+
+  const messages = data.messages || [];
+  if (messages.length === 0) return null;
+
+  let total = 0, sys = 0, ours = 0, cust = 0;
+  let lastCustomerTime = 0;
+  let latestOurText = '';
+  let latestCustText = '';
+  const allTexts = [];
+  const custTexts = [];
+
+  for (const wrapper of messages) {
+    const msg = wrapper.message;
+    if (!msg) continue;
+    total++;
+
+    if (isSystem(msg)) {
+      sys++;
+      continue;
+    }
+
+    if (!isRealText(msg)) continue; // Skip product cards, templates etc.
+
+    const text = getTextContent(msg);
+    const ts = msg.createAt || 0;
+
+    if (isFromUs(msg)) {
+      ours++;
+      if (ts > 0) {
+        latestOurText = text;
+        allTexts.push(text);
+      }
+    } else if (isFromCustomer(msg)) {
+      cust++;
+      if (ts > lastCustomerTime) lastCustomerTime = ts;
+      latestCustText = text;
+      allTexts.push(text);
+      custTexts.push(text);
+    }
+  }
+
+  const real = ours + cust;
+  if (real === 0) return null; // No real messages at all
+
+  const keywords = detectKeywords(allTexts);
+  const lastContactTime = meta?.lastContactTime || meta?.lastContactTimeLong || messages[messages.length - 1]?.message?.createAt || 0;
+  const daysAgo = lastContactTime ? Math.floor((NOW - lastContactTime) / 86400000) : 999;
+  const lastCustomerMsgDays = lastCustomerTime ? Math.floor((NOW - lastCustomerTime) / 86400000) : 999;
+  const cRatio = real > 0 ? Math.round((cust / real) * 100) : 0;
+  const country = meta?.complianceCountryCode || '';
+  const name = meta?.name || meta?.companyName || data.name || '(未知)';
+  const tags = meta?.tagInfo || [];
+  const isCore = tags.includes('3P4KK0L1O5A501H');
+
+  return {
+    cid: data.cid,
+    filename: data.cid ? data.cid.replace(/[#@]/g, '_') + '.json' : '',
+    name,
+    country,
+    isCore,
+    daysAgo,
+    msgCount: total,
+    customerMsgs: cust,
+    ourMsgs: ours,
+    sysMsgs: sys,
+    realMsgs: real,
+    cRatio,
+    lastCustomerMsgDays,
+    latestOurMsg: latestOurText.substring(0, 200),
+    latestCustMsg: latestCustText.substring(0, 200),
+    ...keywords
+  };
+}
+
+// ===================== 主流程 =====================
+
+function main() {
+  console.log('[START] 全量特征提取');
+
+  // 1. 加载元数据
+  const metaPath = path.join(DATA_DIR, 'tm_conversations_latest.json');
+  if (!fs.existsSync(metaPath)) {
+    console.error('[ERROR] 元数据不存在，先运行 sync_okki.js');
+    process.exit(1);
+  }
+  const metaData = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+  const convs = metaData.conversations || [];
+  const metaMap = {};
+  for (const c of convs) metaMap[c.cid] = c;
+  console.log(`[META] ${convs.length} 个客户元数据`);
+
+  // 2. 遍历 chat_history
+  const files = fs.readdirSync(CHAT_DIR).filter(f => f.endsWith('.json'));
+  console.log(`[FILES] ${files.length} 个聊天记录文件`);
+
+  const results = [];
+  let skipped = 0;
+
+  for (const file of files) {
+    const filepath = path.join(CHAT_DIR, file);
+    let data;
+    try {
+      data = JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+    } catch (e) {
+      skipped++;
+      continue;
+    }
+    const cid = data.cid;
+    if (!cid) { skipped++; continue; }
+    const meta = metaMap[cid];
+    const extracted = extractFromData(data, meta);
+    if (extracted) {
+      results.push(extracted);
+    } else {
+      skipped++;
+    }
+  }
+
+  // 3. 补充纯元数据客户（没有 chat_history 文件的）
+  const hasChat = new Set(results.map(r => r.cid));
+  for (const conv of convs) {
+    if (hasChat.has(conv.cid)) continue;
+    const daysAgo = conv.lastContactTime
+      ? Math.floor((NOW - conv.lastContactTime) / 86400000)
+      : 999;
+    const latestMsg = conv.latestMessage || {};
+    const isLatestFromCust = latestMsg.messageType === 'received';
+    results.push({
+      cid: conv.cid,
+      filename: '',
+      name: conv.name || conv.companyName || '(未知)',
+      country: conv.complianceCountryCode || '',
+      isCore: (conv.tagInfo || []).includes('3P4KK0L1O5A501H'),
+      daysAgo,
+      msgCount: 0, customerMsgs: 0, ourMsgs: 0, sysMsgs: 0, realMsgs: 0,
+      cRatio: 0,
+      lastCustomerMsgDays: isLatestFromCust ? daysAgo : 999,
+      latestOurMsg: '',
+      latestCustMsg: isLatestFromCust ? (latestMsg.content || '') : '',
+      hasPI: false, hasAddress: false, hasOrderSignal: false,
+      hasPrice: false, hasSample: false, hasFreight: false,
+      hasMOQ: false, hasQuantity: false
+    });
+  }
+
+  // 4. 输出
+  const outPath = path.join(DATA_DIR, 's1_enhanced_full.json');
+  fs.writeFileSync(outPath, JSON.stringify(results, null, 2), 'utf-8');
+  console.log(`[DONE] 输出: ${outPath}`);
+  console.log(`  总计: ${results.length} 个客户`);
+  console.log(`  有聊天记录: ${results.filter(r => r.filename).length}`);
+  console.log(`  纯元数据: ${results.filter(r => !r.filename).length}`);
+
+  // 统计
+  const stats = { p0_signals: 0, pi: 0, addr: 0, order: 0, price: 0, sample: 0 };
+  for (const r of results) {
+    if (r.hasPI) stats.pi++;
+    if (r.hasAddress) stats.addr++;
+    if (r.hasOrderSignal) stats.order++;
+    if (r.hasPrice) stats.price++;
+    if (r.hasSample) stats.sample++;
+  }
+  console.log(`  有PI: ${stats.pi} | 有地址: ${stats.addr} | 有下单信号: ${stats.order} | 有报价: ${stats.price} | 有样品: ${stats.sample}`);
+}
+
+main();

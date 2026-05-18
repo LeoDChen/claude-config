@@ -1,0 +1,148 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  const expr = `
+    (async function() {
+      var r = {};
+      var imsdk = window._imsdk;
+      var baaS = window._imBaaSSDK;
+
+      // Step 1: Explore getChannel()
+      try {
+        var channel = imsdk.getChannel();
+        r.channelType = typeof channel;
+        r.channelIsNull = channel === null;
+        if (channel) {
+          r.channelConstructor = channel.constructor.name;
+          var chKeys = [];
+          for (var k in channel) chKeys.push(k);
+          r.channelKeys = chKeys.slice(0, 30);
+
+          // Also get own properties
+          try {
+            r.channelOwnKeys = Object.getOwnPropertyNames(channel).slice(0, 30);
+          } catch(e) {}
+
+          // If channel has send method, we might be able to use it
+          r.channelHasSend = typeof channel.send === 'function';
+          r.channelHasRequest = typeof channel.request === 'function';
+          r.channelHasPostMessage = typeof channel.postMessage === 'function';
+          r.channelHasEmit = typeof channel.emit === 'function';
+        }
+      } catch(e) {
+        r.channelError = e.message;
+      }
+
+      // Step 2: Explore getOriginSdk()
+      try {
+        var originSdk = imsdk.getOriginSdk();
+        r.originSdkType = typeof originSdk;
+        if (originSdk) {
+          var osKeys = Object.keys(originSdk).filter(function(k) {
+            return typeof originSdk[k] !== 'function';
+          });
+          r.originSdkProps = osKeys.slice(0, 20);
+
+          // Does originSdk have a socket/connection?
+          ['socket', 'ws', 'connection', 'transport', 'channel', 'conn'].forEach(function(prop) {
+            if (originSdk[prop] !== undefined) {
+              r['originSdk.' + prop] = typeof originSdk[prop];
+              if (typeof originSdk[prop] === 'object' && originSdk[prop]) {
+                var subKeys = Object.keys(originSdk[prop]).slice(0, 15);
+                r['originSdk.' + prop + '.keys'] = subKeys;
+              }
+            }
+          });
+        }
+      } catch(e) {
+        r.originSdkError = e.message;
+      }
+
+      // Step 3: Check if there's a current active socket via Network API
+      // (we can't see it from JS, but let's try)
+
+      // Step 4: Try reConnect
+      var authSvc = baaS.getAuthService();
+      if (authSvc && typeof authSvc.reConnect === 'function') {
+        try {
+          r.beforeReconnectStatus = authSvc.connectionStatus;
+          var reconnectResult = authSvc.reConnect();
+          r.reconnectResult = reconnectResult;
+          await new Promise(function(res) { setTimeout(res, 3000); });
+          r.afterReconnectStatus = authSvc.connectionStatus;
+          r.afterReconnectIsLogin = authSvc.isLogin();
+        } catch(e) {
+          r.reconnectError = e.message;
+        }
+      }
+
+      // Step 5: Try safeInit or init
+      if (authSvc && typeof authSvc.safeInit === 'function' && !r.afterReconnectIsLogin) {
+        try {
+          r.beforeSafeInitStatus = authSvc.connectionStatus;
+          var initResult = authSvc.safeInit();
+          r.safeInitResult = initResult;
+          await new Promise(function(res) { setTimeout(res, 3000); });
+          r.afterSafeInitStatus = authSvc.connectionStatus;
+          r.afterSafeInitIsLogin = authSvc.isLogin();
+        } catch(e) {
+          r.safeInitError = e.message;
+        }
+      }
+
+      // Step 6: Get the MessageService and try to find LWP sender
+      var msgSvc = imsdk.getMessageService();
+      if (msgSvc) {
+        var msgMethods = [];
+        for (var k in msgSvc) {
+          if (typeof msgSvc[k] === 'function') msgMethods.push(k);
+        }
+        r.msgSvcMethods = msgMethods.slice(0, 30);
+      }
+
+      return JSON.stringify(r, null, 2);
+    })()
+  `;
+
+  console.log('Exploring Channel + trying reConnect...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr, awaitPromise: true }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 15000));
+
+  if (results.length > 0) {
+    console.log(results[0].val);
+  } else {
+    console.log('No response');
+  }
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

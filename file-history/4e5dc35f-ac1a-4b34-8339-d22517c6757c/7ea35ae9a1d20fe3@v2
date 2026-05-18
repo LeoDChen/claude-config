@@ -1,0 +1,86 @@
+# OKKI 输出可视化：HTML 管道看板
+
+## 背景
+
+当前 OKKI 输出文件（`output/actions_*.md`）存在以下问题：
+1. 只展示"最紧急的十几个客户"，其余 460+ 客户在输出中隐形
+2. 静默风险列表在 v2 格式中消失
+3. 双轴矩阵只显示数字，无法看到每个格子里具体是谁
+4. 缺少时间变化趋势、缺少按市场分布的管道密度
+5. 行动缺少时间窗口理由和标准动作指引
+
+用户需求：一个**HTML 单页看板**，合并客户分类 + 行动清单，覆盖全部客户，每个生命周期阶段的客户都能看到、都有对应动作。
+
+## 核心架构
+
+```
+数据层（JSON）                    展示层（HTML）
+─────────────────────────      ─────────────────
+data/classification_latest.json  →  generate_dashboard.js  →  output/dashboard_YYYY-MM-DD.html
+data/tm_conversations_latest.json ↗
+```
+
+**关键原则：HTML 由脚本生成，不走 AI 对话**。AI 只参与需要判断的环节（深度分析、话术）。
+每天运行：`node scripts/generate_dashboard.js` → 浏览器打开 HTML，零 token 消耗。
+
+## HTML 看板布局
+
+### 1. 顶部全局指标卡（6 个）
+- 总会话 / 3天活跃 / 超90天无互动 / 未读 / 本期变动 / 待行动
+- 数据来源：`tm_conversations_latest.json` + `classification_latest.json`
+
+### 2. 双轴客户矩阵（核心模块）
+- **行**：8 个生命周期阶段（待回复 / 初询沟通 / 报价已发 / 谈判样品 / PI已发 / 订单执行 / 已签收 / 售后）
+- **列**：5 个质量等级（S / A / B / C / D）+ 变动列
+- **每个格子**：点击展开显示：
+  - 该格客户名单（姓名、国家、静默天数、最近消息摘要）
+  - 该阶段 × 该质量等级的标准跟进动作（文案来自 knowledge/classification-rules.md 第六章）
+  - 每人当前状态标记（正常 / 需关注 / 紧急）
+
+### 3. 静默风险分级（侧栏）
+- 深度静默 90天+ / 长期 30-90天 / 中期 14-30天 / 短期 7-14天 / 近期活跃 3-7天
+- 每行可展开，显示该层级客户名单（按静默天数降序）
+
+### 4. 核心市场管道密度
+- 表格：市场 × 客户数 × S/A级数 × 待行动数
+- 覆盖 7 个核心市场（苏丹/埃及/刚果民主/赞比亚/科特迪瓦/沙特/阿联酋）
+
+### 5. 本期变动
+- 相较上次运行的升降级统计（升级/降级/新进入/流失）
+- 实现方式：脚本对比当前 classification_latest.json 与上次快照
+
+### 6. 底部操作区
+- 跳转链接：已有的单人深度分析文件（如果有）
+- 提示：`/okki 深度分析 [客户名]` 可新开对话
+
+## 技术方案
+
+### 新建文件
+
+**`scripts/generate_dashboard.js`** — 核心生成脚本
+- 读取 `data/classification_latest.json` 获取分类数据
+- 读取 `data/tm_conversations_latest.json` 获取会话元数据
+- 读取上次运行快照（`output/.dashboard_snapshot.json`）计算变动
+- 内置「阶段标准动作」配置（从 classification-rules.md 第六章提取）
+- 生成自包含 HTML 文件（CSS/JS 内嵌，无外部依赖）
+- 输出到 `output/dashboard_YYYY-MM-DD.html`
+- 保存当前快照供下次对比
+
+### 数据依赖
+- `data/classification_latest.json` — 每个客户的：lifecycle_stage, quality_grade, silence_days, last_message_time
+- `data/tm_conversations_latest.json` — 全局统计（总会话、未读、活跃数等）
+- 如分类数据格式不兼容，需同步调整分类脚本的输出字段
+
+### 改动文件
+- **新建** `scripts/generate_dashboard.js`
+- **不改动** 现有分类脚本、同步脚本、深度分析流程
+
+## 验证方式
+
+1. 运行 `node scripts/generate_dashboard.js`
+2. 浏览器打开 `output/dashboard_YYYY-MM-DD.html`
+3. 检查：全部客户是否出现在对应格子中（总数 = 477）
+4. 检查：每个格子的标准动作文案是否正确
+5. 检查：静默风险分级名单是否完整
+6. 检查：市场分布数字是否与源数据一致
+7. 运行第二次，验证变动统计是否正确

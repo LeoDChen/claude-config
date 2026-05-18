@@ -1,0 +1,146 @@
+/**
+ * 小满CRM — Markdown 看板生成器
+ *
+ * 接收分类后的会话数据，生成可读的看板报告
+ */
+
+import { getCategoryInfo, CATEGORIES } from './classifier.mjs';
+
+/**
+ * 生成完整看板报告
+ * @param {Array} classifiedConversations - 分类后的会话数组
+ * @param {Object} options
+ * @param {Date} options.generatedAt - 生成时间
+ * @returns {string} Markdown 文本
+ */
+export function generateReport(classifiedConversations, options = {}) {
+  const now = options.generatedAt || new Date();
+  const lines = [];
+
+  lines.push(`# 📊 小满CRM客户跟进看板`);
+  lines.push('');
+  lines.push(`> 生成时间: ${formatDate(now)}`);
+  lines.push(`> 总会话数: ${classifiedConversations.length}`);
+  lines.push('');
+
+  // ============================================================
+  // 概览统计
+  // ============================================================
+  lines.push(`## 一、概览`);
+  lines.push('');
+
+  const priorityOrder = ['P0', 'P1', 'P2', 'P3'];
+  const priorityNames = { P0: '🔥 紧急处理', P1: '⚡ 优先处理', P2: '📋 计划安排', P3: '🗂️ 常规处理' };
+
+  for (const pri of priorityOrder) {
+    const cats = CATEGORIES.filter(c => c.priority === pri);
+    const totalForPri = cats.reduce((sum, cat) => {
+      return sum + classifiedConversations.filter(c => (c.classification?.categoryId || 'other') === cat.id).length;
+    }, 0);
+    if (totalForPri === 0) continue;
+
+    lines.push(`### ${priorityNames[pri]}`);
+    lines.push('');
+    lines.push('| 状态 | 数量 | 客户');
+    lines.push('|------|:----:|------');
+
+    for (const cat of cats) {
+      const convs = classifiedConversations.filter(c => (c.classification?.categoryId || 'other') === cat.id);
+      if (convs.length === 0) continue;
+      const names = convs.map(c => {
+        const tier = c.classification?.tier || 'C';
+        const tierBadge = getTierBadge(tier);
+        return `${tierBadge} ${c.name}`;
+      }).join(', ');
+      lines.push(`| ${cat.emoji} ${cat.label} | ${convs.length} | ${names}`);
+    }
+    lines.push('');
+  }
+
+  // ============================================================
+  // 详细列表
+  // ============================================================
+  lines.push(`---`);
+  lines.push('');
+  lines.push(`## 二、详细列表`);
+  lines.push('');
+
+  const priority = { 'P0': 0, 'P1': 1, 'P2': 2, 'P3': 3, 'P4': 4 };
+  const sorted = [...classifiedConversations].sort((a, b) => {
+    const aCat = getCategoryInfo(a.classification?.categoryId);
+    const bCat = getCategoryInfo(b.classification?.categoryId);
+    const aPri = aCat ? priority[aCat.priority] || 99 : 99;
+    const bPri = bCat ? priority[bCat.priority] || 99 : 99;
+    if (aPri !== bPri) return aPri - bPri;
+    // Same priority: sort by tier (S > A > B > C)
+    const tierOrder = { S: 0, A: 1, B: 2, C: 3 };
+    const aTier = tierOrder[a.classification?.tier] || 99;
+    const bTier = tierOrder[b.classification?.tier] || 99;
+    return aTier - bTier;
+  });
+
+  for (let i = 0; i < sorted.length; i++) {
+    const conv = sorted[i];
+    const cls = conv.classification || {};
+    const catInfo = getCategoryInfo(cls.categoryId) || { emoji: '❓', label: '未分类' };
+
+    lines.push(`### ${i + 1}. ${catInfo.emoji} ${conv.name}`);
+    lines.push('');
+    lines.push(`- **分类**: ${catInfo.emoji} ${catInfo.label} (${catInfo.desc})`);
+    lines.push(`- **优先级**: ${cls.tier ? getTierBadge(cls.tier) + ' ' + cls.tier + '级' : '未评估'}`);
+    lines.push(`- **消息数**: ${conv.messages?.length || 0} 条`);
+    lines.push(`- **判断依据**: ${(cls.reasons || ['无']).join('；')}`);
+
+    // 最新一条消息预览
+    const lastMsg = conv.messages?.[conv.messages.length - 1];
+    if (lastMsg) {
+      const direction = lastMsg.side === 'received' ? '📩 客户说' : '📤 我方说';
+      const snippet = lastMsg.content.substring(0, 150);
+      lines.push(`- **最新消息**: ${direction}: "${snippet}${lastMsg.content.length > 150 ? '...' : ''}"`);
+    }
+
+    lines.push('');
+  }
+
+  // ============================================================
+  // 分类说明附录
+  // ============================================================
+  lines.push(`---`);
+  lines.push('');
+  lines.push(`## 附录：分类说明`);
+  lines.push('');
+  lines.push('| 分类 | 优先级 | 定义 | 建议操作 |');
+  lines.push('|------|:------:|------|---------|');
+
+  const catDetails = {
+    awaiting_reply: '即时回复',
+    awaiting_quote: '尽快报价',
+    negotiating: '保持沟通',
+    after_sales: '优先处理',
+    sample_request: '安排寄样',
+    sample_followup: '跟进反馈',
+    awaiting_payment: '催款跟进',
+    awaiting_delivery: '安排发货',
+    followup: '安排回访',
+    keep_warm: '定期联系',
+    activate: '批量激活',
+  };
+
+  for (const cat of CATEGORIES) {
+    const action = catDetails[cat.id] || '—';
+    lines.push(`| ${cat.emoji} ${cat.label} | ${cat.priority} | ${cat.desc} | ${action} |`);
+  }
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+function formatDate(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function getTierBadge(tier) {
+  const badges = { S: '🔴', A: '🟠', B: '🟡', C: '⚪' };
+  return badges[tier] || '⚪';
+}

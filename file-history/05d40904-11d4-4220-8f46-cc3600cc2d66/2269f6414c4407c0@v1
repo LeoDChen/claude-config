@@ -1,0 +1,188 @@
+/**
+ * OKKI 交易 → 销售订单 同步脚本 v3
+ * 用法：node scripts/sync_orders.js
+ */
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const CDP_URL = 'http://localhost:9222';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+async function main() {
+  let browser, page;
+
+  // CDP 连接
+  let useCdp = false;
+  try {
+    const http = require('http');
+    const cdpOk = await new Promise(r => {
+      http.get('http://127.0.0.1:9222/json/version', res => r(true)).on('error', () => r(false));
+    });
+    if (cdpOk) {
+      browser = await chromium.connectOverCDP(CDP_URL);
+      const pages = browser.contexts()[0].pages();
+      page = pages[0];
+      useCdp = true;
+      log('CDP 已连接');
+    }
+  } catch (e) {}
+
+  if (!useCdp) {
+    log('启动 Chrome...');
+    browser = await chromium.launchPersistentContext(PROFILE, {
+      channel: 'chrome', headless: false,
+      viewport: { width: 1440, height: 900 },
+      args: ['--remote-debugging-port=9222'],
+    });
+    page = await browser.newPage();
+  }
+
+  // 导航到订单页
+  log('导航到销售订单页...');
+  await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 2000));
+
+  // 等登录
+  if (page.url().includes('login')) {
+    log('请登录 OKKI...');
+    const startTime = Date.now();
+    while (page.url().includes('login')) {
+      await new Promise(r => setTimeout(r, 2000));
+      if (Date.now() - startTime > 5 * 60 * 1000) {
+        log('登录超时');
+        await browser.close();
+        return;
+      }
+    }
+    log('已登录，重新导航...');
+    await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 3000));
+  }
+
+  log('当前 URL: ' + page.url());
+
+  // 等待虚拟列表渲染完成
+  await page.waitForSelector('.vue-recycle-scroller__item-view', { timeout: 10000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 1000));
+
+  // 日期标准化
+  function normalizeDate(dateStr) {
+    if (!dateStr) return '';
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (dateStr === '昨天') { const d = new Date(today); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); }
+    if (dateStr === '今天') return today.toISOString().slice(0, 10);
+    if (dateStr === '前天') { const d = new Date(today); d.setDate(d.getDate() - 2); return d.toISOString().slice(0, 10); }
+    const mmdd = dateStr.match(/(\d{1,2})月(\d{1,2})日/);
+    if (mmdd) {
+      const m = parseInt(mmdd[1]), d = parseInt(mmdd[2]);
+      const year = (m > now.getMonth() + 1) ? now.getFullYear() - 1 : now.getFullYear();
+      return `${year}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }
+    return dateStr;
+  }
+
+  // 提取当前页订单数据
+  function extractPageOrders() {
+    return page.evaluate(() => {
+      const result = [];
+      const rows = document.querySelectorAll('.vue-recycle-scroller__item-view');
+      rows.forEach(row => {
+        if (row.querySelector('.row-item__title')) return;
+        const cells = row.querySelectorAll('.cell-inner');
+        if (cells.length < 6) return;
+        const texts = Array.from(cells).map(c => c.textContent?.trim() || '');
+        // cells: [空, 空, 行号, 订单号, 更新日期, 订单金额, 客户, 订单状态, ERP状态, ...]
+        if (texts.length >= 8 && texts[3] && /^\d{10,}/.test(texts[3])) {
+          result.push({
+            orderNo: texts[3],
+            orderDate: texts[4],
+            amount: texts[5],
+            customer: texts[6],
+            status: texts[7],
+            erpStatus: texts[8] || '',
+          });
+        }
+      });
+      return result;
+    });
+  }
+
+  // 提取第1页
+  log('提取第1批...');
+  let orders = await extractPageOrders();
+  log(`  第1批: ${orders.length} 条`);
+
+  // 虚拟列表滚动
+  const seen = new Set(orders.map(o => o.orderNo));
+  const vlSelector = '.virtual-list-wrap, [class*=virtual-list]';
+  for (let scroll = 1; scroll <= 8; scroll++) {
+    const vl = await page.$(vlSelector);
+    if (!vl) { log('  未找到滚动容器'); break; }
+    const box = await vl.boundingBox();
+    if (!box) { log('  滚动容器不可见'); break; }
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 800);
+    await new Promise(r => setTimeout(r, 2000));
+    const more = await extractPageOrders();
+    let added = 0;
+    for (const o of more) {
+      if (!seen.has(o.orderNo)) { seen.add(o.orderNo); orders.push(o); added++; }
+    }
+    log(`  滚动${scroll}次: +${added} 条 (累计 ${orders.length})`);
+    if (added === 0) break;
+  }
+
+  // 翻页
+  for (let pg = 2; pg <= 10; pg++) {
+    const clicked = await page.evaluate((pgNum) => {
+      const all = document.querySelectorAll('li, button');
+      for (const el of all) {
+        if (el.textContent?.trim() === String(pgNum) && el.offsetParent !== null) { el.click(); return true; }
+      }
+      const next = document.querySelector('.el-pagination__next:not(.disabled), [class*=next]:not([class*=disabled])');
+      if (next && next.offsetParent !== null) { next.click(); return true; }
+      return false;
+    }, pg);
+    if (!clicked) break;
+    log(`  翻到第${pg}页...`);
+    await page.waitForSelector('.vue-recycle-scroller__item-view', { timeout: 8000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 1500));
+    const pageOrders = await extractPageOrders();
+    let added = 0;
+    for (const o of pageOrders) {
+      if (!seen.has(o.orderNo)) { seen.add(o.orderNo); orders.push(o); added++; }
+    }
+    log(`  第${pg}页: +${added} 条 (累计 ${orders.length})`);
+    if (added === 0) break;
+  }
+
+  log(`共提取 ${orders.length} 条订单`);
+
+  // 日期标准化
+  for (const o of orders) { o.orderDate = normalizeDate(o.orderDate); }
+
+  // 保存
+  const outPath = path.join(DATA_DIR, 'orders_latest.json');
+  const output = { exportedAt: new Date().toISOString(), total: orders.length, orders };
+  fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
+  log(`已保存: ${outPath}`);
+
+  // 统计
+  const statusCounts = {};
+  for (const o of orders) { statusCounts[o.status] = (statusCounts[o.status] || 0) + 1; }
+  log('订单状态统计:');
+  for (const [k, v] of Object.entries(statusCounts)) { log(`  ${k}: ${v}`); }
+
+  const delivered = orders.filter(o => o.status === '交易成功');
+  log(`\n交易成功客户 (${delivered.length}人):`);
+  for (const o of delivered) { log(`  ${o.customer} | ${o.amount} | ${o.orderDate}`); }
+
+  log('完成。浏览器保持打开，供后续使用');
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

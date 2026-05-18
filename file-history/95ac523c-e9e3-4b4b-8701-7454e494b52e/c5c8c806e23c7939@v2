@@ -1,0 +1,41 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.launch({
+    headless: false,
+    args: ['--remote-debugging-port=9222']
+  });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  console.log('=== 正在打开小满登录页面... ===');
+  await page.goto('https://login.xiaoman.cn/login?system_id=v5client&return_url=https%3A%2F%2Fcrm.xiaoman.cn%2F', { waitUntil: 'domcontentloaded' });
+  console.log('=== 浏览器已启动，请手动登录小满 ===');
+
+  // Poll for URL change to detect login
+  let loggedIn = false;
+  for (let i = 0; i < 300; i++) { // 10 minutes max
+    const url = page.url();
+    if (!url.includes('login')) {
+      loggedIn = true;
+      break;
+    }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+
+  if (!loggedIn) {
+    console.log('登录超时');
+    await browser.close();
+    process.exit(1);
+  }
+
+  console.log('=== 登录成功！===', page.url());
+  await page.waitForTimeout(3000);
+  console.log('=== 浏览器保持运行，我可以继续操作 ===');
+
+  // Keep alive
+  await new Promise(() => {});
+})().catch(err => {
+  console.error('Error:', err);
+  process.exit(1);
+});

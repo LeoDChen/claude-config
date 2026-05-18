@@ -1,0 +1,130 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+(async () => {
+  // Connect to user's existing Chrome (NOT launching a new browser)
+  let browser;
+  try {
+    browser = await chromium.connectOverCDP(CDP_URL);
+  } catch (e) {
+    console.log('❌ 无法连接到Chrome CDP');
+    console.log('   请先关闭所有Chrome窗口，然后用以下命令重新启动：');
+    console.log('   chrome.exe --remote-debugging-port=9222');
+    console.log('   然后打开 crm.xiaoman.cn 确认已登录，再运行本脚本');
+    process.exit(1);
+  }
+
+  const context = browser.contexts()[0];
+  const pages = context.pages();
+  const page = pages.find(p => p.url().includes('xiaoman')) || pages[0];
+
+  console.log('=== OKKI CDP 只读抓取 ===');
+  console.log('连接方式: CDP (纯本地，不触发网络认证)');
+  console.log('风险等级: 零（复用已有登录态，无新登录）');
+  console.log('当前页面:', page.url().substring(0, 120));
+
+  // Check if we're on OKKI
+  if (!page.url().includes('xiaoman') && !page.url().includes('onetalk')) {
+    console.log('\n⚠️  当前页面不是OKKI，尝试导航...');
+    await page.goto('https://crm.xiaoman.cn', { waitUntil: 'networkidle', timeout: 15000 }).catch(() => {});
+    await page.waitForTimeout(3000);
+
+    if (page.url().includes('login')) {
+      console.log('❌ OKKI 需要登录。请在Chrome中手动登录后重试本脚本');
+      await browser.disconnect();
+      process.exit(1);
+    }
+    console.log('✅ OKKI 已登录');
+  }
+
+  // Collect API responses going forward
+  const apiData = [];
+  page.on('response', async (response) => {
+    try {
+      const ct = response.headers()['content-type'] || '';
+      if (ct.includes('json')) {
+        const body = await response.json();
+        const url = response.url();
+        if (url.includes('xiaoman.cn') || url.includes('onetalk') || url.includes('alibaba.com')) {
+          apiData.push({ url: url.substring(0, 250), status: response.status(), data: body });
+        }
+      }
+    } catch (e) {}
+  });
+
+  // Navigate to trigger customer data API calls
+  console.log('\n=== 触发数据加载 ===');
+
+  const routes = [
+    'https://crm.xiaoman.cn/inbox',
+    'https://crm.xiaoman.cn/im',
+  ];
+
+  for (const url of routes) {
+    try {
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 10000 });
+      await page.waitForTimeout(2000);
+      console.log(`导航: ${url} → ${page.url().substring(0, 80)}`);
+    } catch (e) {}
+  }
+
+  // Wait for API calls to complete
+  await page.waitForTimeout(3000);
+
+  // Save everything
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+
+  // Save full DOM text
+  const pageText = await page.evaluate(() => document.body.innerText);
+  fs.writeFileSync(path.join(DATA_DIR, `page_dump_${ts}.txt`), pageText);
+  console.log(`页面文本: ${pageText.length}字符`);
+
+  // Save screenshot
+  await page.screenshot({ path: path.join(DATA_DIR, `screenshot_${ts}.png`), fullPage: true });
+
+  // Save API responses
+  if (apiData.length > 0) {
+    // Extract customer data from API responses
+    let customers = null;
+    for (const resp of apiData) {
+      const d = resp.data;
+      const candidates = [d?.data?.list, d?.data?.records, d?.list, d?.records, d?.data?.data?.list, d?.result?.list];
+      for (const c of candidates) {
+        if (Array.isArray(c) && c.length > 5) {
+          customers = c;
+          console.log(`找到客户数据: ${c.length}条 → ${resp.url.substring(0, 100)}`);
+          break;
+        }
+      }
+      if (customers) break;
+    }
+
+    const output = {
+      capturedAt: new Date().toISOString(),
+      method: 'cdp_readonly',
+      totalCustomers: customers ? customers.length : 0,
+      customers: customers,
+      apiDump: apiData.map(d => ({ url: d.url, status: d.status, keys: Object.keys(d.data || {}).slice(0, 10) }))
+    };
+
+    fs.writeFileSync(
+      path.join(DATA_DIR, `extracted_${ts}.json`),
+      JSON.stringify(output, null, 2)
+    );
+    console.log(`数据已保存: extracted_${ts}.json`);
+  } else {
+    console.log('未拦截到API响应，保存DOM文本用于解析');
+  }
+
+  console.log('\n=== 抓取完成 ===');
+  await browser.disconnect();
+  console.log('已断开CDP，Chrome不受影响');
+
+})().catch(err => {
+  console.error('脚本错误:', err.message);
+  process.exit(1);
+});

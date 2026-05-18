@@ -1,0 +1,60 @@
+<h2>生命周期分类 — 三套方案</h2>
+<p class="subtitle">选一套，或告诉我哪里想调</p>
+
+<div class="section">
+  <h3>方案 A：5 阶段（最简洁）</h3>
+  <table>
+    <tr><td style="padding:6px 10px;"><strong>1. 新客初询</strong></td><td style="padding:6px 10px;color:#94a3b8;">第一次接触，问价/要目录</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>2. 需求沟通</strong></td><td style="padding:6px 10px;color:#94a3b8;">讨论规格/数量/定制/样品</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>3. 报价/PI</strong></td><td style="padding:6px 10px;color:#94a3b8;">价格已发，等确认</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>4. 订单执行</strong></td><td style="padding:6px 10px;color:#94a3b8;">付款→生产→发货→签收</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>5. 中断/流失</strong></td><td style="padding:6px 10px;color:#94a3b8;">任何阶段沉默了</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>方案 B：8 阶段（区分未成交/已成交）</h3>
+  <p class="label">未成交客户</p>
+  <table>
+    <tr><td style="padding:6px 10px;"><strong>1. 待回复</strong></td><td style="padding:6px 10px;color:#94a3b8;">客户发了消息我没回</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>2. 初询沟通</strong></td><td style="padding:6px 10px;color:#94a3b8;">互相了解需求</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>3. 报价已发</strong></td><td style="padding:6px 10px;color:#94a3b8;">等客户反应</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>4. 谈判/样品</strong></td><td style="padding:6px 10px;color:#94a3b8;">细节博弈中</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>5. PI已发</strong></td><td style="padding:6px 10px;color:#94a3b8;">等付款</td></tr>
+  </table>
+  <p class="label" style="margin-top:12px;">已成交客户</p>
+  <table>
+    <tr><td style="padding:6px 10px;"><strong>6. 订单执行中</strong></td><td style="padding:6px 10px;color:#94a3b8;">付款后→生产→发货</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>7. 已签收</strong></td><td style="padding:6px 10px;color:#94a3b8;">等待反馈/复购</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>8. 售后</strong></td><td style="padding:6px 10px;color:#94a3b8;">质量问题/投诉</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>方案 C：4 阶段（按客户心理）</h3>
+  <table>
+    <tr><td style="padding:6px 10px;"><strong>1. 探索期</strong></td><td style="padding:6px 10px;color:#94a3b8;">刚到，在收集信息。刚发询盘/要目录/问MOQ</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>2. 评估期</strong></td><td style="padding:6px 10px;color:#94a3b8;">在比较、在犹豫。报价已发/要样品/在比价</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>3. 决策期</strong></td><td style="padding:6px 10px;color:#94a3b8;">准备下单。确认数量地址/PI已发/等付款</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>4. 交付/复购</strong></td><td style="padding:6px 10px;color:#94a3b8;">已成交。生产中→已发货→已签收→复购/售后</td></tr>
+  </table>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>5 阶段动作型</h3><p>一眼知道下一步该干嘛。缺点是订单执行阶段太粗（付款到签收全在一起）</p></div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>8 阶段状态型</h3><p>区分未成交/已成交，跟现在用的最接近。比A细但不会太碎</p></div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content"><h3>4 阶段心理型</h3><p>按客户决策心理，话术策略天然对齐。每阶段内可再分子状态</p></div>
+  </div>
+  <div class="option" data-choice="mix" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content"><h3>混搭 / 再说</h3><p>各有取舍，组合调整</p></div>
+  </div>
+</div>

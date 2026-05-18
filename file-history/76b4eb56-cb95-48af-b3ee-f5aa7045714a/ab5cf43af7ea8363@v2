@@ -1,0 +1,90 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  const expr = `
+    (async function() {
+      var results = {};
+      var convs = window.__conversationListFullData__;
+
+      // Try the first 5 conversations that have latestMessage content
+      var targets = convs.filter(function(c) {
+        return c.latestMessage && c.latestMessage.content && c.latestMessage.content.length > 0;
+      }).slice(0, 5);
+
+      // Use WS service this time
+      var wsSvc = window._imsdk.getMessageService();
+
+      for (var i = 0; i < targets.length; i++) {
+        var c = targets[i];
+        try {
+          var r = await new Promise(function(resolve) {
+            wsSvc.listMessageWithConversationCodeForHistory({
+              conversationCode: c.cid,
+              count: 20,
+              cursor: { sendTime: Date.now() },
+              dataCallback: function(r) {
+                resolve({
+                  ok: true,
+                  n: r.data ? r.data.length : 0,
+                  hasMore: r.hasMore,
+                  firstContent: r.data && r.data[0] ? r.data[0].content : null,
+                  firstSender: r.data && r.data[0] ? r.data[0].senderId || r.data[0].from : null
+                });
+              },
+              errorCallBack: function(e) {
+                resolve({ ok: false, err: e && e.message || String(e) });
+              }
+            });
+          });
+          results['conv' + i] = { name: c.name, cid: c.cid.substring(0, 40), result: r };
+        } catch(e) {
+          results['conv' + i] = { name: c.name, err: e.message };
+        }
+      }
+
+      // Also get auth status
+      var a = window._imsdk.getAuthService();
+      results.auth = {
+        isLogin: a.isLogin(),
+        connectionStatus: a.connectionStatus,
+        uid: a.getLoginUid()
+      };
+
+      return JSON.stringify(results);
+    })()
+  `;
+
+  console.log('Testing SDK on 5 conversations with active WS...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr, awaitPromise: true }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 30000));
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

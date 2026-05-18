@@ -1,0 +1,255 @@
+/**
+ * 小满CRM — 聊天记录抓取器 v2
+ *
+ * 用法: node scraper.mjs
+ * 前置条件: Chrome 端口9222已开启，小满已登录并在TM消息页
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { saveCustomerImages } from './image-utils.mjs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+/**
+ * 提取会话列表
+ */
+async function getConversationList(frame) {
+  return frame.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map(el => {
+      const text = el.textContent || '';
+      // Extract name from .contact-right (avoids avatar initial prefix issue)
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+
+      const isSelected = el.classList.contains('selected');
+      const isUnread = text.includes('[未读]');
+      const lastMsg = nameText.replace(/^.+?\d{2,4}[-:\/]\d{1,2}[-:\/]?\d{0,2}\s*/, '').replace(/\[(未读|已读)\]\s*/, '').trim();
+
+      return { name, isUnread, isSelected, lastMessage: lastMsg.substring(0, 200) };
+    });
+  });
+}
+
+/**
+ * 滚动会话列表到底部以确保所有项都在DOM中
+ */
+async function scrollConversationList(frame) {
+  await frame.evaluate(() => {
+    const container = document.querySelector('.seller-conversation-list') ||
+      document.querySelector('.conversation-list-content') ||
+      document.querySelector('.im-conversation-list-container');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+  await new Promise(r => setTimeout(r, 500));
+}
+
+/**
+ * 获取当前会话的完整消息
+ */
+async function getCurrentMessages(frame) {
+  return frame.evaluate(() => {
+    const messages = [];
+    const wrappers = document.querySelectorAll('.message-item-wrapper.messenger');
+
+    wrappers.forEach(wrapper => {
+      const isLeft = wrapper.classList.contains('item-left');
+      const isRight = wrapper.classList.contains('item-right');
+
+      const textEl = wrapper.querySelector('.session-rich-content.text');
+      const cardEl = wrapper.querySelector('.session-rich-content.card');
+      const securityEl = wrapper.querySelector('.session-security');
+      const avatarEl = wrapper.querySelector('.session-avatar.head-portrait.messenger');
+      const autoReply = wrapper.querySelector('.session-rich-content')?.textContent || '';
+
+      if (!textEl && !cardEl && !securityEl) return;
+
+      // Skip system messages
+      if (securityEl) return;
+
+      const content = (textEl || cardEl).textContent.trim();
+      const avatar = avatarEl ? (avatarEl.textContent || '').trim() : '';
+
+      // Clean up content - remove translation artifacts
+      const cleanContent = content
+        .replace(/翻译中…反馈$/, '')
+        .replace(/由阿里翻译提供反馈$/, '')
+        .replace(/阿里国际Marco大模型翻译反馈$/, '')
+        .replace(/由阿里翻译提供$/, '')
+        .trim();
+
+      messages.push({
+        side: isLeft ? 'received' : isRight ? 'sent' : 'system',
+        content: cleanContent,
+        isCard: !!cardEl,
+        sender: avatar || undefined,
+        isAutoReply: autoReply.includes('自动接待发送') || autoReply.includes('去优化'),
+      });
+    });
+
+    return messages;
+  });
+}
+
+/**
+ * 点击指定索引的联系人
+ */
+async function clickConversation(frame, index) {
+  const result = await frame.evaluate((idx) => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    const target = containers[idx];
+    if (!target) return null;
+    target.scrollIntoView({ block: 'center' });
+    target.click();
+    return (target.textContent || '').trim().substring(0, 150);
+  }, index);
+  await new Promise(r => setTimeout(r, 2000));
+  return result;
+}
+
+/**
+ * 等待并确认消息区域已更新（非空白）
+ */
+async function waitForMessages(frame) {
+  for (let i = 0; i < 10; i++) {
+    const hasContent = await frame.evaluate(() => {
+      const msgs = document.querySelectorAll('.session-rich-content.text, .session-rich-content.card');
+      return msgs.length > 0;
+    });
+    if (hasContent) return true;
+    await new Promise(r => setTimeout(r, 500));
+  }
+  return false;
+}
+
+async function scrapeAll() {
+  console.log('=== 小满CRM聊天记录抓取 v2 ===\n');
+  const { browser, ctx, talkFrame } = await connect();
+  console.log('✅ 已连接到小满');
+
+  try {
+    // 1. 获取完整会话列表
+    console.log('\n📋 获取会话列表...');
+    // Scroll to ensure all items rendered
+    await scrollConversationList(talkFrame);
+    await scrollConversationList(talkFrame);
+    const conversations = await getConversationList(talkFrame);
+    console.log(`   共 ${conversations.length} 个会话`);
+
+    conversations.forEach((c, i) => {
+      const status = c.isSelected ? '🟢' : c.isUnread ? '📩' : '  ';
+      console.log(`  ${status} [${i}] ${c.name}`);
+    });
+
+    // 2. 切换各筛选Tab，统计
+    console.log('\n📊 筛选统计...');
+    const filterLabels = ['全部', '未读', '待回复', '待跟进'];
+    const filterCounts = {};
+
+    for (const label of filterLabels) {
+      await frameEvaluateClickTab(talkFrame, label);
+      const list = await getConversationList(talkFrame);
+      filterCounts[label] = list.length;
+      console.log(`   ${label}: ${list.length} 个会话`);
+    }
+
+    // 回到"全部"
+    await frameEvaluateClickTab(talkFrame, '全部');
+    await new Promise(r => setTimeout(r, 1000));
+
+    // 3. 遍历所有会话获取详情（限前25个，避免太慢）
+    const allData = [];
+    const total = Math.min(conversations.length, 25);
+    const imageDedup = new Set(); // 全局图片去重
+
+    for (let i = 0; i < total; i++) {
+      const conv = conversations[i];
+      if (conv.name === 'Assistant Eva官方') continue; // Skip system account
+
+      process.stdout.write(`\r💬 [${i + 1}/${total}] ${conv.name}...`);
+
+      const clicked = await clickConversation(talkFrame, i);
+      if (!clicked) {
+        console.log(`\n   ⚠️ 无法点击索引 ${i}`);
+        continue;
+      }
+
+      await waitForMessages(talkFrame);
+      const messages = await getCurrentMessages(talkFrame);
+
+      // 提取并保存该客户的图片
+      const savedImages = await saveCustomerImages(ctx, talkFrame, conv.name, imageDedup);
+      if (savedImages.length > 0) {
+        process.stdout.write(`📷${savedImages.length} `);
+      }
+
+      // Re-get conv data to get current status
+      const updatedList = await getConversationList(talkFrame);
+      const current = updatedList[i] || conv;
+
+      allData.push({
+        name: current.name,
+        status: current.isUnread ? 'unread' : 'read',
+        lastMessageSnippet: current.lastMessage,
+        messageCount: messages.length,
+        messages: messages.slice(-50), // Last 50 messages max
+        images: savedImages.length > 0 ? savedImages : undefined,
+      });
+    }
+
+    console.log('\n');
+
+    // 4. 保存
+    const timestamp = new Date().toISOString().replace(/[:]/g, '-').substring(0, 19);
+    const outputPath = join(DATA_DIR, `数据快照_${timestamp}.json`);
+    writeFileSync(outputPath, JSON.stringify(allData, null, 2), 'utf-8');
+
+    // 5. 生成摘要
+    const totalMsg = allData.reduce((sum, c) => sum + c.messages.length, 0);
+    const totalImg = allData.reduce((sum, c) => sum + (c.images?.length || 0), 0);
+    const unreadCount = allData.filter(c => c.status === 'unread').length;
+    console.log(`\n✅ 抓取完成`);
+    console.log(`   会话: ${allData.length} | 总消息: ${totalMsg} | 图片: ${totalImg} | 未读: ${unreadCount}`);
+    console.log(`   已保存: ${outputPath}`);
+
+    return allData;
+  } finally {
+    await browser.close();
+  }
+}
+
+async function frameEvaluateClickTab(frame, label) {
+  return frame.evaluate((tabLabel) => {
+    const tabs = document.querySelectorAll('.im-next-tabs-tab.list-tab-item');
+    for (const tab of tabs) {
+      if ((tab.textContent || '').trim() === tabLabel) {
+        tab.click();
+        return true;
+      }
+    }
+    return false;
+  }, label);
+}
+
+scrapeAll().catch(err => {
+  console.error('\n❌ 抓取失败:', err.message);
+  process.exit(1);
+});

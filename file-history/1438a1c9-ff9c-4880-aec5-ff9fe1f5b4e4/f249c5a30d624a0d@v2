@@ -1,0 +1,19 @@
+# 报价单 V3 — Apple 简约风格
+
+## 设计方向
+- 无垂直线、仅浅灰水平分隔线
+- 白色底 + #F9F9F9 交替行
+- 表头黑字浅灰底，底部细线
+- 分组标题：大字号深灰，左对齐
+- 图片：宽度 160px，撑满图片单元格（行高 120px+）
+- 序号按合并后实际行数计（约25行，非50）
+
+## 列结构
+No.(5) | Product Name(14) | Photo(22) | Size(10) | Qty(7) | Unit Price(11) | Amount(11)
+
+## 15M-2Y 合并规则
+- 每个产品两行：No./Product Name/Photo/Unit Price/Amount 合并，Size/Qty 分行
+- 666 补件：单行
+
+## 输出
+C:/Users/Administrator/Desktop/Quotation_50Pcs.xlsx

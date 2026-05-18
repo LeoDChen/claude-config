@@ -1,0 +1,58 @@
+# CC+OB 协作系统 V3 执行进度
+
+> 更新：2026-05-11 | 来源：`99_系统文件/CC+OB协作系统_配置瘦身审核文档_V3.md`
+
+## 已完成
+
+| 步骤 | 内容 | 日期 |
+|------|------|------|
+| 1 | 全局 rules 清空（7 目录已删） | 05-10 |
+| 4 | Agents 50→7（删 42 语言/行业 agent） | 05-10 |
+| 5 | 全局 CLAUDE.md 188→30 行 | 05-10 |
+| 6 | 项目 rules→1（仅 operations-rules.md） | 05-10 |
+| 8 | OKKI CLAUDE.md 指针化改造 | 05-11 |
+| 2 | Skills 清理：`.agents/skills/` 各 34 软件技能目录已删（全局+项目双清） | 05-11 |
+| 3 | Commands 核查：全局删 9 业务命令，保留 6 通用；项目保留全 15 | 05-11 |
+| 7 | 项目同步：全局 skills 14→5（去重 9 业务技能）；agents 完全一致保留双份 | 05-11 |
+
+### 步骤 2 技术笔记
+
+- `.agents/skills/` 由 ECC `agents-core` 模块管理（`install-state.json` 逐文件追踪）
+- 手动删除后 `ecc doctor` 会报 drift，但 `ecc repair` 才会恢复
+- hooks.json 无自动 repair 钩子，不会自动恢复
+- 备份位置：`C:\Users\Administrator\.claude\backups\20260511\.agents-{global,project}/`
+
+### 步骤 3/7 最终分布
+
+**全局 (C:\Users\Administrator\.claude\)**:
+- skills (5): deep-research, knowledge-ops, prompt-optimizer, search-first, token-budget-advisor
+- commands (6): checkpoint, context-budget, plan, prompt-optimize, resume-session, save-session
+- agents (7): code-explorer, code-reviewer, doc-updater, docs-lookup, planner, security-reviewer, silent-failure-hunter
+
+**项目 (d:\ClaudeWorkspace\.claude\)**:
+- skills (21): 9 业务 + 7 手动层 + 2 OKKI驱动 + 3 通用辅助（保留完整集）
+- commands (15): 全部保留（9 业务 + 6 通用）
+- agents (7): 与全局相同（保留双份，agents 不污染 system-reminder）
+
+### 上下文瘦身（05-11 额外完成）
+
+- 删除 AGENTS.md（8KB 软件工程说明书）
+- 记忆文件 30→22 个（删过期/合并重复/删被覆盖）
+- OKKI CLAUDE.md 6.3KB→2.7KB（去重 + 指针化）
+- STATE.md 9.5KB→5.9KB（历史档案→archive.md）
+- business-rules.md 5.6KB→4.1KB（删重复段落）
+- sync_okki.js 新增 preComputed 预计算字段
+- 抖音视频分析文件→OB
+- `.agents/skills/` 70 个目录清空（全局 34 + 项目 34）
+- 全局 skills 14→5，commands 15→6
+
+## 剩余
+
+| 步骤 | 内容 | 备注 |
+|------|------|------|
+| 9 | 最终 OB 笔记完整记录 | 需等所有步骤完成后单独做 |
+
+## 下次启动指令
+
+> V3 全部执行步骤已完成（1-8），仅剩步骤 9（OB 笔记记录）。
+> 如需执行步骤 9：在 OB vault `E:\道友的宝贝\道友的宝贝\对话归档\CC\` 下创建 V3 完成的完整笔记。

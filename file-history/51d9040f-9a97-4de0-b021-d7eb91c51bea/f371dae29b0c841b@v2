@@ -1,0 +1,582 @@
+/**
+ * OKKI 每日客户分析一键流水线
+ *
+ * 用法：
+ *   node scripts/daily_pipeline.js           完整流程
+ *   node scripts/daily_pipeline.js --no-ai   跳过AI话术
+ *   node scripts/daily_pipeline.js --p0-only 只看P0客户
+ *
+ * 输入：
+ *   data/tm_conversations_latest.json — 全量466客户元数据（由sync_okki.js产出）
+ *   data/s1_enhanced.json          — 44活跃客户的增强特征（由enhanced_classify.js产出）
+ * 输出：
+ *   output/daily_YYYY-MM-DD.xlsx   — Excel看板
+ *   output/actions_YYYY-MM-DD.md   — 行动清单
+ */
+
+const fs = require('fs');
+const path = require('path');
+const ExcelJS = require('exceljs');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CONFIG_DIR = path.join(__dirname, '..', 'config');
+const OUTPUT_DIR = path.join(__dirname, '..', 'output');
+
+// 我方 OKKI UID（用于判断消息方向）
+const OUR_UID = '2500000853693@icbu';
+
+// ===================== 工具函数 =====================
+
+function loadJSON(filepath) {
+  if (!fs.existsSync(filepath)) {
+    console.error(`[ERROR] 文件不存在: ${filepath}`);
+    return null;
+  }
+  return JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+}
+
+function todayStr() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function daysBetween(ts1, ts2) {
+  return Math.floor((ts1 - ts2) / (1000 * 60 * 60 * 24));
+}
+
+// ===================== 数据加载与合并 =====================
+
+/**
+ * 从 tm_conversations_latest.json 加载全量客户元数据，
+ * 与 s1_enhanced.json 的增强特征合并。
+ * 返回统一的客户数组。
+ */
+function loadAndMergeCustomers() {
+  // 1. 加载全量元数据
+  const metaPath = path.join(DATA_DIR, 'tm_conversations_latest.json');
+  if (!fs.existsSync(metaPath)) {
+    console.error(`[ERROR] 元数据文件不存在: ${metaPath}`);
+    console.error('[HINT] 请先运行 node scripts/sync_okki.js');
+    process.exit(1);
+  }
+  const meta = loadJSON(metaPath);
+  const convs = meta.conversations || [];
+  const now = Date.now();
+
+  // 2. 加载增强特征
+  let enhancedMap = {};
+  const enhancedPath = path.join(DATA_DIR, 's1_enhanced.json');
+  if (fs.existsSync(enhancedPath)) {
+    const enhanced = loadJSON(enhancedPath);
+    if (Array.isArray(enhanced)) {
+      for (const e of enhanced) {
+        if (e.cid) enhancedMap[e.cid] = e;
+      }
+      console.log(`[DATA] 增强特征: ${enhanced.length} 个客户`);
+    }
+  } else {
+    console.log('[DATA] 无增强特征文件,仅使用元数据');
+  }
+
+  // 3. 合并
+  const customers = convs.map(conv => {
+    const cid = conv.cid;
+    const enhanced = enhancedMap[cid] || {};
+
+    // 从元数据提取
+    const lastContactTime = conv.lastContactTime || conv.lastContactTimeLong || 0;
+    const daysAgo = lastContactTime ? daysBetween(now, lastContactTime) : 999;
+    const country = conv.complianceCountryCode || '';
+    const name = conv.name || conv.companyName || conv.loginId || '(未知)';
+    const tags = conv.tagInfo || [];
+    const latestMsg = conv.latestMessage || {};
+    const isLatestFromUs = latestMsg.messageType === 'send';
+    const isLatestFromCust = latestMsg.messageType === 'received';
+
+    // 基础特征（优先用增强数据，否则从元数据推断）
+    const hasPI = enhanced.hasPI || false;
+    const hasAddress = enhanced.hasAddress || false;
+    const hasOrderSignal = enhanced.hasOrderSignal || false;
+    const hasPrice = enhanced.hasPrice || false;
+    const hasSample = enhanced.hasSample || false;
+    const hasFreight = enhanced.hasFreight || false;
+    const hasMOQ = enhanced.hasMOQ || false;
+    const hasQuantity = enhanced.hasQuantity || false;
+    const msgCount = enhanced.msgCount || 0;
+    const customerMsgs = enhanced.customerMsgs || 0;
+    const ourMsgs = enhanced.ourMsgs || 0;
+    const sysMsgs = enhanced.sysMsgs || 0;
+    const realMsgs = enhanced.realMsgs || 0;
+    const cRatio = enhanced.cRatio || 0;
+    const lastCustomerMsgDays = enhanced.lastCustomerMsgDays !== undefined
+      ? enhanced.lastCustomerMsgDays
+      : (isLatestFromCust ? daysAgo : 999);
+    const latestOurMsg = enhanced.latestOurMsg || (isLatestFromUs ? latestMsg.content : '');
+    const latestCustMsg = enhanced.latestCustMsg || (isLatestFromCust ? latestMsg.content : '');
+
+    const isCore = tags.includes('3P4KK0L1O5A501H');
+
+    return {
+      cid,
+      name,
+      country,
+      isCore,
+      daysAgo,
+      msgCount,
+      customerMsgs,
+      ourMsgs,
+      sysMsgs,
+      realMsgs,
+      cRatio,
+      lastCustomerMsgDays,
+      latestOurMsg,
+      latestCustMsg,
+      hasPI,
+      hasAddress,
+      hasOrderSignal,
+      hasPrice,
+      hasSample,
+      hasFreight,
+      hasMOQ,
+      hasQuantity,
+      _source: enhanced.cid ? 'enhanced' : 'metadata'
+    };
+  });
+
+  const enhancedCount = customers.filter(c => c._source === 'enhanced').length;
+  console.log(`[DATA] 全量: ${customers.length} 个客户 (${enhancedCount} 有增强特征, ${customers.length - enhancedCount} 仅元数据)`);
+  return customers;
+}
+
+// ===================== 规则引擎 =====================
+
+function evalCondition(customer, cond) {
+  const val = customer[cond.field];
+  if (val === undefined) return false;
+
+  switch (cond.op) {
+    case 'eq': return val === cond.value;
+    case 'neq': return val !== cond.value;
+    case 'gt': return val > cond.value;
+    case 'gte': return val >= cond.value;
+    case 'lt': return val < cond.value;
+    case 'lte': return val <= cond.value;
+    case 'in': return Array.isArray(cond.value) && cond.value.includes(val);
+    case 'contains': return typeof val === 'string' && val.toLowerCase().includes(String(cond.value).toLowerCase());
+    default: return false;
+  }
+}
+
+function matchRule(customer, rule) {
+  if (rule.all) return rule.all.every(c => evalCondition(customer, c));
+  if (rule.any) return rule.any.some(c => evalCondition(customer, c));
+  return false;
+}
+
+/**
+ * 对单个客户做五梯队分类。
+ * 按 P0→P1→P2→P3 顺序匹配，命中即停止。都未命中归入 P4。
+ */
+function classifyCustomer(customer, rules) {
+  for (const tier of ['p0', 'p1', 'p2', 'p3']) {
+    const tierDef = rules[tier];
+    if (!tierDef || !tierDef.rules) continue;
+    for (const rule of tierDef.rules) {
+      if (matchRule(customer, rule)) {
+        return { ...customer, tier, tierLabel: tierDef.label, tierReason: rule.name };
+      }
+    }
+  }
+  return { ...customer, tier: 'p4', tierLabel: rules.p4.label, tierReason: rules.p4.description };
+}
+
+// ===================== 评分引擎 =====================
+
+const TIER_BASE = { p0: 100, p1: 70, p2: 45, p3: 20, p4: 0 };
+
+function scoreCustomer(customer, scoring, rules) {
+  const w = scoring.weights;
+  let score = TIER_BASE[customer.tier] || 0;
+
+  // 时效惩罚：每多1天扣分
+  score -= (customer.daysAgo || 0) * w.daysAgo_penalty.value;
+
+  // 客户最近回复加分
+  if (customer.lastCustomerMsgDays !== undefined && customer.lastCustomerMsgDays <= 1) {
+    score += w.lastCustomerMsg_bonus.value;
+  }
+
+  // 核心市场加分
+  if (rules.core_markets.includes(customer.country)) {
+    score += w.core_market_bonus.value;
+  }
+
+  // 下单信号加分
+  if (customer.hasOrderSignal) {
+    score += w.order_signal_bonus.value;
+  }
+
+  // PI+地址加分
+  if (customer.hasPI && customer.hasAddress) {
+    score += w.pi_address_bonus.value;
+  }
+
+  // 高互动加分
+  if (customer.realMsgs >= 30) {
+    score += w.high_engagement_bonus.value;
+  }
+
+  // 客户消息占比高加分
+  if (customer.cRatio >= 40) {
+    score += w.customer_reply_bonus.value;
+  }
+
+  // 沉默惩罚
+  const silence = rules.silence_warnings[customer.tier];
+  if (silence && customer.lastCustomerMsgDays >= silence.danger) {
+    score -= w.silence_penalty.value;
+  }
+
+  return { ...customer, score };
+}
+
+// ===================== 阶段判断 =====================
+
+function determineStage(customer) {
+  if (customer.hasPI && customer.hasAddress && customer.daysAgo <= 7) {
+    return { stage: 1, label: '待确认付款', action: '确认PI信息无误 → 提醒付款 → 锁定排产。时效：24h内。' };
+  }
+  if (customer.realMsgs >= 15 && customer.daysAgo <= 3) {
+    return { stage: 2, label: '谈判中·近期活跃', action: '补全信息缺口 → 给价格区间 → 引导下一步。时效：48h内。' };
+  }
+  if (customer.hasPrice && customer.lastCustomerMsgDays >= 3) {
+    return { stage: 3, label: '报价已发·等回应', action: '3-5天后温和跟进(确认收到+提供新价值)，不要催单。' };
+  }
+  if (customer.realMsgs < 10 && customer.daysAgo <= 2) {
+    return { stage: 4, label: '初询阶段', action: '确认数量+目的地 → 给报价 → 引导选款。时效：24h内。' };
+  }
+  if (customer.realMsgs <= 5 && customer.lastCustomerMsgDays >= 3) {
+    return { stage: 5, label: '模板提问后沉默', action: '换策略重联：给选择题而非开放式问题，给具体产品推荐。' };
+  }
+  return { stage: 6, label: '低意向/非采购', action: '不投入时间，标记待观察。' };
+}
+
+// ===================== 沉默风险检测 =====================
+
+function checkSilence(customer, rules) {
+  const silence = rules.silence_warnings[customer.tier];
+  if (!silence) return 'normal';
+  const d = customer.lastCustomerMsgDays;
+  if (d === undefined || d >= 900) return 'normal'; // 未知/元数据默认值，不报警
+  if (d >= silence.danger) return 'danger';
+  if (d >= silence.warning) return 'warning';
+  return 'normal';
+}
+
+// ===================== Excel 生成 =====================
+
+async function generateExcel(customers, rules, today) {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('客户看板');
+
+  const headers = [
+    '优先级', '梯队', '客户名', '国家', '阶段', '距今天数',
+    '消息总数', '客户消息', '我方消息', '客户占比',
+    'PI', '地址', '下单信号', '报价', '样品', '运费',
+    '最近我方消息', '最近客户消息', '分类理由', '行动建议', '沉默风险'
+  ];
+
+  const headerRow = ws.addRow(headers);
+  headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2F5496' } };
+  headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  // 颜色定义
+  const tierColors = {
+    p0: { argb: 'FFFFC7CE' }, // 红色
+    p1: { argb: 'FFFFEB9C' }, // 黄色
+    p2: { argb: 'FFC6EFCE' }, // 绿色
+    p3: { argb: 'FFBDD7EE' }, // 蓝色
+    p4: { argb: 'FFD9D9D9' }  // 灰色
+  };
+  const silenceColors = {
+    danger: { argb: 'FFFF4444' },
+    warning: { argb: 'FFFFAA00' }
+  };
+
+  for (const c of customers) {
+    const stage = determineStage(c);
+    const silence = checkSilence(c, rules);
+
+    const row = ws.addRow([
+      c.score.toFixed(0),
+      `${c.tier.toUpperCase()} - ${c.tierLabel}`,
+      c.name || '(未知)',
+      c.country || '',
+      stage.label,
+      c.daysAgo ?? '',
+      c.msgCount ?? '',
+      c.customerMsgs ?? '',
+      c.ourMsgs ?? '',
+      c.cRatio != null ? `${c.cRatio}%` : '',
+      c.hasPI ? '✓' : '',
+      c.hasAddress ? '✓' : '',
+      c.hasOrderSignal ? '✓' : '',
+      c.hasPrice ? '✓' : '',
+      c.hasSample ? '✓' : '',
+      c.hasFreight ? '✓' : '',
+      (c.latestOurMsg || '').substring(0, 60),
+      (c.latestCustMsg || '').substring(0, 60),
+      c.tierReason || '',
+      stage.action,
+      silence === 'danger' ? '严重' : silence === 'warning' ? '注意' : ''
+    ]);
+
+    // 行着色
+    const bg = tierColors[c.tier] || tierColors.p4;
+    row.eachCell((cell, colNum) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: bg };
+      cell.alignment = { vertical: 'middle', wrapText: true };
+    });
+
+    // 沉默风险着色
+    if (silence === 'danger' || silence === 'warning') {
+      const silenceCell = row.getCell(21);
+      silenceCell.font = { bold: true, color: { argb: silence === 'danger' ? 'FFFF0000' : 'FFFF8800' } };
+    }
+  }
+
+  // 列宽
+  ws.columns = headers.map((h, i) => {
+    const widths = [7, 16, 20, 7, 16, 8, 7, 7, 7, 8, 5, 5, 7, 5, 5, 5, 40, 40, 28, 44, 7];
+    return { width: widths[i] || 12 };
+  });
+
+  // 冻结首行
+  ws.views = [{ state: 'frozen', ySplit: 1 }];
+
+  // 自动筛选
+  ws.autoFilter = { from: 'A1', to: `U${customers.length + 1}` };
+
+  const outPath = path.join(OUTPUT_DIR, `daily_${today}.xlsx`);
+  await wb.xlsx.writeFile(outPath);
+  console.log(`[DONE] Excel 看板 → ${outPath}`);
+  return outPath;
+}
+
+// ===================== 行动清单生成 =====================
+
+function generateActionList(customers, rules, scoring, today) {
+  const tiers = { p0: [], p1: [], p2: [], p3: [], p4: [] };
+  for (const c of customers) {
+    if (tiers[c.tier]) tiers[c.tier].push(c);
+  }
+
+  let md = `# OKKI 每日行动清单 — ${today}\n\n`;
+  md += `> 自动生成于 ${new Date().toLocaleString('zh-CN')}\n`;
+  md += `> 客户总数：${customers.length} | `;
+  md += `P0: ${tiers.p0.length} | P1: ${tiers.p1.length} | P2: ${tiers.p2.length} | P3: ${tiers.p3.length} | P4: ${tiers.p4.length}\n\n`;
+
+  md += `---\n\n## 统计概览\n\n`;
+  md += `| 梯队 | 人数 | 说明 |\n`;
+  md += `|------|------|------|\n`;
+  md += `| P0 | ${tiers.p0.length} | ${rules.p0.description} |\n`;
+  md += `| P1 | ${tiers.p1.length} | ${rules.p1.description} |\n`;
+  md += `| P2 | ${tiers.p2.length} | ${rules.p2.description} |\n`;
+  md += `| P3 | ${tiers.p3.length} | ${rules.p3.description} |\n`;
+  md += `| P4 | ${tiers.p4.length} | ${rules.p4.description} |\n`;
+
+  // 沉默风险汇总
+  const dangerList = customers.filter(c => checkSilence(c, rules) === 'danger');
+  const warnList = customers.filter(c => checkSilence(c, rules) === 'warning');
+  if (dangerList.length > 0 || warnList.length > 0) {
+    md += `\n## 沉默风险预警\n\n`;
+    if (dangerList.length > 0) {
+      md += `**严重 (${dangerList.length}人):**\n`;
+      for (const c of dangerList) md += `- ${c.name} (${c.country}) — ${c.lastCustomerMsgDays}天未回复\n`;
+    }
+    if (warnList.length > 0) {
+      md += `\n**注意 (${warnList.length}人):**\n`;
+      for (const c of warnList) md += `- ${c.name} (${c.country}) — ${c.lastCustomerMsgDays}天未回复\n`;
+    }
+  }
+
+  // P0 详情
+  if (tiers.p0.length > 0) {
+    md += `\n---\n\n## P0 · 立即行动 (${tiers.p0.length}人)\n\n`;
+    md += `| # | 客户 | 国家 | 距今天 | 阶段 | 分类理由 | 最近客户消息 | 行动 |\n`;
+    md += `|---|------|------|--------|------|----------|-------------|------|\n`;
+    tiers.p0.forEach((c, i) => {
+      const stage = determineStage(c);
+      md += `| ${i + 1} | ${c.name} | ${c.country} | ${c.daysAgo}d | ${stage.label} | ${c.tierReason} | ${(c.latestCustMsg || '').substring(0, 50)} | ${stage.action} |\n`;
+    });
+  }
+
+  // P1 摘要
+  if (tiers.p1.length > 0) {
+    md += `\n---\n\n## P1 · 本周跟进 (${tiers.p1.length}人)\n\n`;
+    md += `| # | 客户 | 国家 | 距今天 | 阶段 | 分类理由 |\n`;
+    md += `|---|------|------|--------|------|----------|\n`;
+    tiers.p1.slice(0, 20).forEach((c, i) => {
+      const stage = determineStage(c);
+      md += `| ${i + 1} | ${c.name} | ${c.country} | ${c.daysAgo}d | ${stage.label} | ${c.tierReason} |\n`;
+    });
+    if (tiers.p1.length > 20) {
+      md += `\n> ... 还有 ${tiers.p1.length - 20} 人，详见 Excel 看板\n`;
+    }
+  }
+
+  // P2 摘要
+  if (tiers.p2.length > 0) {
+    md += `\n---\n\n## P2 · 观察中 (${tiers.p2.length}人)\n\n`;
+    md += `| # | 客户 | 国家 | 距今天 | 分类理由 |\n`;
+    md += `|---|------|------|--------|----------|\n`;
+    tiers.p2.slice(0, 10).forEach((c, i) => {
+      md += `| ${i + 1} | ${c.name} | ${c.country} | ${c.daysAgo}d | ${c.tierReason} |\n`;
+    });
+    if (tiers.p2.length > 10) {
+      md += `\n> ... 还有 ${tiers.p2.length - 10} 人，详见 Excel 看板\n`;
+    }
+  }
+
+  md += `\n---\n\n## 下一步\n\n`;
+  md += `1. 打开 \`output/daily_${today}.xlsx\` 看板，按优先级处理\n`;
+  md += `2. 从 P0 开始逐个联系客户\n`;
+  md += `3. 联系后更新 OKKI CRM 中的跟进记录\n`;
+  md += `4. 下次运行 \`node scripts/daily_pipeline.js\` 获取更新后的分析\n`;
+
+  const outPath = path.join(OUTPUT_DIR, `actions_${today}.md`);
+  fs.writeFileSync(outPath, md, 'utf-8');
+  console.log(`[DONE] 行动清单 → ${outPath}`);
+  return outPath;
+}
+
+// ===================== 统计输出 =====================
+
+function printStats(customers, rules) {
+  const tiers = { p0: [], p1: [], p2: [], p3: [], p4: [] };
+  const countries = {};
+  for (const c of customers) {
+    if (tiers[c.tier]) tiers[c.tier].push(c);
+    if (c.country) countries[c.country] = (countries[c.country] || 0) + 1;
+  }
+
+  const dangerCount = customers.filter(c => checkSilence(c, rules) === 'danger').length;
+
+  console.log('\n========================================');
+  console.log('  OKKI 每日分析结果');
+  console.log('========================================');
+  console.log(`  客户总数: ${customers.length}`);
+  console.log(`  P0 (立即行动): ${tiers.p0.length}人`);
+  console.log(`  P1 (本周跟进): ${tiers.p1.length}人`);
+  console.log(`  P2 (观察中):   ${tiers.p2.length}人`);
+  console.log(`  P3 (低优先级): ${tiers.p3.length}人`);
+  console.log(`  P4 (沉默):     ${tiers.p4.length}人`);
+  console.log(`  沉默预警:     ${dangerCount}人`);
+  console.log('========================================\n');
+
+  if (tiers.p0.length > 0) {
+    console.log('--- P0 客户 ---');
+    tiers.p0.forEach((c, i) => {
+      const stage = determineStage(c);
+      console.log(`  ${i + 1}. ${c.name} (${c.country}) — ${stage.label} — ${c.tierReason}`);
+    });
+    console.log('');
+  }
+}
+
+/**
+ * 诊断：显示增强特征客户在规则分类下的分布。
+ * 帮助用户发现规则gap——哪些活跃客户掉到了P4。
+ */
+function printEnhancedGap(customers) {
+  const enhanced = customers.filter(c => c._source === 'enhanced');
+  const byTier = {};
+  for (const c of enhanced) {
+    if (!byTier[c.tier]) byTier[c.tier] = [];
+    byTier[c.tier].push(c);
+  }
+
+  console.log('--- 增强特征客户分布 ---');
+  for (const tier of ['p0', 'p1', 'p2', 'p3', 'p4']) {
+    const list = byTier[tier] || [];
+    console.log(`  ${tier.toUpperCase()}: ${list.length}人`);
+  }
+
+  // 如果增强客户掉到了 P4，列出来供用户审核
+  const fellThrough = byTier.p4 || [];
+  if (fellThrough.length > 0) {
+    console.log(`\n  [注意] ${fellThrough.length} 个增强特征客户掉到 P4（规则未覆盖）：`);
+    for (const c of fellThrough) {
+      console.log(`    - ${c.name} (${c.country}) | daysAgo=${c.daysAgo} | msgs=${c.realMsgs} | cRatio=${c.cRatio}% | PI=${c.hasPI} Addr=${c.hasAddress} Price=${c.hasPrice} Sample=${c.hasSample}`);
+    }
+    console.log('  [建议] 如果以上客户应该升级，请调整 config/tier_rules.json 补充规则\n');
+  }
+}
+
+// ===================== 主流程 =====================
+
+async function main() {
+  const args = process.argv.slice(2);
+  const skipAI = args.includes('--no-ai');
+  const p0Only = args.includes('--p0-only');
+
+  console.log('[START] OKKI 每日分析流水线');
+  console.log(`[INFO] 时间: ${new Date().toLocaleString('zh-CN')}`);
+
+  // 1. 加载并合并数据
+  let customers = loadAndMergeCustomers();
+
+  // 2. 加载规则
+  const tierRules = loadJSON(path.join(CONFIG_DIR, 'tier_rules.json'));
+  const scoring = loadJSON(path.join(CONFIG_DIR, 'scoring.json'));
+  if (!tierRules || !scoring) {
+    console.error('[ERROR] 配置文件加载失败');
+    process.exit(1);
+  }
+  console.log('[CONFIG] 规则和评分配置已加载');
+
+  // 3. 分类
+  console.log('[CLASSIFY] 开始分类...');
+  customers = customers.map(c => classifyCustomer(c, tierRules));
+
+  // 如果是 p0-only，只保留 P0
+  if (p0Only) {
+    customers = customers.filter(c => c.tier === 'p0');
+    console.log(`[FILTER] 仅保留 P0 客户: ${customers.length}人`);
+  }
+
+  // 4. 评分排序
+  console.log('[SCORE] 开始评分排序...');
+  customers = customers.map(c => scoreCustomer(c, scoring, tierRules));
+  customers.sort((a, b) => b.score - a.score);
+
+  // 5. 生成产出
+  const today = todayStr();
+  console.log(`[GENERATE] 生成报告 (${today})...`);
+
+  // 确保 output 目录存在
+  if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  }
+
+  await generateExcel(customers, tierRules, today);
+  generateActionList(customers, tierRules, scoring, today);
+
+  // 6. 统计
+  printStats(customers, tierRules);
+  printEnhancedGap(customers);
+
+  console.log('[DONE] 流水线完成！');
+  if (!skipAI) {
+    console.log('[TODO] AI话术草稿功能尚未接入（Phase 2）');
+  }
+}
+
+main().catch(err => {
+  console.error('[FATAL]', err);
+  process.exit(1);
+});

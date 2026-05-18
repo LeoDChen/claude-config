@@ -1,0 +1,129 @@
+<div style="max-width:900px;margin:0 auto;">
+
+<h2 style="font-size:28px;margin-bottom:8px;">10 种边缘情况 — 处理策略</h2>
+<p class="subtitle">这些场景下标准判定会失效，必须启用人工判断</p>
+
+<div class="section">
+  <h3>核心原则</h3>
+  <p>边缘情况<strong>不能写成自动化规则</strong>。它们是信号——当这些模式出现时，我应该标记出来让你判断，而不是直接应用标准分级。</p>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;">
+
+  <!-- Case 1 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #dc2626;">
+    <div style="font-size:13px;color:#f87171;margin-bottom:6px;">#1 大客户试水</div>
+    <h4 style="margin:0 0 8px;">首单量小，背景大</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">连锁店/大品牌只下50件测试。按"当前订单量"会被判 B/C，但真实价值是 S。</p>
+    <div style="background:rgba(220,38,38,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#f87171;">信号：</strong>客户透露出品牌/连锁/渠道身份，但首批数量很小<br>
+      <strong style="color:#f87171;">处理：</strong>按身份定级，不按当前订单量。标记"试水型"
+    </div>
+  </div>
+
+  <!-- Case 2 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #f97316;">
+    <div style="font-size:13px;color:#fb923c;margin-bottom:6px;">#2 季节性大客户</div>
+    <h4 style="margin:0 0 8px;">一年一次，一次大单</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">只在他采购季出现，平时看起来像"沉默流失"。按时间阈值会误判流失。</p>
+    <div style="background:rgba(249,115,22,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#fb923c;">信号：</strong>历史有大单 + 每年固定时间联系 + 每次联系即下单<br>
+      <strong style="color:#fb923c;">处理：</strong>标记"季节性"，不按常规沉默规则。采购季前1月预热
+    </div>
+  </div>
+
+  <!-- Case 3 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #f59e0b;">
+    <div style="font-size:13px;color:#fbbf24;margin-bottom:6px;">#3 中间人/采购代理</div>
+    <h4 style="margin:0 0 8px;">他不显山露水，但背后是大客户</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">说话不专业、不暴露背后客户、只关心执行细节。表面像 C 级。</p>
+    <div style="background:rgba(245,158,11,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#fbbf24;">信号：</strong>"for client" / 要第三方验货 / 只关心物流/文件细节不关心价格<br>
+      <strong style="color:#fbbf24;">处理：</strong>主动问"这是给您自己的店还是给客户采购"来确认身份
+    </div>
+  </div>
+
+  <!-- Case 4 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #22c55e;">
+    <div style="font-size:13px;color:#4ade80;margin-bottom:6px;">#4 新兴市场大客户</div>
+    <h4 style="margin:0 0 8px;">没LinkedIn / 没官网，但当地市场份额大</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">非洲/中东大客户常没线上痕迹。背调查不到就判低价值 = 错误。</p>
+    <div style="background:rgba(34,197,94,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#4ade80;">信号：</strong>来自核心市场 + 订单量不小 + 线下沟通流畅 + 但网上查不到<br>
+      <strong style="color:#4ade80;">处理：</strong>不因"查不到"降级。以对话内容和订单量为准
+    </div>
+  </div>
+
+  <!-- Case 5 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #6366f1;">
+    <div style="font-size:13px;color:#a5b4fc;margin-bottom:6px;">#5 关系型慢转化</div>
+    <h4 style="margin:0 0 8px;">聊天几百条，从未下单</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">Mona型——信任度极高、聊天量巨大、就是不转化。任何算法都判低价值。</p>
+    <div style="background:rgba(99,102,241,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#a5b4fc;">信号：</strong>消息量巨大 + 客户主动聊天 + 信任度高 + 但转化时间长<br>
+      <strong style="color:#a5b4fc;">处理：</strong>不逼单、不降级。保持聊天维护 + 新品同步，等触发事件
+    </div>
+  </div>
+
+  <!-- Case 6 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #8b5cf6;">
+    <div style="font-size:13px;color:#a78bfa;margin-bottom:6px;">#6 语言障碍假象</div>
+    <h4 style="margin:0 0 8px;">英语差 ≠ 不专业</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">法语/阿拉伯语区的大批发商英语简短破碎，看起来像小客户。</p>
+    <div style="background:rgba(139,92,246,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#a78bfa;">信号：</strong>语法错误但订单量/需求明确 + 法语/阿语区客户<br>
+      <strong style="color:#a78bfa;">处理：</strong>用客户母语问关键信息。不因语言降级
+    </div>
+  </div>
+
+  <!-- Case 7 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #ec4899;">
+    <div style="font-size:13px;color:#f472b6;margin-bottom:6px;">#7 被前任供应商坑过</div>
+    <h4 style="margin:0 0 8px;">极其警惕 ≠ 难搞的小客户</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">反复要认证、验厂、确认细节——恰恰是大客户吃过亏后的正常反应。</p>
+    <div style="background:rgba(236,72,153,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#f472b6;">信号：</strong>反复确认认证/质量/工厂真实性 + 警惕但需求量不小<br>
+      <strong style="color:#f472b6;">处理：</strong>主动发认证文件 + 工厂实拍。耐心回应每次确认需求
+    </div>
+  </div>
+
+  <!-- Case 8 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #14b8a6;">
+    <div style="font-size:13px;color:#2dd4bf;margin-bottom:6px;">#8 离岸注册</div>
+    <h4 style="margin:0 0 8px;">国家标签误导</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">OKKI显示开曼/BVI，实际业务在非洲。国家标签误导市场判断。</p>
+    <div style="background:rgba(20,184,166,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#2dd4bf;">信号：</strong>国家是避税地 + 但对话/收货地址暴露真实市场<br>
+      <strong style="color:#2dd4bf;">处理：</strong>以收货地址/对话内容判断真实市场，不以注册国判断
+    </div>
+  </div>
+
+  <!-- Case 9 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #eab308;">
+    <div style="font-size:13px;color:#facc15;margin-bottom:6px;">#9 拼单采购</div>
+    <h4 style="margin:0 0 8px;">单人量小，背后联盟量大</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">代表几个店主凑单。一个人身上看不到真实总需求。</p>
+    <div style="background:rgba(234,179,8,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#facc15;">信号：</strong>"my friends also want" / 多次选款但每次量小 / 问混款折扣<br>
+      <strong style="color:#facc15;">处理：</strong>主动问"你是一起发还是分开发"来判断真实总量
+    </div>
+  </div>
+
+  <!-- Case 10 -->
+  <div style="background:#1e293b;border-radius:10px;padding:20px;border-left:4px solid #ef4444;">
+    <div style="font-size:13px;color:#fca5a5;margin-bottom:6px;">#10 传统老派商人</div>
+    <h4 style="margin:0 0 8px;">没有数字足迹，但有实体帝国</h4>
+    <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">没网站没LinkedIn、老式邮件沟通。但有仓库和分销网络的隐形大户。</p>
+    <div style="background:rgba(239,68,68,0.1);padding:10px 12px;border-radius:6px;font-size:13px;">
+      <strong style="color:#fca5a5;">信号：</strong>提到仓库/店铺/分销 + 订单量高 + 但网上完全查不到<br>
+      <strong style="color:#fca5a5;">处理：</strong>以订单量和对话内容为准。不因"查不到"降级
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:28px;padding:20px;background:linear-gradient(135deg, #1e293b 0%, #2d1e3b 100%);border-radius:10px;text-align:center;">
+  <p style="margin:0;font-size:15px;"><strong>执行方式：</strong>每次分析客户时，如果命中以上任一模式 → <span style="color:#f59e0b;">输出中标注"边缘情况 #N"</span> → 附带建议但不强制定级 → 等你确认</p>
+</div>
+
+</div>

@@ -1,0 +1,39 @@
+# OKKI 客户分析 — 启动指令
+
+## 对话一：同步数据（本项目对话）
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js
+```
+
+脚本自动启动 Chrome → 检测登录 → 导航 TM → 增量拉取新消息。跑完即完成。
+
+## 对话二：分析（新对话，粘贴以下内容）
+
+```
+继续 OKKI CRM。读 STATE.md 和 knowledge/ 全部文件。
+
+读 data/tm_conversations_latest.json 和 data/chat_history/。
+消息在 message.content.text.content，发送者在 message.sender.uid，我方=2500000853693@icbu。
+过滤 systemMessage/autoReply。
+
+两遍法分类。P0/P1 深度+话术，P2-P4 统计。消息≥10条逐条读。
+输出 reports/客户五梯队分析_YYYY-MM-DD.docx + 摘要。
+```
+
+## 数据文件速查
+
+| 文件 | 内容 |
+|------|------|
+| `data/tm_conversations_latest.json` | 最新全量会话元数据 |
+| `data/chat_history/{cid}.json` | 每个会话的完整聊天历史 |
+| `data/customers/*.json` | 346 客户邮件+详情 |
+
+## 消息结构
+
+```
+message.content.text.content  → 消息内容（明文）
+message.sender.uid            → 发送者（我方=2500000853693@icbu）
+message.createAt              → 时间戳（ms）
+message.extension.basicMessageInfo → JSON字符串，systemMessage/autoReply 为 true 则跳过
+```

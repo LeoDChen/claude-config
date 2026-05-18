@@ -1,0 +1,90 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = {};
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val !== null && val !== undefined) {
+          results[response.id] = JSON.parse(val);
+        } else {
+          results[response.id] = response.result;
+        }
+      }
+    } catch (e) {
+      // ignore parse errors for non-JSON results
+    }
+  });
+
+  // Check state
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: {
+      expression: `(function() { var a=window._imBaaSSDK.getAuthService(); return JSON.stringify({isLogin:a.isLogin(),status:a.connectionStatus,convs:window.__conversationListFullData__.length}); })()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  console.log('SDK:', JSON.stringify(results[1]));
+
+  // Get 3 test CIDs
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: {
+      expression: `(function(){var c=window.__conversationListFullData__;var r=[];for(var i=0;i<c.length&&r.length<3;i++){if(c[i].latestMessage&&c[i].latestMessage.content)r.push({cid:c[i].cid,name:c[i].name})}return JSON.stringify(r);})()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  const testCids = results[2];
+  console.log('Test CIDs:', JSON.stringify(testCids));
+
+  if (!testCids || testCids.length === 0) { console.log('No conversations with messages'); process.exit(1); }
+  const cid = testCids[0].cid;
+  console.log('\nTesting with CID:', cid);
+
+  // Test 1: listMessageWithConversationCodeForHistory
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 3, method: 'Runtime.evaluate', params: {
+      expression: `(async function(){var m=window._imsdk.getMessageService();try{var r=await m.listMessageWithConversationCodeForHistory("${cid}",20,9007199254740991);return JSON.stringify({ok:true,cnt:r?r.length:0,isArr:Array.isArray(r),sample:r&&r.length>0?JSON.stringify(r[0]).substring(0,200):'[]'})}catch(e){return JSON.stringify({ok:false,err:e.message})}})()`,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 10000));
+  console.log('Test1 (listMsgForHistory):', JSON.stringify(results[3]));
+
+  // Test 2: listMessageWithConversationCode (non-history)
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 4, method: 'Runtime.evaluate', params: {
+      expression: `(async function(){var m=window._imsdk.getMessageService();try{var r=await m.listMessageWithConversationCode("${cid}",20,9007199254740991);return JSON.stringify({ok:true,cnt:r?r.length:0,isArr:Array.isArray(r),sample:r&&r.length>0?JSON.stringify(r[0]).substring(0,200):'[]'})}catch(e){return JSON.stringify({ok:false,err:e.message})}})()`,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 10000));
+  console.log('Test2 (listMsgWithConvCode):', JSON.stringify(results[4]));
+
+  // Test 3: Try to find and use the raw LWP send function
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 5, method: 'Runtime.evaluate', params: {
+      expression: `(function(){var r={};var imsdk=window._imsdk;var originSdk=imsdk.getOriginSdk();var allKeys=[];for(var k in originSdk){allKeys.push(k)}r.originSdkAllKeys=allKeys.slice(0,40);var ownKeys=Object.getOwnPropertyNames(originSdk);r.originSdkOwnKeys=ownKeys.slice(0,40);var proto=Object.getPrototypeOf(originSdk);var protoKeys=[];for(var k in proto)protoKeys.push(k);r.originSdkProtoKeys=protoKeys.slice(0,40);return JSON.stringify(r)})()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 3000));
+  console.log('Test3 (originSdk):', JSON.stringify(results[5]));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

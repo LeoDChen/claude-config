@@ -1,0 +1,60 @@
+# OKKI CRM 客户分析项目
+
+## 背景
+
+小星星服饰工厂（母婴纺织品 B2B OEM/ODM）的 OKKI CRM 客户分析。
+用户是 OKKI **子账号**，同事是阿里国际站**主账号**（登录阿里卖家）。
+数据抓取必须确保不影响同事账号。
+
+## 账号安全（必读）
+
+```
+同一个国际站店铺
+├── 主账号（同事）── 阿里卖家
+└── 子账号（用户）── OKKI小满
+```
+
+**被挤原理**：阿里SSO在企业维度刷新token → 多次新建浏览器登录触发风控 → 主账号token被清。
+**安全方案**：CDP连接用户已有Chrome → 纯本地读数据 → 不触发新登录 → 零风险。
+
+详见 `knowledge/security.md`
+
+## 数据抓取流程
+
+### 1. 用户启动Chrome CDP
+
+```
+完全关闭Chrome → Win+R → chrome.exe --remote-debugging-port=9222
+打开 crm.xiaoman.cn 确认已登录
+```
+
+### 2. 运行CDP抓取脚本
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/extract_cdp.js
+```
+
+脚本连接用户Chrome（`127.0.0.1:9222`），纯本地读取DOM+拦截API响应，不发起任何认证请求。数据保存到 `data/extracted_*.json`
+
+### 3. 分析数据
+
+按 analysis framework 输出待处理事项。
+
+## 数据文件
+
+- `data/` — 取最新时间戳
+  - `extracted_*.json` — CDP抓取的客户数据
+  - `*_全量客户分类.json` — 全量432人分类
+  - `deep_scrape_v7_*.json` — 完整对话
+- `knowledge/factory.md` — 工厂信息
+- `knowledge/business-rules.md` — 判断规则
+- `knowledge/system-prompt.md` — 分析框架（必须先读）
+- `knowledge/security.md` — 账号安全原理
+
+## 分析执行规则
+
+1. 先读 `knowledge/` 下四个文件
+2. 如果 data/ 无今天数据 → 提示用户按上述流程抓取
+3. 读最新数据文件，消息≥10条必须逐条读
+4. 基于对话+工厂背景判断阶段/卡点/下一步
+5. 输出中文，话术按客户语言。按四梯队排列（今天/48h/本周/按需）

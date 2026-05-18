@@ -1,0 +1,308 @@
+// 诊断 fetchMessages 错误
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 检查 fetchMessages 是否存在 ===
+    console.log('=== fetchMessages 存在性 ===\n');
+
+    const checkFetch = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var baas = window._imBaaSSDK;
+                if (!baas) return { error: 'no baas' };
+
+                var httpMsg = baas.getMessageServiceHttp();
+                var wsMsg = baas.getMessageService();
+                var v2Msg = baas.getMessageServiceV2();
+
+                return {
+                    httpMsg_exists: !!httpMsg,
+                    httpMsg_type: typeof httpMsg,
+                    httpMsg_fetchMessages: typeof (httpMsg && httpMsg.fetchMessages),
+                    httpMsg_methods: httpMsg ? Object.keys(httpMsg).filter(function(k) { return typeof httpMsg[k] === 'function'; }) : [],
+                    wsMsg_exists: !!wsMsg,
+                    wsMsg_type: typeof wsMsg,
+                    v2Msg_exists: !!v2Msg
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(checkFetch.result?.value || '(无)');
+
+    // === 2. 尝试手动调用 fetchMessages ===
+    console.log('\n=== 手动调用 fetchMessages ===\n');
+
+    const manualCall = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var baas = window._imBaaSSDK;
+                    var httpMsg = baas.getMessageServiceHttp();
+
+                    // 看 fetchMessages 源码
+                    var src = httpMsg.fetchMessages ? httpMsg.fetchMessages.toString() : 'NOT A FUNCTION';
+
+                    // 尝试调用
+                    try {
+                        var result = httpMsg.fetchMessages({});
+                        resolve(JSON.stringify({
+                            source: src.substring(0, 300),
+                            callResult: typeof result,
+                            isPromise: result && typeof result.then === 'function'
+                        }));
+                    } catch(e) {
+                        resolve(JSON.stringify({
+                            source: src.substring(0, 300),
+                            error: e.message || String(e)
+                        }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(manualCall.result?.value || '(无)');
+
+    // === 3. 查找导致错误的 v(...) 函数 ===
+    console.log('\n=== 搜索 webpack 中的 fetchMessages ===\n');
+
+    const searchWebpack = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // webpackJsonp 可能包含模块定义
+                var wpPush = window.webpackJsonp && window.webpackJsonp.push;
+                var result = {};
+
+                // 搜索全局变量名
+                var keys = Object.keys(window);
+                var fetchKeys = keys.filter(function(k) {
+                    return k.toLowerCase().includes('fetch') || k.toLowerCase().includes('message');
+                });
+                result.fetchKeys = fetchKeys;
+
+                // 检查 imsdk 原型链上的 fetchMessages
+                var msgSvcHttp = window._imBaaSSDK.getMessageServiceHttp();
+                var protoChain = [];
+                var proto = Object.getPrototypeOf(msgSvcHttp);
+                var depth = 0;
+                while (proto && depth < 5) {
+                    var methods = Object.getOwnPropertyNames(proto).filter(function(n) {
+                        return n.includes('fetch') || n.includes('Fetch') || n.includes('message');
+                    });
+                    protoChain.push({
+                        constructor: proto.constructor ? proto.constructor.name : 'unknown',
+                        fetchMethods: methods
+                    });
+                    proto = Object.getPrototypeOf(proto);
+                    depth++;
+                }
+                result.protoChain = protoChain;
+
+                return JSON.stringify(result);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(searchWebpack.result?.value || '(无)');
+
+    // === 4. 尝试修复：用 _imsdk.getMessageService() 替代 ===
+    console.log('\n=== 用 WS 版 MessageService 直接调 ===\n');
+
+    const wsMsgCall = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var fullData = window.__conversationListFullData__;
+                    if (!fullData || !fullData[0]) { resolve('no data'); return; }
+
+                    // 直接用 WS MessageService（listMessageWithConversationCodeForHistory）
+                    var msgSvc = window._imsdk.getMessageService();
+
+                    msgSvc.listMessageWithConversationCodeForHistory({
+                        conversationCode: fullData[0].cid,
+                        count: 10,
+                        dataCallback: function(result) {
+                            resolve(JSON.stringify({
+                                success: true,
+                                count: (result.data || []).length,
+                                hasMore: result.hasMore,
+                                first: result.data && result.data[0] ? {
+                                    content: (result.data[0].content||'').substring(0, 200),
+                                    time: result.data[0].sendTime,
+                                    keys: Object.keys(result.data[0]).slice(0, 20)
+                                } : null
+                            }));
+                        },
+                        errorCallBack: function(err) {
+                            resolve(JSON.stringify({ error: 'WS API error: ' + JSON.stringify(err).substring(0, 200) }));
+                        }
+                    });
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(wsMsgCall.result?.value || '(无)');
+
+    // === 5. 看页面控制台错误 ===
+    console.log('\n=== 检查 window 错误 ===\n');
+
+    const errors = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                // 检查页面控制台中可能有的错误信息
+                var result = {};
+
+                // 看连接状态 UI
+                var connStatus = document.querySelector('.connection-status-container');
+                result.connStatusText = connStatus ? connStatus.textContent.trim() : 'not found';
+
+                // 看是否有错误弹窗
+                var dialogs = document.querySelectorAll('[class*="dialog"], [class*="toast"], [class*="error"], [class*="notice"]');
+                var dialogTexts = [];
+                for (var i = 0; i < Math.min(5, dialogs.length); i++) {
+                    var t = dialogs[i].textContent.trim();
+                    if (t.length > 5 && t.length < 200) dialogTexts.push(t);
+                }
+                result.dialogTexts = dialogTexts;
+
+                // 检查 auth 状态
+                var auth = window._imsdk.getAuthService();
+                result.auth = {
+                    isLogin: auth.isLogin(),
+                    nick: auth.getLoginNick(),
+                    uid: auth.getLoginUid()
+                };
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(errors.result?.value || '(无)');
+
+    // === 6. 尝试用 localStorage/sessionStorage 中的 token 调用 HTTP API ===
+    console.log('\n=== 查找可用 token ===\n');
+
+    const tokenHunt = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var tokens = {};
+
+                // localStorage
+                for (var i = 0; i < localStorage.length; i++) {
+                    var key = localStorage.key(i);
+                    if (key && (key.includes('token') || key.includes('Token') || key.includes('auth') || key.includes('Auth') || key.includes('session'))) {
+                        var val = localStorage.getItem(key);
+                        tokens['ls:' + key] = val ? val.substring(0, 100) : 'null';
+                    }
+                }
+
+                // sessionStorage
+                for (var j = 0; j < sessionStorage.length; j++) {
+                    var sk = sessionStorage.key(j);
+                    if (sk && (sk.includes('token') || sk.includes('Token') || sk.includes('auth') || sk.includes('session'))) {
+                        var sv = sessionStorage.getItem(sk);
+                        tokens['ss:' + sk] = sv ? sv.substring(0, 100) : 'null';
+                    }
+                }
+
+                // cookies
+                var cookies = document.cookie.split(';');
+                for (var k = 0; k < cookies.length; k++) {
+                    var c = cookies[k].trim();
+                    if (c.includes('token') || c.includes('auth') || c.includes('session') || c.includes('login')) {
+                        tokens['cookie:' + c.substring(0, 30)] = c.substring(0, 100);
+                    }
+                }
+
+                return tokens;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(tokenHunt.result?.value || '(无)');
+
+    // === 7. 检查 onetalk 页面接收的 postMessage ===
+    console.log('\n=== postMessage 监听 ===\n');
+
+    const postMsg = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 设置 postMessage 监听器（只能捕获之后的消息）
+                window.__postMessages = [];
+                window.addEventListener('message', function(e) {
+                    window.__postMessages.push({
+                        origin: e.origin,
+                        data: typeof e.data === 'string' ? e.data.substring(0, 200) : JSON.stringify(e.data).substring(0, 200)
+                    });
+                });
+
+                return 'listener set';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(postMsg.result?.value);
+
+    await new Promise(r => setTimeout(r, 3000));
+
+    const msgs = await cmd('Runtime.evaluate', {
+        expression: 'JSON.stringify(window.__postMessages || [])',
+        returnByValue: true
+    });
+    console.log('收到的 postMessage:', msgs.result?.value);
+
+    ws.close();
+    console.log('\n完成');
+})();

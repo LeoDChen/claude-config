@@ -1,0 +1,113 @@
+<div style="max-width:900px;margin:0 auto;">
+
+<div style="text-align:center;margin-bottom:40px;">
+  <h2 style="font-size:28px;margin-bottom:8px;">客户质量五级判定标准</h2>
+  <p style="color:#94a3b8;font-size:16px;">满足任意一条即可定级。信息不足默认降一级。</p>
+</div>
+
+<!-- S 级 -->
+<div style="background:linear-gradient(135deg, #1a0a0a 0%, #2d1010 100%);border:1px solid #dc2626;border-radius:12px;padding:28px;margin-bottom:20px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="background:#dc2626;width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;">S</div>
+    <div>
+      <h3 style="margin:0;font-size:20px;">战略客户</h3>
+      <p style="margin:4px 0 0;color:#f87171;font-size:13px;">最高投入 · 深度维护 · 订单执行期每天同步进度</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="background:rgba(220,38,38,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">品牌商 / ODM + 首单 ≥ 500 件 + 定制包装/吊牌/条形码</div>
+    <div style="background:rgba(220,38,38,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">有明确分销渠道 — Amazon、连锁零售、区域代理网络</div>
+    <div style="background:rgba(220,38,38,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">复购客户，累计 ≥ 1000 件 或 金额 ≥ $3000<br><span style="color:#f87171;font-size:12px;">（OKKI 订单数据优先，无数据则看对话确认）</span></div>
+    <div style="background:rgba(220,38,38,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">公司规模大 — 客户自述或背调确认，非推测<br><span style="color:#f87171;font-size:12px;">（加分项，不是硬线）</span></div>
+    <div style="background:rgba(220,38,38,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">客户主动提供官网/店铺链接/公司资料 — 正规经营信号</div>
+  </div>
+</div>
+
+<!-- A 级 -->
+<div style="background:linear-gradient(135deg, #1a1005 0%, #2d1d08 100%);border:1px solid #f97316;border-radius:12px;padding:28px;margin-bottom:20px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="background:#f97316;width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;">A</div>
+    <div>
+      <h3 style="margin:0;font-size:20px;">优质客户</h3>
+      <p style="margin:4px 0 0;color:#fb923c;font-size:13px;">积极跟进 · 定期回访 · 48h 响应</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="background:rgba(249,115,22,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">批发商/零售商 + 明确批量 ≥ 200 件 + 沟通专业</div>
+    <div style="background:rgba(249,115,22,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">现货大单 — 批发商身份 + 200-500 件以上</div>
+    <div style="background:rgba(249,115,22,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">定制/OEM 需求 + 态度认真 — 反复沟通细节</div>
+    <div style="background:rgba(249,115,22,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">已成交客户，首单 200-500 件</div>
+    <div style="background:rgba(249,115,22,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">样品已寄出、在等反馈 — 态度认真的信号</div>
+    <div style="background:rgba(249,115,22,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">已确认接受 MOQ 500、在谈价格 — 接近成交</div>
+  </div>
+</div>
+
+<!-- B 级 -->
+<div style="background:linear-gradient(135deg, #0f0f1a 0%, #1a1a2d 100%);border:1px solid #6366f1;border-radius:12px;padding:28px;margin-bottom:20px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="background:#6366f1;width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;">B</div>
+    <div>
+      <h3 style="margin:0;font-size:20px;">普通客户</h3>
+      <p style="margin:4px 0 0;color:#a5b4fc;font-size:13px;">正常推进 · 不拔高不放弃 · 72h 响应</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="background:rgba(99,102,241,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">小零售商 + 需求模糊 + 量未定</div>
+    <div style="background:rgba(99,102,241,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">有真实需求但量暂未确认的批发商</div>
+    <div style="background:rgba(99,102,241,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">需求明确但量小 — 50-200 件非定制</div>
+    <div style="background:rgba(99,102,241,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">信息不足但对话活跃 — 暂无法判断规模</div>
+  </div>
+</div>
+
+<!-- C 级 -->
+<div style="background:linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);border:1px solid #6b7280;border-radius:12px;padding:28px;margin-bottom:20px;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="background:#6b7280;width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;">C</div>
+    <div>
+      <h3 style="margin:0;font-size:20px;">低价值客户</h3>
+      <p style="margin:4px 0 0;color:#9ca3af;font-size:13px;">快速处理 · 被动响应 · 不主动投入</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="background:rgba(107,114,128,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">个人买家 / 自用 / 送礼 + ≤ 30 件</div>
+    <div style="background:rgba(107,114,128,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">一次性采购，无复购可能</div>
+    <div style="background:rgba(107,114,128,0.08);border-radius:6px;padding:12px 16px;font-size:14px;">行为散漫 — 问完消失、无决策权</div>
+  </div>
+</div>
+
+<!-- D 级 -->
+<div style="background:linear-gradient(135deg, #1a1a1a 0%, #222 100%);border:1px solid #4b5563;border-radius:12px;padding:28px;margin-bottom:20px;opacity:0.7;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div style="background:#4b5563;width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;">D</div>
+    <div>
+      <h3 style="margin:0;font-size:20px;">无关 / 废弃</h3>
+      <p style="margin:4px 0 0;color:#9ca3af;font-size:13px;">不投入 · 归档 · 不占精力</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div style="background:rgba(75,85,99,0.06);border-radius:6px;padding:12px 16px;font-size:14px;">品类完全不匹配 — 成人服装/我们不做</div>
+    <div style="background:rgba(75,85,99,0.06);border-radius:6px;padding:12px 16px;font-size:14px;">仅系统消息，无任何真实客户对话</div>
+    <div style="background:rgba(75,85,99,0.06);border-radius:6px;padding:12px 16px;font-size:14px;">非采购意图 — 问转让/加盟/找工作</div>
+    <div style="background:rgba(75,85,99,0.06);border-radius:6px;padding:12px 16px;font-size:14px;">误入 / 垃圾询盘</div>
+  </div>
+</div>
+
+<!-- 底部规则 -->
+<div style="display:flex;gap:16px;margin-top:28px;">
+  <div style="flex:1;background:#1e293b;border-radius:10px;padding:20px;text-align:center;">
+    <div style="font-size:28px;margin-bottom:8px;">⬇️</div>
+    <p style="margin:0;font-size:14px;"><strong>信息不足默认降级</strong></p>
+    <p style="margin:6px 0 0;color:#94a3b8;font-size:13px;">看不出规模的先放 B，不因"可能是大客户"拔高</p>
+  </div>
+  <div style="flex:1;background:#1e293b;border-radius:10px;padding:20px;text-align:center;">
+    <div style="font-size:28px;margin-bottom:8px;">⬆️</div>
+    <p style="margin:0;font-size:14px;"><strong>信号触发可升级</strong></p>
+    <p style="margin:6px 0 0;color:#94a3b8;font-size:13px;">B 级展现品牌/渠道/批量信号后 → 升级 A 或 S</p>
+  </div>
+</div>
+
+<div style="margin-top:20px;padding:16px;background:#1e293b;border-radius:8px;text-align:center;font-size:13px;color:#94a3b8;">
+  修改记录：删掉"核心市场"条件 · 公司规模改为加分项 · 复购数据用 OKKI 订单字段 · 新增客户主动提供资料/样品寄出/MOQ确认信号
+</div>
+
+</div>

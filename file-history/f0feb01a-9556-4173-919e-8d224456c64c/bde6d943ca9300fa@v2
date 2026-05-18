@@ -1,0 +1,7 @@
+// Stop: Ensure archive directory exists for today
+const fs = require('fs');
+const dt = new Date().toISOString().slice(0, 10);
+const dir = 'd:/ClaudeWorkspace/07_归档/' + dt;
+try {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+} catch (e) { /* ignore */ }

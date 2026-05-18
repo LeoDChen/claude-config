@@ -1,0 +1,232 @@
+// Phase 1: 使用 HTTP 版 SDK API + 重新认证
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 探索 getMessageServiceHttp ===
+    console.log('=== getMessageServiceHttp 方法 ===\n');
+
+    const httpMsgSvc = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var baas = window._imBaaSSDK;
+                if (!baas) return { error: 'no baas' };
+
+                var httpSvc = baas.getMessageServiceHttp();
+                if (!httpSvc) return { error: 'no http svc' };
+
+                var methods = [];
+                var proto = Object.getPrototypeOf(httpSvc);
+                while (proto) {
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        if (typeof proto[names[i]] === 'function') {
+                            methods.push(names[i] + '(' + proto[names[i]].length + ')');
+                        }
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return { methods: methods };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(httpMsgSvc.result?.value || '(无)');
+
+    // === 2. 探索 getConversationServiceHttp ===
+    console.log('\n=== getConversationServiceHttp 方法 ===\n');
+
+    const httpConvSvc = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var baas = window._imBaaSSDK;
+                var httpSvc = baas.getConversationServiceHttp();
+                if (!httpSvc) return { error: 'no http svc' };
+
+                var methods = [];
+                var proto = Object.getPrototypeOf(httpSvc);
+                while (proto) {
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        if (typeof proto[names[i]] === 'function') {
+                            methods.push(names[i] + '(' + proto[names[i]].length + ')');
+                        }
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return { methods: methods };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(httpConvSvc.result?.value || '(无)');
+
+    // === 3. 看 getMessageServiceV2 ===
+    console.log('\n=== getMessageServiceV2 方法 ===\n');
+
+    const msgV2 = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var baas = window._imBaaSSDK;
+                var v2 = baas.getMessageServiceV2();
+                if (!v2) return { error: 'no v2' };
+
+                var methods = [];
+                var proto = Object.getPrototypeOf(v2);
+                while (proto) {
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        if (typeof proto[names[i]] === 'function') {
+                            methods.push(names[i] + '(' + proto[names[i]].length + ')');
+                        }
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return { methods: methods };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(msgV2.result?.value || '(无)');
+
+    // === 4. 尝试重新认证 ===
+    console.log('\n=== 尝试认证 ===\n');
+
+    const auth = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var authSvc = window._imsdk.getAuthService();
+
+                    // 看有没有缓存的 token
+                    var token = localStorage.getItem('im_token') ||
+                                sessionStorage.getItem('im_token') ||
+                                '';
+
+                    // 尝试 initFromAccessToken
+                    try {
+                        // 先看 auth 当前状态
+                        var status = {
+                            isLogin: authSvc.isLogin(),
+                            nick: authSvc.getLoginNick(),
+                            uid: authSvc.getLoginUid(),
+                            localStorageKeys: Object.keys(localStorage).filter(function(k) {
+                                return k.toLowerCase().includes('token') || k.toLowerCase().includes('auth') || k.toLowerCase().includes('login');
+                            })
+                        };
+
+                        // 尝试获取 openId
+                        try {
+                            var openId = authSvc.getOpenId({});
+                            status.openIdResult = openId;
+                        } catch(e) {
+                            status.openIdError = e.message || String(e);
+                        }
+
+                        resolve(JSON.stringify(status));
+                    } catch(e) {
+                        resolve(JSON.stringify({ error: e.message || String(e) }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(auth.result?.value || '(无)');
+
+    // === 5. 用 HTTP API 直接调用 MTOP ===
+    console.log('\n=== 尝试 HTTP 直接调 MTOP 消息 API ===\n');
+
+    const mtoptest = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    // 从第一个会话获取 chatToken
+                    var conv = window.__conversationListFullData__[0];
+                    var chatToken = conv.chatToken;
+                    var cid = conv.cid;
+
+                    // 尝试用 MTOP HTTP API 获取消息
+                    var params = {
+                        conversationCode: cid,
+                        count: 5
+                    };
+
+                    // 直接用 XHR 调 MTOP
+                    var xhr = new XMLHttpRequest();
+                    var url = 'https://acs.h.alibaba.com/h5/mtop.alibaba.icbu.im.listprevmsgs/1.0/' +
+                              '?jsv=2.7.2&appKey=24889839&t=' + Date.now() +
+                              '&api=mtop.alibaba.icbu.im.listPrevMsgs&v=1.0&dataType=json&type=originaljson' +
+                              '&data=' + encodeURIComponent(JSON.stringify(params));
+
+                    xhr.open('GET', url, true);
+                    xhr.withCredentials = true;
+                    xhr.onload = function() {
+                        resolve(JSON.stringify({
+                            status: xhr.status,
+                            url: url.substring(0, 100),
+                            body: xhr.responseText.substring(0, 1000)
+                        }));
+                    };
+                    xhr.onerror = function() {
+                        resolve(JSON.stringify({ error: 'XHR failed', status: xhr.status }));
+                    };
+                    xhr.send();
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(mtoptest.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 两种交互模式对比</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Microsoft YaHei', sans-serif; background:#1a1a2e; color:#eee; display:flex; gap:20px; padding:20px; min-height:100vh; }
+.panel { flex:1; background:#16213e; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+.panel-header { padding:16px 20px; font-size:18px; font-weight:bold; text-align:center; }
+.mode-a .panel-header { background:#0f3460; }
+.mode-b .panel-header { background:#533483; }
+.panel-body { flex:1; padding:16px; overflow-y:auto; display:flex; flex-direction:column; gap:12px; }
+.badge { display:inline-block; padding:2px 10px; border-radius:10px; font-size:12px; font-weight:bold; }
+.badge-now { background:#e94560; color:#fff; }
+.badge-soon { background:#f5a623; color:#000; }
+.badge-idle { background:#555; color:#aaa; }
+.card { background:#1a1a3e; border:1px solid #2a2a5e; border-radius:8px; padding:14px; cursor:pointer; transition:all 0.2s; }
+.card:hover { border-color:#e94560; transform:translateX(4px); }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.card-name { font-size:15px; font-weight:bold; }
+.card-meta { font-size:12px; color:#aaa; }
+.card-preview { font-size:12px; color:#999; line-height:1.5; }
+.card-action { margin-top:6px; font-size:11px; color:#f5a623; }
+.step { background:#1a1a3e; border:1px solid #533483; border-radius:10px; padding:20px; }
+.step-title { font-size:14px; color:#aaa; margin-bottom:4px; }
+.step-customer { font-size:20px; font-weight:bold; color:#e94560; margin-bottom:12px; }
+.step-info { font-size:13px; color:#ccc; line-height:1.8; }
+.step-action { margin-top:12px; padding:12px; background:#53348322; border:1px dashed #533483; border-radius:8px; font-size:13px; color:#f5a623; }
+.step-buttons { display:flex; gap:8px; margin-top:16px; }
+.btn { padding:8px 18px; border-radius:6px; border:none; font-size:13px; cursor:pointer; font-weight:bold; }
+.btn-primary { background:#e94560; color:#fff; }
+.btn-secondary { background:#333; color:#ccc; }
+.btn-deep { background:#f5a623; color:#000; }
+.step-counter { text-align:center; font-size:12px; color:#666; margin-top:8px; }
+.ai-message { background:#53348322; border-left:3px solid #533483; padding:12px; border-radius:0 8px 8px 0; font-size:13px; color:#ccc; }
+.divider { border:none; border-top:1px solid #333; margin:4px 0; }
+.section-label { font-size:11px; color:#666; text-transform:uppercase; letter-spacing:1px; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<!-- 模式 A：先看列表再点 -->
+<div class="panel mode-a">
+<div class="panel-header">模式 A：先看全局列表，你自己挑</div>
+<div class="panel-body">
+
+<div class="ai-message">
+启动 /okki 后，AI 说：<br>
+"看板已更新。以下是你需要关注的客户列表。你想先看哪个？"
+</div>
+
+<div class="section-label">热层 — 需立即处理</div>
+
+<div class="card">
+<div class="card-header">
+<span class="card-name">Inderpreet kaur</span>
+<span class="badge badge-now">NOW</span>
+</div>
+<div class="card-meta">谈判中 · 1天前 · 球在我方</div>
+<div class="card-preview">确认订单细节，客户问了包装方式</div>
+<div class="card-action">→ 需要回复包装方案</div>
+</div>
+
+<div class="card">
+<div class="card-header">
+<span class="card-name">arshavin amoah</span>
+<span class="badge badge-now">NOW</span>
+</div>
+<div class="card-meta">待付款 · 25天前 · 球在我方</div>
+<div class="card-preview">订单已备货完成，等待客户付款</div>
+<div class="card-action">→ 需要催款</div>
+</div>
+
+<div class="card">
+<div class="card-header">
+<span class="card-name">Loza Bondok</span>
+<span class="badge badge-now">NOW</span>
+</div>
+<div class="card-meta">报价已发 · 28天前 · 球在我方</div>
+<div class="card-preview">客户等待更新，我方承诺了没兑现</div>
+<div class="card-action">→ 需要发更新+致歉</div>
+</div>
+
+<div class="section-label">温层 — 需要关注</div>
+
+<div class="card">
+<div class="card-header">
+<span class="card-name">jonathan aston</span>
+<span class="badge badge-soon">SOON</span>
+</div>
+<div class="card-meta">报价已发 · 3天前 · 已读未回</div>
+<div class="card-preview">报价 $2.70/pc，客户已读没回复</div>
+</div>
+
+<div class="card">
+<div class="card-header">
+<span class="card-name">maimouna cisse</span>
+<span class="badge badge-soon">SOON</span>
+</div>
+<div class="card-meta">谈判中 · 3天前 · 球在我方</div>
+<div class="card-preview">客户问了棉质面料，我方还没确认</div>
+</div>
+
+<div class="section-label">冷层 — 激活池（360人）</div>
+
+<div class="card" style="opacity:0.6">
+<div class="card-header">
+<span class="card-name">Ahmed Mohamed</span>
+<span class="badge badge-idle">IDLE</span>
+</div>
+<div class="card-meta">苏丹 · 2024-08 · 婴儿连体衣询价未成交</div>
+</div>
+
+<div class="card" style="opacity:0.6">
+<div class="card-header">
+<span class="card-name">Fatima Diallo</span>
+<span class="badge badge-idle">IDLE</span>
+</div>
+<div class="card-meta">科特迪瓦 · 2024-11 · 问过样品价没下文</div>
+</div>
+
+<hr class="divider">
+<div style="font-size:12px;color:#666;text-align:center">
+← 你从列表中挑一个 →<br>点进去 → AI 展示完整状态卡 → 你决定做什么
+</div>
+
+</div>
+</div>
+
+<!-- 模式 B：AI 按优先级带你过 -->
+<div class="panel mode-b">
+<div class="panel-header">模式 B：AI 主动带你逐个处理</div>
+<div class="panel-body">
+
+<div class="ai-message">
+启动 /okki 后，AI 说：<br>
+"扫描完成。现在有 <b>7 个人需要处理</b>，<b>3 个紧急</b>。我们从最紧急的开始。"
+</div>
+
+<div class="step-counter">第 1/7 个 — 紧急 · 等待时间最长</div>
+
+<div class="step">
+<div class="step-title">当前客户</div>
+<div class="step-customer">Loza Bondok <span class="badge badge-now">NOW</span></div>
+<div class="step-info">
+<b>状态：</b>报价已发，等待你的更新 28 天<br>
+<b>上次：</b>你承诺发新产品图片和报价，还没发<br>
+<b>背景：</b>沙特客户，之前下过小单，渠道是本地母婴连锁<br>
+<b>报价：</b>$2.70/pc × 500件（2026-04-17）
+</div>
+<div class="step-action">
+下一步：给客户发新产品图片 + 完整报价 + 致歉延迟
+</div>
+<div class="step-buttons">
+<button class="btn btn-primary">帮我起草回复</button>
+<button class="btn btn-deep">深度分析这个人</button>
+<button class="btn btn-secondary">跳过，下一个</button>
+</div>
+</div>
+
+<div class="step-counter">处理完 Loza 之后 → 自动进入第 2/7 个</div>
+
+<div class="step" style="opacity:0.5">
+<div class="step-title">下一个等待中</div>
+<div class="step-customer">arshavin amoah <span class="badge badge-now">NOW</span></div>
+<div class="step-info">
+订单已备货完成 25 天，等待客户付款...
+</div>
+<div class="step-action">
+下一步：催款（订单#xxx，金额$xxx）
+</div>
+</div>
+
+<div class="step" style="opacity:0.3">
+<div class="step-title">再下一个</div>
+<div class="step-customer">Inderpreet kaur <span class="badge badge-now">NOW</span></div>
+<div class="step-info">活跃谈判中，需回复包装方案...</div>
+</div>
+
+<hr class="divider">
+<div style="font-size:12px;color:#666;text-align:center">
+AI 按紧急程度排序 → 逐个带你过 →<br>
+处理完一个自动下一个 → 全部处理完生成今日总结
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

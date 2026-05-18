@@ -1,0 +1,13 @@
+// PreToolUse: Block dangerous git/rm commands
+const fs = require('fs');
+let data = '';
+process.stdin.on('data', c => data += c);
+process.stdin.on('end', () => {
+  const input = JSON.parse(data);
+  const cmd = input.tool_input?.command || '';
+  if (/git\s+(push|reset).*--(force|hard)/i.test(cmd) || /rm\s+-rf/i.test(cmd)) {
+    process.stderr.write('[HOOK BLOCKED] 危险命令: ' + cmd);
+    process.exit(2);
+  }
+  process.stdout.write(data);
+});

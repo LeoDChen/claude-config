@@ -1,0 +1,56 @@
+Write-Host "=== Testing Explorer: opening different locations ==="
+
+# Test 1: Open C:\ directly
+Write-Host "Opening C:\ ..."
+Start-Process explorer.exe -ArgumentList 'C:\'
+
+Start-Sleep -Seconds 2
+
+# Test 2: Open Downloads folder
+Write-Host "Opening Downloads..."
+Start-Process explorer.exe -ArgumentList "$env:USERPROFILE\Downloads"
+
+Write-Host ""
+Write-Host "Check:"
+Write-Host "  Do C:\ and Downloads windows open normally?"
+Write-Host "  Or do they also show green bar and hang?"
+Write-Host ""
+Write-Host "=== Now check DelegateFolders ==="
+
+$delPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\DelegateFolders'
+if (Test-Path $delPath) {
+    Get-ChildItem $delPath | ForEach-Object {
+        $clsid = $_.PSChildName
+        Write-Host "DelegateFolders: $clsid"
+    }
+}
+
+# Also check the remaining non-CLSID entries
+Write-Host ""
+Write-Host "=== Remaining MyComputer NameSpace entries ==="
+$nsPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace'
+Get-ChildItem $nsPath | ForEach-Object {
+    $clsid = $_.PSChildName
+    $default = (Get-ItemProperty $_.PSPath -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+    if ($default) {
+        Write-Host "  $clsid = $default"
+    } else {
+        Write-Host "  $clsid (no display name)"
+    }
+}
+
+Write-Host ""
+Write-Host "=== Critical: Check Folder\shell ==="
+$checkPaths = @(
+    'HKLM:\SOFTWARE\Classes\Folder\shell',
+    'HKLM:\SOFTWARE\Classes\Folder\shellex\ContextMenuHandlers',
+    'HKLM:\SOFTWARE\Classes\Directory\shell',
+    'HKLM:\SOFTWARE\Classes\Drive\shell'
+)
+foreach ($p in $checkPaths) {
+    if (Test-Path $p) {
+        Write-Host "$p : EXISTS"
+    } else {
+        Write-Host "$p : MISSING!"
+    }
+}

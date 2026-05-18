@@ -1,0 +1,709 @@
+const fs = require('fs');
+const path = require('path');
+
+// --dashboard-only: 跳过提取，只从 s3 生成 HTML
+const dashboardOnly = process.argv.includes('--dashboard-only');
+
+// 从 sync_okki.js 产出的最新元数据加载（而非旧 s1_classification.json）
+const metaPath = path.join(__dirname, '..', 'data', 'tm_conversations_latest.json');
+const convMeta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+const allConversations = convMeta.conversations || [];
+console.log('加载会话元数据: ' + allConversations.length + ' 条');
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const NOW = Date.now();
+const DAY = 86400000;
+const OUR_UID = '2500000853693@icbu';
+
+// ── 工具函数 ──
+const SYS_PATTERNS = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '有流失', 'Buyer has churn risk',
+  '一旦离开平台', '由于您介入该会话', 'Due to your intervention',
+  '平台规则提醒', '查看规则', '平台交易有保障', '平台已告知买家',
+  'AI智能判断该买家', '该买家已去除', '享受安全保障',
+  '翻译结果由买家发送', '由阿里翻译提供',
+  '买家进店', '访客接待',
+  '撤回了一条消息',
+  '反馈', 'AI给您生成了一条回复建议', 'AI给您生成',
+  'You have a visitor', 'This buyer has been pre-screened',
+  '当前买家首次给您发消息', '查看买家特征',
+  '平台规则提醒', '为了更好的保护买卖双方利益', '维护平台有序的市场秩序', '引导买家站外沟通',
+];
+function isSys(c) { const t = c && c.text && c.text.content || ''; if (c && c.custom) return false; if (!t.trim()) return true; for (const p of SYS_PATTERNS) if (t.includes(p)) return true; return false; }
+function getText(c, sc) { if (c && c.text && c.text.content) return c.text.content; if (c && c.custom) { if (sc && sc.summary) return sc.summary; return '[产品卡片]'; } return ''; }
+
+// ── 生命周期 & 行动判定已砍 ──
+// AI 在第二步全权判定。脚本只提取数据，不做判断。
+
+// ── 质量等级判定  ──
+function determineQuality(e, fullCustText, fullConvText) {
+  const ft = (fullConvText || '').toLowerCase();
+  const ct = (fullCustText || '').toLowerCase();
+
+  // ── 全量对话提取数量信息（从客户消息提取更可靠）──
+  // 支持英/中/法/西/阿语常见数量单位
+  const qtyMatches = ct.match(/(\d{3,})\s*(pcs|pieces|units?|unit[ée]s?|件|piece|pc|pce|paires?|douzaines?|qt[ée]|quantit[ée]s?|sets?|ensembles?)/gi) || [];
+  let maxQty = 0;
+  for (const qm of qtyMatches) {
+    const n = parseInt(qm.match(/\d+/)[0], 10);
+    if (n > maxQty) maxQty = n;
+  }
+
+  // ── 母婴品类信号（修正 D 误判用）──
+  const isBabyRelated = /(baby|kid|child|infant|toddler|newborn|bib|romper|bodysuit|onesie|swaddle|sleepsuit|blanket|crib|stroller|nursery|童|婴|幼|卡通|cartoon)/i.test(ft);
+
+  // ── S 级信号（严格版 — 优先用 ct 即客户消息）──
+  const sSignals = [];
+  // 品牌/ODM: 明确且有意图的组合（含法/西/阿语）
+  if (/(odm|oem|private\s*(label|brand)|own\s*(brand|design|label)|custom\s*(logo|packaging|packing|design|label|box|bag|tag)|hangtag|barcode|brand\s*name|brand\s*label|your\s*logo|my\s*logo|our\s*logo|marque|personnalis[ée]|personnaliser|[ée]tiquette.*perso|logo.*perso|votre.*logo|mon.*logo|mon.*design|mon.*propre)/i.test(ct))
+    sSignals.push('品牌/ODM');
+  // 分销渠道: 明确平台或分销语言（含法/西/阿语）
+  if (/(amazon|walmart|shopify|distributor|retail\s*(chain|store|shop)|wholesale\s*(channel|distributor|business)|sell\s*(on|through|in)\s*(amazon|walmart|shopify|online)|revendeur|distributeur|vendre.*(sur|en ligne|amazon)|boutique.*(en ligne|online)|tienda.*(online|en.linea)|mayorista)/i.test(ct))
+    sSignals.push('分销渠道');
+  if (maxQty >= 500) sSignals.push('大批量(' + maxQty + '件)');
+  // 公司资料: 客户主动分享
+  if (/(here.*(is|are).*(website|store|shop|link)|check.*(my|our).*(website|store|shop|page)|this\s*is\s*(my|our).*(website|store|shop)|find\s*(us|me).*(on|at).*(website|store))/i.test(ct) ||
+      /(https?:\/\/|www\.\w+\.(com|net|org|co))/i.test(ct))
+    sSignals.push('公司资料');
+  // 复购: 明确的复购/追加语言
+  if (/(reorder|restock|another\s*(order|shipment|batch|container)|second\s*(order|shipment)|repeat\s*order|buy\s*more|order\s*more|send\s*more|top\s*up)/i.test(ct))
+    sSignals.push('复购信号');
+
+  // ── A 级附加信号 ──
+  const aSignals = [];
+  if (maxQty >= 200 && maxQty < 500) aSignals.push('中批量(' + maxQty + '件)');
+  if (/(500.*ok|500.*fine|moq.*(ok|fine|accept|no.*problem)|accept.*(moq|500|minimum)|can.*(take|do|handle).*500|ok.*(with|about).*(500|moq)|no.*problem.*(500|moq)|(je|nous).*(prends?|commande|veux|voudrais).*500|500.*(va|marche|ok|d'accord)|pas.*probl[èe]me.*500)/i.test(ct))
+    aSignals.push('MOQ已接受');
+  if (/(sample.*(sent|shipped|sending|ready|prepar|made|done|making|proceed)|(sent|shipped|send|ready).*sample|样品.*(寄|发|做|准备))/i.test(ft))
+    aSignals.push('样品已寄/在准备');
+  if (e.realMsgs >= 15 && e.customerMsgs >= 3)
+    aSignals.push('深度沟通(' + e.realMsgs + '条)');
+  if (/(price.*(high|expensive|too much|negot|discount|lower|reduce|better.*price|best.*price|last.*price|final.*price)|便宜|贵|折扣|降价|便宜点|r[ée]duction|remise|rabais|n[ée]goci|trop.*(cher|[ée]lev[ée]|haut)|moins.*cher|prix.*(bas|moins)|descuento|rebaja|caro|muy.*caro|barato)/i.test(ct))
+    aSignals.push('价格谈判');
+  if (/(bsci|iso|audit|certif|认证|factory.*(video|tour|visit)|验厂|验货)/i.test(ct))
+    aSignals.push('关心认证/验厂');
+  if (/(freight|shipping|运费|物流|delivery.*cost|ship.*cost|transport.*cost|dhl|fedex|ups|aramex|courier|by sea|by air|container)/i.test(ct) && e.hasQuantity)
+    aSignals.push('讨论运费+数量');
+
+  // ── C 级降级信号 ──
+  const cSignals = [];
+  if (/(for myself|for my kid|for my baby|personal use|自用|送人|gift.*for|for.*gift|personal.*purchase|own.*use|just.*for.*(me|myself|my.*kid|my.*baby)|pour moi|pour mon|personnel|usage.*personnel|uso.*personal|para mi)/i.test(ct))
+    cSignals.push('个人自用');
+  if (/(just.*(few|a few|small|little|some)|small.*(quantity|order|business|little)|little.*(order|quantity|business|bit)|tiny|only.*(need|want).*\d{1,2}\s*(pcs|pieces)|petit.*(quantit[ée]|commande)|peu.*(de|commande)|juste.*(quelques|un peu)|solo.*(pocos?|pocas?|unos?|unas?))/i.test(ct))
+    cSignals.push('小批量暗示');
+  if (maxQty > 0 && maxQty <= 50) cSignals.push('明确小量(' + maxQty + '件)');
+  if (e.realMsgs <= 3 && e.customerMsgs === 1 && !e.hasPrice && !e.hasSample && !e.hasQuantity)
+    cSignals.push('单次浅层互动');
+
+  // ── D 级判定（修正版）──
+  if (e.realMsgs <= 2 && e.customerMsgs === 0)
+    return { grade: 'D', label: '无关/废弃', reason: '仅系统消息/无真实对话', auto: true };
+
+  // 品类不匹配：成人/非母婴 AND NOT 母婴相关
+  if (/(adult|成人|men.*wear|男装|sexy|lingerie|women.*dress|fashion.*(dress|wear)|wedding|evening.*(dress|wear)|not.*(baby|kid|child))/i.test(ft) && !isBabyRelated)
+    return { grade: 'D', label: '无关', reason: '品类不匹配(非母婴)', auto: true };
+
+  // 非采购意图
+  if (/(转让|加盟|franchise|找.*工作|job|hiring|recruit|sell.*business)/i.test(ft) && e.realMsgs <= 5)
+    return { grade: 'D', label: '无关', reason: '非采购意图', auto: true };
+
+  // ── 综合定级 ──
+  const totalSSignals = sSignals.length;
+  const totalASignals = aSignals.length;
+  const totalCSignals = cSignals.length;
+
+  // S: 2+ 个S级信号
+  if (totalSSignals >= 2)
+    return { grade: 'S', label: '战略客户', reason: sSignals.join('+'), auto: true };
+
+  // A: 1个S级信号 或 (2+个A级信号+有实质互动)
+  if (totalSSignals >= 1)
+    return { grade: 'A', label: '优质客户', reason: [...sSignals, ...aSignals].filter(Boolean).join('+') || sSignals.join('+'), auto: true };
+
+  if (totalASignals >= 2 && e.realMsgs >= 5)
+    return { grade: 'A', label: '优质客户', reason: aSignals.join('+'), auto: true };
+
+  // C: 明确降级信号 + 无上升信号
+  if (totalCSignals >= 2 && totalSSignals === 0 && totalASignals <= 1)
+    return { grade: 'C', label: '低价值', reason: cSignals.join('+'), auto: true };
+
+  if (maxQty > 0 && maxQty <= 30 && totalSSignals === 0 && totalASignals === 0)
+    return { grade: 'C', label: '低价值', reason: '明确小量≤30件', auto: true };
+
+  // 单次互动无后续 → C（而非B）
+  if (e.realMsgs <= 4 && e.customerMsgs >= 1 && e.customerMsgs <= 2 && !e.hasPrice && !e.hasSample && !e.hasQuantity && typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays > 30)
+    return { grade: 'C', label: '低价值', reason: '单次互动+30天无后续', auto: true };
+
+  // 浅互动+长期沉默 → C（"问完消失"模式）
+  if (e.realMsgs <= 5 && e.customerMsgs <= 2 && totalSSignals === 0 && totalASignals <= 1 && typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays > 60)
+    return { grade: 'C', label: '低价值', reason: '浅互动+长期沉默(' + e.lastCustomerMsgDays + 'd)', auto: true };
+
+  // B: 有实质互动，信号不足以升A/S也不足以降C/D
+  if (e.realMsgs >= 3 && e.customerMsgs >= 1)
+    return { grade: 'B', label: '普通客户', reason: '有互动但信号不足', auto: true };
+
+  if (e.hasPrice || e.hasSample || e.hasQuantity)
+    return { grade: 'B', label: '普通客户', reason: '有实质讨论', auto: true };
+
+  return { grade: 'B', label: '普通客户', reason: '信息不足', auto: true };
+}
+
+// ── 国家代码→中文映射 ──
+const COUNTRY_CN = {
+  'US':'美国','GB':'英国','DE':'德国','FR':'法国','IT':'意大利','ES':'西班牙','NL':'荷兰','BE':'比利时','PT':'葡萄牙','RU':'俄罗斯','TR':'土耳其',
+  'IN':'印度','PK':'巴基斯坦','BD':'孟加拉','JP':'日本','KR':'韩国','HK':'香港','ID':'印尼','MY':'马来西亚','PH':'菲律宾','VN':'越南','TH':'泰国',
+  'SD':'苏丹','EG':'埃及','CD':'刚果民主','ZM':'赞比亚','CI':'科特迪瓦','SA':'沙特','AE':'阿联酋','GH':'加纳','NG':'尼日利亚','KE':'肯尼亚','TZ':'坦桑尼亚',
+  'ZA':'南非','MA':'摩洛哥','DZ':'阿尔及利亚','TN':'突尼斯','LY':'利比亚','ET':'埃塞俄比亚','UG':'乌干达','RW':'卢旺达','CM':'喀麦隆','SN':'塞内加尔',
+  'ML':'马里','TG':'多哥','BJ':'贝宁','BF':'布基纳法索','CG':'刚果','GA':'加蓬','ZR':'刚果(金)','LR':'利比里亚','SL':'塞拉利昂','GN':'几内亚',
+  'IQ':'伊拉克','LB':'黎巴嫩','JO':'约旦','KW':'科威特','QA':'卡塔尔','OM':'阿曼','BH':'巴林','IL':'以色列','SY':'叙利亚','YE':'也门',
+  'BR':'巴西','AR':'阿根廷','CL':'智利','CO':'哥伦比亚','PE':'秘鲁','MX':'墨西哥','BO':'玻利维亚','VE':'委内瑞拉','EC':'厄瓜多尔','PY':'巴拉圭',
+  'AU':'澳大利亚','NZ':'新西兰','CA':'加拿大','PL':'波兰','UA':'乌克兰','RO':'罗马尼亚','HU':'匈牙利','CZ':'捷克','SE':'瑞典','DK':'丹麦',
+  'MD':'摩尔多瓦','PA':'巴拿马','ZW':'津巴布韦','DJ':'吉布提',
+};
+function countryCN(code) { return COUNTRY_CN[code] || code; }
+
+// ── 新增：提取 + 匹配 + 分桶 ──
+
+function extractConversationSnippet(msgs, N) {
+  if (!msgs || msgs.length === 0) return [];
+  const real = [];
+  for (const m of msgs) {
+    if (isSys((m.message || m).content)) continue;
+    const msg = m.message || m;
+    const uid = msg.sender && msg.sender.uid || '';
+    const text = getText(msg.content, msg.searchableContent);
+    if (!text.trim()) continue;
+    const date = msg.createAt ? new Date(msg.createAt).toISOString().slice(0, 10) : '?';
+    const who = uid === OUR_UID ? '[我方]' : '[客户]';
+    real.push(who + ' ' + date + ' | ' + text.substring(0, 200));
+    if (real.length >= N) break;
+  }
+  return real.reverse();
+}
+
+function computeDirection(customerMsgs, ourMsgs, lastCustomerMsgDate) {
+  if (lastCustomerMsgDate) {
+    const lastCustTs = new Date(lastCustomerMsgDate).getTime();
+    let lastOurTs = 0;
+    // 从已遍历的消息中拿 lastOurDate（在循环里记的）
+    return 'to_them'; // 默认，主循环会覆盖
+  }
+  if (customerMsgs > ourMsgs) return 'to_us';
+  return 'to_them';
+}
+
+function matchOrder(name, ordersData) {
+  if (!ordersData || !ordersData.orders || ordersData.orders.length === 0) return null;
+  if (!name) return null;
+  const n = name.toLowerCase().trim();
+  // 精确匹配
+  for (const o of ordersData.orders) {
+    if ((o.customer || '').toLowerCase().trim() === n) return { matched: true, status: o.status, paidAt: o.orderDate, orderNo: o.orderNo };
+  }
+  // 模糊匹配：客户名包含公司名或反之
+  for (const o of ordersData.orders) {
+    const cn = (o.customer || '').toLowerCase().trim();
+    if (!cn) continue;
+    if (n.includes(cn) || cn.includes(n)) return { matched: true, status: o.status, paidAt: o.orderDate, orderNo: o.orderNo };
+  }
+  return null;
+}
+
+function bucketFilter(client) {
+  const d = client.lastCustomerMsgDays;
+  const g = client.grade;
+  const hasOrder = !!client.orderMatched;
+  const msgCount = client.realMsgs || 0;
+  // 桶 2：有任一活跃信号
+  if (typeof d === 'number' && d < 60) return 2;
+  if (g === 'A' || g === 'S') return 2;
+  if (hasOrder) return 2;
+  if (msgCount >= 10) return 2;
+  // 其余 → 桶 1
+  return 1;
+}
+
+// ── 加载订单数据 ──
+let ordersData = null;
+const ordersPath = path.join(__dirname, '..', 'data', 'orders_latest.json');
+if (fs.existsSync(ordersPath)) {
+  try { ordersData = JSON.parse(fs.readFileSync(ordersPath, 'utf8')); } catch (e) {}
+}
+if (ordersData) {
+  console.log('已加载订单数据: ' + (ordersData.total || ordersData.orders?.length || 0) + ' 条');
+}
+
+// ── 主循环 ──
+const candidates = allConversations;
+console.log('处理全部 ' + candidates.length + ' 个客户...\n');
+
+const enhanced = [];
+for (const c of candidates) {
+  // 平台机器人/非客户实体 → D级
+  if (c.name === 'Assistant Eva') continue; // 平台机器人
+  const fid = c.cid ? c.cid.replace(/#/g, '_').replace(/@/g, '_') + '.json' : '';
+  const fp = path.join(chatDir, fid);
+
+  let msgCount = 0, customerMsgs = 0, ourMsgs = 0, sysMsgs = 0;
+  let latestOurDate = '', latestCustDate = '';
+  let lastCustomerMsgDays = 9999;
+  let fullCustText = '', fullConvText = '';
+  let allMsgs = [];
+
+  if (fs.existsSync(fp)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+      allMsgs = data.messages || [];
+      msgCount = allMsgs.length;
+
+      for (const m of allMsgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const text = getText(msg.content, msg.searchableContent);
+        const date = msg.createAt || '';
+        if (isSys(msg.content)) { sysMsgs++; continue; }
+
+        if (uid === OUR_UID) {
+          ourMsgs++;
+          if (date > latestOurDate) latestOurDate = date;
+          if (text.trim()) fullConvText += text + ' | ';
+        } else if (uid) {
+          customerMsgs++;
+          if (date > latestCustDate) latestCustDate = date;
+          if (text.trim()) { fullCustText += text + ' | '; fullConvText += text + ' | '; }
+          if (date) lastCustomerMsgDays = Math.min(lastCustomerMsgDays, Math.floor((NOW - new Date(date).getTime()) / DAY));
+        }
+      }
+    } catch (e) { /* skip corrupt */ }
+  }
+
+  const realMsgs = customerMsgs + ourMsgs;
+  const country = c.country || '';
+  const direction = lastCustomerMsgDays !== 9999 && latestCustDate > latestOurDate ? 'to_us' : 'to_them';
+
+  // 质量等级（脚本继续算，AI 可覆盖）
+  const ql = determineQuality({
+    realMsgs, customerMsgs, ourMsgs, hasPrice: false, hasSample: false, hasQuantity: false, lastCustomerMsgDays
+  }, fullCustText, fullConvText);
+
+  // 订单匹配
+  const orderMatched = matchOrder(c.name, ordersData);
+
+  // 对话片段
+  const snippet = extractConversationSnippet(allMsgs, 12);
+
+  const obj = {
+    name: c.name || '(未知)',
+    country,
+    countryCN: countryCN(country),
+    cid: c.cid,
+    grade: ql.grade,
+    gradeReason: ql.reason,
+    totalMsgs: msgCount,
+    customerMsgs,
+    ourMsgs,
+    lastCustomerMsgDays: lastCustomerMsgDays === 9999 ? '-' : lastCustomerMsgDays,
+    direction,
+    order: orderMatched,
+    snippet,
+    // 临时字段（供分桶+后续使用）
+    realMsgs,
+    fullCustText,
+    fullConvText,
+  };
+
+  obj.bucket = bucketFilter(obj);
+  enhanced.push(obj);
+}
+
+// ── 汇总统计 ──
+const gCount = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+for (const e of enhanced) gCount[e.grade] = (gCount[e.grade] || 0) + 1;
+const bucket1Count = enhanced.filter(e => e.bucket === 1).length;
+const bucket2Count = enhanced.filter(e => e.bucket === 2).length;
+const orderMatchCount = enhanced.filter(e => e.order).length;
+console.log('=== 提取完成 ===');
+console.log('总客户: ' + enhanced.length);
+console.log('质量: S=' + gCount.S + ' A=' + gCount.A + ' B=' + gCount.B + ' C=' + gCount.C + ' D=' + gCount.D);
+console.log('桶2(AI正常读): ' + bucket2Count + ' | 桶1(AI扫一眼): ' + bucket1Count);
+console.log('已匹配订单: ' + orderMatchCount + '人');
+console.log('');
+
+// ── 输出 s1_enhanced.json (保留向后兼容) ──
+fs.writeFileSync(path.join(__dirname, '..', 'data', 's1_enhanced.json'), JSON.stringify(enhanced, null, 2));
+console.log('已保存 data/s1_enhanced.json (' + enhanced.length + '条)');
+
+// ── 输出 s2_ai_input.json ──
+const s2Output = enhanced.map(e => ({
+  name: e.name,
+  country: e.country,
+  cid: e.cid,
+  grade: e.grade,
+  totalMsgs: e.totalMsgs,
+  customerMsgs: e.customerMsgs,
+  ourMsgs: e.ourMsgs,
+  lastCustomerMsgDays: e.lastCustomerMsgDays,
+  direction: e.direction,
+  bucket: e.bucket,
+  order: e.order,
+  snippet: e.snippet,
+}));
+const s2Path = path.join(__dirname, '..', 'data', 's2_ai_input.json');
+fs.writeFileSync(s2Path, JSON.stringify(s2Output, null, 2));
+console.log('已保存 data/s2_ai_input.json (' + s2Output.length + '条) → 供 AI 判定');
+console.log('');
+
+// ── HTML 看板 ──
+if (dashboardOnly) {
+  // 只生成看板，跳过提取
+  console.log('--dashboard-only 模式：只生成 HTML 看板\n');
+  const s3Path = path.join(__dirname, '..', 'data', 's3_ai_judgments.json');
+  if (!fs.existsSync(s3Path)) {
+    console.log('错误：未找到 s3_ai_judgments.json，请先运行 AI 判定工作流');
+    process.exit(1);
+  }
+  const s3Data = JSON.parse(fs.readFileSync(s3Path, 'utf8'));
+  console.log('读取 AI 判定结果: ' + s3Data.length + '条');
+  generateDashboard(s3Data);
+  process.exit(0);
+}
+
+// 检查是否有 AI 判定结果
+const s3Path = path.join(__dirname, '..', 'data', 's3_ai_judgments.json');
+const s3Exists = fs.existsSync(s3Path);
+if (s3Exists) {
+  const s3Data = JSON.parse(fs.readFileSync(s3Path, 'utf8'));
+  console.log('读取 AI 判定结果: ' + s3Data.length + '条');
+  generateDashboard(s3Data);
+} else {
+  console.log('未找到 s3_ai_judgments.json，跳过我 HTML 看板生成');
+  console.log('运行 AI 判定工作流后再执行: node scripts/enhanced_classify.js --dashboard-only');
+}
+
+function generateDashboard(data) {
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const timeStr = now.toLocaleString('zh-CN');
+
+  // 活跃阶段列表（9阶段）
+  const stageOrder = ['需求探索', '报价已发', '谈判中', '待付款', '待发货', '已发货/在途', '已签收', '售后', '待返单'];
+  // 终态
+  const terminalStages = ['搁置', '未成交'];
+  const gradeOrder = ['S', 'A', 'B', 'C', 'D'];
+
+  // 按阶段分组
+  const byStage = {};
+  for (const s of stageOrder) byStage[s] = [];
+  for (const t of terminalStages) byStage[t] = [];
+  for (const e of data) {
+    const s = e.stage || '需求探索';
+    if (byStage[s]) byStage[s].push(e);
+    else {
+      if (!byStage['需求探索']) byStage['需求探索'] = [];
+      byStage['需求探索'].push(e);
+    }
+  }
+
+  // 合并 s2 数据（获取 lastCustomerMsgDays 等字段）
+  const s2Path2 = path.join(__dirname, '..', 'data', 's2_ai_input.json');
+  let mergedData = data;
+  if (fs.existsSync(s2Path2)) {
+    try {
+      const s2Data = JSON.parse(fs.readFileSync(s2Path2, 'utf8'));
+      const s2Map = new Map();
+      for (const s of s2Data) s2Map.set(s.cid || s.name, s);
+      mergedData = data.map(d => {
+        const s2 = s2Map.get(d.cid) || s2Map.get(d.name);
+        return s2 ? { ...s2, ...d, lastCustomerMsgDays: s2.lastCustomerMsgDays, countryCN: s2.country ? countryCN(s2.country) : d.countryCN || '' } : d;
+      });
+    } catch (e) {}
+  }
+
+  // 用合并后的数据重建 byStage
+  const byStage2 = {};
+  for (const s of stageOrder) byStage2[s] = [];
+  for (const t of terminalStages) byStage2[t] = [];
+  for (const e of mergedData) {
+    const s = e.stage || '需求探索';
+    if (byStage2[s]) byStage2[s].push(e);
+    else { if (!byStage2['需求探索']) byStage2['需求探索'] = []; byStage2['需求探索'].push(e); }
+  }
+
+  const silenceTiers = [
+    { label: '近期活跃 <3天', color: '#27ae60', maxD: 3 },
+    { label: '近期活跃 3-7天', color: '#27ae60', maxD: 7, minD: 3 },
+    { label: '短期静默 7-14天', color: '#3498db', maxD: 14, minD: 7 },
+    { label: '中期静默 14-30天', color: '#f39c12', maxD: 30, minD: 14 },
+    { label: '长期静默 30-90天', color: '#e67e22', maxD: 90, minD: 30 },
+    { label: '沉淀 90天+', color: '#c0392b', maxD: 99999, minD: 90 },
+  ];
+  const silenceGroups = {};
+  for (const tier of silenceTiers) silenceGroups[tier.label] = [];
+  for (const e of mergedData) {
+    const d = e.lastCustomerMsgDays === '-' || e.lastCustomerMsgDays === undefined ? 9999 : e.lastCustomerMsgDays;
+    if (typeof d !== 'number') { silenceGroups['沉淀 90天+'].push(e); continue; }
+    for (const tier of silenceTiers) {
+      if (d < tier.maxD && (tier.minD === undefined || d >= tier.minD)) {
+        silenceGroups[tier.label].push(e); break;
+      }
+    }
+  }
+
+  // 静默风险分级 HTML（可折叠）
+  const silenceHtml = silenceTiers.map(tier => {
+    const items = silenceGroups[tier.label] || [];
+    if (items.length === 0) return '';
+    const sorted = items.sort((a, b) => {
+      const da = typeof a.lastCustomerMsgDays === 'number' ? a.lastCustomerMsgDays : 9999;
+      const db = typeof b.lastCustomerMsgDays === 'number' ? b.lastCustomerMsgDays : 9999;
+      return da - db;
+    });
+    const itemsHtml = sorted.map(e => {
+      const d = typeof e.lastCustomerMsgDays === 'number' ? e.lastCustomerMsgDays : '?';
+      const g = e.grade || '?';
+      return '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;"><span>' + esc(e.name) + ' <span style="color:var(--text-secondary);">' + esc(e.countryCN || e.country || '??') + ' · ' + g + '级</span></span><span>' + d + '天</span></div>';
+    }).join('');
+    const rgba = tier.color === '#27ae60' ? '39,174,96' : tier.color === '#3498db' ? '52,152,219' : tier.color === '#f39c12' ? '243,156,18' : tier.color === '#e67e22' ? '230,126,34' : '192,57,43';
+    return '<div><div onclick="var d=this.nextElementSibling;d.style.display=d.style.display===\'block\'?\'none\':\'block\'" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;">' +
+      '<span>● <strong style="color:' + tier.color + ';">' + tier.label + '</strong></span>' +
+      '<strong style="font-size:16px;color:' + tier.color + ';">' + items.length + '</strong></div>' +
+      '<div style="display:none;padding:8px 14px;background:rgba(' + rgba + ',0.08);border-bottom:1px solid var(--border);">' + itemsHtml + '</div></div>';
+  }).filter(Boolean).join('');
+
+  // KPI
+  const total = mergedData.length;
+  const active3d = mergedData.filter(e => typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays < 3).length;
+  const silent90p = mergedData.filter(e => typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays >= 90).length;
+  const directionToUs = mergedData.filter(e => e.direction === 'to_us').length;
+  const needsAction = mergedData.filter(e => e.priority === 'now' || e.priority === 'soon').length;
+
+  const kpiCards = [
+    { num: total, label: '总客户', color: '#1a5276' },
+    { num: active3d, label: '3天活跃', color: '#1a5276' },
+    { num: silent90p, label: '超90天无互动', color: '#c0392b' },
+    { num: directionToUs, label: '球在我方', color: '#e67e22' },
+    { num: mergedData.filter(e => e.confidence === 'uncertain').length, label: '需确认', color: '#e74c3c' },
+    { num: needsAction, label: '需行动', color: '#8e44ad' },
+  ];
+
+  // 双轴矩阵 (活跃阶段 × 质量)
+  const matrixData = {};
+  for (const s of stageOrder) { matrixData[s] = {}; for (const g of gradeOrder) matrixData[s][g] = []; }
+  const terminalData = {};
+  for (const t of terminalStages) terminalData[t] = [];
+  for (const e of mergedData) {
+    const s = e.stage || '需求探索';
+    const g = e.grade || 'D';
+    if (terminalStages.includes(s)) {
+      terminalData[s].push(e);
+    } else if (matrixData[s] && matrixData[s][g]) {
+      matrixData[s][g].push(e);
+    }
+  }
+
+  // 矩阵表格行
+  const matrixRows = stageOrder.map(s => {
+    const cells = gradeOrder.map(g => {
+      const items = matrixData[s] ? (matrixData[s][g] || []) : [];
+      const n = items.length;
+      if (n === 0) return '<td style="text-align:center;padding:6px 8px;border:1px solid var(--border);color:var(--text-tertiary);">0</td>';
+      let opacity = Math.min(0.5, 0.15 + n * 0.005);
+      if (g === 'S') opacity = Math.min(0.5, 0.2 + n * 0.02);
+      return '<td style="text-align:center;padding:6px 8px;border:1px solid var(--border);cursor:pointer;background:rgba(255,159,10,' + opacity + ');font-weight:600;" onclick="openModal(\'' + s + '\',\'' + g + '\')">' + n + '</td>';
+    }).join('');
+    return '<tr><td class="rl">' + s + '</td>' + cells + '</tr>';
+  }).join('');
+
+  // 终态池 HTML（可折叠）
+  const terminalHtml = terminalStages.map(t => {
+    const items = terminalData[t] || [];
+    if (items.length === 0) return '';
+    const icon = t === '搁置' ? '⏸' : '❌';
+    const style = t === '未成交' ? 'border-color:#ff3b30;background:rgba(255,59,48,0.03);' : '';
+    const tip = t === '搁置' ? '回访：直接跟进，"上次那个案子还在推进吗？"' : '回访：换产品/新切入点/等认证更新后重新激活';
+    const sorted = items.sort((a, b) => {
+      const da = typeof a.lastCustomerMsgDays === 'number' ? a.lastCustomerMsgDays : 9999;
+      const db = typeof b.lastCustomerMsgDays === 'number' ? b.lastCustomerMsgDays : 9999;
+      return da - db;
+    });
+    const itemsHtml = sorted.map(e => {
+      const d = typeof e.lastCustomerMsgDays === 'number' ? e.lastCustomerMsgDays + '天' : '?';
+      const grade = e.grade || '?';
+      const reason = e.reason || e.actionHint || '';
+      const conf = e.confidence === 'uncertain' ? ' ⚠️' : '';
+      return '<div class="client-row"><span>' + esc(e.name) + conf + ' <span class="from-tag">' + esc(grade) + '级</span></span><span style="font-size:10px;color:var(--text-secondary);">' + esc(reason).substring(0, 40) + ' · ' + d + '</span></div>';
+    }).join('');
+    return '<div class="terminal-pool" style="' + style + '">' +
+      '<div onclick="var d=this.nextElementSibling;d.style.display=d.style.display===\'block\'?\'none\':\'block\'" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:4px 0;">' +
+      '<h4 style="margin:0;">' + icon + ' ' + t + ' — ' + items.length + '人</h4>' +
+      '<strong style="font-size:16px;color:var(--text-secondary);">' + items.length + '</strong></div>' +
+      '<div style="display:none;max-height:400px;overflow-y:auto;">' + itemsHtml + '</div>' +
+      '<div style="font-size:10px;color:var(--text-secondary);margin-top:6px;">' + tip + '</div></div>';
+  }).filter(Boolean).join('');
+
+  // 构建 JSON 数据（供弹窗用）
+  function toEntry(e) {
+    return {
+      n: e.name, c: e.countryCN || e.country || '??',
+      d: typeof e.lastCustomerMsgDays === 'number' ? e.lastCustomerMsgDays : 999,
+      g: e.grade || '?',
+      st: e.stage || '需求探索',
+      ac: e.actionHint || '',
+      pr: e.priority || 'idle',
+      cf: e.confidence || 'certain',
+      rs: e.reason || ''
+    };
+  }
+  function kpiSort(arr) {
+    const order = { now: 0, soon: 1, idle: 2 };
+    return arr.sort((a, b) => {
+      const pd = (order[a.pr] ?? 3) - (order[b.pr] ?? 3);
+      if (pd !== 0) return pd;
+      return a.d - b.d;
+    });
+  }
+
+  const matrixJson = {};
+  for (const s of stageOrder) {
+    matrixJson[s] = {};
+    for (const g of gradeOrder) {
+      matrixJson[s][g] = kpiSort((matrixData[s][g] || []).map(toEntry));
+    }
+  }
+  // 终态也加入 JSON
+  for (const t of terminalStages) {
+    matrixJson[t] = {};
+    for (const g of gradeOrder) matrixJson[t][g] = [];
+    for (const e of (terminalData[t] || [])) {
+      const ge = e.grade || 'D';
+      if (!matrixJson[t][ge]) matrixJson[t][ge] = [];
+      matrixJson[t][ge].push(toEntry(e));
+    }
+  }
+
+  const kpiJson = {
+    "总客户": kpiSort(mergedData.map(toEntry)),
+    "3天活跃": kpiSort(mergedData.filter(e => typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays < 3).map(toEntry)),
+    "超90天无互动": kpiSort(mergedData.filter(e => typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays >= 90).map(toEntry)),
+    "球在我方": kpiSort(mergedData.filter(e => e.direction === 'to_us').map(toEntry)),
+    "需确认": kpiSort(mergedData.filter(e => e.confidence === 'uncertain').map(toEntry)),
+    "需行动": kpiSort(mergedData.filter(e => e.priority === 'now' || e.priority === 'soon').map(toEntry))
+  };
+
+  const html = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n<title>OKKI 客户管道看板 — ' + today + '</title>\n' +
+'<style>\n' +
+'  :root { --bg-primary: #f5f5f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5e7; --border: #d1d1d6;\n' +
+'    --text-primary: #1d1d1f; --text-secondary: #86868b; --text-tertiary: #aeaeb2;\n' +
+'    --accent: #0071e3; --success: #34c759; --warning: #ff9f0a; --error: #ff3b30; }\n' +
+'  @media (prefers-color-scheme: dark) {\n' +
+'    :root { --bg-primary: #1d1d1f; --bg-secondary: #2d2d2f; --bg-tertiary: #3d3d3f;\n' +
+'      --border: #424245; --text-primary: #f5f5f7; --text-secondary: #86868b;\n' +
+'      --text-tertiary: #636366; --accent: #0a84ff; }\n' +
+'  }\n' +
+'  * { box-sizing: border-box; margin: 0; padding: 0; }\n' +
+'  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;\n' +
+'    background: var(--bg-primary); color: var(--text-primary); line-height: 1.5;\n' +
+'    padding: 20px 24px; max-width: 1500px; margin: 0 auto; }\n' +
+'  h1 { font-size: 1.3rem; margin-bottom: 4px; }\n' +
+'  .subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px; }\n' +
+'  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }\n' +
+'  .kpi { color: #fff; padding: 14px 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: transform 0.15s; }\n' +
+'  .kpi:hover { transform: scale(1.03); }\n' +
+'  .kpi .num { font-size: 28px; font-weight: 700; }\n' +
+'  .kpi .lbl { font-size: 11px; opacity: 0.9; }\n' +
+'  .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }\n' +
+'  .card-hd { background: var(--bg-tertiary); padding: 10px 14px; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }\n' +
+'  .card-hd span { font-weight: normal; font-size: 11px; color: var(--text-secondary); }\n' +
+'  table.mx { width: 100%; border-collapse: collapse; font-size: 11px; }\n' +
+'  table.mx th { padding: 6px 4px; border: 1px solid var(--border); background: var(--bg-tertiary); font-weight: 600; font-size:10px; text-align:center; }\n' +
+'  table.mx th.stage-col { width:76px; }\n' +
+'  table.mx td { border: 1px solid var(--border); text-align: center; padding: 7px 3px; }\n' +
+'  table.mx td.rl { font-weight: 600; font-size: 10px; background: var(--bg-tertiary); }\n' +
+'  .terminal-row { display: flex; gap: 16px; padding: 14px; }\n' +
+'  .terminal-pool { flex: 1; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }\n' +
+'  .terminal-pool h4 { font-size: 12px; margin-bottom: 6px; }\n' +
+'  .terminal-pool .from-tag { font-size: 10px; color: var(--text-secondary); background: var(--bg-tertiary); padding: 1px 6px; border-radius: 10px; margin-left: 4px; }\n' +
+'  .terminal-pool .client-row { font-size: 11px; padding: 3px 0; display: flex; justify-content: space-between; border-bottom: 1px dotted var(--border); }\n' +
+'  .terminal-pool .client-row:last-child { border-bottom: none; }\n' +
+'  .footer { margin-top: 24px; padding: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-secondary); text-align: center; }\n' +
+'  .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45); z-index:9999; justify-content:center; align-items:center; }\n' +
+'  .modal-overlay.show { display:flex; }\n' +
+'  .modal-box { background:var(--bg-secondary); border-radius:10px; width:750px; max-width:92vw; max-height:75vh; overflow-y:auto; box-shadow:0 8px 30px rgba(0,0,0,0.25); }\n' +
+'  @media (prefers-color-scheme: dark) { .modal-box { box-shadow:0 8px 30px rgba(0,0,0,0.6); } }\n' +
+'  .modal-hd { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--border); font-weight:600; font-size:15px; position:sticky; top:0; background:var(--bg-secondary); border-radius:10px 10px 0 0; z-index:1; }\n' +
+'  .modal-close { cursor:pointer; font-size:20px; color:var(--text-secondary); line-height:1; padding:0 4px; border:none; background:none; }\n' +
+'  .modal-close:hover { color:var(--text-primary); }\n' +
+'  .modal-body { padding:14px 18px; }\n' +
+'  .modal-body table { width:100%; border-collapse:collapse; font-size:12px; }\n' +
+'  .modal-body th { padding:6px 8px; border:1px solid var(--border); background:var(--bg-tertiary); text-align:left; font-weight:600; }\n' +
+'  .modal-body td { padding:6px 8px; border:1px solid var(--border); }\n' +
+'</style>\n</head>\n<body>\n\n' +
+'<h1>OKKI 客户管道看板</h1>\n' +
+'<div class="subtitle">生成时间：' + timeStr + ' | AI 判定结果 | 数据源：s3_ai_judgments.json | 全覆盖 ' + total + ' 客户</div>\n\n' +
+'<div class="kpi-grid">\n' +
+  kpiCards.map(c => '<div class="kpi" style="background:' + c.color + ';" onclick="openKpiModal(\'' + c.label + '\')"><div class="num">' + c.num + '</div><div class="lbl">' + c.label + '</div></div>').join('\n') + '\n</div>\n\n' +
+'<div class="card">\n  <div class="card-hd">客户双轴矩阵 <span>（8阶段活跃管线 × 质量等级）— 点击数字弹出客户名单</span></div>\n' +
+'  <div style="overflow-x:auto;">\n    <table class="mx">\n      <tr><th class="stage-col">阶段 \\ 等级</th><th>S</th><th>A</th><th>B</th><th>C</th><th>D</th></tr>\n' +
+'      ' + matrixRows + '\n    </table>\n  </div>\n' +
+'  <div style="padding:6px 14px;font-size:10px;color:var(--text-secondary);">颜色越深=该格客户越多 | 点击数字弹出详情（AI判定结果 + 行动方向）</div>\n</div>\n\n' +
+'<div class="card">\n  <div class="card-hd">终态池 <span>（从活跃阶段掉出，不出现在上方矩阵）</span></div>\n' +
+'  <div class="terminal-row">' + (terminalHtml || '<div style="padding:14px;color:var(--text-secondary);font-size:12px;">暂无终态客户</div>') + '</div>\n</div>\n\n' +
+'<div class="card">\n  <div class="card-hd">静默风险分级</div>\n  <div>' + silenceHtml + '</div>\n</div>\n\n' +
+'<div class="footer">管道看板 — AI 判定生成 | 深度分析请新开对话 | 生成时间：' + timeStr + '</div>\n\n' +
+'<div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">\n' +
+'  <div class="modal-box"><div class="modal-hd"><span id="modal-title"></span><button class="modal-close" onclick="closeModal()">✕</button></div>\n' +
+'    <div class="modal-body" id="modal-body"></div></div>\n</div>\n\n' +
+'<script>\n' +
+'window.MATRIX = ' + JSON.stringify(matrixJson) + ';\n' +
+'window.KPI_DATA = ' + JSON.stringify(kpiJson) + ';\n' +
+'function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }\n' +
+'function gradeTag(g) {\n' +
+'  var colors = {S:"#ff9f0a",A:"#0a84ff",B:"#636366",C:"#86868b",D:"#48484a"};\n' +
+'  return \'<span style="background:\' + (colors[g]||\"#636366\") + \';color:\' + (g===\"S\"?\"#1d1d1f\":\"#fff\") + \';padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;\">\' + esc(g) + \'</span>\';\n' +
+'}\n' +
+'function prioIcon(p) {\n' +
+'  var icons = {now:"🔴",soon:"🟡",idle:"⚪"};\n' +
+'  return icons[p] || "";\n' +
+'}\n' +
+'function openKpiModal(key) {\n' +
+'  var data = window.KPI_DATA[key] || [];\n' +
+'  document.getElementById("modal-title").innerHTML = esc(key) + " — " + data.length + "人";\n' +
+'  var rows = "";\n' +
+'  for (var i = 0; i < data.length; i++) {\n' +
+'    var c = data[i];\n' +
+'    var confIcon = c.cf === "uncertain" ? " ⚠️" : "";\n' +
+'    rows += "<tr><td>" + gradeTag(c.g) + "<strong>" + esc(c.n) + confIcon + "</strong></td><td style=\\"text-align:center;white-space:nowrap;font-size:11px;\\">" + esc(c.c) + " · " + (c.d === 999 ? "?" : c.d + "d") + "</td><td style=\\"font-size:12px;\\">" + esc(c.st) + "</td><td style=\\"color:var(--text-primary);font-weight:600;font-size:12px;\\">" + prioIcon(c.pr) + " " + esc(c.ac) + "</td></tr>";\n' +
+'  }\n' +
+'  document.getElementById("modal-body").innerHTML =\n' +
+'    \'<div style="max-height:55vh;overflow-y:auto;"><table><tr><th style="width:140px;">客户</th><th style="text-align:center;width:100px;">国家 · 静默</th><th>阶段</th><th>行动方向</th></tr>\' + rows + \'</table></div>\' +\n' +
+'    \'<div style="margin-top:8px;font-size:10px;color:var(--text-tertiary);">💡 🔴now=今天 🟡soon=本周 ⚪idle=暂不 | ⚠️=AI不确定需确认 | ESC/点击遮罩关闭</div>\';\n' +
+'  document.getElementById("modal-overlay").classList.add("show");\n' +
+'}\n' +
+'function openModal(ls, q) {\n' +
+'  var data = window.MATRIX[ls] && window.MATRIX[ls][q] ? window.MATRIX[ls][q] : [];\n' +
+'  document.getElementById("modal-title").innerHTML = esc(ls) + " × " + esc(q) + "级 — " + data.length + "人";\n' +
+'  var rows = "";\n' +
+'  for (var i = 0; i < data.length; i++) {\n' +
+'    var c = data[i];\n' +
+'    var confIcon = c.cf === "uncertain" ? " ⚠️" : "";\n' +
+'    var reasonStr = c.rs ? "<br><span style=\\"font-size:10px;color:var(--text-secondary);\\">📋 " + esc(c.rs) + "</span>" : "";\n' +
+'    rows += "<tr><td style=\\"white-space:nowrap;\\">" + gradeTag(c.g) + "<strong>" + esc(c.n) + confIcon + "</strong></td><td style=\\"text-align:center;white-space:nowrap;font-size:11px;\\">" + esc(c.c) + " · " + c.d + "d</td><td style=\\"font-size:12px;\\">" + esc(c.st) + reasonStr + "</td><td style=\\"color:var(--text-primary);font-weight:600;font-size:12px;\\">" + prioIcon(c.pr) + " " + esc(c.ac) + "</td></tr>";\n' +
+'  }\n' +
+'  document.getElementById("modal-body").innerHTML =\n' +
+'    \'<div style="max-height:55vh;overflow-y:auto;"><table><tr><th style="width:140px;">客户</th><th style="text-align:center;width:100px;">国家 · 静默</th><th>阶段 / 依据</th><th>行动方向</th></tr>\' + rows + \'</table></div>\' +\n' +
+'    \'<div style="margin-top:8px;font-size:10px;color:var(--text-tertiary);">💡 🔴now=今天 🟡soon=本周 ⚪idle=暂不 | ⚠️=AI不确定 | ESC/点击遮罩关闭</div>\';\n' +
+'  document.getElementById("modal-overlay").classList.add("show"); }\n' +
+'function closeModal() { document.getElementById("modal-overlay").classList.remove("show"); }\n' +
+'document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeModal(); });\n' +
+'</script>\n</body>\n</html>';
+
+  const outPath = path.join(__dirname, '..', 'output', 'dashboard_' + today + '.html');
+  fs.writeFileSync(outPath, html, 'utf-8');
+  console.log('看板 → ' + outPath);
+
+  // 同时保存增强后的全量JSON
+  fs.writeFileSync(path.join(__dirname, '..', 'data', 's1_enhanced_full.json'), JSON.stringify(data, null, 2));
+  console.log('全量数据 → data/s1_enhanced_full.json (' + data.length + '条)');
+}

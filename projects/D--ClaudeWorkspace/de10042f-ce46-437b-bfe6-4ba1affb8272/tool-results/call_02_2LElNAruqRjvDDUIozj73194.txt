@@ -1,0 +1,252 @@
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md-61-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md-62-### 🔴 唯一卡点：CPC认证 = 硬障碍
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md-63-
+08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md:64:- Amazon US对儿童产品强制要求16 CFR Part 1615 + CPC证书
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md-65-- 现货没有CPC，送检费用$290-728/款
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md-66-- 对$800订单来说检测费不成比例
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Asselya_Marina_深度分析_2026-05-13.md-67-- Leo的诚实回复（"honest over quick sale"）是正确做法
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md-132-- 等待24h后温和跟进，补上品质背书
+d:\ClaudeWorkspace\08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md-133-
+d:\ClaudeWorkspace\08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md-134-**第四步：具体话术** (发时翻译成法语)
+08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md:135:> Raymond，关于报价你慢慢看，有问题随时问。顺便说一下——我们通过了ISO9001质量管理体系认证，从面料进厂到成品出货每道工序都有检验节点。需要我把证书发给你吗？
+d:\ClaudeWorkspace\08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md-136-
+d:\ClaudeWorkspace\08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md-137----
+d:\ClaudeWorkspace\08_客户跟进\Okki\reports\今日跟进战报_2026-04-29.md-138-
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-423-        "QHr5": "账号不存在",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-642-        "rWFi": "获取授权码失败",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-643-        "brTW": "授权中...",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-644-        "qKr3": "暂时无法直接登录小满系统",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:645:        "3zPB": "查看登录指引文档",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-646-        "iSwa": "返回登录页面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-647-        "aeVX": "主页"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-648-      }
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-423-        "QHr5": "账号不存在",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-642-        "rWFi": "获取授权码失败",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-643-        "brTW": "授权中...",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-644-        "qKr3": "暂时无法直接登录小满系统",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:645:        "3zPB": "查看登录指引文档",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-646-        "iSwa": "返回登录页面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-647-        "aeVX": "主页"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-648-      }
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-423-        "QHr5": "账号不存在",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-642-        "rWFi": "获取授权码失败",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-643-        "brTW": "授权中...",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-644-        "qKr3": "暂时无法直接登录小满系统",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:645:        "3zPB": "查看登录指引文档",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-646-        "iSwa": "返回登录页面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-647-        "aeVX": "主页"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-648-      }
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\p0_analysis_data.json-268-        "text": "We're the factory that produced the Pampers 2024 Olympic baby towels — specializing in OEM/ODM baby clothing. Our quality system is ISO9001 certified, and every batch comes with inspection reports from authorized Chinese labs. Are you leaning more toward the romper style or the onesie? I can send detailed spec sheets and real product photos for whichever interests you more.",
+08_客户跟进\Okki\p0_analysis_data.json-269-        "translateTo": "英语"
+d:\ClaudeWorkspace\08_客户跟进\Okki\p0_analysis_data.json-270-      },
+08_客户跟进\Okki\p0_analysis_data.json:271:      "hook": "hook_iso_cert ✅（德国客户重认证，话术末尾可追加'需要看ISO9001证书吗？'）",
+08_客户跟进\Okki\p0_analysis_data.json-272-      "postNote": "德国客户对认证和合规极其敏感。如进入实质询价：诚实告知ISO9001有效、BSCI体系工厂、无OEKO-TEX/CE/REACH。不要假装有——德国买家会核实。4条消息极薄数据，48h无回复降B级。"
+d:\ClaudeWorkspace\08_客户跟进\Okki\p0_analysis_data.json-273-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\p0_analysis_data.json-274-    {
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-423-        "QHr5": "账号不存在",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-642-        "rWFi": "获取授权码失败",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-643-        "brTW": "授权中...",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-644-        "qKr3": "暂时无法直接登录小满系统",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:645:        "3zPB": "查看登录指引文档",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-646-        "iSwa": "返回登录页面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-647-        "aeVX": "主页"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-648-      }
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-423-        "QHr5": "账号不存在",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-642-        "rWFi": "获取授权码失败",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-643-        "brTW": "授权中...",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-644-        "qKr3": "暂时无法直接登录小满系统",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:645:        "3zPB": "查看登录指引文档",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-646-        "iSwa": "返回登录页面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-647-        "aeVX": "主页"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-648-      }
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-423-        "QHr5": "账号不存在",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-642-        "rWFi": "获取授权码失败",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-643-        "brTW": "授权中...",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-644-        "qKr3": "暂时无法直接登录小满系统",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:645:        "3zPB": "查看登录指引文档",
+
+[Showing results with pagination = limit: 250]

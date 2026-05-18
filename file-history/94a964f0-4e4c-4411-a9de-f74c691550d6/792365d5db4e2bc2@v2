@@ -1,0 +1,55 @@
+# Use .NET Environment to get the real Desktop path
+Add-Type -AssemblyName System.Windows.Forms
+
+$desktopPath = [Environment]::GetFolderPath('Desktop')
+Write-Host "Desktop path: $desktopPath"
+Write-Host "Desktop exists: $(Test-Path $desktopPath)"
+
+# Count items and check for problematic files
+$items = Get-ChildItem $desktopPath -Force -ErrorAction SilentlyContinue
+if ($items) {
+    $count = ($items | Measure-Object).Count
+    Write-Host "Item count: $count"
+
+    # Check for desktop.ini
+    $ini = Join-Path $desktopPath 'desktop.ini'
+    if (Test-Path $ini) {
+        $iniItem = Get-Item $ini -Force
+        Write-Host "desktop.ini attributes: $($iniItem.Attributes)"
+        Write-Host "desktop.ini content:"
+        Get-Content $ini -Encoding Unicode
+    } else {
+        Write-Host "desktop.ini MISSING - this is bad!"
+        # Create it
+        $iniContent = @"
+[.ShellClassInfo]
+LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21769
+IconResource=%SystemRoot%\system32\imageres.dll,-183
+"@
+        Set-Content -Path $ini -Value $iniContent -Encoding Unicode
+        (Get-Item $ini -Force).Attributes = 'Hidden', 'System', 'Archive'
+        Write-Host "Created desktop.ini with correct attributes"
+    }
+
+    # Check folder attributes
+    $folder = Get-Item $desktopPath -Force
+    Write-Host "Desktop folder attributes: $($folder.Attributes)"
+
+    # Check for any files with problematic names (very long paths, etc.)
+    Write-Host "`nChecking for problematic items..."
+    $problematic = @()
+    foreach ($item in $items) {
+        try {
+            $null = $item.FullName
+        } catch {
+            $problematic += $item.Name
+            Write-Host "  PROBLEMATIC: $($item.Name)"
+        }
+        if ($item.FullName.Length -gt 240) {
+            $problematic += "$($item.Name) (long path: $($item.FullName.Length) chars)"
+            Write-Host "  LONG PATH: $($item.Name) - $($item.FullName.Length) chars"
+        }
+    }
+}
+
+Write-Host "`nDone checking Desktop folder."

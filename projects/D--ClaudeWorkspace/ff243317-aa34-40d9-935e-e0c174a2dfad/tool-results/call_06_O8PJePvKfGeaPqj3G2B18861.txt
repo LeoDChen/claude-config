@@ -1,0 +1,231 @@
+C:\Users\Administrator\.claude\the-security-guide.md:308:## Kill Switches
+C:\Users\Administrator\.claude\the-security-guide.md:325:Practical dead-man switch:
+C:\Users\Administrator\.claude\the-security-guide.md:358:- implement process-group kill and heartbeat-based dead-man switches
+C:\Users\Administrator\.claude\commands\flutter-review.md:81:Issue: `ref.watch(authProvider)` switches on loading/data but has no `error` branch.
+C:\Users\Administrator\.claude\commands\flutter-review.md:82:Fix: Add error case to the switch expression or `when()` call to show a user-facing error message.
+C:\Users\Administrator\.claude\cache\changelog.md:153:- Create and switch between named custom themes from `/theme`, or hand-edit JSON files in `~/.claude/themes/`; plugins can also ship themes via a `themes/` directory
+C:\Users\Administrator\.claude\cache\changelog.md:334:- Added `/tui` command and `tui` setting — run `/tui fullscreen` to switch to flicker-free rendering in the same conversation
+C:\Users\Administrator\.claude\cache\changelog.md:378:- Improved `/model` to warn before switching models mid-conversation, since the next response re-reads the full history uncached
+C:\Users\Administrator\.claude\cache\changelog.md:405:- Added `path` parameter to the `EnterWorktree` tool to switch into an existing worktree of the current repository
+C:\Users\Administrator\.claude\cache\changelog.md:798:- Fixed `switch_display` in the computer-use tool returning "not available in this session" on multi-monitor setups
+C:\Users\Administrator\.claude\cache\changelog.md:951:- Resuming a session that was in a worktree now switches back to that worktree
+C:\Users\Administrator\.claude\cache\changelog.md:979:- Fixed `/sandbox` tab switching not responding to Tab or arrow keys
+C:\Users\Administrator\.claude\cache\changelog.md:982:- Improved `/permissions` — Tab and arrow keys now switch tabs from within a list
+C:\Users\Administrator\.claude\cache\changelog.md:1000:- Fixed `SessionEnd` hooks not firing when using interactive `/resume` to switch sessions
+C:\Users\Administrator\.claude\cache\changelog.md:1066:- Fixed `←`/`→` accidentally switching tabs in settings, permissions, and sandbox dialogs while navigating lists
+C:\Users\Administrator\.claude\cache\changelog.md:1131:- Fixed the Claude Code header not updating the displayed model name after switching models with `/model` or Option+P
+C:\Users\Administrator\.claude\cache\changelog.md:1207:- Improved bash command parsing by switching to a native module — faster initialization and no memory leak
+C:\Users\Administrator\.claude\cache\changelog.md:1309:- [VSCode] Added native MCP server management dialog — use `/mcp` in the chat panel to enable/disable servers, reconnect, and manage OAuth authentication without switching to the terminal
+C:\Users\Administrator\.claude\cache\changelog.md:1493:- Fixed a panic ("switch on corrupted value") on Windows
+C:\Users\Administrator\.claude\cache\changelog.md:1558:- Sonnet 4.5 with 1M context is being removed from the Max plan in favor of our frontier Sonnet 4.6 model, which now has 1M context. Please switch in /model.
+C:\Users\Administrator\.claude\cache\changelog.md:1615:- Fixed plan mode being lost after context compaction, causing the model to switch from planning to implementation mode (anthropics/claude-code#26061)
+C:\Users\Administrator\.claude\cache\changelog.md:1760:- VSCode: Fixed scroll-to-bottom under-scrolling on initial session load and session switch
+C:\Users\Administrator\.claude\cache\changelog.md:2156:- Fixed collapsed "Reading X files…" indicator incorrectly switching to past tense when thinking blocks appear mid-stream
+C:\Users\Administrator\.claude\cache\changelog.md:2297:- Added ability to switch models while writing a prompt using alt+p (linux, windows), option+p (macos).
+C:\Users\Administrator\.claude\cache\changelog.md:2393:- Switched `/usage` back to "% used"
+C:\Users\Administrator\.claude\cache\changelog.md:2498:- Windows: native installation uses shift+tab as shortcut for mode switching, instead of alt+m
+C:\Users\Administrator\.claude\cache\changelog.md:2934:- Windows: Enabled shift+tab for mode switching on versions of Node.js that support terminal VT mode
+C:\Users\Administrator\.claude\cache\changelog.md:2950:- Windows: mode switching now uses alt + m, and plan mode renders properly
+C:\Users\Administrator\.claude\cache\changelog.md:2951:- Shell: Switch to in-memory shell snapshot to fix file-related errors
+C:\Users\Administrator\.claude\cache\changelog.md:3085:- /resume slash command to switch conversations within Claude Code
+C:\Users\Administrator\.claude\cache\changelog.md:3135:- Added /upgrade for smoother switching to Claude Max plans
+C:\Users\Administrator\.claude\commands\model-route.md:1:# Model Route Command
+C:\Users\Administrator\.claude\commands\model-route.md:7:`/model-route [task-description] [--budget low|med|high]`
+C:\Users\Administrator\.claude\commands\test-coverage.md:23:   - Missing branch coverage (if/else, switch, error paths)
+C:\Users\Administrator\.claude\commands\test-coverage.md:33:4. **Branch coverage** — Each if/else, switch case, ternary
+C:\Users\Administrator\.claude\.agents\skills\api-design\SKILL.md:494:        switch {
+C:\Users\Administrator\.claude\commands\prp-pr.md:31:| Not on base branch | Current branch ≠ base | Stop: "Switch to a feature branch first." |
+C:\Users\Administrator\.claude\.agents\skills\agent-introspection-debugging\SKILL.md:88:- switch from speculative reasoning to direct observation
+C:\Users\Administrator\.claude\agents\planner.md:43:- Minimize context switching
+C:\Users\Administrator\.claude\.agents\skills\strategic-compact\SKILL.md:15:- Switching between unrelated tasks within the same session
+C:\Users\Administrator\.claude\.agents\skills\strategic-compact\SKILL.md:73:| Implementation → Testing | Maybe | Keep if tests reference recent code; compact if switching focus |
+C:\Users\Administrator\.claude\.agents\skills\fal-ai-media\SKILL.md:268:- Start with lower-cost models (Nano Banana 2) for prompt iteration, then switch to Pro for finals
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\zod-to-json-schema\README.md:8:As of November 2025, this project will no longer be actively maintained. [Zod v4 natively supports generating JSON schemas](https://zod.dev/json-schema#ztojsonschema), so I recommend you switch to the new major.
+C:\Users\Administrator\.claude\skills\videodb\reference\use-cases.md:52:- "User switched to a code editor with a Python file"
+C:\Users\Administrator\.claude\skills\blueprint\SKILL.md:39:Blueprint detects git/gh availability automatically. With git + GitHub CLI, it generates full branch/PR/CI workflow plans. Without them, it switches to direct mode (edit-in-place, no branches).
+C:\Users\Administrator\.claude\skills\blueprint\SKILL.md:101:- Git + GitHub CLI (optional — enables full branch/PR/CI workflow; Blueprint detects absence and auto-switches to direct mode)
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\zod-to-json-schema\changelog.md:48:| 3.17.0          | Added switch case handler for new trim "check". No changes to functionality.                                                                                                                                                                                                                                                                                              |
+C:\Users\Administrator\.claude\agents\flutter-reviewer.md:127:- **Missing Dart 3 patterns** — Prefer switch expressions and `if-case` over verbose `is` checks
+C:\Users\Administrator\.claude\skills\api-design\SKILL.md:494:        switch {
+C:\Users\Administrator\.claude\agents\dart-build-resolver.md:106:final name = switch (user.name) {
+C:\Users\Administrator\.claude\.agents\skills\frontend-patterns\SKILL.md:254:  switch (action.type) {
+C:\Users\Administrator\.claude\.agents\skills\frontend-patterns\SKILL.md:575:    switch (e.key) {
+C:\Users\Administrator\.claude\skills\swiftui-patterns\SKILL.md:170:                    switch dest {
+C:\Users\Administrator\.claude\agents\a11y-architect.md:13:- **Architecting Inclusivity**: Design UI systems that natively support assistive technologies (Screen Readers, Voice Control, Switch Access).
+C:\Users\Administrator\.claude\agents\a11y-architect.md:73:- [ ] **Keyboard Accessible**: Every interactive element is reachable via keyboard/switch control.
+C:\Users\Administrator\.claude\skills\agent-introspection-debugging\SKILL.md:88:- switch from speculative reasoning to direct observation
+C:\Users\Administrator\.claude\skills\strategic-compact\SKILL.md:15:- Switching between unrelated tasks within the same session
+C:\Users\Administrator\.claude\skills\strategic-compact\SKILL.md:73:| Implementation → Testing | Maybe | Keep if tests reference recent code; compact if switching focus |
+C:\Users\Administrator\.claude\skills\fal-ai-media\SKILL.md:275:- Start with lower-cost models (Nano Banana 2) for prompt iteration, then switch to Pro for finals
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\has-symbols\CHANGELOG.md:60:- [actions] switch Automatic Rebase workflow to `pull_request_target` event [`4addb7a`](https://github.com/inspect-js/has-symbols/commit/4addb7ab4dc73f927ae99928d68817554fc21dc0)
+C:\Users\Administrator\.claude\skills\enterprise-agent-ops\SKILL.md:15:3. safety controls (scopes, permissions, kill switches)
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\ip-address\README.md:101:- [SwitchyOmega](https://github.com/FelisCatus/SwitchyOmega): a [Chrome
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\ip-address\README.md:103:  for switching between multiple proxies with ~311k users!
+C:\Users\Administrator\.claude\skills\energy-procurement\SKILL.md:39:2. Analyze current tariff structures and identify optimization opportunities (rate switching, demand response enrollment)
+C:\Users\Administrator\.claude\skills\energy-procurement\SKILL.md:100:- **Regulated markets:** A single utility provides generation, transmission, and distribution. Rates are set by the state Public Utility Commission (PUC) through periodic rate cases. You cannot choose your electricity supplier. Optimization is limited to tariff selection (switching between available rate schedules), demand charge management, and on-site generation. Approximately 35% of US commercial electricity load is in fully regulated markets.
+C:\Users\Administrator\.claude\skills\email-ops\SKILL.md:34:- do not switch sender accounts casually; choose the account that matches the project and recipient
+C:\Users\Administrator\.claude\skills\ecc-tools-cost-audit\SKILL.md:46:- switch into the sibling `ECC-Tools` repo
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\object-inspect\CHANGELOG.md:174:- [actions] switch Automatic Rebase workflow to `pull_request_target` event [`f59fd3c`](https://github.com/inspect-js/object-inspect/commit/f59fd3cf406c3a7c7ece140904a80bbc6bacfcca)
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\inherits\README.md:36:If you are using version ~1.0 and planning to switch to ~2.0, be
+C:\Users\Administrator\.claude\skills\dmux-workflows\SKILL.md:188:- **Pane not responding:** Switch to the pane directly or inspect it with `tmux capture-pane -pt <session>:0.<pane-index>`.
+C:\Users\Administrator\.claude\skills\returns-reverse-logistics\SKILL.md:92:- **Swap fraud (return switching):** Returning a counterfeit, cheaper, or broken item in the packaging of a purchased item. Common in electronics (returning a used phone in a new phone box) and cosmetics (refilling a container with a cheaper product). Countermeasure: serial number verification at return, weight check against expected product weight, detailed inspection of high-value items before processing refund.
+C:\Users\Administrator\.claude\rules\dart\coding-style.md:58:final name = switch (user) {
+C:\Users\Administrator\.claude\rules\dart\coding-style.md:94:Always use exhaustive `switch` with sealed types — no default/wildcard:
+C:\Users\Administrator\.claude\rules\dart\coding-style.md:101:return switch (state) {
+C:\Users\Administrator\.claude\rules\java\patterns.md:122:String message = switch (result) {
+C:\Users\Administrator\.claude\rules\java\coding-style.md:53:- **Switch expressions** with arrow syntax (Java 14+)
+C:\Users\Administrator\.claude\rules\java\coding-style.md:54:- **Pattern matching in switch** — exhaustive sealed type handling (Java 21+)
+C:\Users\Administrator\.claude\rules\java\coding-style.md:65:// Switch expression
+C:\Users\Administrator\.claude\rules\java\coding-style.md:66:String label = switch (status) {
+C:\Users\Administrator\.claude\skills\deployment-patterns\SKILL.md:46:Run two identical environments. Switch traffic atomically.
+C:\Users\Administrator\.claude\skills\deployment-patterns\SKILL.md:57:**Pros:** Instant rollback (switch back to blue), clean cutover
+C:\Users\Administrator\.claude\skills\remotion-video-creation\rules\display-captions.md:33:// How often captions should switch (in milliseconds)
+C:\Users\Administrator\.claude\skills\remotion-video-creation\rules\display-captions.md:36:const SWITCH_CAPTIONS_EVERY_MS = 1200;
+C:\Users\Administrator\.claude\skills\remotion-video-creation\rules\display-captions.md:41:    combineTokensWithinMilliseconds: SWITCH_CAPTIONS_EVERY_MS,
+C:\Users\Administrator\.claude\skills\remotion-video-creation\rules\display-captions.md:64:          startFrame + (SWITCH_CAPTIONS_EVERY_MS / 1000) * fps,
+C:\Users\Administrator\.claude\skills\dart-flutter-patterns\SKILL.md:82:final display = switch (user) {
+C:\Users\Administrator\.claude\skills\dart-flutter-patterns\SKILL.md:137:// Exhaustive switch — compiler enforces all branches
+C:\Users\Administrator\.claude\skills\dart-flutter-patterns\SKILL.md:138:Widget buildFrom(UserState state) => switch (state) {
+C:\Users\Administrator\.claude\skills\dart-flutter-patterns\SKILL.md:202:  builder: (context, snapshot) => switch (snapshot) {
+C:\Users\Administrator\.claude\skills\dart-flutter-patterns\SKILL.md:350:  builder: (context, state) => switch (state) {
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\function-bind\CHANGELOG.md:24:- [Tests] switch to nyc for coverage [`ea360ba`](https://github.com/ljharb/function-bind/commit/ea360ba907fc2601ed18d01a3827fa2d3533cdf8)
+C:\Users\Administrator\.claude\skills\quality-nonconformance\SKILL.md:100:- **AQL Sampling Plans (ANSI/ASQ Z1.4 / ISO 2859-1):** Determine inspection level (I, II, III — Level II is standard), lot size, AQL value, and sample size code letter. Tightened inspection: switch after 2 of 5 consecutive lots rejected. Normal: default. Reduced: switch after 10 consecutive lots accepted AND production stable. Critical defects: AQL = 0 with appropriate sample size. Major defects: typically AQL 1.0-2.5. Minor defects: typically AQL 2.5-6.5.
+C:\Users\Administrator\.claude\skills\quality-nonconformance\SKILL.md:111:- **Develop vs. Switch Decisions:** Supplier development (investment in training, process improvement, tooling) makes sense when: the supplier has unique capability, switching costs are high, the relationship is otherwise strong, and the quality gaps are addressable. Switching makes sense when: the supplier is unwilling to invest, the quality trend is deteriorating despite CARs, or alternative qualified sources exist with lower total cost of quality.
+C:\Users\Administrator\.claude\skills\quality-nonconformance\SKILL.md:166:| 2 of 5 consecutive lots rejected under normal | Switch to tightened |
+C:\Users\Administrator\.claude\skills\inventory-demand-planning\SKILL.md:69:- **Tracking Signal:** Cumulative error divided by MAD (mean absolute deviation). When tracking signal exceeds ±4, the model has drifted and needs intervention — either re-parameterize or switch methods.
+C:\Users\Administrator\.claude\skills\nestjs-patterns\SKILL.md:161:    const response = host.switchToHttp().getResponse<Response>();
+C:\Users\Administrator\.claude\skills\nestjs-patterns\SKILL.md:162:    const request = host.switchToHttp().getRequest<Request>();
+C:\Users\Administrator\.claude\skills\nanoclaw-repl\SKILL.md:14:- model switching with `/model`
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:53:do not switch into implementation mode inside this skill. Tell the user this
+C:\Users\Administrator\.claude\skills\google-workspace-ops\SKILL.md:21:Use Google Drive as the entry point, then switch to the right specialist:
+C:\Users\Administrator\.claude\skills\production-scheduling\SKILL.md:54:[Omitted long matching line]
+C:\Users\Administrator\.claude\skills\frontend-patterns\SKILL.md:254:  switch (action.type) {
+C:\Users\Administrator\.claude\skills\frontend-patterns\SKILL.md:575:    switch (e.key) {
+C:\Users\Administrator\.claude\skills\foundation-models-on-device\SKILL.md:28:        switch model.availability {
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\type-is\README.md:165:  switch (typeis(req, ['urlencoded', 'json', 'multipart'])) {
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\type-is\HISTORY.md:267: * switch dependency from `mime` to `mime-types@1.0.0`
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\cookie-signature\History.md:24:* switch to built-in `crypto.timingSafeEqual` for validation instead of previous double-hash method (thank you @jodevsa!)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\src\services\worker\README.md:29:│       ├── SettingsRoutes.ts     # Settings, MCP toggle, branch switching
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\src\services\worker\README.md:100:- `POST /branch/switch` - Switch git branch
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\side-channel\CHANGELOG.md:76:- [actions] switch Automatic Rebase workflow to `pull_request_target` event [`3bcf982`](https://github.com/ljharb/side-channel/commit/3bcf982faa122745b39c33ce83d32fdf003741c6)
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\send\README.md:211:      switch (extname(path)) {
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\qs\README.md:217:It will be used to switch to `iso-8859-1`/`utf-8` mode depending on how the checkmark is encoded.
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\qs\README.md:669:If you're communicating with legacy systems, you can switch to `iso-8859-1` using the `charset` option:
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\qs\CHANGELOG.md:226:- [actions] switch Automatic Rebase workflow to `pull_request_target` event
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\cursor-hooks\STANDALONE-SETUP.md:187:- Switch to OpenRouter with a paid model
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1074:- **Fixed empty context queries after mode switching**: Switching from a non-code mode (e.g., law-study) back to code mode left stale observation type/concept filters in `settings.json`, causing all context queries to return empty results. All modes now read types/concepts from their mode JSON definition uniformly.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1180:- **Fix PostToolUse hook crashes and 5-second latency (#1220)**: Added missing `break` statements to all 7 switch cases in `worker-service.ts` preventing fall-through execution, added `.catch()` on `main()` to handle unhandled promise rejections, and removed redundant `start` commands from hook groups that triggered the 5-second `collectStdin()` timeout
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1191:- **Fix PostToolUse hook crashes and 5-second latency (#1220)**: Added missing `break` statements to all 7 switch cases in `worker-service.ts` preventing fall-through execution, added `.catch()` on `main()` to handle unhandled promise rejections, and removed redundant `start` commands from hook groups that triggered the 5-second `collectStdin()` timeout
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1420:- **Marketplace install**: Switched marketplace sync from npm to bun for package installation consistency (#1140)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1475:- **Persistent HTTP server**: Switched from in-process Chroma to a persistent HTTP server managed by the new `ChromaServerManager` for better reliability and performance
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1693:- **EnvManager**: Switched from fragile allowlist to simple blocklist for subprocess env vars (only strips `ANTHROPIC_API_KEY` per Issue #733)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:1863:**Fix:** Switched to `/api/health` (liveness check), which returns 200 as soon as the HTTP server is listening. This is sufficient for hook communication since the worker accepts requests while background initialization continues.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:2241:- **#543**: Fixed hook execution by switching runtime from `node` to `bun` (resolves `bun:sqlite` issues)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:2904:- **Hot-swap providers**: Switch between Claude and Gemini without restarting the worker
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4136:- Product Hunt badge in viewer header with theme-aware switching (light/dark)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4375:- **Security enhancement** - Switched from execSync to spawnSync with array arguments to prevent command injection
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4419:Added Version Channel section to Settings sidebar allowing users to switch between stable and beta versions directly from the UI.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4423:- Switch to beta branch to access Endless Mode features
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4424:- Switch back to stable for production use
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4428:- `BranchManager.ts`: Git operations for branch detection/switching
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:4429:- `worker-service.ts`: `/api/branch/*` endpoints (status, switch, update)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:5213:2. ✅ Switch between multiple projects → Only selected project's data shown (no mixing)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:5214:3. ✅ Rapid switching between projects → No race conditions or stale data
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:5215:4. ✅ Switch back to "All Projects" → All data appears correctly with SSE updates
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:5422:Access the viewer at http://localhost:37777 and use the theme toggle to switch between light mode, dark mode, or system preference.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CHANGELOG.md:5464:- Quick project switcher in sidebar
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\.plan\worktree-adoption.md:40:| CLI entrypoint switch | `src/npx-cli/index.ts` | 28–169 | Plain `switch (command)`, dynamic `import()` of `./commands/<name>.ts`. No commander/cac. |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\.plan\worktree-adoption.md:50:- Do NOT use a CLI framework (commander, cac, yargs). The codebase uses hand-rolled `switch (command)` + `process.argv.slice(2)`.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\.plan\worktree-adoption.md:391:`src/npx-cli/commands/adopt.ts` — follow shape of sibling commands (dynamic-imported by the switch):
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\.plan\worktree-adoption.md:424:### 5b. CLI switch
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\12-viewer-ui-layer.md:63:From `useSSE.ts:76-120` switch:
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\CLAUDE.md:44:- **Switch profiles per shell:** Set `CLAUDE_MEM_DATA_DIR=<path>` and every claude-mem path (database, chroma, logs, settings.json, worker.pid, transcripts config) derives from it. Example:
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\06-implementation-plan.md:71:**Outcome**: A single public `stripMemoryTags(text: string): string`. Every text-ingress call-site switches to it. Summary paths strip tags (closes P1 security bug).
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\06-implementation-plan.md:259:   - `registerProcess`, `unregisterProcess`, `getProcessBySession`, `getActiveCount`, `waitForSlot`, `getActiveProcesses`, `reapOrphanedProcesses` → these wrap the supervisor's registry. Delete the worker copies; callers switch to `getSupervisor().getRegistry().foo(…)` (already what they ultimately hit).
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\06-implementation-plan.md:507:3. **Delete the old 10 endpoints** under `/sessions/:sessionDbId/*` and `/api/sessions/*` after all hook-side callers are switched. Also delete `/api/context/inject` and `/api/context/semantic`.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\06-implementation-plan.md:509:5. **Hook-side `ensureWorkerRunning` cache**: create `src/hooks/worker-cache.ts` that caches `alive=true` in module scope for the hook process. First call spawns/HTTPs `/health`; subsequent calls skip. Switch all 8 handlers to import from this module.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\11-http-server-routes.md:149:| `SettingsRoutes.ts` | `POST /api/branch/switch` | `SwitchBranchSchema` | `{ branch: z.enum(['main', 'beta/7.0', 'feature/bun-executable']) }` |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\11-http-server-routes.md:204:| `src/services/worker/http/routes/SettingsRoutes.ts` | `184-198` | `branch` presence + allowlist check in `handleSwitchBranch` | `SwitchBranchSchema` (`z.enum([...])` handles both presence and allowlist) |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\11-http-server-routes.md:230:- **E**: No fall-through: after `validateBody` accepts, the handler does NOT re-validate the same field. Example: `SwitchBranchSchema` uses `z.enum(['main','beta/7.0','feature/bun-executable'])` — the handler must not re-check `if (!allowedBranches.includes(branch))`.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\11-http-server-routes.md:410:  - `POST /api/branch/switch` with `{branch:"nonexistent"}` → 400; `{branch:"main"}` → 200.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\03-unified-proposal.md:70:**Anti-pattern to reject**: Do NOT build a plugin registry or factory. Four concrete strategy objects are sufficient — a simple switch or direct construction at call sites is fine.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\10-knowledge-corpus-builder.md:82:> 06 Phase 13 line 579 suggests trimming further to `{name, filters, renderedCorpus, generatedAt}`. This plan keeps the richer shape so `/query` can recompute `renderObservations(obs, CorpusDetailStrategy)` on demand without re-hitting SQLite. If the stored `system_prompt` + observations combined are too large, switch to storing `renderedCorpus` directly; decision flagged in "Gaps" below.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\10-knowledge-corpus-builder.md:278:## Phase 6 — Switch `CorpusBuilder` rendering to `renderObservations(obs, CorpusDetailStrategy)`
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\09-lifecycle-hooks.md:15:[Omitted long matching line]
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\09-lifecycle-hooks.md:91:Switch `context.ts` + `user-message.ts` to a **single** `GET /api/session/start` call. The worker route is produced by Plan 05 Phase 1; this phase only rewires the two hook handlers.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\09-lifecycle-hooks.md:149:2. **Switch all 8 CLI handlers** to import `ensureWorkerAliveOnce` instead of `ensureWorkerRunning`:
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\09-lifecycle-hooks.md:240:Copy from `06-implementation-plan.md` Phase 11 step 3 ("Delete the old 10 endpoints under `/sessions/:sessionDbId/*` and `/api/sessions/*` after all hook-side callers are switched"). Also §3.9 line 403 (SessionRoutes: "`/api/session/*` (4 endpoints — see 3.1)").
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\06-hybrid-search-orchestration.md:218:## Phase 6 — Keep display-wrap in `SearchManager`; switch to `renderObservations(results, SearchResultStrategy)`
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\README.md:180:- 🧪 **Beta Channel** - Try experimental features like Endless Mode via version switching
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\README.md:275:Claude-Mem offers a **beta channel** with experimental features like **Endless Mode** (biomimetic memory architecture for extended sessions). Switch between stable and beta versions from the web viewer UI at http://localhost:37777 → Settings.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\05-context-injection-engine.md:124:**(d) Anti-pattern guards**: A — stop at four strategy names (compile-time `name` union enforces). E — module is the single renderer; callers will switch to it in Phase 6, Phase 7 deletes the old paths.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\05-context-injection-engine.md:206:## Phase 6 — Switch `ContextBuilder.generateContext` + `/api/session/start` handler to `renderObservations`
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\05-context-injection-engine.md:219:- End-to-end byte-identity: capture the pre-refactor output of `GET /api/context/inject?projects=X&colors=true` and `…&colors=false` for a seeded DB; after the switch, curl the same and diff. Zero diff.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\PATHFINDER-2026-04-21\07-plans\05-context-injection-engine.md:235:6. Update imports at: `ContextBuilder.ts` (switch to `renderObservations` + strategies), `SearchManager.ts` / `SearchRoutes.ts` (switch to `SearchResultStrategy`), `KnowledgeAgent.ts` / `CorpusBuilder.ts` (switch to `CorpusDetailStrategy`). Grep for every `import … from '.*AgentFormatter|HumanFormatter|ResultFormatter|CorpusRenderer'` — expect zero after this phase.
+C:\Users\Administrator\.claude\mcp-servers\grsai\node_modules\accepts\README.md:101:  switch (accept.type(['json', 'html'])) {
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\plans\2026-04-29-installer-streamline.md:23:| NPX command dispatcher | `src/npx-cli/index.ts:39–141` | Manual `switch (command)` on `process.argv.slice(2)`. Each case dynamic-imports its handler. |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\plans\2026-04-29-installer-streamline.md:258:In the `switch` block (lines 39–141), copy the `install` case pattern from lines 46–52 and adapt:
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\plugin\skills\pathfinder\SKILL.md:85:- Introducing a registry/factory when a switch statement suffices
+C:\Users\Administrator\.claude\plugins\cache\thedotmack\claude-mem\12.5.1\skills\pathfinder\SKILL.md:85:- Introducing a registry/factory when a switch statement suffices
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\nonsense-logic.md:29:**Why it's questionable:** Function is defined but **never called** anywhere. Grep shows only the definition. The `main()` switch handles 'cursor' via `handleCursorCommand`, not this function.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-600-documentation-audit-features-not-implemented.md:47:- Look for UI elements that don't exist (Version Channel switcher)
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-600-documentation-audit-features-not-implemented.md:59:- Lines 14-24 describe a Version Channel switcher in the Settings modal
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-600-documentation-audit-features-not-implemented.md:61:- Options include "Try Beta (Endless Mode)" and "Switch to Stable"
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-600-documentation-audit-features-not-implemented.md:69:| `switchBranch()` | Implemented | Backend API |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-600-documentation-audit-features-not-implemented.md:72:| `/api/branch/switch` | Implemented | `SettingsRoutes.ts:178-209` |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-600-documentation-audit-features-not-implemented.md:287:| Version Channel UI | Users cannot switch branches via UI | High - Documented prominently |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-598-conversation-history-pollution.md:206:1. **Shared Conversation History:** The plugin maintains a `conversationHistory` array that includes plugin messages, used for provider switching (Claude/Gemini/OpenRouter). This history may leak into user-visible contexts.
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\issue-596-processtransport-not-ready.md:349:4. **No easy workaround** - Requires code changes or provider switching
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\2026-01-06--windows-woes-comprehensive-report.md:271:2. **Fix Issue #517** by switching to WMIC or proper escaping
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\2026-01-04--issue-532-memory-leak-analysis.md:79:  conversationHistory: ConversationMessage[];  // Shared conversation history for provider switching
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\mcp-server-dev\skills\build-mcp-server\references\tool-design.md:100:| 30+ | Switch to search + execute. Optionally promote the top 3–5 to dedicated tools. |
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\reports\2026-01-02--stuck-observations.md:298:2. **Per-message timeout** - No kill switch for hung SDK
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\code-modernization\agents\test-engineer.md:21:  Every IF/EVALUATE/switch arm gets at least one test case. Boundary values
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.cursor\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\pr-review-toolkit\agents\code-simplifier.md:65:   - IMPORTANT: Avoid nested ternary operators - prefer switch statements or if/else chains for multiple conditions
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\mcp-server-dev\skills\build-mcp-app\references\iframe-sandbox.md:162:Developer Tools), then switch the context dropdown (top-left of the Console
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\mcp-server-dev\skills\build-mcp-app\references\apps-sdk-messages.md:89:Ask the host to switch the widget between `"inline"`, `"pip"`, or `"fullscreen"`. Check `getHostContext().availableDisplayModes` first; hide the control if the mode isn't offered. The host responds by firing `onhostcontextchanged` with new `displayMode` and `containerDimensions` — re-render at the new size.
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\mcp-server-dev\skills\build-mcp-app\references\apps-sdk-messages.md:133:| `deviceCapabilities.touch` | Switch hover-only affordances to tap (`pointerdown`) |
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.continue\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\mastra.md:146:- Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.codebuddy\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\external_plugins\telegram\README.md:65:Pairing is for capturing IDs. Once you're in, switch to `allowlist` so strangers don't get pairing-code replies. Ask Claude to do it, or `/telegram:access policy allowlist` directly.
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\factory.md:191:- ✅ Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\cursor.md:167:Your planning files (task_plan.md, findings.md, progress.md) are fully compatible between Cursor and Claude Code. You can switch between them without any changes to your planning files.
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\codebuddy.md:176:- ✅ Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\marketplaces\thedotmack\docs\i18n\README.tl.md:126:- 🧪 **Beta Channel** - Subukan ang mga experimental feature tulad ng Endless Mode sa pamamagitan ng version switching
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.codex\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\docs\antigravity.md:176:- ✅ Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\math-olympiad\skills\math-olympiad\references\attempt_agent.md:19:Switch roles. You are now a strict IMO grader. Check every step. Classify each
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\CONTRIBUTORS.md:159:  - Fixed `check-complete.ps1` completely failing on PowerShell 5.1 due to special character parse errors in double-quoted strings; switched to single-quoted strings with concatenation across all 12 platform copies (PR #88)
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\plugin-dev\skills\plugin-structure\examples\advanced-plugin.md:405:Run two complete environments, switch traffic:
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\plugin-dev\skills\plugin-structure\examples\advanced-plugin.md:408:3. Switch traffic to green
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.opencode\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\commit-commands\README.md:7:The Commit Commands Plugin automates common git operations, reducing context switching and manual command execution. Instead of running multiple git commands, use a single slash command to handle your entire workflow.
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\commit-commands\README.md:145:- Use when you want to minimize context switching
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\mastra.md:146:- Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.pi\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\codebuddy.md:176:- ✅ Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\factory.md:191:- ✅ Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\cursor.md:167:Your planning files (task_plan.md, findings.md, progress.md) are fully compatible between Cursor and Claude Code. You can switch between them without any changes to your planning files.
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\docs\antigravity.md:176:- ✅ Keep it even if you switch teams
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\external_plugins\imessage\skills\configure\SKILL.md:65:   Switch back to `allowlist`?"* and offer `/imessage:access policy
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\code-simplifier\agents\code-simplifier.md:29:   - IMPORTANT: Avoid nested ternary operators - prefer switch statements or if/else chains for multiple conditions
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\CONTRIBUTORS.md:159:  - Fixed `check-complete.ps1` completely failing on PowerShell 5.1 due to special character parse errors in double-quoted strings; switched to single-quoted strings with concatenation across all 12 platform copies (PR #88)
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.gemini\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\plugin-dev\skills\mcp-integration\references\server-types.md:486:Use environment variables to switch servers:
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.pi\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.mastracode\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.gemini\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\plugins\cwc-makers\skills\m5-onboard\SKILL.md:107:- **Power.** Slide the switch on the right edge of the Cardputer-Adv to turn it on. Same switch turns it off. The board runs off its internal LiPo when unplugged; USB-C charges it.
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.factory\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\claude-plugins-official\external_plugins\discord\README.md:83:Pairing is for capturing IDs. Once you're in, switch to `allowlist` so strangers don't get pairing-code replies. Ask Claude to do it, or `/discord:access policy allowlist` directly.
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.opencode\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\cache\planning-with-files\planning-with-files\2.35.0\.factory\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.cursor\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.codex\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.mastracode\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.continue\skills\planning-with-files\examples.md:111:- [ ] Phase 4: Add theme switching logic
+C:\Users\Administrator\.claude\plugins\marketplaces\OthmanAdi-planning-with-files-41a8b15\.codebuddy\skills\planning-with-files\references\examples.md:111:- [ ] Phase 4: Add theme switching logic

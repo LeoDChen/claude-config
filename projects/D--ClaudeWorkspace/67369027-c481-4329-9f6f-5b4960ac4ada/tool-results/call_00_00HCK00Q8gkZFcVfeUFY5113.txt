@@ -1,0 +1,252 @@
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-58-    "isUnread": false,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-59-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-60-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-61-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-62-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json:63:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-64-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-65-    "priority": "P0",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-66-    "tier": "A",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-67-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T06-00-12_P0P1深抓清单.json-68-      "未读+3天内"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-34-    "isUnread": false,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-35-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-36-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-37-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-38-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json:39:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-40-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-41-    "priority": "P0",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-42-    "tier": "A",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-43-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_P0P1深抓清单.json-44-      "未读+3天内"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-58-    "isUnread": true,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-59-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-60-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-61-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-62-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json:63:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-64-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-65-    "priority": "P0",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-66-    "tier": "S",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-67-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_P0P1深抓清单.json-68-      "有未读消息"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-64-      "accountId": 1544193040,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-65-      "messageCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-66-      "messages": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-67-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-68-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json:69:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-70-      "accountId": 1693022673,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-71-      "messageCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-72-      "messages": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-73-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T12-07-13.json-74-    {
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1682-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1683-        "待阅读消息"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1684-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1685-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1686-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json:1687:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json:1688:      "companyName": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1689-      "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1690-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1691-      "loginId": "iq29198198691mwev",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1692-      "unreadCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-1693-      "muted": false,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3976-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3977-        "30天内互动"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3978-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3979-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3980-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json:3981:      "name": "lela alamera",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3982-      "companyName": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3983-      "countryCode": "KW",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3984-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3985-      "loginId": "kw1157665431vogc",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_全量客户分类.json-3986-      "unreadCount": 0,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-118-    "isUnread": true,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-119-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-120-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-121-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-122-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json:123:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-124-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-125-    "priority": "P0",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-126-    "tier": "S",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-127-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T10-49-19_P0P1深抓清单.json-128-      "有未读消息"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-70-    "isUnread": false,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-71-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-72-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-73-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-74-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json:75:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-76-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-77-    "priority": "P0",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-78-    "tier": "A",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-79-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T09-22-29_P0P1深抓清单.json-80-      "未读+3天内"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-58-    "isUnread": false,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-59-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-60-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-61-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-62-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json:63:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-64-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-65-    "priority": "P0",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-66-    "tier": "A",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-67-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_P0P1深抓清单.json-68-      "未读+3天内"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1082-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1083-        "有未读消息"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1084-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1085-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1086-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json:1087:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json:1088:      "companyName": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1089-      "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1090-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1091-      "loginId": "iq29198198691mwev",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1092-      "unreadCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-1093-      "muted": false,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3406-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3407-        "30天内互动"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3408-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3409-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3410-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json:3411:      "name": "lela alamera",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3412-      "companyName": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3413-      "countryCode": "KW",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3414-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3415-      "loginId": "kw1157665431vogc",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T03-57-30_全量客户分类.json-3416-      "unreadCount": 0,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-63-      "accountId": 1544193040,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-64-      "messageCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-65-      "messages": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-66-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-67-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json:68:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-69-      "accountId": 1693022673,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-70-      "messageCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-71-      "messages": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-72-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-43-35.json-73-    {
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-992-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-993-        "未读+3天内"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-994-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-995-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-996-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json:997:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json:998:      "companyName": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-999-      "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-1000-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-1001-      "loginId": "iq29198198691mwev",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-1002-      "unreadCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-1003-      "muted": false,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3406-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3407-        "30天内互动"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3408-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3409-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3410-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json:3411:      "name": "lela alamera",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3412-      "companyName": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3413-      "countryCode": "KW",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3414-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3415-      "loginId": "kw1157665431vogc",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-29T12-13-17_全量客户分类.json-3416-      "unreadCount": 0,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-28-    "Eddie Kilumba(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-29-    "Talosh talosh(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-30-    "Djany Konzi(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-31-    "Charlotte Asibey(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-32-    "azaan ss(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json:33:    "amer ly(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-34-    "TheodoraAdelaide Mahe(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-35-    "rehema kiseyu(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-36-    "Susuanna ParkerAdentwi(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-37-    "Assiatou Barry(DOM中未找到)",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-05-03T01-29-58.json-38-    "Krisgel Igros(DOM中未找到)",
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-310-    "isUnread": false,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-311-    "cid": "1507577810621-2500000853693#11011@icbu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-312-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-313-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-314-  {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json:315:    "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-316-    "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-317-    "priority": "P1",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-318-    "tier": "B",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-319-    "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-05-03T01-19-12_P0P1深抓清单.json-320-      "待阅读消息"
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1082-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1083-        "未读+3天内"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1084-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1085-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1086-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json:1087:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json:1088:      "companyName": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1089-      "countryCode": "IQ",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1090-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1091-      "loginId": "iq29198198691mwev",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1092-      "unreadCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-1093-      "muted": false,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3406-      "reasons": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3407-        "30天内互动"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3408-      ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3409-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3410-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json:3411:      "name": "lela alamera",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3412-      "companyName": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3413-      "countryCode": "KW",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3414-      "buyerLevel": "",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3415-      "loginId": "kw1157665431vogc",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\2026-04-30T07-21-49_全量客户分类.json-3416-      "unreadCount": 0,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-63-      "accountId": 1544193040,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-64-      "messageCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-65-      "messages": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-66-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-67-    {
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json:68:      "name": "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-69-      "accountId": 1693022673,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-70-      "messageCount": 0,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-71-      "messages": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-72-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_api_2026-04-30T11-22-05.json-73-    {
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-4-  "skippedCount": 16,
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-5-  "skipped": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-6-    "raymond cramotte",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-7-    "Doris Akpabio",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-8-    "azaan ss",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json:9:    "amer ly",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-10-    "TheodoraAdelaide Mahe",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-11-    "rehema kiseyu",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-12-    "Susuanna ParkerAdentwi",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-13-    "Assiatou Barry",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_final_2026-04-29T13-05-38.json-14-    "Krisgel Igros",
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-04-30T06-12-00.json-6-  "skipped": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-04-30T06-12-00.json-7-    "Talosh talosh",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-04-30T06-12-00.json-8-    "zainab Babesets",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-04-30T06-12-00.json-9-    "raymond cramotte",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-04-30T06-12-00.json-10-    "azaan ss",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\deep_scrape_2026-04-30T06-12-00.json:11:    "amer ly",
+
+[Showing results with pagination = limit: 250]

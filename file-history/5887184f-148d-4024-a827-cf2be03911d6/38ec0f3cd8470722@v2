@@ -1,0 +1,144 @@
+$desktop = [Environment]::GetFolderPath("Desktop")
+$files = Get-ChildItem $desktop -Filter "*.xlsx" | Where-Object { $_.Name -match "20260505--01" }
+if ($files.Count -eq 0) {
+    Write-Host "No matching files found, listing all xlsx:"
+    Get-ChildItem $desktop -Filter "*.xlsx" | ForEach-Object { Write-Host $_.Name }
+    exit 1
+}
+$inputPath = $files[0].FullName
+Write-Host "Found: $inputPath"
+
+$outputPdf = Join-Path $desktop "XiaoXingXing_Quotation_20260505.pdf"
+
+$excel = New-Object -ComObject Excel.Application
+$excel.Visible = $false
+$excel.DisplayAlerts = $false
+
+$wb = $excel.Workbooks.Open($inputPath)
+$ws = $wb.Sheets.Item(1)
+
+# --- Translate cell values ---
+$ws.Cells.Item(1, 1).Value2 = "XiaoXingXing Garments Co., Ltd. - Quotation"
+
+$ws.Cells.Item(2, 1).Value2 = "Product Name"
+$ws.Cells.Item(2, 2).Value2 = "Fabric"
+$ws.Cells.Item(2, 3).Value2 = "Image"
+$ws.Cells.Item(2, 4).Value2 = "Size"
+$ws.Cells.Item(2, 5).Value2 = "Unit Price"
+$ws.Cells.Item(2, 6).Value2 = "Qty (pcs)"
+$ws.Cells.Item(2, 7).Value2 = "Total (USD)"
+
+$ws.Cells.Item(3, 1).Value2 = "Ice Silk Cloth Diaper"
+$ws.Cells.Item(3, 2).Value2 = "Ice silk style: Surface ice silk mesh + Crotch eco-cotton waterproof membrane"
+$ws.Cells.Item(3, 4).Value2 = "S (4-9kg)`nM (9-14kg)`nL (14-19kg)"
+$ws.Cells.Item(3, 5).Value2 = "$1.20/pc"
+
+$ws.Cells.Item(4, 1).Value2 = "Waterproof Pad"
+$ws.Cells.Item(4, 2).Value2 = "Surface: 100% Cotton`nBottom: 100% Polyester`n       (excl. TPU membrane)"
+$ws.Cells.Item(4, 4).Value2 = "80*100cm"
+$ws.Cells.Item(4, 5).Value2 = "$3.95/pc"
+
+$ws.Cells.Item(6, 1).Value2 = "U-Shape Bib"
+$ws.Cells.Item(6, 2).Value2 = "Surface: 100% Polyester`nBottom: 100% Polyester`n       (excl. TPU membrane)"
+$ws.Cells.Item(6, 4).Value2 = "23*30cm"
+$ws.Cells.Item(6, 5).Value2 = "$0.50/pc"
+
+$ws.Cells.Item(7, 1).Value2 = "Romper"
+$ws.Cells.Item(7, 2).Value2 = "100% Cotton"
+$ws.Cells.Item(7, 4).Value2 = "59cm`n66cm`n73cm`n80cm`n90cm"
+$ws.Cells.Item(7, 5).Value2 = "$4.65/pc"
+
+$ws.Cells.Item(8, 1).Value2 = "Kids' Set"
+$ws.Cells.Item(8, 2).Value2 = "100% Cotton"
+$ws.Cells.Item(8, 4).Value2 = "73cm`n80cm`n90cm`n100cm`n110cm`n120cm`n130cm"
+$ws.Cells.Item(8, 5).Value2 = "$4.35/pc"
+
+$ws.Cells.Item(9, 1).Value2 = "Kids' Set"
+$ws.Cells.Item(9, 2).Value2 = "100% Polyester"
+$ws.Cells.Item(9, 4).Value2 = "80cm`n90cm`n100cm`n110cm`n120cm`n130cm"
+$ws.Cells.Item(9, 5).Value2 = "$2.65/pc"
+
+$ws.Cells.Item(10, 1).Value2 = "Kids' Set"
+$ws.Cells.Item(10, 2).Value2 = "95% Cotton"
+$ws.Cells.Item(10, 4).Value2 = "3-6M`n6-12M`n12-18M`n18-24M`n2T`n3T`n4T"
+$ws.Cells.Item(10, 5).Value2 = "$9.20/pc"
+
+$ws.Cells.Item(11, 1).Value2 = "Muslim Swaddle Wrap"
+$ws.Cells.Item(11, 2).Value2 = "100% Cotton"
+$ws.Cells.Item(11, 4).Value2 = "100*100cm"
+$ws.Cells.Item(11, 5).Value2 = "$2.20/pc"
+
+$ws.Cells.Item(12, 1).Value2 = "Kids' Set"
+$ws.Cells.Item(12, 2).Value2 = "100% Cotton"
+$ws.Cells.Item(12, 4).Value2 = "90cm`n100cm`n110cm`n120cm`n130cm`n140cm`n150cm"
+$ws.Cells.Item(12, 5).Value2 = "$4.50/pc"
+
+$ws.Cells.Item(13, 1).Value2 = "Kids' Set"
+$ws.Cells.Item(13, 2).Value2 = "100% Cotton"
+$ws.Cells.Item(13, 4).Value2 = "73cm`n80cm`n90cm`n100cm`n110cm`n120cm`n130cm"
+$ws.Cells.Item(13, 5).Value2 = "$2.99/pc"
+
+$ws.Cells.Item(14, 1).Value2 = "Kids' Set"
+$ws.Cells.Item(14, 2).Value2 = "100% Cotton"
+$ws.Cells.Item(14, 4).Value2 = "One size (~3 yrs)"
+$ws.Cells.Item(14, 5).Value2 = "$3.18/pc"
+
+$ws.Cells.Item(15, 1).Value2 = "Shipping Cost"
+$ws.Cells.Item(15, 7).Value2 = "$541.20"
+
+$ws.Cells.Item(16, 1).Value2 = "Total"
+$ws.Cells.Item(16, 6).Value2 = "220 pcs"
+$ws.Cells.Item(16, 7).Value2 = "$1,328.60"
+
+# --- Optimize formatting ---
+$ws.Columns.Item(1).ColumnWidth = 22
+$ws.Columns.Item(2).ColumnWidth = 32
+$ws.Columns.Item(3).ColumnWidth = 14
+$ws.Columns.Item(4).ColumnWidth = 16
+$ws.Columns.Item(5).ColumnWidth = 14
+$ws.Columns.Item(6).ColumnWidth = 12
+$ws.Columns.Item(7).ColumnWidth = 16
+
+for ($r = 3; $r -le 14; $r++) {
+    $ws.Rows.Item($r).RowHeight = 75
+}
+
+$ws.Range("A1:G1").Font.Bold = $true
+$ws.Range("A1:G1").Font.Size = 14
+$ws.Range("A1:G1").HorizontalAlignment = -4108
+
+$ws.Range("A2:G2").Font.Bold = $true
+$ws.Range("A2:G2").Interior.Color = 12632256
+$ws.Range("A2:G2").HorizontalAlignment = -4108
+
+$ws.Range("A3:G14").HorizontalAlignment = -4108
+$ws.Range("A3:G14").VerticalAlignment = -4108
+
+$ws.Range("B3:B14").WrapText = $true
+$ws.Range("D3:D14").WrapText = $true
+
+$ws.Range("A15:G15").Font.Bold = $true
+$ws.Range("A16:G16").Font.Bold = $true
+$ws.Range("A16:G16").Font.Size = 12
+
+$ws.Range("A2:G16").Borders.LineStyle = 1
+
+$ws.PageSetup.Orientation = 2
+$ws.PageSetup.PaperSize = 9
+$ws.PageSetup.FitToPagesWide = 1
+$ws.PageSetup.FitToPagesTall = 1
+$ws.PageSetup.LeftMargin = 36
+$ws.PageSetup.RightMargin = 36
+$ws.PageSetup.TopMargin = 36
+$ws.PageSetup.BottomMargin = 36
+
+# Export to PDF
+$wb.ExportAsFixedFormat(0, $outputPdf)
+Write-Host "PDF exported to: $outputPdf"
+
+$wb.Close($false)
+$excel.Quit()
+
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($ws) | Out-Null
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($wb) | Out-Null
+[System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null

@@ -1,0 +1,116 @@
+# OKKI 客户分类准确度重构
+
+## 问题
+
+`enhanced_classify.js` 中两个核心输出不可靠：
+1. **生命周期阶段判定**：正则匹配关键词（PI/deposit/sample）→ 无法区分"讨论过"和"已完成"
+2. **紧急程度判定** (`getAction()`)：纯计时器 → 无法区分"报价等决策"和"客户提问没回"
+
+导致：脚本标 urgent，AI 深度分析后说不用催，用户失去对系统的信任。
+
+## 方案：两段式
+
+**脚本（保召回）**：不再做判断，只做提取和统计。输出结构化数据供 AI 读取。
+
+**AI（保精准）**：读脚本提取的对话片段，判断真实的生命周期阶段和紧急程度。
+
+---
+
+## 脚本改动点
+
+### 1. `extractConversationSnippet()` — 新增
+
+从 chat_history JSON 中提取最近 N 条真实消息（非系统消息），保留顺序和发言人。
+
+**规则：**
+- N=8（默认，可配）
+- 跳过系统消息（沿用现有 `isSys()`）
+- 截断每条消息到 200 字符
+- 输出格式：`[我方/客户] YYYY-MM-DD | 消息内容`
+
+覆盖场景：
+- 8 条全是客户消息 → 正常输出
+- 8 条全是我方消息 → 正常输出
+- 最近几条是系统消息 → 跳过，往前补足 8 条
+- 对话不足 8 条 → 有几条出几条
+
+### 2. `determineLifecycle()` — 保留但降级
+
+保留当前的阶段判定，但：
+- 改名为 `estimateStage()` 
+- 输出增加 `confidence: high|low` 字段
+- `high`：我方消息中有明确关键词（我们确实做了某事）
+- `low`：仅客户消息中出现关键词（客户要求/提问）
+
+### 3. `getAction()` — 大幅简化
+
+不再输出 `urgent/soon/watch/idle`。改为只输出 3 个字段：
+
+| 字段 | 含义 |
+|------|------|
+| `direction` | `to_us`（客户发了最后一条）或 `to_them`（我们发了最后一条） |
+| `days` | 距上次客户消息的天数 |
+| `lastMsgType` | `question/quote/pi/sample/info/general`（简单判断） |
+
+优先级不再由脚本判定，交给 AI。
+
+### 4. 输出文件
+
+新增 `data/s2_ai_input.json`，包含所有"可能需要行动"的客户（阈值放宽，保召回）。每人字段：
+
+```json
+{
+  "name": "jonathan aston",
+  "grade": "B",
+  "country": "加纳",
+  "days": 1,
+  "direction": "to_them",
+  "lastMsgType": "quote",
+  "estimatedStage": "PI已发",
+  "stageConfidence": "low",
+  "snippet": [
+    "[我方] 2026-05-13 | Jonathan, both shipping options to Ghana: Option A — Sea Freight DDP...",
+    "[客户] 2026-05-12 | ok",
+    "[我方] 2026-05-12 | Great! Please provide your delivery address so I can calculate...",
+    ...
+  ]
+}
+```
+
+---
+
+## AI 工作流改动
+
+### 旧流程
+1. 读 STATE.md → 看脚本的 urgency 标签
+2. 逐个深度分析 → 发现矛盾
+
+### 新流程
+1. 运行同步脚本（不变）
+2. 读 `data/s2_ai_input.json` → 分批判断（每批 5-6 人）
+3. 输出精准行动清单
+4. 用户确认后，只对确认的人做深度分析
+
+### AI 判断输出格式
+
+每人一行：
+```
+名字 | 修正阶段 | 球在谁 | 优先级 | 一句话方向 | 置信度
+```
+
+---
+
+## 文件变更
+
+| 文件 | 动作 |
+|------|------|
+| `scripts/enhanced_classify.js` | 修改：新增 extractConversationSnippet()，降级 determineLifecycle()，简化 getAction()，新增 s2_ai_input.json 输出 |
+| `knowledge/analysis-framework.md` | 更新：加入 AI 批量判断的输入/输出规范 |
+
+---
+
+## 验证
+
+1. 跑同步脚本后检查 `s2_ai_input.json` 是否生成
+2. 对比 Jonathan/Earnestina 在旧系统（urgent）和新系统（AI 判断后应为 idle/watch）的差异
+3. 确认生命周期低置信度标记是否正确（PI 阶段误判应标 `low`）

@@ -1,0 +1,71 @@
+# OKKI Dashboard V2 修复计划
+
+## 背景
+
+用户预览 dashboard HTML 后提出 7 个问题。核心诉求：数据准确、交互便捷、行动指引具体。
+
+## 当前状态
+
+- `orders_latest.json` 为空 — `sync_orders.js` 选择器没匹配到 OKKI 订单页的实际 DOM 结构
+- 修复 1/2/3/5/7 不依赖订单数据，可立即改
+- 修复 4 依赖订单数据，需先修 `sync_orders.js`
+- 修复 6 需要改 `enhanced_classify.js` + 重新分类，工作量大，分步做
+
+## 分阶段执行
+
+### 第一阶段：5 项独立修复（generate_dashboard.js）
+
+**修复 1：只过滤 Assistant Eva**
+- 用户明确：只排除 Assistant Eva 这一个系统机器人，不按国家过滤
+- 在 merge 循环中加：`if (name === 'Assistant Eva') continue;`
+
+**修复 2：矩阵表头去重**
+- line 565: `${QUALITY_ORDER.map(q => `<th>S ${q}</th>`)}` → `${QUALITY_ORDER.map(q => `<th>${q}</th>`)}`
+
+**修复 3：弹窗改居中模态框**
+- 参照 `output/popup-demo.html` 方案 B
+- 全局一个 `<div class="modal-overlay">`，点击格子时动态填充内容 + 显示
+- CSS: `position:fixed;` 全屏遮罩，内容区居中 + max-height:70vh 可滚动
+- 关闭: 点遮罩 / X按钮 / ESC键
+
+**修复 5：静默排序反转 + 完整名单**
+- 渲染顺序：hot → active → short → mid → long → deep
+- 展开 `buildSilenceRows` 显示全部客户（去掉 limit=15 截断）
+
+**修复 7：国家代码 → 中文**
+- 已有 `countryNames` 映射表（line 298），扩展覆盖所有出现的国家
+- 矩阵弹窗和静默列表中用 `countryNames[code] || code` 显示
+
+### 第二阶段：订单数据抓取
+
+**问题诊断**：`sync_orders.js` 的 `table tbody tr` 选择器不匹配 OKKI 的实际 DOM。OKKI 是 Vue SPA，订单列表可能不是标准 `<table>` 结构。
+
+**方案**：
+1. 先手动在浏览器打开 `https://crm.xiaoman.cn/order`，F12 查看实际 DOM 结构
+2. 根据实际结构修正选择器
+3. 重新跑 `sync_orders.js` 提取数据
+4. 匹配"交易成功"客户 → 标记 lifecycle 为"已签收"
+
+### 第三阶段：行动目标具体化（修复 6）
+
+- 修改 `enhanced_classify.js`，为每个客户提取 `lastCustQuestion` / `ourResponseQuality` / `responseGapDays`
+- 重新跑分类生成新的 `s1_enhanced_full.json`
+- `generate_dashboard.js` 中在弹窗客户列表展示这些字段
+
+## 改动文件
+
+| 文件 | 阶段 | 说明 |
+|------|------|------|
+| `scripts/generate_dashboard.js` | 一 | 修复 1/2/3/5/7 |
+| `scripts/sync_orders.js` | 二 | 修正选择器，重新提取 |
+| `data/orders_latest.json` | 二 | sync_orders.js 输出 |
+| `scripts/enhanced_classify.js` | 三 | 增加信号字段 |
+| `data/s1_enhanced_full.json` | 三 | 重新分类生成 |
+
+## 验证
+
+1. 看板无 Assistant Eva
+2. 表头：S / A / B / C / D
+3. 弹窗居中，不超出屏幕
+4. 静默：hot 在上 deep 在下，展开全量
+5. 国家显示中文

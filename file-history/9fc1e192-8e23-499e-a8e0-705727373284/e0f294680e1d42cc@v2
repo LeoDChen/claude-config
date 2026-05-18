@@ -1,0 +1,106 @@
+/**
+ * 小满CRM — 图片抓取工具
+ *
+ * 从 TM 聊天中检测图片 URL，通过浏览器上下文下载到本地
+ */
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const IMAGES_DIR = join(__dirname, '..', 'images');
+
+/**
+ * 提取当前会话消息中的所有图片 URL
+ */
+export async function extractImageUrls(frame) {
+  return frame.evaluate(() => {
+    const urls = [];
+    document.querySelectorAll('.message-item-wrapper.messenger img').forEach(img => {
+      if (img.src && img.src.startsWith('http')) urls.push(img.src);
+    });
+    return [...new Set(urls)];
+  });
+}
+
+/**
+ * 通过浏览器上下文下载图片（复用登录态 cookie）
+ * 创建临时页面 -> 导航到图片URL -> 保存响应体 -> 关闭页面
+ */
+async function downloadImageViaContext(ctx, url, savePath) {
+  const newPage = await ctx.newPage();
+  try {
+    const response = await newPage.goto(url, {
+      waitUntil: 'load',
+      timeout: 20000,
+    });
+    if (!response.ok()) {
+      throw new Error(`HTTP ${response.status()}`);
+    }
+    const buffer = await response.body();
+    writeFileSync(savePath, buffer);
+    return buffer.length;
+  } finally {
+    await newPage.close();
+  }
+}
+
+/**
+ * 为当前客户保存所有图片
+ * @param {BrowserContext} ctx - Playwright 浏览器上下文（含登录态）
+ * @param {object} frame - TM 聊天 iframe
+ * @param {string} customerName - 客户名称（用于目录名）
+ * @param {Set} globalDedup - 全局去重 Set（避免重复下载）
+ * @returns {Promise<Array<{url: string, filePath: string, size: number}>>}
+ */
+export async function saveCustomerImages(ctx, frame, customerName, globalDedup) {
+  const urls = await extractImageUrls(frame);
+  if (urls.length === 0) return [];
+
+  const dir = join(IMAGES_DIR, sanitizeName(customerName));
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+  const saved = [];
+  for (const url of urls) {
+    if (globalDedup.has(url)) continue;
+    globalDedup.add(url);
+
+    const ext = url.match(/\.(jpe?g|png|gif|webp|bmp)(?:[?#]|$)/i)?.[1] || 'jpg';
+    const hash = createHash('md5').update(url).digest('hex').substring(0, 10);
+    const filename = `${Date.now()}_${hash}.${ext}`;
+    const filePath = join(dir, filename);
+
+    try {
+      const size = await downloadImageViaContext(ctx, url, filePath);
+      saved.push({ url, filePath, size });
+    } catch (err) {
+      // Silent skip — some images may be expired or restricted
+      console.log(`   ⚠️ 图片跳过: ${url.substring(0, 60)}… (${err.message})`);
+    }
+  }
+  return saved;
+}
+
+/**
+ * 在每条消息中检测图片并注入 URL
+ * @returns {Promise<Array<{url: string, filePath: string|null}>>}
+ */
+export function extractMessageImages(frame) {
+  return frame.evaluate(() => {
+    const results = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(wrapper => {
+      const imgs = wrapper.querySelectorAll('img');
+      if (imgs.length === 0) return;
+      const urls = Array.from(imgs)
+        .map(img => img.src)
+        .filter(s => s && s.startsWith('http'));
+      if (urls.length > 0) results.push(...urls);
+    });
+    return [...new Set(results)];
+  });
+}
+
+function sanitizeName(name) {
+  return name.replace(/[/\\?%*:|"<>]/g, '_').substring(0, 60);
+}

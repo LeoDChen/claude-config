@@ -1,0 +1,156 @@
+/**
+ * OKKI TM 聊天内容抓取 — 从 TM iframe 提取消息
+ *
+ * 使用前：
+ * 1. Chrome --remote-debugging-port=9222 已启动并登录 OKKI
+ * 2. 在 Chrome 中打开 TM 沟通页面，确保看到聊天联系人列表
+ * 3. 运行：node scripts/scrape_tm_chat.js
+ *
+ * 工作方式：
+ * - 在 TM iframe 中尝试调用阿里内部 API 获取消息
+ * - 如果 API 不可用，回退到 DOM 提取
+ * - 逐客户保存到 data/customers/{company_id}_chat.json
+ */
+
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+
+const CDP_URL = 'http://localhost:9222';
+const OUTPUT_DIR = path.join(__dirname, '..', 'data', 'customers');
+const REQUEST_DELAY = 1000;
+
+if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+async function getTMIframe(page) {
+  // 确保在 TM 页面
+  if (!page.url().includes('/talk/hub/tm')) {
+    await page.goto('https://crm.xiaoman.cn/talk/hub/tm', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForTimeout(8000);
+  }
+  const frame = page.frames().find(f => f.url().includes('onetalk.alibaba.com'));
+  return frame;
+}
+
+async function getContactList(tmFrame) {
+  // 尝试从 iframe 内调用阿里 MTOP API 获取联系人
+  const contacts = await tmFrame.evaluate(async () => {
+    // 尝试多种方式获取联系人列表
+    const results = { domContacts: [], apiContacts: null };
+
+    // 方式1: DOM 提取
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    const texts = [];
+    while (node = walker.nextNode()) {
+      const t = node.textContent.trim();
+      if (t.length > 2 && t.length < 100) texts.push(t);
+    }
+
+    // 方式2: 尝试从 localStorage/React state 获取
+    try {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const val = localStorage.getItem(key);
+        if (val && val.includes('"contact"') && val.length < 50000) {
+          try {
+            const parsed = JSON.parse(val);
+            results.apiContacts = { source: 'localStorage:' + key, data: parsed };
+          } catch(_) {}
+        }
+      }
+    } catch(_) {}
+
+    // 方式3: 找所有列表项
+    const listItems = document.querySelectorAll('[class*=list-item], [class*=ListItem], [class*=contact-item], [class*=session-item]');
+    listItems.forEach(item => {
+      const txt = item.textContent.trim().substring(0, 200);
+      if (txt.length > 3) results.domContacts.push(txt);
+    });
+
+    return results;
+  });
+
+  return contacts;
+}
+
+async function getChatMessages(tmFrame, contactName) {
+  // 在 iframe 中点击指定联系人，然后提取消息
+  const messages = await tmFrame.evaluate(async (name) => {
+    const result = { found: false, messages: [], method: '' };
+
+    // 方式1: 尝试通过文本找到并点击联系人
+    const allElements = document.querySelectorAll('*');
+    for (const el of allElements) {
+      if (el.textContent.trim() === name && el.children.length === 0) {
+        el.click();
+        await new Promise(r => setTimeout(r, 2000));
+        result.method = 'click';
+        break;
+      }
+    }
+
+    // 提取当前显示的消息
+    const msgElements = document.querySelectorAll('[class*=message], [class*=msg], [class*=bubble], [class*=chat-content]');
+    msgElements.forEach(el => {
+      const txt = el.textContent.trim();
+      if (txt.length > 1 && txt.length < 5000) {
+        result.messages.push({
+          text: txt,
+          isMine: el.className.includes('self') || el.className.includes('mine') || el.className.includes('right'),
+          time: el.querySelector('[class*=time], time')?.textContent || '',
+        });
+      }
+      result.found = result.found || result.messages.length > 0;
+    });
+
+    return result;
+  }, contactName);
+
+  return messages;
+}
+
+async function main() {
+  console.log('[TM Chat] 连接 Chrome ...');
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到 OKKI 页面');
+
+  const tmFrame = await getTMIframe(page);
+  if (!tmFrame) {
+    console.error('[TM Chat] TM iframe 未找到。请在 Chrome 中手动打开: https://crm.xiaoman.cn/talk/hub/tm');
+    process.exit(1);
+  }
+
+  console.log('[TM Chat] TM iframe 已找到');
+  console.log('[TM Chat] 提取联系人列表...');
+
+  const contacts = await getContactList(tmFrame);
+
+  console.log('[TM Chat] DOM 联系人: ' + (contacts.domContacts || []).length + ' 个');
+  console.log('[TM Chat] API 联系人: ' + (contacts.apiContacts ? 'found' : 'not found'));
+
+  // 输出前 30 个 DOM 联系人
+  if (contacts.domContacts && contacts.domContacts.length > 0) {
+    console.log('');
+    console.log('前 30 个联系人:');
+    contacts.domContacts.slice(0, 30).forEach((c, i) => console.log('  ' + (i + 1) + '. ' + c.substring(0, 80)));
+  }
+
+  // 如果有 API 数据，保存原始数据
+  if (contacts.apiContacts) {
+    const ts = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    const fp = path.join(OUTPUT_DIR, 'tm_contacts_' + ts + '.json');
+    fs.writeFileSync(fp, JSON.stringify(contacts.apiContacts, null, 2));
+    console.log('[TM Chat] 联系人数据已保存: ' + fp);
+  }
+
+  // TODO: 逐客户提取聊天记录
+  // for each contact: click, wait, extract messages, save
+
+  console.log('[TM Chat] 联系人探索完成。');
+  process.exit(0);
+}
+
+main().catch(err => { console.error('[TM Chat]', err.message); process.exit(1); });

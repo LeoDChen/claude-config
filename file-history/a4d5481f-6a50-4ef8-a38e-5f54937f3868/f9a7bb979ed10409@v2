@@ -1,0 +1,83 @@
+<h2>当前方案：P0-P4 五梯队（单轴紧急度模型）</h2>
+<p class="subtitle">问题：客户价值 × 生命周期被强行压缩成一个数字</p>
+
+<div class="section">
+  <h3>现状：所有客户排成一行</h3>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;">
+    <div style="background:#dc2626;color:#fff;padding:12px 20px;border-radius:8px;flex:1;min-width:100px;text-align:center;font-weight:bold;">P0<br><small>今天必须动</small></div>
+    <div style="background:#f97316;color:#fff;padding:12px 20px;border-radius:8px;flex:1;min-width:100px;text-align:center;font-weight:bold;">P1<br><small>48h 内</small></div>
+    <div style="background:#eab308;color:#fff;padding:12px 20px;border-radius:8px;flex:1;min-width:100px;text-align:center;font-weight:bold;">P2<br><small>本周</small></div>
+    <div style="background:#6b7280;color:#fff;padding:12px 20px;border-radius:8px;flex:1;min-width:100px;text-align:center;font-weight:bold;">P3<br><small>按需</small></div>
+    <div style="background:#9ca3af;color:#fff;padding:12px 20px;border-radius:8px;flex:1;min-width:100px;text-align:center;font-weight:bold;">P4<br><small>不管</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>核心矛盾：同一梯队里混着完全不同的人</h3>
+
+<div class="pros-cons">
+  <div class="pros"><h4>P0 里的"高质量"</h4><ul>
+    <li>Keinjol Tata — 品牌ODM 500件 Amazon渠道</li>
+    <li>maimouna cisse — 500件价格谈判中</li>
+    <li>Samia Guenad — DDP报价确认中</li>
+  </ul></div>
+  <div class="cons"><h4>P0 里的"低质量"</h4><ul>
+    <li>Christabel — $7.70 个人小单</li>
+    <li>ali Amjid — ¥510 16件个人买家</li>
+    <li>ivy quarcoo — 问哪些有现货</li>
+  </ul></div>
+</div>
+
+  <p style="margin-top:16px;padding:12px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:4px;">
+    <strong>问题：</strong>品牌ODM 500件 和 $7.70 散客都被标为P0，但它们的<strong>长期价值完全不在一个量级</strong>。
+    反过来，一个曾经下过5000+的老客户如果30天没说话，就被丢到P4从此消失。
+  </p>
+</div>
+
+<div class="section">
+  <h3>你真正想要的：两个独立维度</h3>
+  <table style="width:100%;border-collapse:collapse;margin:12px 0;">
+    <tr>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;width:80px;">&nbsp;</th>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;">初询</th>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;">报价中</th>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;">谈判</th>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;">待付款</th>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;">已成交</th>
+      <th style="background:#1e293b;color:#fff;padding:10px;text-align:center;">沉默</th>
+    </tr>
+    <tr>
+      <td style="background:#dc2626;color:#fff;padding:8px;font-weight:bold;">A级<br>高质量</td>
+      <td style="background:#fef2f2;padding:8px;text-align:center;border:1px solid #fecaca;">重点培养</td>
+      <td style="background:#fef2f2;padding:8px;text-align:center;border:1px solid #fecaca;">全力推进</td>
+      <td style="background:#fef2f2;padding:8px;text-align:center;border:1px solid #fecaca;">今天必回</td>
+      <td style="background:#fef2f2;padding:8px;text-align:center;border:1px solid #fecaca;">加速关闭</td>
+      <td style="background:#fef2f2;padding:8px;text-align:center;border:1px solid #fecaca;">深度维护</td>
+      <td style="background:#fef2f2;padding:8px;text-align:center;border:1px solid #fecaca;">高成本重激活</td>
+    </tr>
+    <tr>
+      <td style="background:#f97316;color:#fff;padding:8px;font-weight:bold;">B级<br>中等</td>
+      <td style="background:#fff7ed;padding:8px;text-align:center;border:1px solid #fed7aa;">正常推进</td>
+      <td style="background:#fff7ed;padding:8px;text-align:center;border:1px solid #fed7aa;">48h回复</td>
+      <td style="background:#fff7ed;padding:8px;text-align:center;border:1px solid #fed7aa;">48h回复</td>
+      <td style="background:#fff7ed;padding:8px;text-align:center;border:1px solid #fed7aa;">常规跟进</td>
+      <td style="background:#fff7ed;padding:8px;text-align:center;border:1px solid #fed7aa;">定期回访</td>
+      <td style="background:#fff7ed;padding:8px;text-align:center;border:1px solid #fed7aa;">标记待激活</td>
+    </tr>
+    <tr>
+      <td style="background:#6b7280;color:#fff;padding:8px;font-weight:bold;">C级<br>低价值</td>
+      <td style="background:#f9fafb;padding:8px;text-align:center;border:1px solid #e5e7eb;">模板回复</td>
+      <td style="background:#f9fafb;padding:8px;text-align:center;border:1px solid #e5e7eb;">发报价+等待</td>
+      <td style="background:#f9fafb;padding:8px;text-align:center;border:1px solid #e5e7eb;">不投入过多</td>
+      <td style="background:#f9fafb;padding:8px;text-align:center;border:1px solid #e5e7eb;">快速关闭</td>
+      <td style="background:#f9fafb;padding:8px;text-align:center;border:1px solid #e5e7eb;">被动响应</td>
+      <td style="background:#f9fafb;padding:8px;text-align:center;border:1px solid #e5e7eb;">不管</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <p style="color:#6b7280;font-size:14px;">
+    上表只是示意，不是最终方案。接下来我们逐条确认：<strong>生命周期有哪些阶段、质量怎么分级、两个维度交叉后每格该做什么</strong>。
+  </p>
+</div>

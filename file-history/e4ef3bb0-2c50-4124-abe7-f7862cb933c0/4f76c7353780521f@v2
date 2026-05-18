@@ -1,0 +1,107 @@
+# OKKI 上下文瘦身方案
+
+## 背景
+
+每次对话自动加载 ~63KB 指令文件，OKKI 分析时再叠加 ~41KB，总计 ~104KB 在被客户聊天数据占用前就已经消耗了上下文。本方案清理无用、过期、重复内容，目标从 104KB 降到 ~60KB，且不影响 ECC 插件和 OKKI 分析功能。
+
+---
+
+## 一、删除 AGENTS.md（释放 8KB）
+
+**文件**：`d:\ClaudeWorkspace\.claude\AGENTS.md`（8,092 字节，167 行）
+
+**内容**：软件工程插件说明书 — TDD、80% 代码覆盖率、Repository Pattern、TypeScript/Rust/Go/Python reviewer、immutability 原则等。
+
+**为什么可以安全删除**：
+- Agent/Skill/Command 的可用性由 `.claude/agents/` `.claude/skills/` `.claude/commands/` 目录结构控制，不由 AGENTS.md 控制
+- AGENTS.md 只是 Claude Code 自动加载的"项目说明书"，等同于第二个 CLAUDE.md
+- 删除后 hooks、skills、commands 全部照常工作
+- 该文件描述的 38 个 agents 大部分已被你删除（git status 显示 ~30 个 agent 文件已 D）
+
+**风险评估**：零风险。ECC 插件通过 `plugin.json` + `hooks.json` 运作，不依赖 AGENTS.md。
+
+---
+
+## 二、记忆文件清理（42KB → ~20KB）
+
+### 2.1 删除过期文件（2 个）
+
+| 文件 | 原因 |
+|------|------|
+| `chrome_cdp_path.md` | CDP 方案已废弃（Chrome 147.x 不监听端口），现用 Playwright + Profile 4 |
+| `okki_crm_project.md` | 描述的 CDP 方案③已过时，内容与 STATE.md 脱节 |
+
+### 2.2 合并重复规则（3 组合 1）
+
+| 合并前 | 合并后 | 原因 |
+|--------|--------|------|
+| `feedback_chinese_response.md` + `inquiry_reply_format.md` + `company_info_output_rules.md` | `output_language_rules.md` | 三条规则都在说同一个主题：输出语言 |
+| `problem_solving_approach.md` + `feedback_dont_trust_stale_analysis.md` | `problem_solving_approach.md`（更新） | 两条语义重叠：不被工具/审计/旧结论限制 |
+| `feedback_context_management.md` + `feedback_context_split.md` | `context_management_rules.md` | 两条都是上下文容量管理 |
+
+### 2.3 删除已被 CLAUDE.md 覆盖的（2 个）
+
+| 文件 | 覆盖来源 |
+|------|----------|
+| `factory_claims_verification.md` | 全局 CLAUDE.md "不确定绝不猜测" + operations-rules.md 工厂信息规则 |
+| `project_ob_autosave.md` | 全局 CLAUDE.md "OB 归档" 段落已覆盖 |
+
+**清理后**：30 个文件 → 22 个文件，42KB → ~20KB
+
+---
+
+## 三、OKKI CLAUDE.md 瘦身（6.3KB → ~3KB）
+
+**当前问题**：OKKI CLAUDE.md 与 knowledge/ 下 4 个文件有大量重叠。
+
+| 重叠内容 | CLAUDE.md 位置 | knowledge/ 位置 |
+|----------|:---:|:---:|
+| 分析原则 1-4 条 | 思考伙伴模式上方 | system-prompt.md 全文 |
+| 两遍法流程 | 分析执行规则 #1 | system-prompt.md 分类流程 |
+| 自检清单 6 项 | 无（在 system-prompt.md） | system-prompt.md 分类后自检 |
+| 账号安全 | 账号安全段落 | security.md 全文 |
+| 数据文件路径 | 数据文件段落 | STATE.md + CLAUDE.md 顶部 |
+
+**保留（独有内容，knowledge/ 不覆盖）**：
+- 思考伙伴模式定义 + 工具/伙伴对比 + 输出格式要求（"我还注意到了"/"需要你确认的"）
+- 数据结论自检规则（4 条触发条件 + 违反信号）
+- 分批硬约束（≤5 人/≤500 条）
+
+**删除（knowledge/ 已覆盖）**：
+- 数据抓取流程（`cd d:\ClaudeWorkspace\...`）→ 已在 STATE.md 和 RUNBOOK.md
+- 数据文件列表 → 已在 STATE.md
+- 分析执行规则 #0-#3 → 已在 system-prompt.md
+- 账号安全/被挤原理 → 已在 security.md
+- "具体的例子"（工具 vs 思考伙伴对比）→ 太长，压缩为 1-2 句
+
+---
+
+## 四、不在此次动的内容（需你决策）
+
+### 4.1 `.claude/.agents/skills/`（34 个软件技能目录）
+
+这 34 个全是软件工程技能（api-design、tdd-workflow、e2e-testing、bun-runtime...），对 B2B 业务零价值。但它们是 ECC 插件安装的，不确定删除后是否影响插件核心功能（hooks 等）。
+
+**建议**：先不动，观察。如果确认这些技能出现在你的"可用技能"列表中且你想清理，下次单独处理。
+
+### 4.2 `hooks.json`（62KB）
+
+ECC 插件核心基础设施，定义了 PreToolUse/PostToolUse 等钩子。虽然大但不直接吃上下文（是 JSON 配置而非 Markdown 指令）。不动。
+
+---
+
+## 五、执行步骤
+
+1. 删除 `d:\ClaudeWorkspace\.claude\AGENTS.md`
+2. 删除过期记忆文件（2 个）
+3. 合并重复记忆文件（3 组 → 各合并为 1 个，更新 MEMORY.md 索引）
+4. 删除已被 CLAUDE.md 覆盖的记忆文件（2 个）
+5. 更新 `d:\ClaudeWorkspace\08_客户跟进\Okki\CLAUDE.md`（删除重复内容，保留独有内容）
+6. 更新 `C:\Users\Administrator\.claude\projects\d--ClaudeWorkspace\memory\MEMORY.md` 索引
+
+## 六、验证
+
+- [ ] 删除 AGENTS.md 后，skills 和 commands（/p4p /inquiry /pitch 等）仍可正常调用
+- [ ] OKKI 分析时 STATE.md + knowledge/ 文件完整加载，无功能损失
+- [ ] MEMORY.md 索引条目数减少，无死链
+- [ ] git diff 确认只删/改了预期文件

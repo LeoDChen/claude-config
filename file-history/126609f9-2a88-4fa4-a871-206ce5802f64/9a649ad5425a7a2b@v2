@@ -1,0 +1,188 @@
+/**
+ * 小满数据清洗器 — 修复采集管道中的数据污染
+ *
+ * 修复三个根因：
+ * 1. 系统账号混入（Eva/系统通知/机器人/纯数字ID）
+ * 2. DOM串位导致不同客户共享相同对话内容
+ * 3. 阿里AI自动回复被当作我方手工消息
+ *
+ * 用法: node data-cleaner.mjs [输入文件] [输出文件]
+ *       node data-cleaner.mjs ../data/deep_scrape_merged_v2_*.json
+ */
+
+import { readFileSync, writeFileSync } from 'fs';
+import { basename, join } from 'path';
+
+// ============================================================
+// System account patterns
+// ============================================================
+const SYSTEM_ACCOUNTS = [
+  /^Assistant\s*Eva/i,
+  /Eva/,
+  /系统通知/,
+  /机器人/,
+  /自动接待/,
+  /小满.*(?:助手|通知|消息)/,
+  /阿里.*(?:助手|通知|消息|小蜜)/,
+  /^\d{6,}$/,
+  /^unknown$/i,
+];
+
+function isSystemAccount(name) {
+  if (!name || name === 'unknown' || name === '') return true;
+  return SYSTEM_ACCOUNTS.some(p => p.test(name));
+}
+
+// ============================================================
+// Auto-reply detection
+// ============================================================
+const AUTO_REPLY_SIGNATURES = [
+  /为了给您提供更准确的报价.*请回答.*个问题/i,
+  /Premièrement.*Deuxièmement.*Troisièmement/i,
+  /First.*Second.*Third/i,
+  /(?:A\)|B\)|C\)|D\)).*(?:A\)|B\)|C\)|D\))/,
+  /自动接待发送/,
+  /去优化/,
+  /阿里国际.*翻译/,
+  /由阿里翻译提供/,
+  /由于您介入该会话.*自动接待将不再触发/,
+];
+
+function isAutoReply(content) {
+  if (!content) return false;
+  return AUTO_REPLY_SIGNATURES.some(p => p.test(content));
+}
+
+// ============================================================
+// Conversation dedup — detect DOM串位 duplicates
+// ============================================================
+function getFingerprint(msgs) {
+  if (!msgs || msgs.length === 0) return '';
+  // Take first 5 client messages as fingerprint
+  const clientMsgs = msgs.filter(m => m.side === 'received');
+  return clientMsgs.slice(0, 5).map(m => (m.content || '').substring(0, 100)).join('|||');
+}
+
+function dedupConversations(customers) {
+  const seen = new Map();
+  const clean = [];
+  const duplicates = [];
+  let systemCount = 0;
+
+  for (const c of customers) {
+    // Step 1: Filter system accounts
+    if (isSystemAccount(c.name)) {
+      systemCount++;
+      continue;
+    }
+
+    const msgs = c.messages || [];
+    if (msgs.length === 0) continue;
+
+    // Step 2: Filter auto-replies from messages
+    const cleanMsgs = msgs.filter(m => {
+      if (m.side === 'sent' && isAutoReply(m.content)) return false;
+      if (m.isSystem) return false;
+      return true;
+    });
+
+    if (cleanMsgs.length === 0) continue;
+
+    // Step 3: Dedup by fingerprint
+    const fp = getFingerprint(cleanMsgs);
+    if (!fp) {
+      clean.push({ ...c, messages: cleanMsgs });
+      continue;
+    }
+
+    const existing = seen.get(fp);
+    if (existing) {
+      duplicates.push({ name: c.name, duplicateOf: existing.name, sharedMsgs: cleanMsgs.length });
+      // Keep the one with MORE messages (more likely the original)
+      if (cleanMsgs.length > existing.messages.length) {
+        // Replace the earlier entry
+        const idx = clean.indexOf(existing);
+        if (idx >= 0) {
+          clean[idx] = { ...c, messages: cleanMsgs };
+          seen.set(fp, { name: c.name, messages: cleanMsgs });
+        }
+      }
+    } else {
+      const entry = { ...c, messages: cleanMsgs };
+      clean.push(entry);
+      seen.set(fp, { name: c.name, messages: cleanMsgs });
+    }
+  }
+
+  return { clean, duplicates, systemCount };
+}
+
+// ============================================================
+// Main
+// ============================================================
+function main() {
+  const args = process.argv.slice(2);
+  const inputPath = args[0];
+  if (!inputPath) {
+    console.error('用法: node data-cleaner.mjs <输入文件>');
+    process.exit(1);
+  }
+
+  console.log(`[cleaner] 读取: ${inputPath}`);
+  const raw = JSON.parse(readFileSync(inputPath, 'utf-8'));
+
+  // Determine data structure
+  let customers;
+  if (raw.results) {
+    customers = Array.isArray(raw.results) ? raw.results : Object.values(raw.results);
+  } else if (Array.isArray(raw)) {
+    customers = raw;
+  } else if (raw.customers) {
+    customers = raw.customers;
+  } else {
+    customers = Object.values(raw).filter(v => typeof v === 'object' && v.name);
+  }
+
+  console.log(`[cleaner] 输入: ${customers.length} 条记录`);
+
+  const { clean, duplicates, systemCount } = dedupConversations(customers);
+
+  console.log(`\n========================================`);
+  console.log(`  数据清洗报告`);
+  console.log(`========================================`);
+  console.log(`  输入: ${customers.length} 条`);
+  console.log(`  系统账号已过滤: ${systemCount} 条`);
+  console.log(`  DOM串位重复: ${duplicates.length} 条`);
+  console.log(`  清洗后: ${clean.length} 条`);
+  console.log(`========================================\n`);
+
+  if (duplicates.length > 0) {
+    console.log('🔴 DOM串位重复详情:');
+    duplicates.forEach(d => {
+      console.log(`   ${d.name} → 与 ${d.duplicateOf} 完全重复 (${d.sharedMsgs}条共享消息)`);
+    });
+    console.log('');
+  }
+
+  console.log(`✅ 清洗后客户列表 (${clean.length}人):`);
+  clean.forEach(c => {
+    const msgs = c.messages?.length || 0;
+    const hasContent = msgs > 2 ? '✓' : '△';
+    console.log(`   ${hasContent} [${msgs}msgs] ${c.name}`);
+  });
+
+  // Output
+  const outPath = args[1] || inputPath.replace(/\.json$/, '_cleaned.json');
+  const output = {
+    cleanedAt: new Date().toISOString(),
+    sourceFile: basename(inputPath),
+    stats: { input: customers.length, systemFiltered: systemCount, duplicates: duplicates.length, cleaned: clean.length },
+    duplicates,
+    customers: clean
+  };
+
+  writeFileSync(outPath, JSON.stringify(output, null, 2));
+  console.log(`\n[cleaner] 已保存: ${outPath}`);
+}
+
+main();

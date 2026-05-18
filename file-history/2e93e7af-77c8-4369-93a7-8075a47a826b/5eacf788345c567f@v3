@@ -1,0 +1,312 @@
+#!/usr/bin/env node
+/**
+ * validate_output.js — AI 输出话术自动扫描
+ *
+ * 扫描 AI 草拟的回复话术，标记潜在风险点。
+ * 不拦截输出，只标记提醒。用户是最终决定者。
+ *
+ * 用法:
+ *   echo "回复文本" | node scripts/validate_output.js [--cid=<cid>]
+ *   node scripts/validate_output.js --file=<path> [--cid=<cid>]
+ *
+ * 检测项:
+ *   1. 具体金额 → 提醒确认
+ *   2. 日期承诺 → 提醒确认
+ *   3. 语言与客户最后消息不一致 → 提醒
+ *   4. MOQ/数量决定 → 提醒确认
+ *   5. 我方延迟回复 >24h 且未致歉 → 提醒
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+// ── 参数解析 ──────────────────────────────────────────────
+const args = process.argv.slice(2);
+const getArg = (name) => {
+  const prefix = `--${name}=`;
+  const found = args.find((a) => a.startsWith(prefix));
+  return found ? found.slice(prefix.length) : null;
+};
+
+const cid = getArg("cid");
+const filePath = getArg("file");
+
+// ── 读取输入 ──────────────────────────────────────────────
+let inputText = "";
+
+if (filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.error(`文件不存在: ${filePath}`);
+    process.exit(1);
+  }
+  inputText = fs.readFileSync(filePath, "utf-8");
+} else {
+  // 从 stdin 读取
+  inputText = fs.readFileSync(0, "utf-8"); // fd 0 = stdin
+}
+
+if (!inputText.trim()) {
+  console.error("未检测到输入文本。用法: echo '回复内容' | node validate_output.js");
+  process.exit(1);
+}
+
+// ── 规则库 ────────────────────────────────────────────────
+
+const findings = [];
+
+// 1. 金额检测
+const amountPatterns = [
+  { pattern: /\$\s*\d+[\d,]*\.?\d*/g, desc: "美元金额 ($)" },
+  { pattern: /USD\s*\d+[\d,]*\.?\d*/gi, desc: "USD 金额" },
+  { pattern: /\d+[\d,]*\.?\d*\s*(美元|美金)/g, desc: "人民币金额" },
+  { pattern: /\d+[\d,]*\.?\d*\s*(欧元|英镑|日元)/g, desc: "外币金额" },
+  { pattern: /\d+[\d,]*\.?\d*\s*元[\/\s]*(件|个|套|条|包|箱)/g, desc: "单价金额" },
+  { pattern: /\d+[\d,]*\.?\d*\s*%/g, desc: "折扣百分比" },
+];
+for (const { pattern, desc } of amountPatterns) {
+  const matches = inputText.match(pattern);
+  if (matches) {
+    for (const m of matches) {
+      findings.push({ type: "金额", severity: "⚠", detail: `${desc}: "${m.trim()}" → 请确认金额无误`, source: "rule:amount" });
+    }
+  }
+}
+
+// 2. 日期承诺检测
+const datePatterns = [
+  // 中文
+  { pattern: /\d+\s*天[内之]/g, desc: "天数承诺" },
+  { pattern: /今天|明天|后天|下周[一二三四五六日]?|本周[一二三四五六日]?/g, desc: "具体日期承诺" },
+  { pattern: /当天[发寄送出货]/g, desc: "当天发货承诺" },
+  { pattern: /立刻[发寄送出给排安]/g, desc: "立刻行动承诺" },
+  { pattern: /马上[发寄送出给排安]/g, desc: "马上行动承诺" },
+  { pattern: /(\d+)\s*(个?小?时|工作日|周|月)\s*[内之]/g, desc: "时间段承诺" },
+  { pattern: /预计.*?\d+\s*天/g, desc: "预计时间承诺" },
+  // 英文
+  { pattern: /within\s+\d+\s*(day|week|month|hour|business\s*day)/gi, desc: "英文时间承诺 (within X days)" },
+  { pattern: /in\s+\d+\s*(day|week|month|hour)/gi, desc: "英文时间承诺 (in X days)" },
+  { pattern: /\b\d+\s*(day|week|month|hour)\b/gi, desc: "英文时间承诺 (X days)" },
+  { pattern: /\b(today|tomorrow|next\s+(week|month)|immediately|right\s+away|ASAP|urgently)\b/gi, desc: "英文紧急/时间词" },
+  { pattern: /ship(ped|ping)?\s+within\s+\d+/gi, desc: "发货时间承诺" },
+  { pattern: /delivery\s+within\s+\d+/gi, desc: "交货时间承诺" },
+  { pattern: /guaranteed?\s*(delivery|ship|arrive)/gi, desc: "保证交货承诺" },
+];
+for (const { pattern, desc } of datePatterns) {
+  const matches = inputText.match(pattern);
+  if (matches) {
+    for (const m of matches) {
+      findings.push({ type: "日期承诺", severity: "⚠", detail: `${desc}: "${m.trim()}" → 请确认时间可行`, source: "rule:date" });
+    }
+  }
+}
+
+// 3. MOQ / 数量决定检测
+const moqPatterns = [
+  { pattern: /MOQ\s*[=:：]?\s*\d+/gi, desc: "MOQ 声明" },
+  { pattern: /\d+\s*(pcs|pieces|units)\s+MOQ/gi, desc: "MOQ 声明（后置）" },
+  { pattern: /起订量\s*[=:：]?\s*\d+/g, desc: "起订量声明" },
+  { pattern: /最小订[单量]\s*[=:：]?\s*\d+/g, desc: "最小订单量" },
+  { pattern: /最少\s*\d+\s*件/g, desc: "最少起订量" },
+  { pattern: /至少[要需订购买]\s*\d+\s*(件|个|套)/g, desc: "最低数量要求" },
+  { pattern: /minimum\s*(order|quantity)\s*[=:：]?\s*\d+/gi, desc: "Minimum order quantity" },
+];
+for (const { pattern, desc } of moqPatterns) {
+  const matches = inputText.match(pattern);
+  if (matches) {
+    for (const m of matches) {
+      findings.push({ type: "数量决定", severity: "⚠", detail: `${desc}: "${m.trim()}" → 请确认数量正确`, source: "rule:moq" });
+    }
+  }
+}
+
+// 4. 交付条款 / 贸易术语
+const tradePatterns = [
+  { pattern: /\b(FOB|CIF|DDP|DAP|EXW|FCA|CFR|CPT|CIP)\b/gi, desc: "贸易术语" },
+];
+for (const { pattern, desc } of tradePatterns) {
+  const matches = inputText.match(pattern);
+  if (matches) {
+    for (const m of [...new Set(matches)]) {
+      findings.push({ type: "贸易术语", severity: "ℹ", detail: `${desc}: "${m}" → 请确认条款正确`, source: "rule:trade" });
+    }
+  }
+}
+
+// ── CID 上下文检查 ────────────────────────────────────────
+let contextInfo = null;
+if (cid) {
+  contextInfo = getContextInfo(cid);
+  if (contextInfo) {
+    // 3. 语言一致性检查
+    if (contextInfo.customerLang) {
+      const inputLang = detectLanguage(inputText);
+      if (inputLang && inputLang !== contextInfo.customerLang && inputLang !== "mixed") {
+        findings.push({
+          type: "语言不一致",
+          severity: "⚠",
+          detail: `客户最后消息语言: ${contextInfo.customerLang === "fr" ? "法语" : contextInfo.customerLang === "ar" ? "阿拉伯语" : contextInfo.customerLang === "en" ? "英语" : contextInfo.customerLang === "zh" ? "中文" : contextInfo.customerLang}，AI 输出语言: ${inputLang === "en" ? "英语" : inputLang === "zh" ? "中文" : inputLang} → 请确认是否需要调整`,
+          source: "rule:lang",
+        });
+      }
+    }
+
+    // 5. 延迟致歉检测
+    if (contextInfo.hoursSinceOurLast > 24) {
+      const hasApology = /sorry|apologize|apology|抱歉|对不起|不好意思|致歉|迟[了到]|晚[了回]复|回复.*晚|回复.*迟/i;
+      if (!hasApology.test(inputText)) {
+        findings.push({
+          type: "延迟致歉",
+          severity: "⚠",
+          detail: `我方上一条消息距今 ${Math.round(contextInfo.hoursSinceOurLast)} 小时，话术中未检测到致歉用语 → 建议添加致歉`,
+          source: "rule:apology",
+        });
+      }
+    }
+  }
+}
+
+// ── 输出 ──────────────────────────────────────────────────
+console.log("═══════════════════════════════════════════");
+console.log("  validate_output.js — AI 话术扫描报告");
+console.log("═══════════════════════════════════════════");
+
+if (cid) {
+  console.log(`客户 CID: ${cid}`);
+  if (contextInfo) {
+    console.log(`客户名称: ${contextInfo.name}`);
+    console.log(`客户最后消息语言: ${contextInfo.customerLang || "未知"}`);
+    console.log(`我方最后消息: ${contextInfo.ourLastTime ? new Date(contextInfo.ourLastTime).toISOString().slice(0, 10) : "未知"} (${contextInfo.hoursSinceOurLast ? Math.round(contextInfo.hoursSinceOurLast) + "h前" : "?"})`);
+  }
+}
+console.log(`输入长度: ${inputText.length} 字符\n`);
+
+if (findings.length === 0) {
+  console.log("✓ 未检测到需要确认的事项");
+} else {
+  // 按类型分组
+  const byType = {};
+  for (const f of findings) {
+    if (!byType[f.type]) byType[f.type] = [];
+    byType[f.type].push(f);
+  }
+
+  for (const [type, items] of Object.entries(byType)) {
+    console.log(`── ${type} (${items.length}条) ──`);
+    for (const item of items) {
+      console.log(`  ${item.severity} ${item.detail}`);
+    }
+    console.log("");
+  }
+
+  console.log(`共 ${findings.length} 条提醒，请逐条确认后发送。`);
+}
+
+// ── 辅助函数 ──────────────────────────────────────────────
+
+function getContextInfo(cidStr) {
+  try {
+    const DATA_DIR = path.resolve(__dirname, "..", "data");
+    const CHAT_DIR = path.join(DATA_DIR, "chat_history");
+
+    const match = cidStr.match(/^(.+)#(\d+)@(\w+)$/);
+    if (!match) return null;
+    const [, left, channel, platform] = match;
+    const filename = `${left}_${channel}_${platform}.json`;
+    const filepath = path.join(CHAT_DIR, filename);
+
+    if (!fs.existsSync(filepath)) return null;
+
+    const raw = JSON.parse(fs.readFileSync(filepath, "utf-8"));
+    const messages = raw.messages || [];
+
+    // 过滤系统消息
+    function isSys(m) {
+      try {
+        const ext = m.message?.extension;
+        if (ext?.systemMessage === true) return true;
+        const bmi = ext?.basicMessageInfo;
+        if (typeof bmi === "string" && bmi.includes('"systemMessage":true')) return true;
+        return false;
+      } catch { return false; }
+    }
+    const realMsgs = messages.filter((m) => !isSys(m));
+
+    // 找客户最后一条消息的语言
+    // 消息按时间倒序（最新在前），从索引 0 向前扫
+    let customerLang = null;
+    for (let i = 0; i < realMsgs.length; i++) {
+      const uid = realMsgs[i].message?.sender?.uid || "";
+      if (!uid.includes("2500000853693")) {
+        const text = realMsgs[i].message?.content?.text?.content || "";
+        if (text.trim()) {
+          const lang = detectLanguage(text);
+          if (lang) {
+            customerLang = lang;
+            break;
+          }
+        }
+      }
+    }
+
+    // 找我方最后一条消息的时间（最新在前，从索引 0 开始）
+    let ourLastTime = null;
+    for (let i = 0; i < realMsgs.length; i++) {
+      const uid = realMsgs[i].message?.sender?.uid || "";
+      if (uid.includes("2500000853693")) {
+        ourLastTime = realMsgs[i].message?.createAt || null;
+        break;
+      }
+    }
+
+    const hoursSinceOurLast = ourLastTime
+      ? (Date.now() - ourLastTime) / (1000 * 60 * 60)
+      : null;
+
+    return {
+      name: raw.name || null,
+      customerLang,
+      ourLastTime,
+      hoursSinceOurLast,
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function detectLanguage(text) {
+  if (!text || !text.trim()) return null;
+
+  // 统计各类字符
+  let cjk = 0;
+  let arabic = 0;
+  let french = 0;
+  let latin = 0;
+
+  for (const ch of text) {
+    const code = ch.charCodeAt(0);
+    if ((code >= 0x4E00 && code <= 0x9FFF) || (code >= 0x3400 && code <= 0x4DBF)) {
+      cjk++;
+    } else if (code >= 0x0600 && code <= 0x06FF) {
+      arabic++;
+    } else if (code >= 0x0041 && code <= 0x007A) {
+      latin++;
+      // 法语特征词
+      if (/[eèéêë]/.test(ch)) french++;
+    }
+  }
+
+  const total = cjk + arabic + latin;
+  if (total === 0) return null;
+
+  if (cjk / total > 0.15) return "zh";
+  if (arabic / total > 0.10) return "ar";
+
+  // 法语特征词检测
+  const frenchWords = /\b(je|tu|nous|vous|le|la|les|est|sont|dans|pour|avec|sur|pas|une|très|bien|merci|bonjour|salut|comment|pourquoi|quand|quoi|parce|aussi|mais|dans|peut|faire|avoir|être|aller|pouvoir|devoir|vouloir|celui|celle|ceux|mon|ton|son|notre|votre|leur)\b/gi;
+  const frenchMatch = text.match(frenchWords);
+  if (frenchMatch && frenchMatch.length >= 2) return "fr";
+
+  if (latin / total > 0.5) return "en";
+
+  return "mixed";
+}

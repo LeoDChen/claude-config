@@ -1,0 +1,87 @@
+# AI外贸顾问系统 — 项目重启
+
+**创建日期**：2026-04-29  
+**当前阶段**：Phase 1-4 完成，Phase 5 持续优化
+
+---
+
+## 项目目标
+
+Claude Code 专属外贸军师——自动监控 300+ 小满客户，诊断卡点，生成话术和策略。
+
+## 核心文件
+
+### 方案
+`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+
+### 知识库（6个文件）
+```
+D:\ClaudeWorkspace\08_客户跟进\knowledge\
+├── factory.md              ← 工厂/品牌背书/技术/品类
+├── business-rules.md       ← 商务规则+交期+现货判断+报价区分
+├── value-translation.md    ← 16个卖点体感翻译
+├── market-psychology.md    ← 5区域客户心理
+├── hooks-library.md        ← 7类钩子×素材×话术
+└── system-prompt.md        ← 五步分析引擎
+```
+
+### 脚本
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\scripts\
+├── snapshot.mjs              ← 索引快照（60秒/300人）
+├── diff.mjs                  ← 对比引擎（P0-P3分类）
+├── daily-check.mjs           ← 每日巡检调度
+├── generate-daily-report.mjs ← 每日战报Markdown
+├── generate-weekly-report.mjs← 每周巡检
+├── scraper.mjs               ← Playwright全量深挖
+└── classifier.mjs            ← 11类S/A/B/C分类
+```
+
+### 工厂背景
+`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+
+---
+
+## 新对话重启指令
+
+复制以下发给 CC：
+
+> 我正在做AI外贸顾问系统项目。读取以下文件了解全貌：
+> 1. 方案：`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+> 2. 知识库：`D:\ClaudeWorkspace\08_客户跟进\knowledge\`（6个文件全部读）
+> 3. 工厂背景：`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+> 4. 最新快照：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\snapshots\`（找最新）
+> 5. 最新日报：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\daily-reports\`（找最新）
+>
+> 读完后告诉我当前状态和下一步。
+
+**处理具体客户时追加**：
+> 对客户{客户名}跑五步分析。在`D:\ClaudeWorkspace\08_客户跟进\Okki\data\客户档案_*.json`中找完整对话。
+
+---
+
+## 日常操作
+
+```
+每天早上 9:00:
+  node daily-check.mjs           ← 快照+对比
+  node generate-daily-report.mjs ← 生成战报
+  打开 reports/每日战报_*.md → 复制CC提示词 → CC分析 → 审核发送
+
+每周一:
+  node generate-weekly-report.mjs ← 休眠客户批量激活
+```
+
+## 进度
+
+| Phase | 状态 |
+|-------|------|
+| 1. 知识库构建 | ✅ |
+| 2. 分析引擎 | ✅（azaan ss 8.5, amer ly 8, DS双审通过） |
+| 3. 数据采集升级 | ✅ |
+| 4. 报告系统 | ✅ |
+| 5. 持续优化 | ⏳ |
+
+## 讨论记录
+
+方案讨论+DS协作：桌面 `0101.txt`

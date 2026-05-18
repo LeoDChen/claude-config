@@ -1,0 +1,46 @@
+---
+date: 2026-05-10
+status: 进行中
+---
+
+# CC+OB 协作系统建设
+
+## 当前状态
+
+讨论到一半，待在新对话继续。
+
+## 背景
+
+用户发现 CLAUDE.md 体系存在问题：
+1. 规则噪音比极高（110+文件、5500+行，大量编程语言规则与用户实际工作无关）
+2. 全局和项目 rules 重复加载
+3. 关键规则（输出中文）在注意力竞争中失败
+4. CLAUDE.md 应该是指针而非知识库本身
+
+## 讨论结论
+
+### 已完成的修改
+- 项目 + 全局 `operations-rules.md`：双语规则 → "默认只输出中文"
+- `commands/inquiry.md`、`order.md`、`logistics.md`：双语 → 中文
+- 新增记忆 `company_info_output_rules.md`：公司名/人名/地址/邮箱必须英文原文
+- 新增记忆 `feedback_chinese_response.md`：所有回复必须中文
+
+### 待在新对话完成
+
+1. **全量盘查全局和项目配置文件** → 生成清单
+2. **建立 OB 知识库目录结构**
+   - 候选路径：`对话归档/CC/知识库/`
+   - 包含：工厂核心信息、OKKI启动指令、商务规则速查、回复话术规范、配置盘查
+3. **改造 CLAUDE.md 为指针模式**
+   - 删掉内嵌知识，换成 OB 路径引用
+4. **建立修改决策框架**
+   - 改之前三问：管什么范围？被谁依赖？可逆吗？
+   - 操作分级：安全/需告知/需确认
+5. **建立同步机制**：改配置 → 同步更新 OB
+
+### 关键路径
+- OB vault: `E:/道友的宝贝/道友的宝贝/`
+- 对话归档: `对话归档/CC/`
+- 全局配置: `C:/Users/Administrator/.claude/`
+- 项目配置: `D:/ClaudeWorkspace/.claude/`
+- 记忆系统: `C:/Users/Administrator/.claude/projects/d--ClaudeWorkspace/memory/`

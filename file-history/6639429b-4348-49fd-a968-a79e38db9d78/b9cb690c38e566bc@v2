@@ -1,0 +1,183 @@
+/**
+ * OKKI 批量 API 数据抓取 — 邮件 + 客户详情
+ *
+ * 完全通过 OKKI 自有 API，不需要 Chrome 在特定页面。
+ * 346 人全量跑完约 10-15 分钟，生成 data/customers/{company_id}.json
+ *
+ * 使用前：Chrome 已通过 --remote-debugging-port=9222 启动并登录 OKKI
+ * 运行：node scripts/scrape_api_batch.js
+ *
+ * 支持增量：
+ *   node scripts/scrape_api_batch.js --since 2026-05-04
+ *   只抓取 archive_time 在指定日期之后的客户
+ */
+
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+
+const CDP_URL = 'http://localhost:9222';
+const OUTPUT_DIR = path.join(__dirname, '..', 'data', 'customers');
+const CUSTOMER_LIST = path.join(__dirname, '..', 'data', 'okki_full_2026-05-05T05-17-48.json');
+const STATE_FILE = path.join(__dirname, '..', 'data', 'scrape_state.json');
+const REQUEST_DELAY = 300;
+const BATCH_SIZE = 20;
+
+if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+function loadState() {
+  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8')); }
+  catch (_) { return { lastFullScrape: null, customers: {} }; }
+}
+
+function saveState(state) {
+  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+async function fetchTrailList(page, companyId) {
+  const p = new URLSearchParams();
+  p.append('company_id', String(companyId));
+  p.append('page', '1');
+  p.append('pageSize', '100');
+
+  return page.evaluate(async (body) => {
+    const xhr = new XMLHttpRequest();
+    return new Promise((resolve) => {
+      xhr.open('POST', 'https://crm.xiaoman.cn/api/customerRead/trailList', false);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.withCredentials = true;
+      xhr.send(body);
+      resolve(JSON.parse(xhr.responseText));
+    });
+  }, p.toString());
+}
+
+async function fetchCustomerDetail(page, companyId) {
+  const p = new URLSearchParams();
+  p.append('company_id', String(companyId));
+
+  return page.evaluate(async (body) => {
+    const xhr = new XMLHttpRequest();
+    return new Promise((resolve) => {
+      xhr.open('POST', 'https://crm.xiaoman.cn/api/customerV2Read/detail', false);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.withCredentials = true;
+      xhr.send(body);
+      resolve(JSON.parse(xhr.responseText));
+    });
+  }, p.toString());
+}
+
+async function main() {
+  const sinceDate = process.argv.includes('--since') ? process.argv[process.argv.indexOf('--since') + 1] : null;
+  const onlyIds = process.argv.includes('--ids') ? process.argv[process.argv.indexOf('--ids') + 1].split(',') : null;
+
+  console.log('[API Batch] 连接 Chrome ...');
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到 OKKI 页面');
+  if (page.url().includes('login')) throw new Error('未登录');
+
+  const allCustomers = JSON.parse(fs.readFileSync(CUSTOMER_LIST, 'utf-8')).customers;
+  const state = loadState();
+
+  // 筛选目标客户
+  let targets = allCustomers;
+  if (onlyIds) {
+    targets = allCustomers.filter(c => onlyIds.includes(String(c.company_id)));
+    console.log('[API Batch] 指定客户: ' + targets.length + ' 人');
+  } else if (sinceDate) {
+    targets = allCustomers.filter(c => (c.archive_time || '') >= sinceDate);
+    console.log('[API Batch] ' + sinceDate + ' 之后: ' + targets.length + ' 人');
+  } else {
+    console.log('[API Batch] 全量: ' + targets.length + ' 人');
+  }
+
+  let done = 0, skipped = 0, errors = 0;
+
+  for (let i = 0; i < targets.length; i++) {
+    const c = targets[i];
+    const cid = String(c.company_id);
+    const name = c.name_info?.info_value || c.name;
+
+    // 检查是否已抓取且未更新
+    const prev = state.customers[cid];
+    const lastArchive = c.archive_time || '';
+    if (prev && prev.archiveTime === lastArchive && !sinceDate && !onlyIds) {
+      skipped++;
+      continue;
+    }
+
+    try {
+      const [trailRes, detailRes] = await Promise.all([
+        fetchTrailList(page, cid),
+        fetchCustomerDetail(page, cid),
+      ]);
+
+      const trails = trailRes.code === 0 ? (trailRes.data?.list || []) : [];
+      const detail = detailRes.code === 0 ? (detailRes.data?.values || {}) : {};
+
+      const output = {
+        company_id: cid,
+        name,
+        scrapedAt: new Date().toISOString(),
+        // 从列表数据中保留关键字段
+        listData: {
+          level: c.cus_tag_info?.[0]?.info_label || '',
+          status: c.trail_status_info?.info_label || '',
+          source: c.origin_list_info?.map(o => o.info_label) || [],
+          country: c.country_region?.country || c.country || '',
+          score: c.score?.data || 0,
+          orderCount: c.performance_order_count || 0,
+          orderAmount: c.transaction_order_amount || 0,
+          contactCount: c.customer_contact_count || 0,
+          archiveTime: c.archive_time || '',
+          orderTime: c.order_time || '',
+          serialNumber: c.serial_id || '',
+        },
+        // 邮件跟进记录
+        trails: {
+          total: trailRes.data?.totalItem || trails.length,
+          tabList: trailRes.data?.tab_list || [],
+          items: trails.map(t => ({
+            id: t.trail_id,
+            type: t.type,
+            typeName: t.node_type_name,
+            createdAt: t.created_at || t.create_time,
+            data: t.data || {},
+            commentList: t.comment_list || [],
+          })),
+        },
+        // 客户详情
+        detail: Object.fromEntries(
+          Object.entries(detail).map(([k, v]) => [k, v?.info_label || v?.info_value || v])
+        ),
+      };
+
+      fs.writeFileSync(path.join(OUTPUT_DIR, cid + '.json'), JSON.stringify(output, null, 2));
+
+      state.customers[cid] = { name, archiveTime: lastArchive, scrapedAt: output.scrapedAt };
+      done++;
+
+      if (done % BATCH_SIZE === 0) {
+        console.log('[API Batch] ' + done + '/' + targets.length + ' (' + skipped + ' skipped, ' + errors + ' errors)');
+        saveState(state);
+      }
+    } catch (e) {
+      errors++;
+      if (errors <= 3) console.error('[API Batch] Error on ' + name + ': ' + e.message);
+    }
+
+    await new Promise(r => setTimeout(r, REQUEST_DELAY));
+  }
+
+  state.lastFullScrape = new Date().toISOString();
+  saveState(state);
+
+  console.log('');
+  console.log('[API Batch] ✅ Done: ' + done + ' scraped, ' + skipped + ' skipped, ' + errors + ' errors');
+  console.log('[API Batch] Files: ' + OUTPUT_DIR);
+  process.exit(0);
+}
+
+main().catch(err => { console.error('[API Batch]', err.message); process.exit(1); });

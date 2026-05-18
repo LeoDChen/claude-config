@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户状态看板 — 双轴矩阵</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f5f5; padding: 20px; color: #333; }
+
+  h1 { font-size: 1.2em; margin-bottom: 2px; }
+  .subtitle { color: #999; font-size: 0.78em; margin-bottom: 16px; }
+  .summary-bar { display: flex; gap: 16px; margin-bottom: 14px; font-size: 0.82em; align-items: center; }
+  .summary-bar span { padding: 4px 12px; border-radius: 14px; background: #fff; border: 1px solid #eee; }
+  .summary-bar strong { font-size: 1.2em; }
+
+  /* Matrix */
+  .matrix-wrap { overflow-x: auto; }
+  .matrix { display: grid; gap: 1px; background: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); min-width: 960px; }
+
+  .cell { background: #fff; padding: 8px 10px; min-height: 52px; display: flex; flex-wrap: wrap; gap: 4px; align-content: start; align-items: start; }
+  .cell-header { background: #fafafa; padding: 8px 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75em; color: #666; text-align: center; }
+  .row-label { background: #fafafa; padding: 8px 10px; display: flex; align-items: center; gap: 6px; font-size: 0.76em; font-weight: 600; white-space: nowrap; }
+
+  .customer-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 13px; font-size: 0.73em; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: all .12s; }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .chip-red { background: #ffebee; border-color: #ffcdd2; color: #b71c1c; }
+  .chip-yellow { background: #fff8e1; border-color: #ffecb3; color: #e65100; }
+  .chip-grey { background: #f5f5f5; border-color: #eee; color: #888; }
+  .chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: #d32f2f; }
+  .chip-dot-yellow { background: #f57c00; }
+  .chip-dot-grey { background: #bbb; }
+  .chip-badge { font-size: 0.68em; padding: 1px 4px; border-radius: 6px; background: rgba(0,0,0,.06); }
+
+  /* Overlay */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1000; justify-content: center; align-items: center; }
+  .overlay.show { display: flex; }
+
+  /* Modal */
+  .modal { background: #fff; border-radius: 14px; box-shadow: 0 8px 48px rgba(0,0,0,.2); width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; animation: modalIn .18s ease; }
+  @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-header h2 { font-size: 1.15em; }
+  .modal-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; padding: 6px 10px; border-radius: 6px; line-height: 1; }
+  .modal-close:hover { background: #f0f0f0; }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; font-size: 0.88em; line-height: 1.6; }
+  .modal-footer { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; flex-shrink: 0; }
+
+  .btn { padding: 7px 18px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.84em; cursor: pointer; background: #fff; transition: .12s; }
+  .btn:hover { background: #f5f5f5; }
+  .btn-primary { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .btn-primary:hover { background: #1565c0; }
+
+  .fm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .fm-item { background: #fafafa; border-radius: 8px; padding: 10px 14px; }
+  .fm-label { color: #999; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; }
+  .fm-value { font-weight: 600; font-size: 0.95em; margin-top: 3px; }
+
+  .section { margin-bottom: 16px; }
+  .section-title { font-weight: 600; font-size: 0.8em; color: #888; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .driver-list { display: flex; flex-direction: column; gap: 6px; }
+  .driver-item { display: flex; gap: 10px; padding: 10px 14px; border-radius: 8px; font-size: 0.9em; align-items: flex-start; }
+  .driver-item-red { background: #fff5f5; border: 1px solid #ffcdd2; }
+  .driver-item-yellow { background: #fffdf5; border: 1px solid #ffecb3; }
+  .driver-icon { font-size: 1.15em; flex-shrink: 0; margin-top: 1px; }
+
+  .chat-snippet { background: #fafafa; border-radius: 8px; padding: 10px 14px; font-size: 0.86em; }
+  .chat-line { padding: 4px 0; display: flex; gap: 10px; align-items: baseline; }
+  .chat-who { font-weight: 600; flex-shrink: 0; min-width: 20px; }
+  .chat-who-me { color: #1976d2; }
+  .chat-who-cust { color: #d32f2f; }
+  .chat-time { color: #bbb; font-size: 0.78em; flex-shrink: 0; min-width: 45px; }
+
+  .key-num { background: #f5f5f5; border-radius: 6px; padding: 7px 12px; margin-bottom: 4px; font-size: 0.85em; }
+
+  .frozen-row { background: #fafafa; padding: 8px 14px; font-size: 0.74em; color: #999; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .frozen-chip { cursor: default; opacity: 0.5; }
+
+  .legend { font-size: 0.75em; color: #999; margin-top: 14px; display: flex; gap: 20px; }
+</style>
+</head>
+<body>
+
+<h1>OKKI 客户状态看板</h1>
+<p class="subtitle">横轴：生命周期阶段 → ｜ 纵轴：紧急度 ｜ 点击客户卡片查看详情</p>
+
+<div class="summary-bar">
+  <span>🔴 需立即处理 <strong>5</strong></span>
+  <span>🟡 需定时关注 <strong>9</strong></span>
+  <span>⚪ 正常流转 <strong>18</strong></span>
+  <span>❄️ 冷冻 <strong>8</strong></span>
+</div>
+
+<div class="matrix-wrap">
+<div class="matrix" style="grid-template-columns: 80px repeat(8, 1fr);">
+  <!-- Headers -->
+  <div class="cell-header"></div>
+  <div class="cell-header">🔍 需求探索</div>
+  <div class="cell-header">💰 报价已发</div>
+  <div class="cell-header">🧪 样品</div>
+  <div class="cell-header">🤝 谈判</div>
+  <div class="cell-header">💳 待付款</div>
+  <div class="cell-header">📦 待发货</div>
+  <div class="cell-header">🚢 在途</div>
+  <div class="cell-header">✅ 已签收</div>
+
+  <!-- RED: 需立即处理 -->
+  <div class="row-label"><span class="chip-dot chip-dot-red"></span>需立即处理</div>
+  <div class="cell">
+    <span class="customer-chip chip-red" onclick="openModal('inderpreet')"><span class="chip-dot chip-dot-red"></span>Inderpreet<span class="chip-badge">未回2d</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-red" onclick="openModal('angela')"><span class="chip-dot chip-dot-red"></span>Angela O<span class="chip-badge">PI等付3d</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-red" onclick="openModal('nassir')"><span class="chip-dot chip-dot-red"></span>Nassir A<span class="chip-badge">承诺超期</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-red" onclick="openModal('jonathan')"><span class="chip-dot chip-dot-red"></span>jonathan<span class="chip-badge">待确认方案</span></span>
+    <span class="customer-chip chip-red" onclick="openModal('aloh')"><span class="chip-dot chip-dot-red"></span>Aloh<span class="chip-badge">物流跟踪</span></span>
+  </div>
+  <div class="cell"></div>
+
+  <!-- YELLOW: 需定时关注 -->
+  <div class="row-label"><span class="chip-dot chip-dot-yellow"></span>需定时关注</div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" onclick="openModal('clara')"><span class="chip-dot chip-dot-yellow"></span>Clara<span class="chip-badge">追问</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" onclick="openModal('hakim')"><span class="chip-dot chip-dot-yellow"></span>Hakim<span class="chip-badge">报价沉默11d</span></span>
+    <span class="customer-chip chip-yellow" onclick="openModal('keinjol')"><span class="chip-dot chip-dot-yellow"></span>Keinjol<span class="chip-badge">DDP待确认</span></span>
+    <span class="customer-chip chip-yellow" onclick="openModal('esther')"><span class="chip-dot chip-dot-yellow"></span>Esther<span class="chip-badge">追问</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" onclick="openModal('akamwau')"><span class="chip-dot chip-dot-yellow"></span>Aka-Mwau<span class="chip-badge">样品追问</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" onclick="openModal('arshavin')"><span class="chip-dot chip-dot-yellow"></span>arshavin<span class="chip-badge">催单后等</span></span>
+    <span class="customer-chip chip-yellow" onclick="openModal('sara')"><span class="chip-dot chip-dot-yellow"></span>Sara D<span class="chip-badge">已读不回12d</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" onclick="openModal('christabel')"><span class="chip-dot chip-dot-yellow"></span>Christabel<span class="chip-badge">更新进度</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" onclick="openModal('wele')"><span class="chip-dot chip-dot-yellow"></span>WELE<span class="chip-badge">签收回访</span></span>
+  </div>
+
+  <!-- GREY: 正常流转 -->
+  <div class="row-label"><span class="chip-dot chip-dot-grey"></span>正常流转</div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('marcos')">Marcos</span>
+    <span class="customer-chip chip-grey" onclick="openModal('christine')">Christine</span>
+    <span class="customer-chip chip-grey" onclick="openModal('begimai')">Begimai</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('aboulaye')">Aboulaye</span>
+    <span class="customer-chip chip-grey" onclick="openModal('alina')">Alina S</span>
+    <span class="customer-chip chip-grey" onclick="openModal('mona')">Mona</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('gabriela')">Gabriela</span>
+    <span class="customer-chip chip-grey" onclick="openModal('diego')">Diego</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('israa')">Israa</span>
+    <span class="customer-chip chip-grey" onclick="openModal('youssouf')">Youssouf</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('sarah_a')">sarah a</span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('christelle')">Christelle</span>
+    <span class="customer-chip chip-grey" onclick="openModal('ernestina')">Ernestina</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey" onclick="openModal('rosette')">Rosette</span>
+    <span class="customer-chip chip-grey" onclick="openModal('amenan')">Amenan</span>
+  </div>
+
+  <!-- FROZEN -->
+  <div class="row-label" style="opacity:0.45"><span class="chip-dot chip-dot-grey"></span>❄️ 冷冻</div>
+  <div class="frozen-row" style="grid-column: span 8;">
+    <span class="customer-chip chip-grey frozen-chip">MENTZEKO Mathi</span>
+    <span class="customer-chip chip-grey frozen-chip">Deekshith Shekar</span>
+    <span class="customer-chip chip-grey frozen-chip">Anne Shen</span>
+    <span class="customer-chip chip-grey frozen-chip">Abdulrhman alal</span>
+    <span class="customer-chip chip-grey frozen-chip">ali Amjid</span>
+    <span class="customer-chip chip-grey frozen-chip">Tahar benmohamed</span>
+    <span class="customer-chip chip-grey frozen-chip">+14人</span>
+  </div>
+</div>
+</div>
+
+<div class="legend">
+  <span>🔴 需立即处理 = 我不动它就死</span>
+  <span>🟡 需定时关注 = 业务推进但需提醒</span>
+  <span>⚪ 正常流转 = 暂无行动信号</span>
+  <span>❄️ 冷冻 = &gt;90天无互动</span>
+</div>
+
+<!-- ============ OVERLAY + MODAL ============ -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modal"></div>
+</div>
+
+<script>
+const customers = {
+  inderpreet: {
+    name:'Inderpreet kaur', country:'美国', stage:'需求探索', heat:'NOW',
+    lastContact:'2天前', firstContact:'2026-05-05',
+    drivers:[
+      {level:'red', title:'未回复——客户5/14发消息等你跟进', detail:'5/14客户发款式图→你确认可做→发花型图→客回👍。你发的合作方案长消息待客回应。已超2天未跟进。'},
+      {level:'yellow', title:'该追问——选款打样流程待推进', detail:'客已说要先打样测试。需确认面料花型选择后推动创建样品单。'}
+    ],
+    chat:[
+      {who:'me',time:'5/14 10:08',text:'"So, our plan here is: you choose a fabric pattern, we create samples..."'},
+      {who:'cust',time:'5/14 10:05',text:'"👍"'},
+      {who:'me',time:'5/14 10:04',text:'"No problem, this style can be made"'},
+      {who:'cust',time:'5/14 10:03',text:'"Can you make this style?"'},
+      {who:'cust',time:'5/14 09:04',text:'"Send me the fabric patterns available?"'}
+    ],
+    nums:['🧪 样品: 2件起，费用可抵扣大货（5/5，MsgID:4095937119712）','📋 合规: 明确告知无美国儿童睡衣认证','🎨 花型库: 300+未上架独家花型'],
+    steps:'1. 跟进面料花型选择\n2. 推动样品单创建\n3. 如客提及合规→明确需客自行安排检测'
+  },
+
+  jonathan: {
+    name:'jonathan aston', country:'加纳', stage:'在途', heat:'NOW',
+    lastContact:'8天前', firstContact:'2026-05-07',
+    drivers:[
+      {level:'red', title:'待确认方案——客户说ok后没选物流方案', detail:'两个物流方案都发了（海运$335/快递$434），客户回"ok"但没选哪个。你追问了但客户8天没反应。该再次确认方案选择。'}
+    ],
+    chat:[
+      {who:'me',time:'5/14',text:'"Hi Jonathan, just checking in — did you have a chance to look at the two shipping options?"'},
+      {who:'me',time:'5/13',text:'"Option A: Sea $335(total $871) · Option B: Express $434(total $970)"'},
+      {who:'cust',time:'5/12',text:'"ok"'},
+      {who:'me',time:'5/9',text:'"quote for 200 pieces at $2.68/pc, total $536"'}
+    ],
+    nums:['💰 报价: $2.68/pc × 200pcs = $536（5/9，MsgID:4093500280599）','🚢 海运: +$335，总$871','📦 快递: +$434，总$970'],
+    steps:'1. 再次确认客户选哪个物流方案\n2. 确认后安排发货，出运单号\n3. 如无回复→WhatsApp'
+  },
+
+  nassir: {
+    name:'Nassir A', country:'苏丹', stage:'谈判中', heat:'NOW',
+    lastContact:'3天前', firstContact:'2026-03-15',
+    drivers:[
+      {level:'red', title:'承诺未兑现——说"明天确认库存"已超1天', detail:'客户付了款问库存，你说"明天早上确认"。承诺日期已过。先把承诺补上再谈别的。'},
+      {level:'yellow', title:'到港提醒——5/18到苏丹港', detail:'上一批货即将到港，提前2天通知客户准备清关手续。'}
+    ],
+    chat:[
+      {who:'me',time:'5/13',text:'"I will confirm the stock situation tomorrow morning"'},
+      {who:'cust',time:'5/13',text:'"Please check if you have 500pcs in stock, I need them urgently"'},
+      {who:'me',time:'5/12',text:'"Payment received, thank you. We will arrange shipping"'}
+    ],
+    nums:['💳 已付: $1,340（5/12）','📦 订单: 500pcs 婴儿连体衣','🚢 目的港: 苏丹港，预计5/18到港'],
+    steps:'1. 先兑现承诺→确认库存回复客户\n2. 5/16通知到港事宜\n3. 更新状态卡'
+  },
+
+  arshavin: {
+    name:'arshavin amoah', country:'加纳', stage:'待付款', heat:'SOON',
+    lastContact:'11天前', firstContact:'2026-03-23',
+    drivers:[
+      {level:'yellow', title:'该追问——$15.50已发11天无回复', detail:'3件兔子礼盒已备好，货代已确认。5/9催过一次，客未回。自4/20后客户无任何消息。暂不连续催单，再等3-5天。'}
+    ],
+    chat:[
+      {who:'me',time:'5/9',text:'"your 3-piece rabbit gift set is ready! fabric supply is limited, recommend confirming soon"'},
+      {who:'me',time:'5/3',text:'"order is $15.50, should I send you the payment link?"'},
+      {who:'cust',time:'4/20',text:'"3 pieces" + I&C CARGO info + Foshan warehouse address'}
+    ],
+    nums:['💰 订单: 3件兔礼盒 $15.50（5/3，MsgID:4084930353878）','🚚 货代: I&C CARGO, Isaac Amoako','📍 佛山仓→阿克拉'],
+    steps:'1. 暂不催单（5/9刚催）\n2. 一周后无回复→WhatsApp\n3. 再两周无回复→降COLD'
+  },
+
+  hakim: {
+    name:'Hakim Ezat', country:'沙特', stage:'报价已发', heat:'SOON',
+    lastContact:'11天前', firstContact:'2026-04-20',
+    drivers:[
+      {level:'yellow', title:'该追问——报价沉默11天', detail:'报$3.68×500pcs后客户未回复也未还价。可能不在采购周期。温和追问。'}
+    ],
+    chat:[
+      {who:'me',time:'5/5',text:'"سعر الوحدة للمنتج: 3.68 دولار، 500 قطعة"'},
+      {who:'cust',time:'5/4',text:'"كم السعر ؟"'}
+    ],
+    nums:['💰 报价: $3.68/pc × 500pcs（5/5）'],
+    steps:'1. 温和追问是否收到报价\n2. 问是否有其他尺寸/面料需求'
+  },
+
+  keinjol: {
+    name:'Keinjol Tata', country:'印度', stage:'报价已发', heat:'SOON',
+    lastContact:'10天前', firstContact:'2026-05-04',
+    drivers:[
+      {level:'yellow', title:'待确认——DDP运费$365、包装$2/盒', detail:'品牌ODM客户(Kinjolluxe)，500件首单。DDP运费和包装盒费用待确认。客户是有备而来的品牌商，决策链路较长。'}
+    ],
+    chat:[
+      {who:'me',time:'5/11',text:'"Amit, sorry to keep you waiting. I am the head of foreign trade..."'},
+      {who:'cust',time:'5/10',text:'"hello" — 品牌ODM客户，500件首单'}
+    ],
+    nums:['🏷️ 品牌: Kinjolluxe (Amazon渠道)','📦 首单: 500件 ODM','🚚 DDP运费: $365（待确认）','📦 包装盒: $2/盒（待确认）'],
+    steps:'1. 确认DDP运费报价\n2. 确认包装盒方案\n3. 推进PI'
+  },
+
+  clara: {
+    name:'Clara ElAssaad', country:'法国', stage:'需求探索', heat:'SOON',
+    lastContact:'7天前', firstContact:'2026-05-07',
+    drivers:[
+      {level:'yellow', title:'该追问——首次回复太简短后补救', detail:'5/7客问2-4岁套装，你回"Convient"太简单。5/13补了详细回复并道歉。客未回。该追问真实需求是个人用还是商业采购。'}
+    ],
+    chat:[
+      {who:'me',time:'5/13',text:'"Bonjour Clara, je suis Leo. Désolé pour la réponse trop courte..."'},
+      {who:'cust',time:'5/7',text:'"bjr svp je veux ces ensembles pour des enfants de 2 à 4ans"'}
+    ],
+    nums:['👶 年龄段: 2-4岁','📏 尺码: 73-130cm（已告知）'],
+    steps:'1. 追问个人用还是商业采购\n2. 如商用→报价+MOQ\n3. 道歉语气已到位，不再强调'
+  },
+
+  wele: {
+    name:'WELE Mounia', country:'多哥', stage:'已签收', heat:'SOON',
+    lastContact:'8天前', firstContact:'2026-02-07',
+    drivers:[
+      {level:'yellow', title:'该回访——签收8天未问反馈', detail:'老客户，已收30件货。上次问销售情况客未回。该回访问产品质量满意度和复购意向。'}
+    ],
+    chat:[
+      {who:'me',time:'5/8',text:'"WELE, bonjour! Comment se sont vendues les 30 pièces?"'},
+      {who:'cust',time:'5/6',text:'"merci j\'ai bien reçu la marchandise je suis satisfaite"'}
+    ],
+    nums:['📦 上次订单: 30件（已签收）','⭐ 客户类型: 复购老客户'],
+    steps:'1. 回访问销售情况\n2. 推新品\n3. 试探复购意向'
+  },
+
+  sara: {
+    name:'Sara Dibes', country:'黎巴嫩', stage:'待付款', heat:'SOON',
+    lastContact:'12天前', firstContact:'2026-04-10',
+    drivers:[
+      {level:'yellow', title:'该追问——PI已发12天已读不回', detail:'PI发了，客户已读但不回复。可能价格需讨论或在比价。需分析心理后追问，降低回复门槛。'}
+    ],
+    chat:[
+      {who:'me',time:'5/4',text:'"Sara, did you receive the PI I sent last time?"'}
+    ],
+    nums:['📄 PI已发（5/4）','📭 已读不回: 12天'],
+    steps:'1. 分析已读不回心理原因\n2. 降低回复门槛的话术追问\n3. 给价格调整空间但不主动降'
+  },
+
+  christabel: {
+    name:'Christabel Kanunsha', country:'赞比亚', stage:'待发货', heat:'SOON',
+    lastContact:'8天前', firstContact:'2026-04-25',
+    drivers:[
+      {level:'yellow', title:'该更新进度——付款后8天没更新', detail:'2件已付，生产中。超过一周没给客户更新备货进度。该拍照/视频发过去，给客户安心感。'}
+    ],
+    chat:[
+      {who:'me',time:'5/8',text:'"Your 2 items (90cm/2yr) are ready. Let me know about shipping."'}
+    ],
+    nums:['📦 2件 90cm/2岁','💰 已付款'],
+    steps:'1. 拍备货照片发给客户\n2. 确认物流方案\n3. 更新状态卡'
+  },
+
+  aloh: {
+    name:'Aloh Voma', country:'美国', stage:'在途', heat:'NOW',
+    lastContact:'8天前', firstContact:'2026-05-02',
+    drivers:[
+      {level:'red', title:'物流跟踪——客户反复强调货代信息', detail:'客户焦虑点在货代发货和运输标记。已发货8天没更新。该跟踪物流并主动同步给客户。'}
+    ],
+    chat:[
+      {who:'me',time:'5/8',text:'"Already packed and shipped, expected to arrive within 3 days"'},
+      {who:'me',time:'5/8',text:'"I will communicate with your freight forwarder and send you the receipt"'}
+    ],
+    nums:['🚚 已发货 20pcs','⚠️ 客户焦虑: 货代信息/运输标记','💰 $3/pc × 20pcs'],
+    steps:'1. 跟踪物流状态\n2. 主动同步运输进展\n3. 到港前通知客户'
+  },
+
+  angela: {
+    name:'Angela O', country:'美国', stage:'报价已发', heat:'NOW',
+    lastContact:'13天前', firstContact:'2026-05-02',
+    drivers:[
+      {level:'red', title:'未回复——PI已做13天等付款', detail:'14款×3件=42件，$200.19+$210运费=$410.19。PI做完后客户无回复。13天太久了，该确认PI是否收到。'}
+    ],
+    chat:[
+      {who:'me',time:'5/3',text:'"Ángela, tu factura proforma ya está lista, 14 modelos × 3 piezas = 42 piezas, $200.19 + $210 envío = $410.19"'},
+      {who:'cust',time:'5/2',text:'"Mucha gracias"'},{who:'me',time:'5/2',text:'"De acuerdo, te lo envío cuando lo termine"'}
+    ],
+    nums:['📄 PI: 42件 $200.19 + $210运费 = $410.19','📭 无回复: 13天'],
+    steps:'1. 确认PI是否收到\n2. 温和催促付款\n3. 问是否需要调整数量/款式'
+  },
+
+  akamwau: {
+    name:'Aka-Mwau Esme', country:'赞比亚', stage:'样品阶段', heat:'SOON',
+    lastContact:'12天前', firstContact:'2026-05-02',
+    drivers:[
+      {level:'yellow', title:'该追问——样品提议后14天没反馈', detail:'问了要不要样品后没后续。该追问是否还需要样品，还是已找到别的供应商。'}
+    ],
+    chat:[
+      {who:'me',time:'5/4',text:'"Do you need a sample?"'},
+      {who:'cust',time:'5/2',text:'（询价消息）'}
+    ],
+    nums:['📭 无回复: 12天'],
+    steps:'1. 追问样品需求\n2. 如需要→确认规格和地址\n3. 如不需要→了解原因'
+  },
+
+  // ---- Normal flow customers (light data) ----
+  aboulaye: {
+    name:'Aboulaye Rabiatou', country:'科特迪瓦', stage:'报价已发', heat:'NORMAL',
+    lastContact:'5天前', firstContact:'2026-05-01',
+    drivers:[], chat:[], nums:[], steps:'正常流转中，暂无行动信号。'
+  },
+  marcoss: { name:'Marcos Kuyu', country:'刚果民主共和国', stage:'需求探索', heat:'NORMAL', lastContact:'4天前', firstContact:'2026-04-20', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  christine: { name:'Christine Muwela', country:'赞比亚', stage:'需求探索', heat:'NORMAL', lastContact:'3天前', firstContact:'2026-03-10', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  begimai: { name:'Begimai Akymbekova', country:'吉尔吉斯斯坦', stage:'需求探索', heat:'NORMAL', lastContact:'2天前', firstContact:'2026-04-15', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  alina: { name:'Alina Svinchuk', country:'乌克兰', stage:'报价已发', heat:'NORMAL', lastContact:'6天前', firstContact:'2026-04-01', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  mona: { name:'Mona almuharraqy', country:'沙特', stage:'报价已发', heat:'NORMAL', lastContact:'7天前', firstContact:'2026-03-20', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  gabriela: { name:'Gabriela Torrealba', country:'委内瑞拉', stage:'样品阶段', heat:'NORMAL', lastContact:'5天前', firstContact:'2026-04-01', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  diego: { name:'Diego Vargas', country:'哥伦比亚', stage:'样品阶段', heat:'NORMAL', lastContact:'3天前', firstContact:'2026-03-15', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  israa: { name:'Israa Fawzi', country:'埃及', stage:'谈判中', heat:'NORMAL', lastContact:'4天前', firstContact:'2026-04-10', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  sarah_a: { name:'sarah alnajar', country:'约旦', stage:'待付款', heat:'NORMAL', lastContact:'2天前', firstContact:'2026-03-01', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  christelle: { name:'Christelle ITwite', country:'刚果民主共和国', stage:'在途', heat:'NORMAL', lastContact:'5天前', firstContact:'2026-02-20', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  ernestina: { name:'Ernestina Afriyie', country:'加纳', stage:'在途', heat:'NORMAL', lastContact:'3天前', firstContact:'2026-03-10', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  rosette: { name:'Rosette Ngoy', country:'刚果民主共和国', stage:'已签收', heat:'NORMAL', lastContact:'7天前', firstContact:'2026-01-05', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  amenan: { name:'Amenanchristine Boua', country:'科特迪瓦', stage:'已签收', heat:'NORMAL', lastContact:'6天前', firstContact:'2026-02-01', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  // aliases
+  marcos: { name:'Marcos Kuyu', country:'刚果民主共和国', stage:'需求探索', heat:'NORMAL', lastContact:'4天前', firstContact:'2026-04-20', drivers:[], chat:[], nums:[], steps:'正常流转中。' },
+  esther: { name:'Esther Chola', country:'赞比亚', stage:'报价已发', heat:'SOON', lastContact:'9天前', firstContact:'2026-03-25',
+    drivers:[{level:'yellow', title:'该追问——报价9天无回复', detail:'客户问了价格后沉默。该温和追问是否收到报价，是否需要更多信息。'}],
+    chat:[], nums:[], steps:'1. 温和追问报价反馈\n2. 了解客户采购计划'
+  },
+  youssouf: { name:'Youssouf', country:'科特迪瓦', stage:'谈判中', heat:'NORMAL', lastContact:'3天前', firstContact:'2026-03-01', drivers:[], chat:[], nums:[], steps:'正常流转中。' }
+};
+
+function openModal(cid) {
+  var d = customers[cid];
+  if (!d) return;
+  var h = '';
+  h += '<div class="modal-header"><h2>' + d.name + '</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  h += '<div class="modal-body">';
+
+  // Frontmatter
+  h += '<div class="fm-grid">';
+  var fields = [
+    ['国家', d.country || ''],
+    ['阶段', d.stage || ''],
+    ['热度', d.heat || ''],
+    ['最后联系', d.lastContact || '']
+  ];
+  for (var i = 0; i < fields.length; i++) {
+    h += '<div class="fm-item"><div class="fm-label">' + fields[i][0] + '</div><div class="fm-value">' + fields[i][1] + '</div></div>';
+  }
+  h += '</div>';
+
+  // Drivers
+  if (d.drivers && d.drivers.length) {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="driver-list">';
+    for (var j = 0; j < d.drivers.length; j++) {
+      var dr = d.drivers[j];
+      var cls = dr.level === 'red' ? 'driver-item-red' : 'driver-item-yellow';
+      var icon = dr.level === 'red' ? '🔴' : '🟡';
+      h += '<div class="driver-item ' + cls + '"><span class="driver-icon">' + icon + '</span><div><strong>' + dr.title + '</strong><div style="color:#999;font-size:0.85em;margin-top:2px;">' + dr.detail + '</div></div></div>';
+    }
+    h += '</div></div>';
+  }
+
+  // Chat
+  if (d.chat && d.chat.length) {
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var k = 0; k < d.chat.length; k++) {
+      var cl = d.chat[k];
+      h += '<div class="chat-line"><span class="chat-who ' + (cl.who === 'me' ? 'chat-who-me' : 'chat-who-cust') + '">' + (cl.who === 'me' ? '我' : '客') + '</span><span class="chat-time">' + cl.time + '</span>' + cl.text + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  // Key numbers
+  if (d.nums && d.nums.length) {
+    h += '<div class="section"><div class="section-title">🔢 关键数字</div>';
+    for (var m = 0; m < d.nums.length; m++) {
+      h += '<div class="key-num">' + d.nums[m] + '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Next step
+  if (d.steps) {
+    h += '<div class="section"><div class="section-title">→ 下一步</div><div style="font-size:0.9em;line-height:1.7;white-space:pre-line">' + d.steps + '</div></div>';
+  }
+
+  h += '</div>';
+  h += '<div class="modal-footer"><button class="btn btn-primary">✏️ 起草回复</button><button class="btn">🔍 深度分析</button><button class="btn">✅ 标记已处理</button></div>';
+
+  document.getElementById('modal').innerHTML = h;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+<h2>HTML 看板布局设计</h2>
+<p class="subtitle">所有信息一个页面，折叠展开，点击下钻。这是整体结构，确认布局方向我们再细化每个模块</p>
+
+<div class="mockup">
+  <div class="mockup-header">OKKI 客户运营看板 — 2026-05-12</div>
+  <div class="mockup-body" style="padding:16px;font-family:monospace;font-size:13px;line-height:1.6;">
+
+<!-- 顶部指标卡 -->
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;">
+  <div style="background:#1a5276;color:#fff;padding:12px;border-radius:6px;text-align:center;">
+    <div style="font-size:24px;font-weight:bold;">477</div>
+    <div style="font-size:11px;opacity:0.85;">总会话</div>
+  </div>
+  <div style="background:#1a5276;color:#fff;padding:12px;border-radius:6px;text-align:center;">
+    <div style="font-size:24px;font-weight:bold;">23</div>
+    <div style="font-size:11px;opacity:0.85;">3天活跃</div>
+  </div>
+  <div style="background:#c0392b;color:#fff;padding:12px;border-radius:6px;text-align:center;">
+    <div style="font-size:24px;font-weight:bold;">267</div>
+    <div style="font-size:11px;opacity:0.85;">超90天无互动</div>
+  </div>
+  <div style="background:#e67e22;color:#fff;padding:12px;border-radius:6px;text-align:center;">
+    <div style="font-size:24px;font-weight:bold;">47</div>
+    <div style="font-size:11px;opacity:0.85;">未读</div>
+  </div>
+  <div style="background:#27ae60;color:#fff;padding:12px;border-radius:6px;text-align:center;">
+    <div style="font-size:24px;font-weight:bold;">17</div>
+    <div style="font-size:11px;opacity:0.85;">本期变动</div>
+  </div>
+  <div style="background:#8e44ad;color:#fff;padding:12px;border-radius:6px;text-align:center;">
+    <div style="font-size:24px;font-weight:bold;">12</div>
+    <div style="font-size:11px;opacity:0.85;">今天行动</div>
+  </div>
+</div>
+
+<!-- 第二部分：双轴矩阵 + 静默风险 并排 -->
+<div style="display:flex;gap:16px;margin-bottom:16px;">
+
+  <!-- 可点击双轴矩阵 -->
+  <div style="flex:1;border:1px solid #ccc;border-radius:6px;overflow:hidden;">
+    <div style="background:#f0f0f0;padding:8px 12px;font-weight:bold;border-bottom:1px solid #ccc;">
+      ▼ 客户双轴矩阵 <span style="font-weight:normal;font-size:11px;color:#888;">（生命周期 × 质量）点击格子展开名单</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <tr style="background:#f8f8f8;">
+        <th style="padding:4px;border:1px solid #ddd;"></th>
+        <th style="padding:4px;border:1px solid #ddd;">S 级</th>
+        <th style="padding:4px;border:1px solid #ddd;">A 级</th>
+        <th style="padding:4px;border:1px solid #ddd;">B 级</th>
+        <th style="padding:4px;border:1px solid #ddd;">C 级</th>
+        <th style="padding:4px;border:1px solid #ddd;">D 级</th>
+        <th style="padding:4px;border:1px solid #ddd;color:#c0392b;">变动</th>
+      </tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">待回复</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#fff3cd;cursor:pointer;">1</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">2</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">3</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">5</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">3</td><td style="text-align:center;padding:4px;border:1px solid #ddd;color:#27ae60;">+1</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">初询沟通</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#fff3cd;cursor:pointer;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">2</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">4</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">6</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">2</td><td style="text-align:center;padding:4px;border:1px solid #ddd;color:#e74c3c;">-2</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">报价已发</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#fff3cd;cursor:pointer;">2</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#fff3cd;cursor:pointer;">3</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">5</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">4</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">1</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">谈判/样品</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#d4edda;cursor:pointer;">1</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#d4edda;cursor:pointer;">2</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">1</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;color:#27ae60;">+3</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">PI已发</td><td style="text-align:center;padding:4px;border:1px solid #ddd;background:#d4edda;cursor:pointer;">1</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">订单执行</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">1</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">已签收</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td></tr>
+      <tr><td style="padding:4px;border:1px solid #ddd;font-weight:bold;">售后</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td><td style="text-align:center;padding:4px;border:1px solid #ddd;">0</td></tr>
+    </table>
+    <div style="padding:6px 12px;font-size:10px;color:#888;">
+      黄色=需要关注 | 绿色=有进展 | 点击数字展开该格客户名单+判断依据
+    </div>
+  </div>
+
+  <!-- 静默风险摘要 -->
+  <div style="flex:0 0 320px;border:1px solid #ccc;border-radius:6px;overflow:hidden;">
+    <div style="background:#f0f0f0;padding:8px 12px;font-weight:bold;border-bottom:1px solid #ccc;">
+      ▼ 静默风险分级
+    </div>
+    <div style="padding:8px 12px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+        <span style="color:#c0392b;">🔴 深度静默 90天+</span> <strong>267人</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+        <span style="color:#e67e22;">🟠 长期静默 30-90天</span> <strong>45人</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+        <span style="color:#f39c12;">🟡 中期静默 14-30天</span> <strong>23人</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+        <span style="color:#3498db;">🔵 短期静默 7-14天</span> <strong>18人</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;">
+        <span style="color:#27ae60;">🟢 近期活跃 3-7天</span> <strong>12人</strong>
+      </div>
+      <div style="margin-top:8px;font-size:10px;color:#888;">
+        点击每行展开该层客户名单（按静默天数排序）
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 第三部分：行动清单 -->
+<div style="border:1px solid #ccc;border-radius:6px;overflow:hidden;margin-bottom:16px;">
+  <div style="background:#f0f0f0;padding:8px 12px;font-weight:bold;border-bottom:1px solid #ccc;">
+    ▼ 今日行动清单（12人） <span style="font-weight:normal;font-size:11px;color:#888;">展开看话术 + 卡点 + 时间窗口理由</span>
+  </div>
+
+  <!-- 行动项 1 -->
+  <div style="border-bottom:1px solid #eee;padding:0;">
+    <div style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;background:#fff;">
+      <span style="background:#c0392b;color:#fff;padding:2px 8px;border-radius:3px;font-size:11px;">紧急</span>
+      <strong>Maimouna Cisse</strong>
+      <span style="color:#888;font-size:12px;">🇨🇮 科特迪瓦</span>
+      <span style="color:#888;font-size:12px;">报价已发 · S级</span>
+      <span style="color:#e67e22;font-size:12px;">静默5天</span>
+    </div>
+    <div style="padding:8px 12px 12px 12px;background:#fafafa;font-size:12px;display:none;">
+      <div style="margin-bottom:6px;"><strong>卡点：</strong>客户已收到报价但未确认，可能在与竞品比价。上次沟通停留在价格确认环节。</div>
+      <div style="margin-bottom:6px;"><strong>时间窗口：</strong>报价后第5天是关键跟进节点——再等2天竞品可能抢先。</div>
+      <div style="background:#fef9e7;padding:8px;border-left:3px solid #f39c12;margin-bottom:4px;">
+        <strong>话术：</strong><br>
+        Hi Maimouna, hope you've had time to review the quotation. I wanted to check if you have any questions about the pricing or specs — happy to adjust based on your target budget. Looking forward to your feedback.
+      </div>
+    </div>
+  </div>
+
+  <!-- 行动项 2 -->
+  <div style="border-bottom:1px solid #eee;padding:0;">
+    <div style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+      <span style="background:#e67e22;color:#fff;padding:2px 8px;border-radius:3px;font-size:11px;">今日</span>
+      <strong>Keinjol Tata</strong>
+      <span style="color:#888;font-size:12px;">🇨🇩 刚果民主</span>
+      <span style="color:#888;font-size:12px;">初询沟通 · S级</span>
+      <span style="color:#e67e22;font-size:12px;">待回复2天</span>
+    </div>
+    <div style="padding:8px 12px 12px 12px;background:#fafafa;font-size:12px;display:none;">
+      <div style="margin-bottom:6px;"><strong>卡点：</strong>新客户首次询盘后我方已回复报价+工厂资料，对方未读。可能的障碍：被竞品吸引/对MOQ有顾虑/仅比价。</div>
+      <div style="margin-bottom:6px;"><strong>时间窗口：</strong>首次回复后48小时是黄金二次触达期。再延迟可能被遗忘。</div>
+      <div style="background:#fef9e7;padding:8px;border-left:3px solid #f39c12;">
+        <strong>话术：</strong><br>
+        Hi Keinjol, just following up on the quotation I sent. We also have some new baby blanket designs I think you'd like — would you be interested in seeing them? Let me know if MOQ is a concern, we can discuss flexible options.
+      </div>
+    </div>
+  </div>
+
+  <!-- 行动项 3 -->
+  <div style="padding:0;">
+    <div style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:12px;">
+      <span style="background:#3498db;color:#fff;padding:2px 8px;border-radius:3px;font-size:11px;">48h内</span>
+      <strong>Samia Guenad</strong>
+      <span style="color:#888;font-size:12px;">🇸🇩 苏丹</span>
+      <span style="color:#888;font-size:12px;">PI已发 · A级</span>
+      <span style="color:#e67e22;font-size:12px;">待付款4天</span>
+    </div>
+    <div style="padding:8px 12px 12px 12px;background:#fafafa;font-size:12px;display:none;">
+      <div style="margin-bottom:6px;"><strong>卡点：</strong>PI已发但付款未到。可能卡在银行流程/外汇审批/决策人变动。</div>
+      <div style="margin-bottom:6px;"><strong>时间窗口：</strong>PI有效期通常7天，已过4天。建议在第6天前确认银行流程状态。</div>
+      <div style="background:#fef9e7;padding:8px;border-left:3px solid #f39c12;">
+        <strong>话术：</strong><br>
+        Hi Samia, hope you're well. Just checking if the payment is proceeding smoothly or if you need any documents from our side to help with the bank process. The PI is valid until [date], please let us know if any adjustments are needed.
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:8px 12px;font-size:11px;color:#888;text-align:center;border-top:1px solid #eee;">
+    ... 剩余 9 项折叠显示（48h内 × 4, 本周 × 5）
+  </div>
+</div>
+
+<!-- 第四部分：市场分布 + 变化趋势 并排 -->
+<div style="display:flex;gap:16px;">
+
+  <!-- 市场分布 -->
+  <div style="flex:1;border:1px solid #ccc;border-radius:6px;overflow:hidden;">
+    <div style="background:#f0f0f0;padding:8px 12px;font-weight:bold;border-bottom:1px solid #ccc;">
+      ▼ 核心市场客户分布
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr style="background:#f8f8f8;"><th style="padding:6px;border:1px solid #ddd;text-align:left;">市场</th><th style="padding:6px;border:1px solid #ddd;">客户数</th><th style="padding:6px;border:1px solid #ddd;">S/A级</th><th style="padding:6px;border:1px solid #ddd;">待行动</th></tr>
+      <tr><td style="padding:6px;border:1px solid #ddd;">🇸🇩 苏丹</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">58</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">4</td><td style="text-align:center;padding:6px;border:1px solid #ddd;color:#c0392b;">3</td></tr>
+      <tr><td style="padding:6px;border:1px solid #ddd;">🇪🇬 埃及</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">42</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">3</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">2</td></tr>
+      <tr><td style="padding:6px;border:1px solid #ddd;">🇨🇩 刚果民主</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">31</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">5</td><td style="text-align:center;padding:6px;border:1px solid #ddd;color:#c0392b;">4</td></tr>
+      <tr><td style="padding:6px;border:1px solid #ddd;">🇸🇦 沙特</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">27</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">2</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:6px;border:1px solid #ddd;">🇦🇪 阿联酋</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">22</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">1</td><td style="text-align:center;padding:6px;border:1px solid #ddd;">0</td></tr>
+    </table>
+  </div>
+
+  <!-- 变化趋势 -->
+  <div style="flex:1;border:1px solid #ccc;border-radius:6px;overflow:hidden;">
+    <div style="background:#f0f0f0;padding:8px 12px;font-weight:bold;border-bottom:1px solid #ccc;">
+      ▼ 本期变动（相较上次运行）
+    </div>
+    <div style="padding:8px 12px;font-size:12px;">
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;">
+        <span>📈 升级客户</span> <strong style="color:#27ae60;">8人</strong>
+        <span style="font-size:10px;color:#888;">(C→B × 3, B→A × 3, A→S × 2)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;">
+        <span>📉 降级客户</span> <strong style="color:#e74c3c;">5人</strong>
+        <span style="font-size:10px;color:#888;">(A→B × 2, B→C × 2, S→A × 1)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;">
+        <span>🆕 新进入</span> <strong style="color:#3498db;">4人</strong>
+        <span style="font-size:10px;color:#888;">(本期新询盘)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;">
+        <span>⏸️ 流失</span> <strong style="color:#95a5a6;">3人</strong>
+        <span style="font-size:10px;color:#888;">(超90天无回复转沉淀)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>设计要点确认</h3>
+  <div class="pros-cons">
+    <div class="pros"><h4>✅ 这个布局解决</h4><ul>
+      <li>矩阵可点击展开 → 看到每个格子具体是谁 + 为什么分到这</li>
+      <li>静默风险分级恢复 → 按天数分段，点击展开具体名单</li>
+      <li>行动清单折叠式 → 每项展开看卡点+时间窗口+话术，不点就不占空间</li>
+      <li>市场分布+变动趋势 → 本期升降一目了然</li>
+    </ul></div>
+    <div class="cons"><h4>❓ 待你确认</h4><ul>
+      <li>信息密度是否合适？会不会太挤？</li>
+      <li>折叠展开的交互方式方便吗？还是希望默认全部展开？</li>
+      <li>是否需要国家/级别筛选器（顶部加一排下拉筛选）？</li>
+      <li>静态 HTML 够用，还是需要 JS 实现排序/筛选/搜索？</li>
+    </ul></div>
+  </div>
+</div>

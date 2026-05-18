@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 看板 — 双轴矩阵</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; color: #333; }
+  h1 { font-size: 1.2em; margin-bottom: 2px; }
+  .subtitle { color: #999; font-size: 0.8em; margin-bottom: 16px; }
+
+  .matrix { display: grid; gap: 1px; background: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .cell { background: #fff; padding: 8px; min-height: 60px; display: flex; flex-wrap: wrap; gap: 4px; align-content: start; }
+  .cell-header { background: #fafafa; padding: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8em; color: #666; text-align: center; }
+  .row-label { background: #fafafa; padding: 6px 10px; display: flex; align-items: center; gap: 6px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+
+  .customer-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 14px; font-size: 0.76em; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: all .12s; }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  .chip-red { background: #ffebee; border-color: #ffcdd2; color: #b71c1c; }
+  .chip-yellow { background: #fff8e1; border-color: #ffecb3; color: #e65100; }
+  .chip-grey { background: #f5f5f5; border-color: #eee; color: #888; }
+
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: #d32f2f; }
+  .chip-dot-yellow { background: #f57c00; }
+  .chip-dot-grey { background: #bbb; }
+
+  .chip-badge { font-size: 0.7em; padding: 1px 4px; border-radius: 8px; margin-left: 2px; }
+  .badge-count { background: rgba(0,0,0,.06); }
+
+  .empty-cell { display: flex; align-items: center; justify-content: center; color: #ddd; font-size: 2em; }
+  .cold-section { opacity: 0.45; }
+
+  .summary-bar { display: flex; gap: 16px; margin-bottom: 14px; font-size: 0.82em; align-items: center; }
+  .summary-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .legend { display: flex; gap: 16px; margin-bottom: 10px; font-size: 0.76em; color: #999; align-items: center; }
+
+  .col-cold { background: #fafafa; }
+  .stage-header { font-size: 0.78em; font-weight: 600; text-align: center; }
+  .stage-count { font-size: 0.7em; font-weight: normal; color: #999; }
+</style>
+</head>
+<body>
+
+<h1>OKKI 客户看板</h1>
+<p class="subtitle">横轴：客户生命周期 → &nbsp; 纵轴：驱动紧急度 &nbsp; 2026-05-16</p>
+
+<div class="summary-bar">
+  <span><span class="summary-dot" style="background:#d32f2f"></span> 需立即处理: <strong>5人</strong></span>
+  <span><span class="summary-dot" style="background:#f57c00"></span> 需定时关注: <strong>12人</strong></span>
+  <span><span class="summary-dot" style="background:#bbb"></span> 正常/冷冻: <strong>23人</strong></span>
+  <span style="color:#999;margin-left:auto">点击客户卡片 → 打开状态卡</span>
+</div>
+
+<div class="matrix" style="grid-template-columns: 80px repeat(8, 1fr);">
+  <!-- Header row -->
+  <div class="cell-header"></div>
+  <div class="cell-header">🔍 需求探索<br><span class="stage-count">12人</span></div>
+  <div class="cell-header">💰 报价已发<br><span class="stage-count">8人</span></div>
+  <div class="cell-header">🧪 样品阶段<br><span class="stage-count">3人</span></div>
+  <div class="cell-header">🤝 谈判中<br><span class="stage-count">2人</span></div>
+  <div class="cell-header">💳 待付款<br><span class="stage-count">4人</span></div>
+  <div class="cell-header">📦 待发货<br><span class="stage-count">5人</span></div>
+  <div class="cell-header">🚢 在途<br><span class="stage-count">4人</span></div>
+  <div class="cell-header">✅ 已签收<br><span class="stage-count">3人</span></div>
+
+  <!-- 🔴 需立即处理 -->
+  <div class="row-label"><span class="chip-dot chip-dot-red"></span> 需立即处理</div>
+  <div class="cell">
+    <span class="customer-chip chip-red"><span class="chip-dot chip-dot-red"></span>Inderpreet<span class="chip-badge badge-count">未回</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-red"><span class="chip-dot chip-dot-red"></span>jonathan<span class="chip-badge badge-count">待发</span></span>
+  </div>
+  <div class="cell empty-cell">·</div>
+  <div class="cell">
+    <span class="customer-chip chip-red"><span class="chip-dot chip-dot-red"></span>Angela O<span class="chip-badge badge-count">未回</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-red"><span class="chip-dot chip-dot-red"></span>Nassir<span class="chip-badge badge-count">承诺</span></span>
+  </div>
+  <div class="cell empty-cell">·</div>
+  <div class="cell empty-cell">·</div>
+  <div class="cell empty-cell">·</div>
+
+  <!-- 🟡 需定时关注 -->
+  <div class="row-label"><span class="chip-dot chip-dot-yellow"></span> 需定时关注</div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Clara<span class="chip-badge badge-count">追问</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>arshavin<span class="chip-badge badge-count">追问</span></span>
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Hakim<span class="chip-badge badge-count">追问</span></span>
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Keinjol<span class="chip-badge badge-count">DDP</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Aka-Mwau<span class="chip-badge badge-count">追问</span></span>
+  </div>
+  <div class="cell empty-cell">·</div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Sara D<span class="chip-badge badge-count">追问</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Christabel<span class="chip-badge badge-count">进度</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>Aloh<span class="chip-badge badge-count">物流</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow"><span class="chip-dot chip-dot-yellow"></span>WELE<span class="chip-badge badge-count">回访</span></span>
+  </div>
+
+  <!-- ⚪ 正常流转 -->
+  <div class="row-label"><span class="chip-dot chip-dot-grey"></span> 正常流转</div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">Aboulaye</span>
+    <span class="customer-chip chip-grey">Marcos</span>
+    <span class="customer-chip chip-grey">Tahar</span>
+    <span class="customer-chip chip-grey">+7</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">Esther</span>
+    <span class="customer-chip chip-grey">+3</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">+2</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">+1</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">ali Amjid</span>
+    <span class="customer-chip chip-grey">+1</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">sarah a</span>
+    <span class="customer-chip chip-grey">+3</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">+3</span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-grey">+2</span>
+  </div>
+
+  <!-- ❄️ 冷冻 -->
+  <div class="row-label" style="opacity:0.4"><span class="chip-dot chip-dot-grey"></span> ❄️ 冷冻</div>
+  <div class="cell cold-section" colspan="8" style="padding:6px 12px; font-size:0.78em; color:#aaa;">
+    MENTZEKO Mathi (喀麦隆, 191天) &nbsp;·&nbsp; Deekshith Shekar (印度, 149天) &nbsp;·&nbsp; Anne Shen (中国, 158天) &nbsp;·&nbsp; +20人 · 折叠中
+  </div>
+</div>
+
+<br>
+<div style="font-size:0.72em;color:#999;line-height:1.6;">
+  💡 红色卡片 = 今天下班前要处理 · 黄色卡片 = 本周内处理 · 灰色 = 正常流转<br>
+  横轴看客户在哪个阶段，纵轴看紧急程度。右上角"待付款+🔴"最该优先；左下角"需求探索+⚪"不急。
+</div>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+  "_说明": "同梯队内客户的排序权重。分数越高越靠前。修改后运行 pipeline 即可生效。",
+
+  "weights": {
+    "daysAgo_penalty": {
+      "_说明": "距今每多1天扣多少分",
+      "value": 5
+    },
+    "lastCustomerMsg_bonus": {
+      "_说明": "客户最近发了消息的加分(≤1天)",
+      "value": 20
+    },
+    "core_market_bonus": {
+      "_说明": "核心市场客户加分(苏丹/埃及/刚果/赞比亚/科特迪瓦/沙特/阿联酋)",
+      "value": 15
+    },
+    "order_signal_bonus": {
+      "_说明": "有下单信号加分",
+      "value": 30
+    },
+    "pi_address_bonus": {
+      "_说明": "PI+地址都有的加分(近成交信号)",
+      "value": 40
+    },
+    "high_engagement_bonus": {
+      "_说明": "高互动(realMsgs≥30)加分",
+      "value": 10
+    },
+    "customer_reply_bonus": {
+      "_说明": "客户消息占比≥40%加分(有诚意)",
+      "value": 10
+    },
+    "silence_penalty": {
+      "_说明": "超过沉默warning线额外扣分",
+      "value": 25
+    }
+  },
+
+  "stages": {
+    "1_awaiting_payment": {
+      "label": "待确认付款",
+      "condition": {"hasPI": true, "hasAddress": true, "daysAgo_lte": 7},
+      "action_template": "确认PI信息无误 → 提醒付款 → 锁定排产。时效：24h内。"
+    },
+    "2_negotiating": {
+      "label": "谈判中·近期活跃",
+      "condition": {"realMsgs_gte": 15, "daysAgo_lte": 3},
+      "action_template": "补全信息缺口 → 给价格区间 → 引导下一步。时效：48h内。"
+    },
+    "3_quoted_waiting": {
+      "label": "报价已发·等回应",
+      "condition": {"hasPrice": true, "lastCustomerMsgDays_gte": 3},
+      "action_template": "3-5天后温和跟进(确认收到+提供新价值)，不要催单。"
+    },
+    "4_initial_inquiry": {
+      "label": "初询阶段",
+      "condition": {"realMsgs_lt": 10, "daysAgo_lte": 2},
+      "action_template": "确认数量+目的地 → 给报价 → 引导选款。时效：24h内。"
+    },
+    "5_template_silence": {
+      "label": "模板提问后沉默",
+      "condition": {"realMsgs_lte": 5, "lastCustomerMsgDays_gte": 3},
+      "action_template": "换策略重联：给选择题而非开放式问题，给具体产品推荐。"
+    },
+    "6_low_intent": {
+      "label": "低意向/非采购",
+      "condition": {"realMsgs_lte": 3},
+      "action_template": "不投入时间，标记待观察。"
+    }
+  }
+}

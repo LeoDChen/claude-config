@@ -1,0 +1,89 @@
+# OKKI 数据新鲜度保障 + /okki 流程整合
+
+> 日期：2026-05-18
+> 触发：用户反馈"每次开启okki项目能不能抓取新询盘，会不会只分析旧数据"
+
+---
+
+## 一、问题诊断
+
+当前管道没有**数据新鲜度强制校验**，风险链路：
+
+```
+sync_okki.js (可能被跳过)
+  → batch_classify_heat.js (静默跑在旧数据)
+    → init_factor_baselines.js (静默跑在旧分类)
+      → 产出 SOON/冷层报告 (基于几天前的数据，无任何警告)
+```
+
+`/okki` 技能写了"必须同步"，但没有程序级保障。
+
+---
+
+## 二、方案：三层防护
+
+### 第 1 层：sync 标记文件
+
+`sync_okki.js` 完成后写入 `data/.last_sync.json`：
+
+```json
+{
+  "date": "2026-05-18",
+  "conversations": 466,
+  "newMessages": 23,
+  "source": "sync_okki.js"
+}
+```
+
+这是整个数据新鲜度的"信任根"。所有下游脚本只信任这个文件。
+
+### 第 2 层：下游脚本入口校验
+
+在 `init_factor_baselines.js` 和 `batch_classify_heat.js` 的 main() 开头加 `checkFreshness()`：
+
+```js
+function checkFreshness() {
+  const syncPath = path.join(__dirname, '..', 'data', '.last_sync.json');
+  if (!fs.existsSync(syncPath)) {
+    console.error('❌ 未找到 .last_sync.json，请先运行 sync_okki.js');
+    process.exit(1);
+  }
+  const sync = JSON.parse(fs.readFileSync(syncPath, 'utf-8'));
+  const syncDate = new Date(sync.date);
+  const today = new Date(TODAY);
+  if (daysBetween(syncDate, today) > 1) {
+    console.error(`❌ 数据已过期（上次同步: ${sync.date}），请先运行 sync_okki.js`);
+    process.exit(1);
+  }
+  console.log(`✅ 数据新鲜度: 上次同步 ${sync.date}，${sync.conversations} 会话`);
+}
+```
+
+**行为**：
+- 无 `.last_sync.json` → 直接拒绝，exit(1)
+- 同步日期距今 > 1 天 → 拒绝，exit(1)
+- 通过 → 打印确认信息，继续执行
+
+### 第 3 层：sync_okki.js 尾部写标记
+
+在 `sync_okki.js` 成功完成后写入 `.last_sync.json`。失败不写。
+
+---
+
+## 三、涉及文件
+
+| 文件 | 改动 |
+|------|------|
+| `scripts/sync_okki.js` | 末尾加写 `.last_sync.json` 逻辑（~5行） |
+| `scripts/init_factor_baselines.js` | 开头加 `checkFreshness()` 函数 + main() 首行调用（~20行） |
+| `scripts/batch_classify_heat.js` | 同上 |
+| `.claude/skills/okki/SKILL.md` | 补充 factor_baselines 到 /okki flow + 标注 sync 失败时的行为 |
+
+---
+
+## 四、验证
+
+1. 删除 `.last_sync.json` → 运行 init_factor_baselines.js → 应拒绝并提示 "请先运行 sync_okki.js"
+2. 创建假的 `.last_sync.json` 日期为 2026-05-10 → 运行 → 应拒绝并提示 "数据已过期"
+3. 正常运行 sync_okki.js → 确认 `.last_sync.json` 生成 → 运行下游脚本 → 通过
+4. 确认 `/okki` 技能文档更新后，下次调用 `/okki` 时会自动执行 sync → classify → factor_baselines 完整链路

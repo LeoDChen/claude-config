@@ -1,0 +1,1248 @@
+/c/Users/Administrator/.claude/skills/:
+total 80
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121 0 May  8 17:59 ..
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 agent-harness-construction
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 agent-introspection-debugging
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 agent-sort
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 agentic-engineering
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 ai-first-engineering
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 ai-regression-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 android-clean-architecture
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 api-connector-builder
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 api-design
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 article-writing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 automation-audit-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 autonomous-loops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:17 b2b-visual-design
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 backend-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 blueprint
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 brand-voice
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 carrier-relationship-management
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 claude-api
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 claude-devfleet
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 clickhouse-io
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 code-tour
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 coding-standards
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 compose-multiplatform-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 configure-ecc
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 connections-optimizer
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 content-engine
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 content-hash-cache-pattern
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 continuous-agent-loop
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 continuous-learning
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 continuous-learning-v2
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:17 copywriting
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 cost-aware-llm-pipeline
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 council
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 cpp-coding-standards
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 cpp-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 crosspost
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 csharp-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 customer-billing-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:17 customer-pitch
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 customs-trade-compliance
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 dart-flutter-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 dashboard-builder
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 data-scraper-agent
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 database-migrations
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 deep-research
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 defi-amm-security
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 deployment-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 django-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 django-security
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 django-tdd
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 django-verification
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 dmux-workflows
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 docker-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 dotnet-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 e2e-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 ecc-tools-cost-audit
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 email-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 energy-procurement
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 enterprise-agent-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 eval-harness
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 evm-token-decimals
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 exa-search
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 fal-ai-media
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 finance-billing-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 foundation-models-on-device
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 frontend-design
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 frontend-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 frontend-slides
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 github-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 golang-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 golang-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 google-workspace-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 healthcare-phi-compliance
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 hipaa-compliance
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 hookify-rules
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:17 inquiry-analysis
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 inventory-demand-planning
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 investor-materials
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 investor-outreach
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 iterative-retrieval
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 java-coding-standards
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 jira-integration
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 jpa-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 knowledge-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 kotlin-coroutines-flows
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 kotlin-exposed-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 kotlin-ktor-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 kotlin-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 kotlin-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 laravel-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 laravel-plugin-discovery
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 laravel-security
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 laravel-tdd
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 laravel-verification
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 lead-intelligence
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 liquid-glass-design
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 llm-trading-agent-security
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:22 logistics
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 logistics-exception-management
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 manim-video
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 market-research
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 mcp-server-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 messages-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 nanoclaw-repl
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 nestjs-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 nodejs-keccak256
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 nutrient-document-processing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:22 office-tools
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:23 order-followup
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:16 p4p-optimization
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 perl-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 perl-security
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 perl-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 plankton-code-quality
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 postgres-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 product-capability
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:23 product-listing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 production-scheduling
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 project-flow-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 prompt-optimizer
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 python-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 python-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 quality-nonconformance
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 ralphinho-rfc-pipeline
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 regex-vs-llm-structured-text
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 remotion-video-creation
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 research-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 returns-reverse-logistics
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 rust-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 rust-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 search-first
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 security-bounty-hunter
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 security-review
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 security-scan
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 seo
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 skill-stocktake
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 social-graph-ranker
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 springboot-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 springboot-security
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 springboot-tdd
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 springboot-verification
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 strategic-compact
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 swift-actor-persistence
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 swift-concurrency-6-2
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 swift-protocol-di-testing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 swiftui-patterns
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 tdd-workflow
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 team-builder
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 terminal-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 token-budget-advisor
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 ui-demo
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 unified-notifications-ops
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 verification-loop
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 video-editing
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 videodb
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 visa-doc-translate
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 workspace-surface-audit
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 x-api
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:14 {p4p-optimization,inquiry-analysis,customer-pitch,b2b-visual-design,copywriting,product-listing,order-followup,logistics,office-tools}
+
+/c/Users/Administrator/.claude/skills/agent-harness-construction:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2000 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/agent-introspection-debugging:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5529 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/agent-sort:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5910 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/agentic-engineering:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1731 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/ai-first-engineering:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1336 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/ai-regression-testing:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11533 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/android-clean-architecture:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8794 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/api-connector-builder:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2650 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/api-design:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 13110 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/article-writing:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2914 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/automation-audit-ops:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4155 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/autonomous-loops:
+total 92
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 24726 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/b2b-visual-design:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:17 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1989 Apr 25 14:17 SKILL.md
+
+/c/Users/Administrator/.claude/skills/backend-patterns:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 13837 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/blueprint:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5344 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/brand-voice:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3636 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 references
+
+/c/Users/Administrator/.claude/skills/brand-voice/references:
+total 4
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1063 Apr 25 14:37 voice-profile-schema.md
+
+/c/Users/Administrator/.claude/skills/carrier-relationship-management:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 23761 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/claude-api:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8544 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/claude-devfleet:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5817 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/clickhouse-io:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 10429 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/code-tour:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6716 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/coding-standards:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 12697 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/compose-multiplatform-patterns:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8120 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/configure-ecc:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 15847 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/connections-optimizer:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5465 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/content-engine:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4358 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/content-hash-cache-pattern:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5604 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/continuous-agent-loop:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1083 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/continuous-learning:
+total 73
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3888 Apr 25 14:37 SKILL.md
+-rw-r--r-- 1 Administrator 197121  391 Apr 25 14:37 config.json
+-rwxr-xr-x 1 Administrator 197121 2391 Apr 25 14:37 evaluate-session.sh
+
+/c/Users/Administrator/.claude/skills/continuous-learning-v2:
+total 89
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 12548 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 agents
+-rw-r--r-- 1 Administrator 197121   135 Apr 25 14:37 config.json
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 hooks
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 scripts
+
+/c/Users/Administrator/.claude/skills/continuous-learning-v2/agents:
+total 44
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rwxr-xr-x 1 Administrator 197121 9876 Apr 25 14:37 observer-loop.sh
+-rw-r--r-- 1 Administrator 197121 7396 Apr 25 14:37 observer.md
+-rwxr-xr-x 1 Administrator 197121 6392 Apr 25 14:37 session-guardian.sh
+-rwxr-xr-x 1 Administrator 197121 7522 Apr 25 14:37 start-observer.sh
+
+/c/Users/Administrator/.claude/skills/continuous-learning-v2/hooks:
+total 20
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rwxr-xr-x 1 Administrator 197121 16161 Apr 25 14:37 observe.sh
+
+/c/Users/Administrator/.claude/skills/continuous-learning-v2/scripts:
+total 108
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rwxr-xr-x 1 Administrator 197121  7761 Apr 25 14:37 detect-project.sh
+-rwxr-xr-x 1 Administrator 197121 57750 Apr 25 14:37 instinct-cli.py
+-rw-r--r-- 1 Administrator 197121 33106 Apr 25 14:37 test_parse_instinct.py
+
+/c/Users/Administrator/.claude/skills/copywriting:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:17 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2008 Apr 25 14:17 SKILL.md
+
+/c/Users/Administrator/.claude/skills/cost-aware-llm-pipeline:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5718 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/council:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6346 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/cpp-coding-standards:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 22279 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/cpp-testing:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 9163 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/crosspost:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3435 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/csharp-testing:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8619 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/customer-billing-ops:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4277 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/customer-pitch:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:17 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1373 Apr 25 14:17 SKILL.md
+
+/c/Users/Administrator/.claude/skills/customs-trade-compliance:
+total 96
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 29045 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/dart-flutter-patterns:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 15908 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/dashboard-builder:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2344 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/data-scraper-agent:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 24072 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/database-migrations:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11839 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/deep-research:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4582 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/defi-amm-security:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4783 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/deployment-patterns:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11000 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/django-patterns:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 21025 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/django-security:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 15805 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/django-tdd:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 20922 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/django-verification:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11479 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/dmux-workflows:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6324 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/docker-patterns:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8251 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/dotnet-patterns:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 9220 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/e2e-testing:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8065 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/ecc-tools-cost-audit:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6484 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/email-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3433 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/energy-procurement:
+total 96
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 30077 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/enterprise-agent-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1204 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/eval-harness:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6494 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/evm-token-decimals:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3847 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/exa-search:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3386 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/fal-ai-media:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6933 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/finance-billing-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3819 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/foundation-models-on-device:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8176 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/frontend-design:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3823 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/frontend-patterns:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 14773 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/frontend-slides:
+total 84
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6547 Apr 25 14:37 SKILL.md
+-rw-r--r-- 1 Administrator 197121 9145 Apr 25 14:37 STYLE_PRESETS.md
+
+/c/Users/Administrator/.claude/skills/github-ops:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4627 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/golang-patterns:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 14029 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/golang-testing:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 16638 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/google-workspace-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2724 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/healthcare-phi-compliance:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5561 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/hipaa-compliance:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3617 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/hookify-rules:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3534 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/inquiry-analysis:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:17 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1613 Apr 25 14:17 SKILL.md
+
+/c/Users/Administrator/.claude/skills/inventory-demand-planning:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 24508 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/investor-materials:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2723 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/investor-outreach:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2643 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/iterative-retrieval:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6681 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/java-coding-standards:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3872 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/jira-integration:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8968 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/jpa-patterns:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4548 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/knowledge-ops:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6740 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/kotlin-coroutines-flows:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 7754 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/kotlin-exposed-patterns:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 22007 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/kotlin-ktor-patterns:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 19435 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/kotlin-patterns:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 18842 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/kotlin-testing:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 20691 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/laravel-patterns:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 10539 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/laravel-plugin-discovery:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6381 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/laravel-security:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 7442 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/laravel-tdd:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 7433 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/laravel-verification:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4250 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/lead-intelligence:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11765 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 agents
+
+/c/Users/Administrator/.claude/skills/lead-intelligence/agents:
+total 20
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2319 Apr 25 14:37 enrichment-agent.md
+-rw-r--r-- 1 Administrator 197121 2549 Apr 25 14:37 mutual-mapper.md
+-rw-r--r-- 1 Administrator 197121 3065 Apr 25 14:37 outreach-drafter.md
+-rw-r--r-- 1 Administrator 197121 2028 Apr 25 14:37 signal-scorer.md
+
+/c/Users/Administrator/.claude/skills/liquid-glass-design:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 9045 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/llm-trading-agent-security:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4494 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/logistics:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:22 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1416 Apr 25 14:22 SKILL.md
+
+/c/Users/Administrator/.claude/skills/logistics-exception-management:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 16877 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/manim-video:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2894 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 assets
+
+/c/Users/Administrator/.claude/skills/manim-video/assets:
+total 4
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2897 Apr 25 14:37 network_graph_scene.py
+
+/c/Users/Administrator/.claude/skills/market-research:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2226 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/mcp-server-patterns:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4071 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/messages-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2884 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/nanoclaw-repl:
+total 68
+drwxr-xr-x 1 Administrator 197121   0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121   0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 853 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/nestjs-patterns:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6408 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/nodejs-keccak256:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2845 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/nutrient-document-processing:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5890 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/office-tools:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:22 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1269 Apr 25 14:22 SKILL.md
+
+/c/Users/Administrator/.claude/skills/order-followup:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:23 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3063 Apr 25 14:23 SKILL.md
+
+/c/Users/Administrator/.claude/skills/p4p-optimization:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:16 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1363 Apr 25 14:16 SKILL.md
+
+/c/Users/Administrator/.claude/skills/perl-patterns:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11525 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/perl-security:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 13752 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/perl-testing:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11189 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/plankton-code-quality:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 7950 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/postgres-patterns:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3808 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/product-capability:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4424 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/product-listing:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:23 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1372 Apr 25 14:23 SKILL.md
+
+/c/Users/Administrator/.claude/skills/production-scheduling:
+total 92
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 28573 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/project-flow-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3133 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/prompt-optimizer:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 16228 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/python-patterns:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 16748 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/python-testing:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 18862 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/quality-nonconformance:
+total 96
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 30387 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/ralphinho-rfc-pipeline:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1522 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/regex-vs-llm-structured-text:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6481 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/remotion-video-creation:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3538 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 rules
+
+/c/Users/Administrator/.claude/skills/remotion-video-creation/rules:
+total 125
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2279 Apr 25 14:37 3d.md
+-rw-r--r-- 1 Administrator 197121  784 Apr 25 14:37 animations.md
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 assets
+-rw-r--r-- 1 Administrator 197121 1590 Apr 25 14:37 assets.md
+-rw-r--r-- 1 Administrator 197121 3822 Apr 25 14:37 audio.md
+-rw-r--r-- 1 Administrator 197121 2920 Apr 25 14:37 calculate-metadata.md
+-rw-r--r-- 1 Administrator 197121 1587 Apr 25 14:37 can-decode.md
+-rw-r--r-- 1 Administrator 197121 1747 Apr 25 14:37 charts.md
+-rw-r--r-- 1 Administrator 197121 3442 Apr 25 14:37 compositions.md
+-rw-r--r-- 1 Administrator 197121 3698 Apr 25 14:37 display-captions.md
+-rw-r--r-- 1 Administrator 197121 5496 Apr 25 14:37 extract-frames.md
+-rw-r--r-- 1 Administrator 197121 3484 Apr 25 14:37 fonts.md
+-rw-r--r-- 1 Administrator 197121 1354 Apr 25 14:37 get-audio-duration.md
+-rw-r--r-- 1 Administrator 197121 1627 Apr 25 14:37 get-video-dimensions.md
+-rw-r--r-- 1 Administrator 197121 1341 Apr 25 14:37 get-video-duration.md
+-rw-r--r-- 1 Administrator 197121 3868 Apr 25 14:37 gifs.md
+-rw-r--r-- 1 Administrator 197121 2783 Apr 25 14:37 images.md
+-rw-r--r-- 1 Administrator 197121 2113 Apr 25 14:37 import-srt-captions.md
+-rw-r--r-- 1 Administrator 197121 1776 Apr 25 14:37 lottie.md
+-rw-r--r-- 1 Administrator 197121  973 Apr 25 14:37 measuring-dom-nodes.md
+-rw-r--r-- 1 Administrator 197121 3000 Apr 25 14:37 measuring-text.md
+-rw-r--r-- 1 Administrator 197121 2385 Apr 25 14:37 sequencing.md
+-rw-r--r-- 1 Administrator 197121  423 Apr 25 14:37 tailwind.md
+-rw-r--r-- 1 Administrator 197121  700 Apr 25 14:37 text-animations.md
+-rw-r--r-- 1 Administrator 197121 3927 Apr 25 14:37 timing.md
+-rw-r--r-- 1 Administrator 197121  856 Apr 25 14:37 transcribe-captions.md
+-rw-r--r-- 1 Administrator 197121 3726 Apr 25 14:37 transitions.md
+-rw-r--r-- 1 Administrator 197121 1209 Apr 25 14:37 trimming.md
+-rw-r--r-- 1 Administrator 197121 3507 Apr 25 14:37 videos.md
+
+/c/Users/Administrator/.claude/skills/remotion-video-creation/rules/assets:
+total 24
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3429 Apr 25 14:37 charts-bar-chart.tsx
+-rw-r--r-- 1 Administrator 197121 2183 Apr 25 14:37 text-animations-typewriter.tsx
+-rw-r--r-- 1 Administrator 197121 2387 Apr 25 14:37 text-animations-word-highlight.tsx
+
+/c/Users/Administrator/.claude/skills/research-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3593 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/returns-reverse-logistics:
+total 92
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 24699 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/rust-patterns:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 13378 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/rust-testing:
+total 76
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 11699 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/search-first:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6686 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/security-bounty-hunter:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3533 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/security-review:
+total 88
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 12234 Apr 25 14:37 SKILL.md
+-rw-r--r-- 1 Administrator 197121 10171 Apr 25 14:37 cloud-infrastructure-security.md
+
+/c/Users/Administrator/.claude/skills/security-scan:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4469 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/seo:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4308 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/skill-stocktake:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 7785 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 scripts
+
+/c/Users/Administrator/.claude/skills/skill-stocktake/scripts:
+total 16
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rwxr-xr-x 1 Administrator 197121 3271 Apr 25 14:37 quick-diff.sh
+-rwxr-xr-x 1 Administrator 197121 1952 Apr 25 14:37 save-results.sh
+-rwxr-xr-x 1 Administrator 197121 5677 Apr 25 14:37 scan.sh
+
+/c/Users/Administrator/.claude/skills/social-graph-ranker:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4144 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/springboot-patterns:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 9919 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/springboot-security:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8019 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/springboot-tdd:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 3774 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/springboot-verification:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5821 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/strategic-compact:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5281 Apr 25 14:37 SKILL.md
+-rwxr-xr-x 1 Administrator 197121 1788 Apr 25 14:37 suggest-compact.sh
+
+/c/Users/Administrator/.claude/skills/swift-actor-persistence:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 4798 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/swift-concurrency-6-2:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 8010 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/swift-protocol-di-testing:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6007 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/swiftui-patterns:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6939 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/tdd-workflow:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 13064 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/team-builder:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 7172 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/terminal-ops:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2985 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/token-budget-advisor:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6105 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/ui-demo:
+total 80
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 15244 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/unified-notifications-ops:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5618 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/verification-loop:
+total 68
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 2491 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/video-editing:
+total 76
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 9725 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/videodb:
+total 84
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 14131 Apr 25 14:37 SKILL.md
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 reference
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 scripts
+
+/c/Users/Administrator/.claude/skills/videodb/reference:
+total 124
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121     0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 20455 Apr 25 14:37 api-reference.md
+-rw-r--r-- 1 Administrator 197121 12190 Apr 25 14:37 capture-reference.md
+-rw-r--r-- 1 Administrator 197121  4847 Apr 25 14:37 capture.md
+-rw-r--r-- 1 Administrator 197121 16558 Apr 25 14:37 editor.md
+-rw-r--r-- 1 Administrator 197121 10263 Apr 25 14:37 generative.md
+-rw-r--r-- 1 Administrator 197121 15286 Apr 25 14:37 rtstream-reference.md
+-rw-r--r-- 1 Administrator 197121  1881 Apr 25 14:37 rtstream.md
+-rw-r--r-- 1 Administrator 197121  7928 Apr 25 14:37 search.md
+-rw-r--r-- 1 Administrator 197121 11867 Apr 25 14:37 streaming.md
+-rw-r--r-- 1 Administrator 197121  4451 Apr 25 14:37 use-cases.md
+
+/c/Users/Administrator/.claude/skills/videodb/scripts:
+total 12
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rwxr-xr-x 1 Administrator 197121 8422 Apr 25 14:37 ws_listener.py
+
+/c/Users/Administrator/.claude/skills/visa-doc-translate:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 1836 Apr 25 14:37 README.md
+-rw-r--r-- 1 Administrator 197121 3859 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/workspace-surface-audit:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 5151 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/x-api:
+total 72
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 .
+drwxr-xr-x 1 Administrator 197121    0 Apr 25 14:38 ..
+-rw-r--r-- 1 Administrator 197121 6458 Apr 25 14:37 SKILL.md
+
+/c/Users/Administrator/.claude/skills/{p4p-optimization,inquiry-analysis,customer-pitch,b2b-visual-design,copywriting,product-listing,order-followup,logistics,office-tools}:
+total 64
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:14 .
+drwxr-xr-x 1 Administrator 197121 0 Apr 25 14:38 ..

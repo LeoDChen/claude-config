@@ -1,0 +1,86 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let logs = [];
+
+  // Listen for ALL CDP events from the iframe
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      // Capture network requests
+      if (response.method === 'Network.requestWillBeSent') {
+        const url = response.params.request.url;
+        const method = response.params.request.method;
+        // Log all XHR/fetch requests
+        if (url.includes('message') || url.includes('mtop') || url.includes('history') || url.includes('list') || url.includes('query') || url.includes('api')) {
+          logs.push({ type: 'REQ', method, url: url.substring(0, 200) });
+        }
+      }
+      // Capture responses
+      if (response.method === 'Network.responseReceived') {
+        const url = response.params.response.url;
+        const status = response.params.response.status;
+        if (url.includes('message') || url.includes('mtop') || url.includes('history') || url.includes('list') || url.includes('query')) {
+          logs.push({ type: 'RESP', status, url: url.substring(0, 200) });
+        }
+      }
+    } catch (e) {}
+  });
+
+  // Enable Network domain
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 0, method: 'Network.enable', params: {} })
+  });
+
+  // Also enable Runtime for console
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 0, method: 'Runtime.enable', params: {} })
+  });
+
+  console.log('Network monitoring active. Waiting 4 seconds for any background requests...');
+  await new Promise(r => setTimeout(r, 4000));
+
+  // Try a simple SDK call and capture what network request it makes
+  const expr = `
+    new Promise(function(resolve) {
+      var httpSvc = window._imBaaSSDK.getMessageServiceHttp();
+      var convs = window.__conversationListFullData__;
+      var c = convs[0];
+      httpSvc.listMessageWithConversationCodeForHistory({
+        conversationCode: c.cid,
+        count: 5,
+        dataCallback: function(r) {
+          resolve(JSON.stringify({ done: true, n: r.data ? r.data.length : 0 }));
+        },
+        errorCallBack: function(e) {
+          resolve(JSON.stringify({ done: true, err: e && e.message || String(e) }));
+        }
+      });
+    })
+  `;
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr, awaitPromise: true }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 5000));
+  console.log('Network logs (' + logs.length + '):');
+  logs.forEach(l => console.log(JSON.stringify(l)));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

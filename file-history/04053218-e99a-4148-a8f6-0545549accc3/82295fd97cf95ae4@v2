@@ -1,0 +1,265 @@
+// OKKI AI Classification Engine v3
+// Key: <30d silence = active stage + silence sub-state; 30d+ = 搁置 terminal
+
+const fs = require('fs');
+const s2 = JSON.parse(fs.readFileSync('./data/s2_ai_input.json', 'utf8'));
+
+function classify(c) {
+  const totalMsgs = c.totalMsgs || 0;
+  const customerMsgs = c.customerMsgs || 0;
+  const ourMsgs = c.ourMsgs || 0;
+  const lastCust = c.lastCustomerMsgDays != null ? c.lastCustomerMsgDays : 999;
+  const dir = c.direction;
+  const order = c.order;
+  const snippet = c.snippet || [];
+  const snippetText = snippet.join(' ');
+
+  let stage = '需求探索';
+  let priority = 'idle';
+  let reason = '';
+
+  // Content detectors
+  const hasQuote = /报价|quote|price|\$[0-9]+\b|offer\b|\bPI\b|proforma|invoice|unit price|成交价|总价|total.{0,20}price|价格.{0,10}\$|\$[0-9]+\.[0-9]+/i.test(snippetText);
+  const hasNegotiation = /negotiate|商量|discount|MOQ|minimum|样品|sample|定制|custom\b|logo|brand|图案|pattern|design|customiz/i.test(snippetText);
+  const hasPayment = /payment|付款|deposit|定金|paid|收款|confirm.{0,20}order|确认.{0,10}订单|pay now/i.test(snippetText);
+  const hasShipping = /ship|tracking|物流|express|courier|delivery|收货|forwarder|transitaire|tracking.{0,10}number|运单|sent.{0,10}goods|enviado|expédié/i.test(snippetText);
+  const hasReceived = /received|收到|arrived|arrivé|reçu|满意|satisf|happy|love.{0,5}it|great.{0,10}product|encantaron|merci beaucoup|already.*got|已经.*收到/i.test(snippetText);
+  const hasComplaint = /(?:quality|product|order|shipment).{0,5}(?:problem|issue|defect|complaint)|wrong.{0,10}(?:product|item|size|color|order)|退款|退货|refund|not.{0,5}(?:good|right|what.{0,5}ordered|correct)|damaged|missing|defect/i.test(snippetText);
+  const hasRFQ = /RFQ|rfq market/i.test(snippetText);
+  const hasSupplierPromise = /(?:i will|i'll|我会|let me|please wait).{0,30}(?:send|check|reply|update|confirm|look into|get back|find|prepare|create|provide)/i.test(snippetText);
+
+  // === ORDER-BASED (highest priority) ===
+  if (order && order.matched) {
+    const st = order.status;
+    if (st === '待收款') {
+      stage = '待付款';
+      if (lastCust <= 7) { priority = 'now'; reason = '有订单待收款，客户' + lastCust + '天前活跃'; }
+      else if (lastCust <= 30) { priority = 'soon'; reason = '有订单待收款，静默' + lastCust + '天需催款'; }
+      else { priority = 'idle'; reason = '有订单待收款但静默' + lastCust + '天'; }
+      return { stage, priority, reason };
+    }
+    if (st === '待发货') {
+      stage = '待发货';
+      if (lastCust <= 14) { priority = 'soon'; reason = '订单待发货，静默' + lastCust + '天'; }
+      else { priority = 'idle'; reason = '订单待发货，静默' + lastCust + '天'; }
+      return { stage, priority, reason };
+    }
+    if (st === '已发货') {
+      stage = '已发货/在途';
+      if (lastCust <= 14) { priority = 'now'; reason = '在途需跟踪物流，静默' + lastCust + '天'; }
+      else { priority = 'soon'; reason = '在途，静默' + lastCust + '天需跟踪到港'; }
+      return { stage, priority, reason };
+    }
+    if (st === '交易成功') {
+      if (lastCust <= 60) {
+        stage = '已签收';
+        priority = lastCust <= 30 ? 'soon' : 'idle';
+        reason = '订单交易成功已签收，静默' + lastCust + '天';
+      } else {
+        stage = '搁置'; priority = 'idle';
+        reason = '订单完成超60天，自然搁置';
+      }
+      return { stage, priority, reason };
+    }
+    if (st === '交易取消') {
+      stage = '未成交'; priority = 'idle';
+      reason = '订单已取消';
+      return { stage, priority, reason };
+    }
+  }
+
+  // === CONTENT-BASED STAGE ===
+  // Determine active stage from content
+  // v3.1: added minimum thresholds to prevent stage inflation
+  if (hasQuote && hasNegotiation && totalMsgs >= 6 && customerMsgs >= 2) {
+    stage = '谈判中';
+  } else if (hasQuote && totalMsgs >= 4) {
+    stage = '报价已发';
+  } else if (hasNegotiation && totalMsgs >= 6 && customerMsgs >= 2) {
+    stage = '谈判中';
+  } else if (hasShipping && hasReceived && order && order.matched) {
+    stage = '已签收';
+  } else if (hasShipping && !hasReceived) {
+    stage = '已发货/在途';
+  } else if (hasComplaint) {
+    stage = '售后';
+  } else if (hasPayment && order && order.matched) {
+    stage = '待付款';
+  } else if (hasRFQ) {
+    stage = '报价已发';
+    reason = 'RFQ报价客户';
+  }
+
+  // === SILENCE → TERMINAL OVERRIDE ===
+  // 30d+ silence → 搁置 (regardless of stage)
+  if (lastCust > 90) {
+    const from = stage;
+    stage = '搁置';
+    priority = 'idle';
+    reason = '深度静默' + lastCust + '天（从' + from + '掉出）';
+    return { stage, priority, reason };
+  }
+
+  if (lastCust > 30) {
+    const from = stage;
+    // Exception: 已签收 has longer tolerance
+    if (from === '已签收' && lastCust <= 90) {
+      priority = 'idle';
+      reason = '已签收，静默' + lastCust + '天';
+      return { stage, priority, reason };
+    }
+    stage = '搁置';
+    priority = 'idle';
+    reason = '静默' + lastCust + '天（从' + from + '掉出）';
+    return { stage, priority, reason };
+  }
+
+  // === PRIORITY FOR ACTIVE STAGE (<30d silence) ===
+  // Now: <3d silence or ball-in-our-court
+  // Soon: 3-14d for quote/negotiation/shipping, 3-7d for exploration
+  // Idle: 14-30d for most, 7-30d for simple exploration
+
+  if (lastCust <= 1) {
+    priority = 'now';
+  } else if (lastCust <= 3) {
+    priority = 'now';  // 3天内客户有回应，必须马上跟进
+  } else if (lastCust <= 7) {
+    priority = 'soon';
+  } else if (lastCust <= 14) {
+    if (stage === '需求探索' && totalMsgs < 10) {
+      priority = 'idle';
+    } else {
+      priority = 'soon';
+    }
+  } else {
+    // 14-30d
+    if (['报价已发', '谈判中', '已发货/在途', '待付款'].includes(stage)) {
+      priority = 'soon';
+    } else {
+      priority = 'idle';
+    }
+  }
+
+  // Override: ball in our court
+  if (dir === 'to_us' && lastCust <= 7) {
+    priority = 'now';
+  }
+
+  // Override: supplier made a promise but never delivered (≥14d silence)
+  if (hasSupplierPromise && lastCust >= 14 && lastCust <= 60 && stage !== '搁置') {
+    priority = 'now';
+    reason = (reason || '') + '；我方有未兑现承诺';
+  }
+
+  if (!reason) {
+    const silLabel = lastCust <= 3 ? '活跃' : (lastCust <= 7 ? '短期沉默' : (lastCust <= 14 ? '中期沉默' : '长期沉默'));
+    reason = stage + '中，' + silLabel + lastCust + '天';
+  }
+
+  return { stage, priority, reason };
+}
+
+function correctGrade(c, snippetText) {
+  let grade = c.grade;
+  let override = null;
+
+  // Phantom / non-customer accounts
+  if (['Leon Scott Kennedy', 'Anne Shen', 'User name', '(未知)', 'd zm'].includes(c.name)) {
+    return { grade: 'D', override: 'D' };
+  }
+
+  // Personal use → downgrade
+  if (/(?:uso personal|personal use|for myself|my baby|mon bébé|primipare)/i.test(snippetText) && c.totalMsgs < 50) {
+    if (grade === 'A') return { grade: 'B', override: 'B' };
+    if (grade === 'B') return { grade: 'C', override: 'C' };
+  }
+
+  // Adult clothing mismatch → D (but NOT if they have existing orders)
+  if (/(?:ropa de mujer|women.*cloth|adult.*cloth|period pant|seamless pant|femme.*adulte|pour femme)/i.test(snippetText)) {
+    if (/(?:solo.*bebé|solo.*niño|only.*baby|only.*infant|only.*kid|fabricamos.*bebé|manufacture.*baby|only make.*baby)/i.test(snippetText)) {
+      if (grade !== 'S' && !(c.order && c.order.matched)) {
+        return { grade: 'D', override: 'D' };
+      }
+    }
+  }
+
+  // Suspicious names → D (now covered by ghost list above; kept as safety net)
+  if (c.name === 'User name' || c.name === '(未知)') {
+    return { grade: 'D', override: 'D' };
+  }
+
+  // Dead accounts: 1 customer message + 60d+ silence
+  if (c.customerMsgs <= 1 && c.lastCustomerMsgDays > 60 && c.totalMsgs <= 5) {
+    if (grade === 'A' || grade === 'B') return { grade: 'D', override: 'D' };
+  }
+
+  return { grade, override };
+}
+
+// Process
+const results = [];
+const stageDist = {};
+const priorityDist = {};
+const gradeDist = {};
+let gradeCorrections = 0;
+
+s2.forEach(c => {
+  const cls = classify(c);
+  const snippetText = (c.snippet || []).join(' ');
+  const gradeResult = correctGrade(c, snippetText);
+  const finalGrade = gradeResult.grade;
+
+  const entry = {
+    name: c.name,
+    cid: c.cid,
+    country: c.country,
+    stage: cls.stage,
+    grade: finalGrade,
+    priority: cls.priority,
+    actionHint: cls.reason,
+    reason: cls.reason,
+    confidence: 'high',
+    actionPriority: cls.priority,
+    stageLabel: cls.stage,
+    actionStatus: cls.priority === 'now' ? '紧急' : (cls.priority === 'soon' ? '尽快处理' : '观察'),
+    actionText: cls.reason
+  };
+  if (gradeResult.override) {
+    entry.gradeOverride = gradeResult.override;
+    gradeCorrections++;
+  }
+
+  results.push(entry);
+  stageDist[cls.stage] = (stageDist[cls.stage] || 0) + 1;
+  priorityDist[cls.priority] = (priorityDist[cls.priority] || 0) + 1;
+  gradeDist[finalGrade] = (gradeDist[finalGrade] || 0) + 1;
+});
+
+fs.writeFileSync('./data/s3_ai_judgments.json', JSON.stringify(results, null, 2));
+
+console.log('=== AI Classification v3 ===');
+console.log('Total:', results.length, '| Grade corrections:', gradeCorrections);
+console.log('Stages:', JSON.stringify(stageDist));
+console.log('Stage count:', Object.keys(stageDist).length);
+console.log('Priorities:', JSON.stringify(priorityDist));
+console.log('Idle %:', (priorityDist.idle / results.length * 100).toFixed(1) + '%');
+console.log('Grades:', JSON.stringify(gradeDist));
+
+const sc = Object.keys(stageDist).length;
+const ip = priorityDist.idle / results.length * 100;
+console.log('');
+console.log(sc >= 6 ? 'PASS' : 'FAIL', 'stage count:', sc, '(need >=6)');
+console.log(ip <= 60 ? 'PASS' : 'FAIL', 'idle:', ip.toFixed(1) + '% (need <=60%)');
+
+// Show now & soon counts
+const nowList = results.filter(r => r.priority === 'now');
+console.log('\n--- NOW (' + nowList.length + ') ---');
+nowList.forEach(r => console.log('  ' + r.name + ' | ' + r.country + ' | ' + r.grade + ' | ' + r.stage + ' | ' + r.reason));
+
+// Check the 3 球在对方 customers
+console.log('\n--- 球在对方 (to_us) ---');
+const toUsS2 = s2.filter(c => c.direction === 'to_us');
+toUsS2.forEach(c => {
+  const r = results.find(x => x.cid === c.cid);
+  console.log('  ' + r.name + ' | ' + r.country + ' | ' + r.grade + ' | ' + r.stage + ' | ' + r.priority);
+});

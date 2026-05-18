@@ -1,0 +1,111 @@
+/**
+ * 探查：客户全量列表 + 会话消息滚动 + 图片处理
+ */
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) { console.log('no page'); return; }
+
+  console.log('=== 当前URL ===');
+  console.log(page.url());
+
+  // 1. TM聊天 — 滚动加载更多会话，看能加载多少
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) { console.log('no talk frame'); return; }
+
+  console.log('\n=== TM 会话列表滚动测试 ===');
+  // 先获取当前可见数
+  let before = await talkFrame.evaluate(() => document.querySelectorAll('.contact-item-container').length);
+  console.log(`滚动前: ${before} 个会话`);
+
+  // 多次滚动到底部
+  for (let i = 0; i < 10; i++) {
+    await talkFrame.evaluate(() => {
+      const c = document.querySelector('.seller-conversation-list') || document.querySelector('.conversation-list-content');
+      if (c) c.scrollTop = c.scrollHeight;
+    });
+    await new Promise(r => setTimeout(r, 800));
+    const after = await talkFrame.evaluate(() => document.querySelectorAll('.contact-item-container').length);
+    if (after === before) break; // no more loaded
+    console.log(`滚动 ${i + 1}: ${before} → ${after}`);
+    before = after;
+  }
+  console.log(`最终: ${before} 个会话`);
+
+  // 2. 检查一个消息区能滚动加载多少历史消息
+  console.log('\n=== 消息历史滚动测试 ===');
+  // 点击第一个会话
+  await talkFrame.evaluate(() => {
+    const first = document.querySelector('.contact-item-container');
+    if (first) first.click();
+  });
+  await new Promise(r => setTimeout(r, 2000));
+
+  // 先看当前可见消息数
+  let msgBefore = await talkFrame.evaluate(() => document.querySelectorAll('.message-item-wrapper.messenger').length);
+  console.log(`滚动消息前: ${msgBefore} 条可见`);
+
+  // 滚动消息区顶部加载历史
+  for (let i = 0; i < 8; i++) {
+    await talkFrame.evaluate(() => {
+      const c = document.querySelector('.message-flow-container.messenger');
+      if (c) c.scrollTop = 0; // scroll to top to trigger history loading
+    });
+    await new Promise(r => setTimeout(r, 1500));
+    const msgAfter = await talkFrame.evaluate(() => document.querySelectorAll('.message-item-wrapper.messenger').length);
+    if (msgAfter === msgBefore) break;
+    console.log(`消息滚动 ${i + 1}: ${msgBefore} → ${msgAfter}`);
+    msgBefore = msgAfter;
+  }
+  console.log(`最终消息: ${msgBefore} 条`);
+
+  // 3. 检查图片消息在DOM中的样子
+  console.log('\n=== 图片消息检测 ===');
+  const imgInfo = await talkFrame.evaluate(() => {
+    const items = [];
+    // Look for image-related elements in messages
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(el => {
+      const imgs = el.querySelectorAll('img, [class*="image"], [class*="img"], [class*="picture"], [style*="background-image"]');
+      const text = el.textContent?.substring(0, 80) || '';
+      if (imgs.length > 0 || text.includes('[图片]') || text.includes('[image]')) {
+        items.push({
+          text: text.substring(0, 60),
+          imgCount: imgs.length,
+          imgTags: Array.from(imgs).map(i => i.tagName + (i.src ? ` src=${i.src.substring(0, 80)}` : '')),
+        });
+      }
+    });
+    return items.slice(0, 10);
+  });
+  console.log(`找到 ${imgInfo.length} 条含图片的消息`);
+  imgInfo.forEach((item, i) => {
+    console.log(`  [${i}] "${item.text}" 图片: ${item.imgCount} 个`);
+    item.imgTags.forEach(t => console.log(`    ${t}`));
+  });
+
+  // 4. 尝试切换到"客户"模块
+  console.log('\n=== 客户模块探查 ===');
+  // Click the 客户 menu item in sidebar
+  const custNav = await page.evaluate(() => {
+    const items = document.querySelectorAll('.fixed-menu-item, a, li');
+    for (const el of items) {
+      if (el.textContent?.trim() === '客户') {
+        el.click();
+        return 'clicked 客户';
+      }
+    }
+    return 'not found';
+  });
+  console.log(custNav);
+  await new Promise(r => setTimeout(r, 3000));
+  console.log('跳转后URL:', page.url());
+
+  // Check if page content changed
+  const pageText = await page.evaluate(() => document.body?.innerText?.substring(0, 3000) || '');
+  console.log('页面内容:\n', pageText);
+
+  await browser.close();
+})().catch(err => { console.error(err.message); });

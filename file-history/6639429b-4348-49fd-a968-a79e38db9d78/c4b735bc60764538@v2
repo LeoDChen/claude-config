@@ -1,0 +1,68 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 13:18
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**数据抓取完成 ✅ → 进入阶段2：全量 AI 分类**
+
+## 本次会话成果
+
+### 抓取成功（2026-05-05）
+
+**最终方案：CDP 连接 + page.evaluate XHR（URL-encoded）**
+
+```
+Chrome --remote-debugging-port=9222 --user-data-dir=C:\tmp\cdp_session_v3
+    ↓
+Playwright connectOverCDP → page.evaluate → XHR withCredentials
+    ↓
+逐页调用 customerV3Read/companyList → 4 页 → 346 人
+```
+
+### 关键发现
+
+1. **Playwright launchPersistentContext 不可用** — 它新开浏览器，Profile 4 cookie 无法恢复 OKKI SSO 会话
+2. **CDP 端口必须配 --user-data-dir** — Chrome 安全限制，不指定则端口不监听
+3. **API 用 URL-encoded form data，不是 JSON** — `curPage=1&pageSize=100&...`，之前送 JSON 格式的 `{page:1}` 被 API 忽略，导致每页返回相同数据
+4. **客户总数：346 人**（之前估计 432 有误，可能数据变化或过滤条件不同）
+
+### 正确抓取命令
+
+```bash
+# 1. 启动 Chrome（先确保没有 Chrome 在运行）
+"C:/Users/Administrator/AppData/Local/Google/Chrome/Application/chrome.exe" \
+  --remote-debugging-port=9222 \
+  --user-data-dir="C:\tmp\cdp_session_v3" \
+  https://crm.xiaoman.cn/
+
+# 2. 在 Chrome 中手动登录 OKKI
+
+# 3. 运行脚本
+node scripts/scrape_cdp_full.js
+```
+
+## 待办优先级
+
+1. **阶段2 全量 AI 分类** — 用 `scripts/classify_ai.js` 对 346 人全量分类
+2. **阶段5 生成报告** — 基于分类结果生成看板报告
+3. **自动化日程** — 考虑设置定期自动抓取（CDP 方式需要 Chrome 手动登录，不能全自动）
+
+## 关键数据文件
+
+| 文件 | 说明 |
+|------|------|
+| `data/okki_full_2026-05-05T05-17-48.json` | **最新** 346 人全量快照 |
+| `scripts/scrape_cdp_full.js` | **可用** CDP+XHR 自动翻页抓取脚本 |
+| `scripts/scrape_cdp.js` | CDP 被动拦截脚本（备用） |
+| `scripts/scrape_okki.js` | Playwright Profile 4 方案（**已废弃-无法恢复登录态**） |
+| `scripts/classify_rules.js` | 阶段1 规则分类 |
+| `scripts/classify_ai.js` | 阶段2 AI 分类 |
+| `scripts/generate_report.js` | 阶段5 报告生成 |
+
+## 下次启动指令
+
+> 继续OKKI CRM数据分析。先读STATE.md和knowledge/下文件。
+> 数据抓取已完成：data/okki_full_2026-05-05T05-17-48.json（346人）
+> 下一步：用 scripts/classify_ai.js 对 346 人全量 AI 分类。

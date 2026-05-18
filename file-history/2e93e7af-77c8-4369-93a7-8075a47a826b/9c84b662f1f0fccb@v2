@@ -1,0 +1,215 @@
+#!/usr/bin/env node
+/**
+ * scan_updates.js — 状态卡自动扫描（防腐烂机制）
+ *
+ * 每次 /okki 启动时运行，检测：
+ *   1. 聊天有新消息但状态卡未更新 → 标记"待检查"
+ *   2. NOW 客户超过 7 天未 checked → 提醒
+ *   3. SOON 客户超过 30 天未 checked → 标注"可能过期"
+ *
+ * 用法:
+ *   node scripts/scan_updates.js
+ *   node scripts/scan_updates.js --json    (JSON 输出，供其他脚本消费)
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const DATA_DIR = path.resolve(__dirname, "..", "data");
+const BRIEFS_DIR = path.join(DATA_DIR, "briefs");
+const CHAT_DIR = path.join(DATA_DIR, "chat_history");
+
+const NOW_STALE_DAYS = 7;
+const SOON_STALE_DAYS = 30;
+
+// ── 辅助 ──────────────────────────────────────────────────
+
+function cidToFilename(cidStr) {
+  const match = cidStr.match(/^(.+)#(\d+)@(\w+)$/);
+  if (!match) return null;
+  const [, left, channel, platform] = match;
+  return `${left}_${channel}_${platform}.json`;
+}
+
+function fmtDays(n) {
+  if (n === 0) return "今天";
+  if (n === 1) return "昨天";
+  if (n < 30) return `${n}天前`;
+  if (n < 365) return `${Math.round(n / 30)}月前`;
+  return `${Math.round(n / 365)}年前`;
+}
+
+// ── 解析 frontmatter ─────────────────────────────────────
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  const fm = {};
+  for (const line of match[1].split("\n")) {
+    const kv = line.match(/^(\w+):\s*(.+)$/);
+    if (kv) fm[kv[1]] = kv[2].trim();
+  }
+  return fm;
+}
+
+// ── 主扫描逻辑 ───────────────────────────────────────────
+
+function scan() {
+  if (!fs.existsSync(BRIEFS_DIR)) {
+    console.error("briefs 目录不存在: " + BRIEFS_DIR);
+    return { summary: {}, items: [] };
+  }
+
+  const files = fs.readdirSync(BRIEFS_DIR).filter((f) => f.endsWith(".md"));
+  const results = [];
+
+  for (const file of files) {
+    const filePath = path.join(BRIEFS_DIR, file);
+    const content = fs.readFileSync(filePath, "utf-8");
+    const fm = parseFrontmatter(content);
+    if (!fm || !fm.cid) continue;
+
+    const cid = fm.cid;
+    const heat = fm.heat;
+    const checked = fm.checked ? new Date(fm.checked + "T00:00:00Z") : null;
+    const stage = fm.stage || "未知";
+    const country = fm.country || "未知";
+
+    // 从文件名提取客户名
+    const nameFromFile = file.replace(/^[\d-]+_/, "").replace(/\.md$/, "");
+    const displayName = nameFromFile || "未知";
+
+    // 查找聊天文件
+    const chatFilename = cidToFilename(cid);
+    const chatPath = chatFilename ? path.join(CHAT_DIR, chatFilename) : null;
+    let chatLatestTime = null;
+    let chatTotalMessages = 0;
+    let hasNewerMessages = false;
+
+    if (chatPath && fs.existsSync(chatPath)) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(chatPath, "utf-8"));
+        chatTotalMessages = raw.messages?.length || 0;
+        if (raw.messages && raw.messages.length > 0) {
+          // 消息按时间倒序（最新在前），索引 0 即最新
+          chatLatestTime = raw.messages[0].message?.createAt || null;
+          if (chatLatestTime && checked) {
+            hasNewerMessages = chatLatestTime > checked.getTime();
+          }
+        }
+      } catch (e) {
+        // 聊天文件损坏，跳过
+      }
+    }
+
+    // 计算 checked 距今几天
+    const daysSinceChecked = checked
+      ? Math.round((Date.now() - checked.getTime()) / 86400000)
+      : null;
+
+    // 判定标记
+    const flags = [];
+    if (hasNewerMessages) {
+      flags.push("有新消息");
+    }
+    if (heat === "NOW" && daysSinceChecked !== null && daysSinceChecked > NOW_STALE_DAYS) {
+      flags.push(`过期${daysSinceChecked}天未检查`);
+    }
+    if (heat === "SOON" && daysSinceChecked !== null && daysSinceChecked > SOON_STALE_DAYS) {
+      flags.push("可能过期");
+    }
+
+    results.push({
+      file,
+      cid,
+      displayName,
+      country,
+      heat,
+      stage,
+      checked: fm.checked,
+      daysSinceChecked,
+      chatLatestTime: chatLatestTime ? new Date(chatLatestTime).toISOString().slice(0, 10) : null,
+      chatTotalMessages,
+      hasNewerMessages,
+      flags,
+    });
+  }
+
+  // 汇总
+  const nowNew = results.filter((r) => r.heat === "NOW" && r.hasNewerMessages).length;
+  const soonNew = results.filter((r) => r.heat === "SOON" && r.hasNewerMessages).length;
+  const nowStale = results.filter((r) => r.heat === "NOW" && r.flags.some((f) => f.includes("过期"))).length;
+  const soonStale = results.filter((r) => r.heat === "SOON" && r.flags.some((f) => f.includes("可能过期"))).length;
+  const needsAttention = results.filter((r) => r.flags.length > 0);
+
+  return {
+    summary: {
+      totalCards: results.length,
+      nowCards: results.filter((r) => r.heat === "NOW").length,
+      soonCards: results.filter((r) => r.heat === "SOON").length,
+      coldCards: results.filter((r) => r.heat === "COLD").length,
+      nowNew,
+      soonNew,
+      nowStale,
+      soonStale,
+      needsAttention: needsAttention.length,
+    },
+    items: results.sort((a, b) => {
+      // NOW first, then SOON, then COLD; within same heat, needsAttention first
+      const heatOrder = { NOW: 0, SOON: 1, COLD: 2 };
+      const ha = heatOrder[a.heat] ?? 9;
+      const hb = heatOrder[b.heat] ?? 9;
+      if (ha !== hb) return ha - hb;
+      const fa = a.flags.length > 0 ? 0 : 1;
+      const fb = b.flags.length > 0 ? 0 : 1;
+      return fa - fb;
+    }),
+  };
+}
+
+// ── 输出 ──────────────────────────────────────────────────
+
+const result = scan();
+const { summary, items } = result;
+const jsonMode = process.argv.includes("--json");
+
+if (jsonMode) {
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(0);
+}
+
+console.log("═══════════════════════════════════════");
+console.log("  scan_updates.js — 状态卡扫描报告");
+console.log("═══════════════════════════════════════");
+console.log(`扫描时间: ${new Date().toISOString().slice(0, 10)}`);
+console.log(`状态卡总数: ${summary.totalCards} (NOW:${summary.nowCards} SOON:${summary.soonCards} COLD:${summary.coldCards})`);
+console.log("");
+
+if (summary.needsAttention === 0) {
+  console.log("✓ 所有状态卡均为最新，无需处理。");
+} else {
+  console.log(`⚠ ${summary.needsAttention} 张状态卡需要注意：`);
+  if (summary.nowNew > 0) console.log(`  ${summary.nowNew} 个 NOW 客户有新消息待检查`);
+  if (summary.soonNew > 0) console.log(`  ${summary.soonNew} 个 SOON 客户有新消息待检查`);
+  if (summary.nowStale > 0) console.log(`  ${summary.nowStale} 个 NOW 客户超过 ${NOW_STALE_DAYS} 天未检查`);
+  if (summary.soonStale > 0) console.log(`  ${summary.soonStale} 个 SOON 客户可能过期`);
+  console.log("");
+
+  // 表头
+  const header = `${"客户".padEnd(22)} ${"热度".padEnd(6)} ${"checked".padEnd(12)} ${"最新消息".padEnd(12)} ${"标记"}`;
+  console.log(header);
+  console.log("-".repeat(header.length + 10));
+
+  for (const item of items) {
+    if (item.flags.length === 0) continue;
+    const name = item.displayName.padEnd(22).substring(0, 22);
+    const heat = item.heat.padEnd(6);
+    const checked = (item.checked || "?").padEnd(12);
+    const latest = (item.chatLatestTime || "无文件").padEnd(12);
+    const flags = item.flags.join(", ");
+    console.log(`${name} ${heat} ${checked} ${latest} ${flags}`);
+  }
+}
+
+console.log("");
+console.log(`提示: ${summary.needsAttention} 张待检查 → AI 逐张对比状态卡 vs 新消息，更新状态卡内容`);

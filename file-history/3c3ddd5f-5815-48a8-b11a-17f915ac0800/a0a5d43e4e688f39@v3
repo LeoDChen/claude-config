@@ -1,0 +1,109 @@
+# OKKI 数据新鲜度保障 + /okki 流程整合
+
+> 日期：2026-05-18
+> 触发：用户反馈"每次开启okki项目能不能抓取新询盘，会不会只分析旧数据"
+
+---
+
+## 一、问题诊断
+
+当前管道没有**数据新鲜度校验**，风险链路：
+
+```
+sync_okki.js (可能被跳过)
+  → batch_classify_heat.js (静默跑在旧数据)
+    → init_factor_baselines.js (静默跑在旧分类)
+      → 产出 SOON/冷层报告 (基于几天前的数据，无任何警告)
+```
+
+`/okki` 技能写了"必须同步"，但没有程序级保障。
+
+---
+
+## 二、sync_okki.js 能否识别新客户？ ✓
+
+能。`sync_okki.js:318-334` 的 diff 逻辑：
+
+1. 加载 `tm_conversations_full.json`（上次归档基线），构建 `Map<cid, 旧数据>`
+2. 遍历当前从 OKKI 提取的会话列表
+3. `cid` 不在旧 Map 中 → `reason: '新会话'`（新客户/新询盘）
+4. `cid` 在旧 Map 中但 messageId 或 lastContactTime 变了 → `reason: '消息更新'`
+5. 所有 `changed` 会话统一走 LWP 增量拉取聊天记录
+
+**结论**：新客户 → 自动检测 → 拉消息 → 写入 `chat_history/{cid}.json` → 下游脚本自动纳入分析。
+
+---
+
+## 三、方案：软警告 + 可跳过
+
+用户明确说了"有时候不需要同步，直接分析现有最新数据就行"。所以不用硬拒绝，改用**显式提醒 + 可跳过**。
+
+### 第 1 层：sync 标记文件
+
+`sync_okki.js` 完成后写入 `data/.last_sync.json`：
+
+```json
+{
+  "date": "2026-05-18",
+  "conversations": 466,
+  "newConversations": 2,
+  "updatedConversations": 15,
+  "source": "sync_okki.js"
+}
+```
+
+### 第 2 层：下游脚本入口提醒（不阻断）
+
+在 `init_factor_baselines.js` 和 `batch_classify_heat.js` 的 main() 开头加 `checkFreshness()`：
+
+```js
+function checkFreshness() {
+  const syncPath = path.join(__dirname, '..', 'data', '.last_sync.json');
+  if (!fs.existsSync(syncPath)) {
+    console.log('⚠️  未找到 .last_sync.json，无法确认数据新鲜度');
+    console.log('   建议先运行: node scripts/sync_okki.js');
+    return; // 不阻断
+  }
+  const sync = JSON.parse(fs.readFileSync(syncPath, 'utf-8'));
+  const syncDate = new Date(sync.date);
+  const today = new Date(TODAY);
+  const daysAgo = daysBetween(syncDate, today);
+  if (daysAgo > 0) {
+    console.log(`⚠️  数据 ${daysAgo} 天前同步（${sync.date}），建议先运行 sync_okki.js`);
+    console.log(`   本次分析基于现有数据继续...`);
+  } else {
+    console.log(`✅ 数据已同步: ${sync.date}，${sync.conversations} 会话`);
+  }
+}
+```
+
+**行为**：
+- 无 `.last_sync.json` → 打印黄色提醒，继续运行
+- 同步日期是昨天/更早 → 打印提醒 + 天数，继续运行
+- 今天同步过 → 打印绿色确认，继续运行
+- **永不阻断**，用户说"本次不同步"就能直接用
+
+### 第 3 层：sync_okki.js 尾部写标记
+
+sync_okki.js 成功完成后写入 `.last_sync.json`。失败不写。
+
+---
+
+## 四、涉及文件
+
+| 文件 | 改动 |
+|------|------|
+| `scripts/sync_okki.js` | 末尾加写 `.last_sync.json`（~10行） |
+| `scripts/init_factor_baselines.js` | 开头加 `checkFreshness()` + main() 首行调用（~20行） |
+| `scripts/batch_classify_heat.js` | 同上（~20行） |
+| `.claude/skills/okki/SKILL.md` | 补充说明：默认先 sync，用户说"不同步"则跳过 |
+
+---
+
+## 五、验证
+
+1. 删除 `.last_sync.json` → 运行 init_factor_baselines.js → 应有 ⚠️ 提醒但正常完成
+2. 创建假的 `.last_sync.json` 日期为 2026-05-10 → 运行 → 应显示 "8 天前同步" 提醒但正常完成
+3. 正常运行 sync_okki.js → 确认 `.last_sync.json` 生成（含 newConversations/updatedConversations 计数）
+4. sync 后再运行下游脚本 → 应显示 ✅
+5. 确认新客户在 heat_classification.json 中出现（sync → classify 完整链路）

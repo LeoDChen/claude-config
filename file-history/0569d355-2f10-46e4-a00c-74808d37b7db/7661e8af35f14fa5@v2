@@ -1,0 +1,244 @@
+/**
+ * 全量客户深抓 — 渐进式虚拟滚动批次处理
+ * 侧边栏滚一批→点一批→再滚一批，零URL跳转，零风险
+ * 用法: node deep-scrape-all.mjs [批次大小] [总人数]
+ * 默认: 每批30人, 全量
+ */
+import { chromium } from 'playwright';
+import { writeFileSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+const BATCH = parseInt(process.argv[2]) || 30;
+const LIMIT = parseInt(process.argv[3]) || 9999;
+const CLICK_GAP = 800;   // ms between clicks within a batch
+const BATCH_GAP = 2000;  // ms between batches (scroll + settle)
+const CHAT_SCROLL = 10;  // chat history scroll rounds
+
+const SYS = [
+  /由于您介入该会话/, /自动接待将不再触发/, /自动接待对话轮次已达上限/,
+  /在Alibaba\.com平台聊天和交易/, /享受安全保障/,
+  /请勿在站外沟通或交易/, /该买家在站外/,
+  /买家尚未在平台完成身份验证/, /注意交易安全/,
+  /跟进提醒/, /以上内容由阿里翻译提供/, /阿里国际Marco大模型/, /反馈/,
+];
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  return { browser, page, tf: page.frames()[1] };
+}
+
+async function getMasterList(tf) {
+  return tf.evaluate(() => {
+    const d = window.__conversationListFullData__;
+    if (!d || !Array.isArray(d)) return [];
+    return d.map(c => ({
+      name: c.name || c.contact?.name || '',
+      accountId: c.accountId || c.contact?.accountId || '',
+      accountIdEncrypt: c.accountIdEncrypt || c.contact?.accountIdEncrypt || '',
+      chatToken: c.chatToken || c.contact?.chatToken || '',
+      lastContactTime: c.lastContactTime || 0,
+    })).filter(c => c.name && c.name.length > 1 && !/Assistant\s*Eva|系统通知/i.test(c.name));
+  });
+}
+
+async function getVisibleList(tf) {
+  return tf.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map((el, idx) => {
+      const right = el.querySelector('.contact-right');
+      const text = right ? (right.textContent || '').trim() : '';
+      const m = text.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = m ? m[1].trim() : text.substring(0, 35).trim();
+      return { index: idx, name };
+    });
+  });
+}
+
+async function scrollSidebar(tf, rounds = 3) {
+  for (let i = 0; i < rounds; i++) {
+    await tf.evaluate(() => {
+      const list = document.querySelector('.seller-conversation-list') ||
+        document.querySelector('.conversation-list-content') ||
+        document.querySelector('.im-conversation-list-container');
+      if (list) list.scrollTop += list.clientHeight * 0.8;
+    });
+    await new Promise(r => setTimeout(r, 400));
+  }
+}
+
+async function clickConv(tf, index) {
+  await tf.evaluate((idx) => {
+    const items = document.querySelectorAll('.contact-item-container');
+    if (items[idx]) { items[idx].scrollIntoView({ block: 'center' }); items[idx].click(); }
+  }, index);
+  await new Promise(r => setTimeout(r, 1800));
+  try {
+    await tf.waitForFunction(() => document.querySelectorAll('.message-item-wrapper').length > 0, { timeout: 2000 });
+  } catch (e) { /* continue */ }
+  await new Promise(r => setTimeout(r, 700));
+}
+
+async function scrollChatHistory(tf) {
+  await tf.evaluate(async (rounds) => {
+    const container = document.querySelector('.message-flow-container') ||
+      document.querySelector('[class*="message-flow"]') ||
+      document.querySelector('.messenger-content-container');
+    if (!container) return;
+    for (let i = 0; i < rounds; i++) {
+      container.scrollTop = 0;
+      await new Promise(r => setTimeout(r, 600));
+    }
+  }, CHAT_SCROLL);
+}
+
+async function extractMessages(tf) {
+  return tf.evaluate(() => {
+    const sysP = [/由于您介入该会话/, /自动接待将不再触发/, /自动接待对话轮次已达上限/, /在Alibaba\.com平台聊天和交易/, /享受安全保障/, /请勿在站外沟通或交易/, /买家尚未在平台完成身份验证/, /注意交易安全/, /跟进提醒/, /以上内容由阿里翻译提供/];
+    const result = [];
+    document.querySelectorAll('.message-item-wrapper').forEach(el => {
+      const isRight = el.classList.contains('item-right');
+      const textDiv = el.querySelector('.session-rich-content');
+      let text = textDiv ? (textDiv.textContent || '').trim() : '';
+      if (!text) {
+        const cd = el.querySelector('.user-content');
+        if (cd) {
+          const clone = cd.cloneNode(true);
+          clone.querySelectorAll('.message-flow-menu-box, .session-translate, .session-avatar, .item-base-info').forEach(n => n.remove());
+          text = (clone.textContent || '').trim();
+        }
+      }
+      if (sysP.some(p => p.test(text))) return;
+      if (!text || text.length < 2) return;
+      text = text.replace(/\s+/g, ' ').trim();
+
+      // Images
+      const images = [];
+      el.querySelectorAll('img').forEach(img => {
+        const src = img.src || img.getAttribute('src') || '';
+        if (src && !src.includes('smily-big') && !src.includes('atmgateway-client') && !src.includes('menu-icon') && !src.includes('translate-icon') && !src.includes('_48x48') && !src.includes('_60x60')) {
+          images.push(src);
+        }
+      });
+
+      // Files
+      const files = [];
+      el.querySelectorAll('a[href*="clouddisk"], a[href*="redirectFileUrl"]').forEach(n => {
+        if (n.href) files.push(n.href);
+      });
+
+      // Cards
+      const cards = [];
+      el.querySelectorAll('[class*="inquiry-card"], [class*="product-card"], [class*="goods-card"], [class*="quote-card"]').forEach(card => {
+        cards.push({ text: (card.textContent || '').trim().replace(/\s+/g, ' ').substring(0, 500) });
+      });
+
+      result.push({ side: isRight ? 'sent' : 'received', text, images, files, cards });
+    });
+    return result;
+  });
+}
+
+async function main() {
+  const { tf } = await connect();
+  console.log('[0] 已连接\n');
+
+  // 获取全量名单
+  const master = await getMasterList(tf);
+  console.log(`[1] 全量名单: ${master.length} 人`);
+
+  const toProcess = master.slice(0, LIMIT);
+  console.log(`    目标: ${toProcess.length} 人, 每批 ${BATCH} 人\n`);
+
+  const done = new Set();
+  const results = [];
+  let batchNo = 0, totalSuccess = 0, totalSkip = 0;
+
+  while (done.size < toProcess.length) {
+    batchNo++;
+    // 获取当前可见
+    const visible = await getVisibleList(tf);
+
+    // 匹配可见列表中未处理的
+    const todo = [];
+    for (const v of visible) {
+      if (done.has(v.name)) continue;
+      const match = toProcess.find(c => {
+        const dn = (v.name || '').toLowerCase().trim();
+        const tn = (c.name || '').toLowerCase().trim();
+        return dn === tn || dn.includes(tn) || tn.includes(dn) || dn.split(/\s+/)[0] === tn.split(/\s+/)[0];
+      });
+      if (match) todo.push({ ...v, fullName: match.name });
+    }
+
+    if (todo.length === 0) {
+      // 没有新客户了，需要滚动加载下一批
+      console.log(`  [批次${batchNo}] 无新客户，滚动侧边栏...`);
+      await scrollSidebar(tf, 5);
+      continue;
+    }
+
+    console.log(`── [批次${batchNo}] ${todo.length} 人 ──`);
+
+    for (const t of todo) {
+      process.stdout.write(`  ${t.fullName.padEnd(24)} `);
+      try {
+        await clickConv(tf, t.index);
+        await scrollChatHistory(tf);
+        const msgs = await extractMessages(tf);
+        const real = msgs.filter(m => m.text && m.text.length > 3 && !SYS.some(p => p.test(m.text)));
+        const imgCount = real.reduce((s, m) => s + (m.images || []).length, 0);
+        const fileCount = real.reduce((s, m) => s + (m.files || []).length, 0);
+        const cardCount = real.reduce((s, m) => s + (m.cards || []).length, 0);
+
+        results.push({
+          name: t.fullName,
+          messageCount: real.length,
+          imageCount: imgCount,
+          fileCount,
+          cardCount,
+          messages: real,
+        });
+        console.log(`✅ ${real.length}条 ${imgCount>0?'📷'+imgCount+' ':''}${fileCount>0?'📎'+fileCount+' ':''}${cardCount>0?'🃏'+cardCount:''}`);
+        done.add(t.fullName);
+        totalSuccess++;
+      } catch (e) {
+        console.log(`❌ ${e.message}`);
+        totalSkip++;
+      }
+      await new Promise(r => setTimeout(r, CLICK_GAP));
+    }
+
+    // 批次间滚动
+    if (done.size < toProcess.length) {
+      await scrollSidebar(tf, 3);
+      await new Promise(r => setTimeout(r, BATCH_GAP));
+    }
+
+    console.log(`  进度: ${done.size}/${toProcess.length} (${(done.size/toProcess.length*100).toFixed(0)}%)\n`);
+  }
+
+  // 保存
+  const now = new Date();
+  const ts = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const outFile = join(DATA_DIR, `deep_scrape_all_${ts}.json`);
+  writeFileSync(outFile, JSON.stringify({
+    scrapedAt: now.toISOString(),
+    method: 'dom-batch-scroll-zero-risk',
+    targeted: toProcess.length,
+    success: totalSuccess,
+    skipped: totalSkip,
+    results,
+  }, null, 2));
+
+  console.log(`\n🏁 全量完成: ${totalSuccess}成功 ${totalSkip}跳过`);
+  console.log(`   零URL跳转, 零风险`);
+  console.log(`   已保存: ${outFile}`);
+}
+
+main().catch(err => { console.error('错误:', err.message); process.exit(1); });

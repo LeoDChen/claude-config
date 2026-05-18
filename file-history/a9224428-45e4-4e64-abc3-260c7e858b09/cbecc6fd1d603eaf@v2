@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "vision-reader": {
+      "command": "node",
+      "args": ["C:\\Users\\Administrator\\.claude\\mcp-servers\\vision-reader\\server.mjs"],
+      "env": {
+        "DEEPSEEK_API_KEY": "sk-4afdff3d5c16447cba84986a03636a1f"
+      }
+    }
+  }
+}

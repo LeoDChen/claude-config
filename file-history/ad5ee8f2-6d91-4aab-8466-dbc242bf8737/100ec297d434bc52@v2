@@ -1,0 +1,111 @@
+/**
+ * OKKI 单个客户数据提取脚本 — Console 注入版
+ *
+ * 使用方式：
+ * 1. Chrome 打开 OKKI CRM，进入某个客户详情页
+ * 2. F12 → Console，粘贴此脚本，回车
+ * 3. 数据自动复制到剪贴板，同时输出到 Console
+ * 4. 将剪贴板内容粘贴给我
+ */
+
+(async function extractCustomer() {
+  const result = {
+    extractedAt: new Date().toISOString(),
+    url: location.href,
+    customer: {},
+    contacts: [],
+    chats: [],
+    inquiries: [],
+    orders: [],
+    emails: [],
+  };
+
+  // ====== 1. 基本信息 ======
+  const nameEl = document.querySelector('[class*="name"], [class*="Name"], [class*="title"], h1, h2');
+  if (nameEl) result.customer.name = nameEl.textContent.trim();
+
+  // 遍历页面所有可见文本字段
+  const labels = document.querySelectorAll('label, .label, [class*="label"], dt, .field-label');
+  labels.forEach(l => {
+    const key = l.textContent.trim().replace(/[：:]\s*$/, '');
+    const valueEl = l.nextElementSibling || l.parentElement?.querySelector('dd, .value, [class*="value"], span, p');
+    if (valueEl && key.length > 0 && key.length < 30) {
+      const val = valueEl.textContent.trim();
+      if (val && val !== key) result.customer[key] = val;
+    }
+  });
+
+  // ====== 2. 从 DOM 提取完整信息 ======
+  // 国家/地区
+  const countryEl = document.querySelector('[class*="country"], [class*="Country"], [class*="region"]');
+  if (countryEl) result.customer.country = countryEl.textContent.trim();
+
+  // 买家等级
+  const levelEl = document.querySelector('[class*="level"], [class*="Level"], [class*="grade"]');
+  if (levelEl) result.customer.buyerLevel = levelEl.textContent.trim();
+
+  // 邮箱
+  const emailEls = document.querySelectorAll('a[href^="mailto:"]');
+  emailEls.forEach(el => result.contacts.push({ type: 'email', value: el.textContent.trim() || el.href.replace('mailto:', '') }));
+
+  // ====== 3. 尝试从页面内嵌数据中提取（React/Vue 的 __INITIAL_STATE__ 等）=====
+  const scripts = document.querySelectorAll('script');
+  scripts.forEach(s => {
+    const text = s.textContent || '';
+    // 常见的状态注入模式
+    const patterns = [
+      /window\.__INITIAL_STATE__\s*=\s*({.+?});\s*$/m,
+      /window\.__NUXT__\s*=\s*({.+?});\s*$/m,
+      /window\.__DATA__\s*=\s*({.+?});\s*$/m,
+      /"customer"[:\s]+({[^}]+})/gi,
+    ];
+    patterns.forEach(p => {
+      const m = text.match(p);
+      if (m) {
+        try {
+          const data = JSON.parse(m[1]);
+          result._embeddedData = data;
+        } catch (e) { /* ignore parse errors */ }
+      }
+    });
+  });
+
+  // ====== 4. 提取聊天消息 ======
+  const msgEls = document.querySelectorAll('[class*="message"], [class*="Message"], [class*="chat"], [class*="Chat"], .msg-item, .chat-item, [class*="bubble"]');
+  msgEls.forEach(el => {
+    const text = el.textContent.trim();
+    if (text.length > 2) {
+      const timeEl = el.querySelector('[class*="time"], [class*="Time"], [class*="date"], time');
+      const senderEl = el.querySelector('[class*="sender"], [class*="Sender"], [class*="from"], [class*="author"]');
+      result.chats.push({
+        sender: senderEl ? senderEl.textContent.trim() : 'unknown',
+        time: timeEl ? timeEl.textContent.trim() : null,
+        content: text.substring(0, 500),
+      });
+    }
+  });
+  if (result.chats.length === 0) {
+    // 回退：取页面主体文本
+    const mainContent = document.querySelector('main, [class*="content"], [class*="detail"], .main, #app');
+    if (mainContent) {
+      result._pageText = mainContent.textContent.trim().substring(0, 5000);
+    }
+  }
+
+  // ====== 5. 输出 ======
+  const json = JSON.stringify(result, null, 2);
+  console.log('========== 提取完成 ==========');
+  console.log(json);
+
+  // 复制到剪贴板
+  try {
+    await navigator.clipboard.writeText(json);
+    console.log('✅ 已自动复制到剪贴板！直接 Ctrl+V 粘贴给 Claude Code。');
+  } catch (e) {
+    console.log('⚠️ 自动复制失败，请手动复制上方 JSON。');
+    console.log('（右键上方输出 → Copy object 或手动选中复制）');
+  }
+
+  console.log(`========== 统计：${result.chats.length} 条消息，${result.contacts.length} 个联系方式 ==========`);
+  return result;
+})();

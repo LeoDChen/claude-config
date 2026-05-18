@@ -1,0 +1,274 @@
+#!/usr/bin/env node
+/**
+ * batch_gen_briefs.js — 批量生成状态卡草稿
+ *
+ * 从 heat_classification.json 读取 NOW 客户列表，
+ * 读取聊天记录最后 20 条消息，自动生成状态卡。
+ *
+ * 所有 AI 生成的摘要字段标注"初稿"。
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const DATA_DIR = path.resolve(__dirname, "..", "data");
+const CHAT_DIR = path.join(DATA_DIR, "chat_history");
+const BRIEFS_DIR = path.join(DATA_DIR, "briefs");
+const HEAT_PATH = path.join(DATA_DIR, "heat_classification.json");
+
+const OUR_UID = "2500000853693";
+const READ_MSG_COUNT = 20; // 读取最近 N 条消息用于生成摘要
+
+// ── 国家代码映射 ──────────────────────────────────────────
+const COUNTRY_MAP = {
+  US: "美国", GH: "加纳", CM: "喀麦隆", ZA: "南非", CD: "刚果民主共和国",
+  CI: "科特迪瓦", ZM: "赞比亚", IQ: "伊拉克", SA: "沙特阿拉伯", AE: "阿联酋",
+  SD: "苏丹", EG: "埃及", OM: "阿曼", BH: "巴林", KW: "科威特", QA: "卡塔尔",
+  LB: "黎巴嫩", JO: "约旦", PS: "巴勒斯坦", SY: "叙利亚", YE: "也门",
+  IN: "印度", PK: "巴基斯坦", UK: "英国", FR: "法国", DE: "德国",
+  ES: "西班牙", IT: "意大利", NL: "荷兰", CA: "加拿大", AR: "阿根廷",
+  TG: "多哥", KE: "肯尼亚", TZ: "坦桑尼亚", SN: "塞内加尔", RU: "俄罗斯",
+  KZ: "哈萨克斯坦", UZ: "乌兹别克斯坦", JP: "日本", CN: "中国", HK: "香港",
+  VN: "越南", IL: "以色列", VE: "委内瑞拉", BR: "巴西",
+};
+
+// ── 过滤黑名单 ──────────────────────────────────────────
+const SKIP_NAMES = [
+  "assistant eva", "assistanteva", // OKKI AI bot
+  "leon scott kennedy", // obvious spam
+];
+
+const SKIP_KEYWORDS = ["鸭梨"]; // spam message content
+
+function shouldSkip(result) {
+  if (SKIP_NAMES.includes(result.name.toLowerCase().trim())) return true;
+  for (const kw of SKIP_KEYWORDS) {
+    if (result.lastMsgPreview && result.lastMsgPreview.includes(kw)) return true;
+  }
+  return false;
+}
+
+// ── 辅助 ──────────────────────────────────────────────────
+
+function cidToFilename(cidStr) {
+  const match = cidStr.match(/^(.+)#(\d+)@(\w+)$/);
+  if (!match) return null;
+  const [, left, channel, platform] = match;
+  return `${left}_${channel}_${platform}.json`;
+}
+
+function safeFilename(name, cid) {
+  // cid prefix + sanitized name
+  const shortCid = cid.split("#")[0].replace(/[@.]/g, "_");
+  const safeName = name.replace(/[\/\\:*?"<>|]/g, "-").replace(/\s+/g, "-");
+  return `${shortCid}_${safeName}.md`;
+}
+
+function isSystemMessage(msg) {
+  try {
+    const ext = msg.message?.extension;
+    if (ext?.systemMessage === true) return true;
+    const bmi = ext?.basicMessageInfo;
+    if (typeof bmi === "string" && bmi.includes('"systemMessage":true')) return true;
+    return false;
+  } catch { return false; }
+}
+
+function getMsgText(msg) {
+  try { return msg.message?.content?.text?.content || ""; } catch { return ""; }
+}
+
+function getMsgTime(msg) {
+  try { return msg.message?.createAt || 0; } catch { return 0; }
+}
+
+function senderIsUs(msg) {
+  try { return (msg.message?.sender?.uid || "").includes(OUR_UID); } catch { return false; }
+}
+
+function getMsgId(msg) {
+  try { return msg.message?.messageId || ""; } catch { return ""; }
+}
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// ── 判定阶段（基于聊天内容） ──────────────────────────────
+function detectStage(messages) {
+  const all = messages.map((m) => getMsgText(m).toLowerCase()).join(" ");
+  if (/(payment|付款|deposit|定金|invoice|PI|proforma)/.test(all) && /(paid|付了|已付|done)/.test(all)) return "已成交（终态）";
+  if (/(tracking|物流|shipment|shipped|已发货|提单|B\/L)/.test(all)) return "已发货/在途";
+  if (/(ready|ready to ship|备好|ship.*soon|about to ship)/.test(all)) return "待发货";
+  if (/(payment|付款|deposit|定金|balance|余款|pay)/i.test(all)) return "待付款";
+  if (/(price|报价|usd|dollar|\$|单价|quotation|quote)/.test(all)) return "报价已发";
+  if (/(sample|样品|打样)/.test(all)) return "样品阶段";
+  if (/(negotiate|谈判|discount|折扣|better price|便宜)/.test(all)) return "谈判中";
+  if (/(catalog|pattern|design|style|color|size)/.test(all)) return "需求探索";
+  return "需求探索";
+}
+
+// ── 生成动态摘要 ──────────────────────────────────────────
+function generateRecentSummary(realMsgs) {
+  const recent = realMsgs.slice(0, Math.min(5, realMsgs.length));
+  const lines = [];
+  for (const msg of recent.reverse()) { // 时间正序
+    const ts = getMsgTime(msg);
+    const sender = senderIsUs(msg) ? "我" : "客";
+    const text = getMsgText(msg).substring(0, 200).replace(/\n/g, " ");
+    const msgId = getMsgId(msg);
+    if (text.trim()) {
+      lines.push(`- ${fmtDate(ts)} ${sender}: ${text}（MsgID:${msgId}）`);
+    }
+  }
+  return lines.join("\n");
+}
+
+// ── 提取关键数字 ──────────────────────────────────────────
+function extractKeyNumbers(realMsgs) {
+  const nums = [];
+  for (const msg of realMsgs) {
+    const text = getMsgText(msg);
+    const ts = getMsgTime(msg);
+    const sender = senderIsUs(msg) ? "我" : "客";
+    const msgId = getMsgId(msg);
+
+    // 报价
+    const priceMatch = text.match(/(\$\s*[\d.]+)\s*(\/pc|per piece|USD|每件|单价)?/gi);
+    if (priceMatch) {
+      for (const p of priceMatch) {
+        if (!nums.some((n) => n.includes(p))) {
+          nums.push(`- 报价：${p.trim()}（${fmtDate(ts)}，${sender}，MsgID:${msgId}）`);
+        }
+      }
+    }
+
+    // 数量
+    const qtyMatch = text.match(/(\d+)\s*(pieces|pcs|件|个|条|套)/gi);
+    if (qtyMatch) {
+      for (const q of qtyMatch) {
+        if (!nums.some((n) => n.includes(q))) {
+          nums.push(`- 数量：${q.trim()}（${fmtDate(ts)}，${sender}，MsgID:${msgId}）`);
+        }
+      }
+    }
+  }
+  return nums.slice(0, 8).join("\n"); // 最多 8 条
+}
+
+// ── 生成下一步建议 ────────────────────────────────────────
+function generateNextStep(result, realMsgs) {
+  const days = result.daysSinceLastContact;
+  const lastSender = result.lastSender;
+
+  if (result.reason.includes("超期")) {
+    return `→ [初稿] 客户等待超过${days}天未回复，建议尽快处理。${lastSender === "客" ? "检查客户最后消息内容并回复" : "评估是否需要再次跟进"}`;
+  }
+  if (result.stage === "样品阶段") {
+    return "→ [初稿] 确认样品进度，推动下一步（反馈→修改→大货）";
+  }
+  if (result.stage === "待付款") {
+    return "→ [初稿] 确认付款状态，必要时发送付款提醒";
+  }
+  if (result.stage === "待发货") {
+    return "→ [初稿] 确认发货安排，如已发货则更新运单号";
+  }
+  return "→ [初稿] 查看完整聊天记录后确定具体行动方向";
+}
+
+// ── 主逻辑 ──────────────────────────────────────────────────
+
+if (!fs.existsSync(HEAT_PATH)) {
+  console.error("请先运行 batch_classify_heat.js");
+  process.exit(1);
+}
+
+const heatData = JSON.parse(fs.readFileSync(HEAT_PATH, "utf-8"));
+const nowCustomers = heatData.results.filter((r) => r.heat === "NOW" && !shouldSkip(r));
+
+console.log(`NOW 客户: ${nowCustomers.length}人 (已过滤机器人/垃圾)`);
+console.log(`开始生成状态卡...\n`);
+
+let generated = 0;
+let failed = 0;
+
+for (const cust of nowCustomers) {
+  const filename = cidToFilename(cust.cid);
+  if (!filename) { failed++; continue; }
+  const chatPath = path.join(CHAT_DIR, filename);
+  if (!fs.existsSync(chatPath)) { failed++; continue; }
+
+  let raw;
+  try { raw = JSON.parse(fs.readFileSync(chatPath, "utf-8")); }
+  catch { failed++; continue; }
+
+  const allMsgs = raw.messages || [];
+  const realMsgs = allMsgs.filter((m) => !isSystemMessage(m));
+  if (realMsgs.length === 0) { failed++; continue; }
+
+  // 消息时间倒序，取最近 READ_MSG_COUNT 条
+  const recentMsgs = realMsgs.slice(0, READ_MSG_COUNT);
+
+  // 首次联系时间（最旧消息的时间）
+  const firstMsgTime = getMsgTime(realMsgs[realMsgs.length - 1]);
+
+  // 重新判定阶段（基于更全面的消息）
+  const stage = detectStage(recentMsgs);
+
+  // 构建状态卡
+  const countryName = COUNTRY_MAP[cust.country] || cust.country;
+  const safeFile = safeFilename(cust.name, cust.cid);
+  const filePath = path.join(BRIEFS_DIR, safeFile);
+
+  // 跳过已存在的
+  if (fs.existsSync(filePath)) {
+    console.log(`  SKIP (已存在): ${cust.name}`);
+    continue;
+  }
+
+  const frontmatter = `---
+cid: ${cust.cid}
+country: ${countryName}
+heat: NOW
+stage: ${stage}
+checked: ${new Date().toISOString().slice(0, 10)}
+updated: ${new Date().toISOString().slice(0, 10)}
+---`;
+
+  const body = `# ${cust.name}
+
+## 画像
+${countryName} / 未知买家类型 / 阿里巴巴国际站 / ${fmtDate(firstMsgTime)} 首次联系
+
+## 最近动态
+[初稿] 最近5条消息摘要：
+${generateRecentSummary(recentMsgs)}
+→ ${cust.reason}
+
+## 关键数字
+[初稿] 自动提取：
+${extractKeyNumbers(realMsgs) || "（未检测到报价/数量信息）"}
+
+## 下一步
+${generateNextStep(cust, recentMsgs)}
+
+## 深度档案
+无`;
+
+  const card = `${frontmatter}\n\n${body}\n`;
+
+  fs.writeFileSync(filePath, card, "utf-8");
+  console.log(`  OK: ${cust.name.padEnd(25)} | ${countryName.padEnd(6)} | ${stage} | ${safeFile}`);
+  generated++;
+}
+
+console.log(`\n生成: ${generated}张 | 跳过(已存在): ${nowCustomers.length - generated - failed}张 | 失败: ${failed}张`);
+console.log(`状态卡总数: ${fs.readdirSync(BRIEFS_DIR).filter((f) => f.endsWith(".md")).length}张`);

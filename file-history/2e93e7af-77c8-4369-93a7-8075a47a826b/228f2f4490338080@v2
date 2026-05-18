@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI — 双轴矩阵 + 点开详情</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; color: #333; display: flex; gap: 20px; }
+  .main { flex: 1; min-width: 0; }
+  h1 { font-size: 1.15em; margin-bottom: 2px; }
+  .subtitle { color: #999; font-size: 0.78em; margin-bottom: 14px; }
+
+  .matrix { display: grid; gap: 1px; background: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .cell { background: #fff; padding: 6px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 3px; align-content: start; }
+  .cell-header { background: #fafafa; padding: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.74em; color: #666; text-align: center; }
+  .row-label { background: #fafafa; padding: 4px 8px; display: flex; align-items: center; gap: 5px; font-size: 0.76em; font-weight: 600; white-space: nowrap; }
+
+  .customer-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 12px; font-size: 0.72em; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: all .12s; }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  .customer-chip.active { outline: 2px solid #1976d2; outline-offset: 1px; }
+  .chip-red { background: #ffebee; border-color: #ffcdd2; color: #b71c1c; }
+  .chip-yellow { background: #fff8e1; border-color: #ffecb3; color: #e65100; }
+  .chip-grey { background: #f5f5f5; border-color: #eee; color: #888; }
+  .chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: #d32f2f; }
+  .chip-dot-yellow { background: #f57c00; }
+  .chip-dot-grey { background: #bbb; }
+  .chip-badge { font-size: 0.68em; padding: 1px 3px; border-radius: 6px; background: rgba(0,0,0,.06); }
+
+  .panel { width: 380px; flex-shrink: 0; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.06); display: flex; flex-direction: column; max-height: calc(100vh - 40px); position: sticky; top: 20px; }
+  .panel-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+  .panel-header h2 { font-size: 1.05em; }
+  .panel-close { background: none; border: none; font-size: 1.2em; cursor: pointer; color: #999; padding: 4px; }
+  .panel-body { padding: 16px 20px; overflow-y: auto; flex: 1; font-size: 0.85em; }
+  .panel-actions { padding: 12px 20px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; }
+
+  .btn { padding: 7px 16px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.82em; cursor: pointer; background: #fff; transition: .12s; }
+  .btn:hover { background: #f5f5f5; }
+  .btn-primary { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .btn-primary:hover { background: #1565c0; }
+
+  .fm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; font-size: 0.82em; }
+  .fm-item { }
+  .fm-label { color: #999; font-size: 0.75em; }
+  .fm-value { font-weight: 500; }
+
+  .section { margin-bottom: 14px; }
+  .section-title { font-weight: 600; font-size: 0.82em; color: #888; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .driver-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .driver-item { display: flex; gap: 8px; padding: 8px 10px; border-radius: 8px; font-size: 0.84em; align-items: flex-start; }
+  .driver-item-red { background: #fff5f5; border: 1px solid #ffcdd2; }
+  .driver-item-yellow { background: #fffdf5; border: 1px solid #ffecb3; }
+  .driver-icon { font-size: 1.1em; flex-shrink: 0; }
+
+  .chat-snippet { background: #fafafa; border-radius: 8px; padding: 10px 12px; font-size: 0.8em; margin-bottom: 6px; }
+  .chat-line { padding: 2px 0; display: flex; gap: 6px; }
+  .chat-who { font-weight: 600; flex-shrink: 0; }
+  .chat-who-me { color: #1976d2; }
+  .chat-who-cust { color: #d32f2f; }
+  .chat-time { color: #999; font-size: 0.85em; }
+
+  .key-num { background: #f5f5f5; border-radius: 6px; padding: 8px 10px; margin-bottom: 4px; font-size: 0.82em; }
+  .empty-state { display: flex; align-items: center; justify-content: center; height: 100%; color: #bbb; font-size: 0.9em; text-align: center; padding: 40px; }
+  .highlight { background: #fff9c4; padding: 0 2px; }
+</style>
+</head>
+<body>
+
+<div class="main">
+<h1>OKKI 客户看板</h1>
+<p class="subtitle">横轴：生命周期阶段 → ｜ 纵轴：紧急度 ｜ 点卡片看详情</p>
+
+<div class="matrix" style="grid-template-columns: 72px repeat(8, 1fr);" id="matrix">
+  <div class="cell-header"></div>
+  <div class="cell-header">🔍 需求探索</div>
+  <div class="cell-header">💰 报价已发</div>
+  <div class="cell-header">🧪 样品</div>
+  <div class="cell-header">🤝 谈判</div>
+  <div class="cell-header">💳 待付款</div>
+  <div class="cell-header">📦 待发货</div>
+  <div class="cell-header">🚢 在途</div>
+  <div class="cell-header">✅ 已签收</div>
+
+  <div class="row-label"><span class="chip-dot chip-dot-red"></span>需立即处理</div>
+  <div class="cell">
+    <span class="customer-chip chip-red" data-cid="inderpreet" onclick="selectChip(this)"><span class="chip-dot chip-dot-red"></span>Inderpreet<span class="chip-badge">未回</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-red active" data-cid="jonathan" onclick="selectChip(this)"><span class="chip-dot chip-dot-red"></span>jonathan<span class="chip-badge">待发</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-red" data-cid="angela" onclick="selectChip(this)"><span class="chip-dot chip-dot-red"></span>Angela O<span class="chip-badge">未回</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-red" data-cid="nassir" onclick="selectChip(this)"><span class="chip-dot chip-dot-red"></span>Nassir<span class="chip-badge">承诺</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+  <div class="cell"></div>
+
+  <div class="row-label"><span class="chip-dot chip-dot-yellow"></span>需定时关注</div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="clara" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Clara<span class="chip-badge">追问</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="arshavin" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>arshavin<span class="chip-badge">追问</span></span>
+    <span class="customer-chip chip-yellow" data-cid="hakim" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Hakim<span class="chip-badge">追问</span></span>
+    <span class="customer-chip chip-yellow" data-cid="keinjol" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Keinjol<span class="chip-badge">DDP</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="akamwau" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Aka-Mwau<span class="chip-badge">追问</span></span>
+  </div>
+  <div class="cell"></div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="sara" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Sara D<span class="chip-badge">追问</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="christabel" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Christabel<span class="chip-badge">进度</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="aloh" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>Aloh<span class="chip-badge">物流</span></span>
+  </div>
+  <div class="cell">
+    <span class="customer-chip chip-yellow" data-cid="wele" onclick="selectChip(this)"><span class="chip-dot chip-dot-yellow"></span>WELE<span class="chip-badge">回访</span></span>
+  </div>
+
+  <div class="row-label"><span class="chip-dot chip-dot-grey"></span>正常流转</div>
+  <div class="cell"><span class="customer-chip chip-grey">Aboulaye</span><span class="customer-chip chip-grey">Marcos</span><span class="customer-chip chip-grey">Tahar</span><span class="customer-chip chip-grey">+7</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">Esther</span><span class="customer-chip chip-grey">+3</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">+2</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">+1</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">ali Amjid</span><span class="customer-chip chip-grey">+1</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">sarah a</span><span class="customer-chip chip-grey">+3</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">+3</span></div>
+  <div class="cell"><span class="customer-chip chip-grey">+2</span></div>
+
+  <div class="row-label" style="opacity:0.5"><span class="chip-dot chip-dot-grey"></span>❄️冷冻</div>
+  <div class="cell" colspan="8" style="padding:6px 12px;font-size:0.74em;color:#aaa;opacity:0.5;">
+    MENTZEKO Mathi · Deekshith Shekar · Anne Shen · +20人（折叠）
+  </div>
+</div>
+</div>
+
+<!-- Side Panel -->
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <h2 id="panel-title">jonathan aston</h2>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panel-body">
+    <!-- frontmatter -->
+    <div class="fm-grid">
+      <div class="fm-item"><div class="fm-label">国家</div><div class="fm-value">加纳 🇬🇭</div></div>
+      <div class="fm-item"><div class="fm-label">阶段</div><div class="fm-value">报价已发</div></div>
+      <div class="fm-item"><div class="fm-label">最后联系</div><div class="fm-value">7天前</div></div>
+      <div class="fm-item"><div class="fm-label">首次联系</div><div class="fm-value">2026-05-07</div></div>
+    </div>
+
+    <!-- 驱动因子 -->
+    <div class="section">
+      <div class="section-title">📋 驱动因子</div>
+      <div class="driver-list">
+        <div class="driver-item driver-item-red">
+          <span class="driver-icon">🔴</span>
+          <div>
+            <strong>待发货——客户已付，货还没出</strong>
+            <div style="color:#999;font-size:0.85em;margin-top:2px;">2026-05-13 报价 $2.68×200pcs + 运费方案，客户选了方案。5/14 我追问后无回复。该主动安排发货，发运单号。</div>
+          </div>
+        </div>
+        <div class="driver-item driver-item-yellow">
+          <span class="driver-icon">🟡</span>
+          <div>
+            <strong>该追问——客户沉默7天</strong>
+            <div style="color:#999;font-size:0.85em;margin-top:2px;">报价+运费方案发了之后客户未确认。3日内未回复→再追问一次。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 聊到哪了 -->
+    <div class="section">
+      <div class="section-title">💬 聊到哪了</div>
+      <div class="chat-snippet">
+        <div class="chat-line"><span class="chat-who chat-who-me">我</span> <span class="chat-time">5/14</span> "just checking in — did you have a chance to look at the two shipping options?"</div>
+        <div class="chat-line"><span class="chat-who chat-who-me">我</span> <span class="chat-time">5/13</span> "Option A: Sea $335(total $871) · Option B: Express $434(total $970)"</div>
+        <div class="chat-line"><span class="chat-who chat-who-cust">客</span> <span class="chat-time">5/12</span> "ok"</div>
+        <div class="chat-line"><span class="chat-who chat-who-me">我</span> <span class="chat-time">5/9</span> "quote for 200 pieces at <span class='highlight'>$2.68</span>/pc, total $536"</div>
+      </div>
+    </div>
+
+    <!-- 关键数字 -->
+    <div class="section">
+      <div class="section-title">🔢 关键数字</div>
+      <div class="key-num">💰 报价: <strong>$2.68/pc</strong> × 200pcs = $536（5/9，MsgID:4093500280599）</div>
+      <div class="key-num">🚢 海运 DDP: <strong>$335</strong>，总价 $871（5/13，MsgID:4111565581430）</div>
+      <div class="key-num">📦 快递: <strong>$434</strong>，总价 $970（5/13）</div>
+    </div>
+
+    <!-- 下一步 -->
+    <div class="section">
+      <div class="section-title">→ 下一步</div>
+      <div style="font-size:0.88em;line-height:1.5;">
+        1. 确认客户选哪个方案（海运/快递）<br>
+        2. 安排发货，出运单号<br>
+        3. 更新状态卡阶段为"待发货"
+      </div>
+    </div>
+  </div>
+  <div class="panel-actions">
+    <button class="btn btn-primary">✏️ 起草回复</button>
+    <button class="btn">🔍 深度分析</button>
+    <button class="btn">✅ 标记已处理</button>
+  </div>
+</div>
+
+<script>
+// Simple chip selection simulation
+const data = {
+  jonathan: {
+    name:'jonathan aston', country:'加纳', stage:'报价已发', lastContact:'7天前', firstContact:'2026-05-07',
+    drivers: [
+      {level:'red', title:'待发货——客户已付，货还没出', detail:'2026-05-13 报价 $2.68×200pcs + 运费方案，客户选了方案。5/14 我追问后无回复。该主动安排发货，发运单号。'},
+      {level:'yellow', title:'该追问——客户沉默7天', detail:'报价+运费方案发了之后客户未确认。3日内未回复→再追问一次。'}
+    ],
+    chat: [
+      {who:'me', time:'5/14', text:'"just checking in — did you have a chance to look at the two shipping options?"'},
+      {who:'me', time:'5/13', text:'\"Option A: Sea $335(total $871) · Option B: Express $434(total $970)\"'},
+      {who:'cust', time:'5/12', text:'\"ok\"'},
+      {who:'me', time:'5/9', text:'\"quote for 200 pieces at $2.68/pc, total $536\"'}
+    ],
+    nums: ['💰 报价: $2.68/pc × 200pcs = $536（5/9，MsgID:4093500280599）','🚢 海运 DDP: $335，总价 $871（5/13，MsgID:4111565581430）','📦 快递: $434，总价 $970（5/13）'],
+    steps: '1. 确认客户选哪个方案（海运/快递）\n2. 安排发货，出运单号\n3. 更新状态卡阶段为"待发货"'
+  },
+  nassir: {
+    name:'Nassir A', country:'苏丹', stage:'待付款', lastContact:'3天前', firstContact:'2026-03-15',
+    drivers: [
+      {level:'red', title:'承诺未兑现——昨天说"明天确认库存"还没回复', detail:'客户5/13付了款，问到库存情况，我说"明天给你确认"。已超时1天。'},
+      {level:'yellow', title:'到港提醒——5/18到港，该通知客户准备收货', detail:'上一批货5月18日到苏丹港，需提前2天通知客户准备清关文件。'}
+    ],
+    chat: [
+      {who:'me', time:'5/13', text:'"I will confirm the stock situation tomorrow morning"'},
+      {who:'cust', time:'5/13', text:'"Please check if you have 500pcs in stock, I need them urgently"'},
+      {who:'me', time:'5/12', text:'"Payment received, thank you. We will arrange shipping"'}
+    ],
+    nums: ['💳 已付: $1,340（5/12）','📦 订单: 500pcs 婴儿连体衣','🚢 目的港: 苏丹港，预计5/18到港'],
+    steps: '1. 先兑现承诺——确认库存回复客户\n2. 5/16 通知客户5/18到港事宜\n3. 更新状态卡'
+  }
+};
+
+function selectChip(chip) {
+  document.querySelectorAll('.customer-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  const cid = chip.dataset.cid;
+  if (data[cid]) renderPanel(data[cid]);
+}
+
+function renderPanel(d) {
+  document.getElementById('panel-title').textContent = d.name;
+  let html = '';
+  html += `<div class="fm-grid">`;
+  for (const [k,v] of [['国家',d.country+' '],['阶段',d.stage],['最后联系',d.lastContact],['首次联系',d.firstContact]])
+    html += `<div class="fm-item"><div class="fm-label">${k}</div><div class="fm-value">${v}</div></div>`;
+  html += `</div>`;
+
+  html += `<div class="section"><div class="section-title">📋 驱动因子</div><div class="driver-list">`;
+  for (const dr of d.drivers) {
+    const cls = dr.level==='red'?'driver-item-red':'driver-item-yellow';
+    const icon = dr.level==='red'?'🔴':'🟡';
+    html += `<div class="driver-item ${cls}"><span class="driver-icon">${icon}</span><div><strong>${dr.title}</strong><div style="color:#999;font-size:0.85em;margin-top:2px;">${dr.detail}</div></div></div>`;
+  }
+  html += `</div></div>`;
+
+  html += `<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">`;
+  for (const cl of d.chat) {
+    const wcls = cl.who==='me'?'chat-who-me':'chat-who-cust';
+    html += `<div class="chat-line"><span class="chat-who ${wcls}">${cl.who==='me'?'我':'客'}</span> <span class="chat-time">${cl.time}</span> ${cl.text}</div>`;
+  }
+  html += `</div></div>`;
+
+  html += `<div class="section"><div class="section-title">🔢 关键数字</div>`;
+  for (const n of d.nums) html += `<div class="key-num">${n}</div>`;
+  html += `</div>`;
+
+  html += `<div class="section"><div class="section-title">→ 下一步</div><div style="font-size:0.88em;line-height:1.5;white-space:pre-line">${d.steps}</div></div>`;
+
+  document.getElementById('panel-body').innerHTML = html;
+}
+
+function closePanel() {
+  document.querySelectorAll('.customer-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('panel-body').innerHTML = '<div class="empty-state">👈 点击左侧客户卡片<br>查看状态卡详情</div>';
+  document.getElementById('panel-title').textContent = '选择一个客户';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+
+  // Frame 1 is the talk frame with chat content
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) { console.log('Frame 1 not found'); await browser.close(); return; }
+
+  console.log('Frame 1 title:', await talkFrame.title());
+
+  // 1. Dump all key elements with class names and positions
+  const layout = await talkFrame.evaluate(() => {
+    const items = [];
+    // Top level layout containers
+    document.querySelectorAll('body > div, body > section, #app, [class*="layout"], [class*="container"], [class*="wrapper"]').forEach(el => {
+      const cls = typeof el.className === 'string' ? el.className : '';
+      const r = el.getBoundingClientRect();
+      if (r.width > 50 && r.height > 50) {
+        items.push({
+          tag: el.tagName, class: cls.substring(0, 100),
+          w: Math.round(r.width), h: Math.round(r.height),
+          x: Math.round(r.x), y: Math.round(r.y)
+        });
+      }
+    });
+    return items;
+  });
+  console.log(`=== Layout containers (${layout.length}) ===`);
+  layout.forEach(c => console.log(`(${c.x},${c.y}) ${c.w}x${c.h} [${c.tag}] ${c.class}`));
+
+  // 2. Full conversation list items
+  const convList = await talkFrame.evaluate(() => {
+    const items = [];
+    // Find all elements that contain session/conversation names
+    const all = document.querySelectorAll('[class*="conversation"], [class*="session"], [class*="chat-item"], [class*="contact"], [class*="list-item"], li, [class*="msg-item"], [class*="friend"]');
+    all.forEach((el, idx) => {
+      try {
+        const cls = typeof el.className === 'string' ? el.className : '';
+        const text = (el.textContent || '').trim().substring(0, 100);
+        const r = el.getBoundingClientRect();
+        if (text && r.width > 30 && r.height > 20) {
+          items.push({
+            idx, tag: el.tagName, class: cls.substring(0, 80),
+            text, w: Math.round(r.width), h: Math.round(r.height),
+            x: Math.round(r.x), y: Math.round(r.y),
+            childCount: el.children.length
+          });
+        }
+      } catch(e) {}
+    });
+    return items;
+  });
+  console.log(`\n=== Conversation list items (${convList.length}) ===`);
+  convList.forEach(el => {
+    console.log(`[${el.idx}] (${el.x},${el.y}) ${el.w}x${el.h} kids=${el.childCount} "${el.text}"`);
+    console.log(`  class=${el.class}`);
+  });
+
+  // 3. Get input/search fields
+  const inputs = await talkFrame.evaluate(() => {
+    return Array.from(document.querySelectorAll('input, textarea, [contenteditable]')).map(i => {
+      const r = i.getBoundingClientRect();
+      return {
+        placeholder: i.placeholder || '',
+        id: i.id,
+        class: (typeof i.className === 'string' ? i.className : '').substring(0, 50),
+        w: Math.round(r.width), h: Math.round(r.height),
+        x: Math.round(r.x), y: Math.round(r.y)
+      };
+    }).filter(i => i.w > 10);
+  });
+  console.log(`\n=== Inputs (${inputs.length}) ===`);
+  inputs.forEach(i => console.log(JSON.stringify(i)));
+
+  // 4. Get all buttons and clickable items
+  const buttons = await talkFrame.evaluate(() => {
+    return Array.from(document.querySelectorAll('button, a, [role="button"], [role="tab"], [role="menuitem"], [onclick]')).map(el => {
+      const r = el.getBoundingClientRect();
+      return {
+        text: (el.textContent || '').trim().substring(0, 40),
+        class: (typeof el.className === 'string' ? el.className : '').substring(0, 50),
+        id: el.id,
+        w: Math.round(r.width), h: Math.round(r.height),
+        x: Math.round(r.x), y: Math.round(r.y)
+      };
+    }).filter(el => el.w > 5 && el.text);
+  });
+  console.log(`\n=== Buttons/Clickables (${buttons.length}) ===`);
+  buttons.forEach(el => console.log(`(${el.x},${el.y}) ${el.w}x${el.h} "${el.text}" class=${el.class} id=${el.id}`));
+
+  // 5. Get all text visible to understand the full layout
+  const bodyHtml = await talkFrame.evaluate(() => {
+    // Get the raw scrollable text content
+    return document.body?.innerText?.substring(0, 8000) || '';
+  });
+  console.log(`\n=== Full body text ===`);
+  console.log(bodyHtml);
+
+  await browser.close();
+})().catch(err => {
+  console.error('Fatal:', err.message);
+  process.exit(1);
+});

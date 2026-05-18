@@ -1,0 +1,75 @@
+const XLSX = require('xlsx');
+const path = require('path');
+
+// Read template
+const tplPath = 'C:/Users/Administrator/Desktop/形式发票模板.xlsx';
+const wb = XLSX.readFile(tplPath, {cellStyles: true, cellFormula: false});
+const ws = wb.Sheets['accessories'];
+
+// Helper to set cell value and type
+function setCell(ws, addr, value, type) {
+  const cell = ws[addr] || {};
+  cell.t = type || (typeof value === 'number' ? 'n' : 's');
+  cell.v = value;
+  ws[addr] = cell;
+}
+
+// === Fill CONSIGNEE/BUYER section ===
+setCell(ws, 'A5', 'Company: amer ly');
+setCell(ws, 'A6', 'Address: Iraq, Nasiriyah, Dhi Qar, 64001');
+setCell(ws, 'A7', 'Attn: Hussein');
+setCell(ws, 'A8', 'Tel: (+964) 07867026589');
+
+// === Date ===
+// Excel serial for 2026-04-28: (Date.UTC(2026,3,28) - Date.UTC(1899,11,30)) / 86400000
+const serial = (Date.UTC(2026, 3, 28) - Date.UTC(1899, 11, 30)) / 86400000;
+setCell(ws, 'N4', serial, 'n');
+
+// === Invoice No. ===
+setCell(ws, 'L5', 'LT20260428001');
+
+// === Port of Loading ===
+setCell(ws, 'L6', 'Yiyang, China  zip code: 413000');
+
+// === Final Destination ===
+setCell(ws, 'J7', 'Final Destination:');
+setCell(ws, 'L7', 'Iraq');
+
+// === Payment ===
+setCell(ws, 'J8', 'Terms of Payment:');
+setCell(ws, 'L8', '100% T/T in advance');
+
+// === Shipment ===
+setCell(ws, 'J9', 'Shipment :');
+setCell(ws, 'L9', 'Express');
+
+// === Trade Terms ===
+setCell(ws, 'J10', 'Trade Terms:');
+setCell(ws, 'L10', 'DAP');
+
+// === Delivery Time ===
+setCell(ws, 'J11', 'DELIVERY TIME:');
+setCell(ws, 'L11', '1-7 days after payment');
+
+// === Product Table ===
+// Row 15: Product 1
+setCell(ws, 'A15', '1');         // No.
+setCell(ws, 'B15', "Children's Shirt Set");  // Item (B15:J15 merged)
+setCell(ws, 'K15', 28);          // QTY (K15:L15 merged)
+setCell(ws, 'M15', 3.80);        // Price (M15:N15 merged)
+setCell(ws, 'O15', 106.40);      // Total
+
+// Row 16: Shipping fee
+setCell(ws, 'O16', 157.00);
+
+// Row 17: Grand total
+setCell(ws, 'O17', 263.40);
+
+// === Quotation Validity ===
+setCell(ws, 'A27', '4.QUOTATION VALIDITY: ONLY 2026-5-28(FOR GOODS ONLY)');
+
+// Save
+const outDir = 'd:/ClaudeWorkspace/04_报价管理';
+const outPath = path.join(outDir, 'PI_amer_ly_2026-04-28.xlsx');
+XLSX.writeFile(wb, outPath, {bookType: 'xlsx', type: 'file'});
+console.log('Saved to: ' + outPath);

@@ -1,0 +1,252 @@
+C:\Users\Administrator\.claude\AGENTS.md:62:- No hardcoded secrets (API keys, passwords, tokens)
+C:\Users\Administrator\.claude\AGENTS.md:81:**Error handling:** Handle errors at every level. Provide user-friendly messages in UI code. Log detailed context server-side. Never silently swallow errors.
+C:\Users\Administrator\.claude\AGENTS.md:113:   - Personal debugging notes, preferences, and temporary context → auto memory
+C:\Users\Administrator\.claude\AGENTS.md:141:**Context management:** Avoid last 20% of context window for large refactoring and multi-file features. Lower-sensitivity tasks (single edits, docs, simple fixes) tolerate higher utilization.
+C:\Users\Administrator\.claude\agents\silent-failure-hunter.md:17:- errors converted to `null` / empty arrays with no context
+C:\Users\Administrator\.claude\agents\silent-failure-hunter.md:21:- logs without enough context
+C:\Users\Administrator\.claude\README.md:15:export ANTHROPIC_AUTH_TOKEN=your-token
+C:\Users\Administrator\.claude\the-security-guide.md:31:[Omitted long matching line]
+C:\Users\Administrator\.claude\the-security-guide.md:35:[Omitted long matching line]
+C:\Users\Administrator\.claude\the-security-guide.md:55:> [research.checkpoint.com](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
+C:\Users\Administrator\.claude\the-security-guide.md:71:Claude Code had its repo-controlled hooks, MCP settings, and env-var trust paths tested publicly. Amazon Q Developer had a 2025 supply chain incident involving a malicious prompt payload in the VS Code extension, then a separate disclosure around overly broad GitHub token exposure in build infrastructure. Weak credential boundaries plus agent-adjacent tooling is an entrypoint for opportunists.
+C:\Users\Administrator\.claude\the-security-guide.md:122:Do not give the agent your personal Gmail. Create `agent@yourdomain.com`. Do not give it your main Slack. Create a separate bot user or bot channel. Do not hand it your personal GitHub token. Use a short-lived scoped token or a dedicated bot account.
+C:\Users\Administrator\.claude\the-security-guide.md:192:If a workflow only needs to read a repo and run tests, do not let it read your home directory. If it only needs a single repo token, do not hand it org-wide write permissions. If it does not need production, keep it out of production.
+C:\Users\Administrator\.claude\the-security-guide.md:196:Everything an LLM reads is executable context. There is no meaningful distinction between "data" and "instructions" once text enters the context window. Sanitization is not cosmetic; it is part of the runtime boundary.
+C:\Users\Administrator\.claude\the-security-guide.md:405:Build as if malicious text will get into context.
+C:\Users\Administrator\.claude\the-security-guide.md:423:- Check Point Research, "Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files" (February 25, 2026): [research.checkpoint.com](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
+C:\Users\Administrator\.claude\agents\security-reviewer.md:15:2. **Secrets Detection** — Find hardcoded API keys, passwords, tokens
+C:\Users\Administrator\.claude\agents\security-reviewer.md:77:**Always verify context before flagging.**
+C:\Users\Administrator\.claude\cache\changelog.md:18:- Fixed Vertex AI `count_tokens` endpoint returning 400 errors for users behind proxy gateways
+C:\Users\Administrator\.claude\cache\changelog.md:49:- [VSCode] `/context` now opens a native token usage dialog
+C:\Users\Administrator\.claude\cache\changelog.md:63:- Fixed `/usage` returning "rate limited" after a stale OAuth token — now refreshes automatically
+C:\Users\Administrator\.claude\cache\changelog.md:81:- Auto-compact in auto mode now displays `auto` (lowercase, no token count) instead of a misleading token value
+C:\Users\Administrator\.claude\cache\changelog.md:127:- Fixed MCP OAuth client secret stored via `--client-secret` not being sent during token exchange for servers requiring `client_secret_post`
+C:\Users\Administrator\.claude\cache\changelog.md:165:- Fixed MCP servers whose OAuth token response omits `expires_in` requiring re-authentication every hour
+C:\Users\Administrator\.claude\cache\changelog.md:166:- Fixed MCP step-up authorization silently refreshing instead of prompting for re-consent when the server's `insufficient_scope` 403 names a scope the current token already has
+C:\Users\Administrator\.claude\cache\changelog.md:169:- Fixed macOS keychain race where a concurrent MCP token refresh could overwrite a freshly-refreshed OAuth token, causing unexpected "Please run /login" prompts
+C:\Users\Administrator\.claude\cache\changelog.md:170:- Fixed OAuth token refresh failing when the server revokes a token before its local expiry time
+C:\Users\Administrator\.claude\cache\changelog.md:172:- Fixed `/login` having no effect in a session launched with `CLAUDE_CODE_OAUTH_TOKEN` — the env token is now cleared so disk credentials take effect
+C:\Users\Administrator\.claude\cache\changelog.md:198:- OpenTelemetry: `user_prompt` events now include `command_name` and `command_source` for slash commands; `cost.usage`, `token.usage`, `api_request`, and `api_error` now include an `effort` attribute when the model supports effort levels. Custom/MCP command names are redacted unless `OTEL_LOG_TOOL_DETAILS=1` is set
+C:\Users\Administrator\.claude\cache\changelog.md:202:- Fixed Plain-CLI OAuth sessions dying with "Please run /login" when the access token expires mid-session — the token is now refreshed reactively on 401
+C:\Users\Administrator\.claude\cache\changelog.md:205:- Fixed `/login` having no effect when launched with `CLAUDE_CODE_OAUTH_TOKEN` env var and that token expires
+C:\Users\Administrator\.claude\cache\changelog.md:215:- Fixed Opus 4.7 sessions showing inflated `/context` percentages and autocompacting too early — Claude Code was computing against a 200K context window instead of Opus 4.7's native 1M
+C:\Users\Administrator\.claude\cache\changelog.md:282:- Fixed compacting a resumed long-context session failing with "Extra usage is required for long context requests"
+C:\Users\Administrator\.claude\cache\changelog.md:308:- Improved `/setup-vertex` and `/setup-bedrock` to show the actual `settings.json` path when `CLAUDE_CONFIG_DIR` is set, seed model candidates from existing pins on re-run, and offer a "with 1M context" option for supported models
+C:\Users\Administrator\.claude\cache\changelog.md:309:- `/skills` menu now supports sorting by estimated token count — press `t` to toggle
+C:\Users\Administrator\.claude\cache\changelog.md:322:- Fixed `/context` grid rendering with extra blank lines between rows
+C:\Users\Administrator\.claude\cache\changelog.md:338:- Added option to show Claude's last response as commented context in the `Ctrl+G` external editor (enable via `/config`)
+C:\Users\Administrator\.claude\cache\changelog.md:342:- `/context`, `/exit`, and `/reload-plugins` now work from Remote Control (mobile/web) clients
+C:\Users\Administrator\.claude\cache\changelog.md:375:- Added recap feature to provide context when returning to a session, configurable in `/config` and manually invocable with `/recap`; force with `CLAUDE_CODE_ENABLE_AWAY_SUMMARY` if telemetry disabled.
+C:\Users\Administrator\.claude\cache\changelog.md:386:- Fixed Agent tool prompting for permission in auto mode when the safety classifier's transcript exceeded its context window
+C:\Users\Administrator\.claude\cache\changelog.md:450:- Improved tool-not-available errors to explain why and how to proceed when the model calls a tool that exists but isn't available in the current context
+C:\Users\Administrator\.claude\cache\changelog.md:462:- Fixed `--resume`/`--continue` losing conversation context on large sessions when the loader anchored on a dead-end branch instead of the live conversation
+C:\Users\Administrator\.claude\cache\changelog.md:478:- Fixed `/context` Free space and Messages breakdown disagreeing with the header percentage
+C:\Users\Administrator\.claude\cache\changelog.md:479:- Fixed several plugin issues: slash commands resolving to the wrong plugin with duplicate `name:` frontmatter, `/plugin update` failing with `ENAMETOOLONG`, Discover showing already-installed plugins, directory-source plugins loading from a stale version cache, and skills not honoring `context: fork` and `agent` frontmatter fields
+C:\Users\Administrator\.claude\cache\changelog.md:508:- Fixed MCP OAuth `oauth.authServerMetadataUrl` config override not being honored on token refresh after restart, affecting ADFS and similar IdPs
+C:\Users\Administrator\.claude\cache\changelog.md:528:- Fixed MCP tools with `_meta["anthropic/maxResultSizeChars"]` not bypassing the token-based persist layer
+C:\Users\Administrator\.claude\cache\changelog.md:546:- Improved transcript entries to carry final token usage instead of streaming placeholders
+C:\Users\Administrator\.claude\cache\changelog.md:566:- Fixed MCP OAuth `oauth.authServerMetadataUrl` not being honored on token refresh after restart, fixing ADFS and similar IdPs
+C:\Users\Administrator\.claude\cache\changelog.md:568:- Fixed rate-limit upgrade options disappearing after context compaction
+C:\Users\Administrator\.claude\cache\changelog.md:590:- Improved image handling: pasted and attached images are now compressed to the same token budget as images read via the Read tool
+C:\Users\Administrator\.claude\cache\changelog.md:594:- Improved context-low warning to show as a transient footer notification instead of a persistent row
+C:\Users\Administrator\.claude\cache\changelog.md:597:- Improved transcript accuracy: per-block entries now carry the final token usage instead of the streaming placeholder
+C:\Users\Administrator\.claude\cache\changelog.md:640:- Pro users now see a footer hint when returning to a session after the prompt cache has expired, showing roughly how many tokens the next turn will send uncached
+C:\Users\Administrator\.claude\cache\changelog.md:650:- Fixed idle-return "/clear to save X tokens" hint showing cumulative session tokens instead of current context size
+C:\Users\Administrator\.claude\cache\changelog.md:669:- Improved `/claude-api` skill guidance for agent design patterns including tool surface decisions, context management, and caching strategy
+C:\Users\Administrator\.claude\cache\changelog.md:671:- Edit tool now uses shorter `old_string` anchors, reducing output tokens
+C:\Users\Administrator\.claude\cache\changelog.md:711:- Fixed `/stats` undercounting tokens by excluding subagent usage, and losing historical data beyond 30 days when the stats cache format changes
+C:\Users\Administrator\.claude\cache\changelog.md:715:- Fixed skill reminders and other system context being dropped when sending messages with images via the SDK
+C:\Users\Administrator\.claude\cache\changelog.md:717:- Fixed autocompact thrash loop — now detects when context refills to the limit immediately after compacting three times in a row and stops with an actionable error instead of burning API calls
+C:\Users\Administrator\.claude\cache\changelog.md:738:- Changed hook output over 50K characters to be saved to disk with a file path + preview instead of being injected directly into context
+C:\Users\Administrator\.claude\cache\changelog.md:764:- Fixed masked input (e.g., OAuth code paste) leaking the start of the token when wrapping across multiple lines on narrow terminals
+C:\Users\Administrator\.claude\cache\changelog.md:773:- Reduced token overhead when mentioning files with `@` — raw string content no longer JSON-escaped
+C:\Users\Administrator\.claude\cache\changelog.md:776:- Skill descriptions in the `/skills` listing are now capped at 250 characters to reduce context usage
+C:\Users\Administrator\.claude\cache\changelog.md:780:- [VSCode] Fixed extension defaulting Max plan users to Sonnet after the OAuth token refreshes (8 hours after login)
+C:\Users\Administrator\.claude\cache\changelog.md:781:- Read tool now uses compact line-number format and deduplicates unchanged re-reads, reducing token usage
+C:\Users\Administrator\.claude\cache\changelog.md:794:- Fixed `/compact` failing with "context exceeded" when the conversation has grown too large for the compact request itself to fit
+C:\Users\Administrator\.claude\cache\changelog.md:801:- Fixed MCP step-up authorization failing when a refresh token exists — servers requesting elevated scopes via `403 insufficient_scope` now correctly trigger the re-authorization flow
+C:\Users\Administrator\.claude\cache\changelog.md:825:- Added idle-return prompt that nudges users returning after 75+ minutes to `/clear`, reducing unnecessary token re-caching on stale sessions
+C:\Users\Administrator\.claude\cache\changelog.md:828:- MCP tool descriptions and server instructions are now capped at 2KB to prevent OpenAPI-generated servers from bloating context
+C:\Users\Administrator\.claude\cache\changelog.md:831:- Token counts ≥1M now display as "1.5m" instead of "1512.6k"
+C:\Users\Administrator\.claude\cache\changelog.md:883:- Fixed background subagents becoming invisible after context compaction, which could cause duplicate agents to be spawned
+C:\Users\Administrator\.claude\cache\changelog.md:911:- Increased non-streaming fallback token cap (21k → 64k) and timeout (120s → 300s local) so fallback requests are less likely to be truncated
+C:\Users\Administrator\.claude\cache\changelog.md:942:- Fixed multiple concurrent Claude Code sessions requiring repeated re-authentication when one session refreshes its OAuth token
+C:\Users\Administrator\.claude\cache\changelog.md:964:- Changed plan mode to hide the "clear context" option by default (restore with `"showClearContextOnPlanAccept": true`)
+C:\Users\Administrator\.claude\cache\changelog.md:1036:- [VSCode] Fixed "API Error: Rate limit reached" when selecting Opus — model dropdown no longer offers 1M context variant to subscribers whose plan tier is unknown
+C:\Users\Administrator\.claude\cache\changelog.md:1040:- Increased default maximum output token limits for Claude Opus 4.6 to 64k tokens, and the upper bound for Opus 4.6 and Sonnet 4.6 models to 128k tokens
+C:\Users\Administrator\.claude\cache\changelog.md:1049:- Fixed cost and token usage not being tracked when the API falls back to non-streaming mode
+C:\Users\Administrator\.claude\cache\changelog.md:1099:- Fixed spurious "Context limit reached" when invoking a skill with `model:` frontmatter on a 1M-context session
+C:\Users\Administrator\.claude\cache\changelog.md:1114:- Improved background agent behavior — killing a background agent now preserves its partial results in the conversation context
+C:\Users\Administrator\.claude\cache\changelog.md:1125:- Added 1M context window for Opus 4.6 by default for Max, Team, and Enterprise plans (previously required extra usage)
+C:\Users\Administrator\.claude\cache\changelog.md:1135:- Fixed token estimation over-counting for thinking and `tool_use` blocks, preventing premature context compaction
+C:\Users\Administrator\.claude\cache\changelog.md:1147:- Added actionable suggestions to `/context` command — identifies context-heavy tools, memory bloat, and capacity warnings with specific optimization tips
+C:\Users\Administrator\.claude\cache\changelog.md:1153:- Fixed MCP OAuth refresh never prompting for re-auth after the refresh token expires, for OAuth servers that return errors with HTTP 200 (e.g. Slack)
+C:\Users\Administrator\.claude\cache\changelog.md:1178:- Fixed JSON-output hooks injecting no-op system-reminder messages into the model's context on every turn
+C:\Users\Administrator\.claude\cache\changelog.md:1189:- Improved the Remote Control spawn mode selection prompt with better context
+C:\Users\Administrator\.claude\cache\changelog.md:1228:- Fixed prompt cache invalidation in SDK `query()` calls, reducing input token costs up to 12x
+C:\Users\Administrator\.claude\cache\changelog.md:1256:- Fixed startup UI freeze when many claude.ai proxy connectors refresh an expired OAuth token simultaneously
+C:\Users\Administrator\.claude\cache\changelog.md:1258:- Fixed the Read tool putting oversized images into context when image processing failed, breaking subsequent turns in long image-heavy sessions
+C:\Users\Administrator\.claude\cache\changelog.md:1261:- Fixed claude.ai connectors failing to reconnect after OAuth token refresh
+C:\Users\Administrator\.claude\cache\changelog.md:1263:- Fixed background agent completion notifications missing the output file path, which made it difficult for parent agents to recover agent results after context compaction
+C:\Users\Administrator\.claude\cache\changelog.md:1299:- Fixed skill listing being re-injected on every `--resume` (~600 tokens saved per resume)
+C:\Users\Administrator\.claude\cache\changelog.md:1325:- Added `InstructionsLoaded` hook event that fires when CLAUDE.md or `.claude/rules/*.md` files are loaded into context
+C:\Users\Administrator\.claude\cache\changelog.md:1328:- Added `pluginTrustMessage` in managed settings to append organization-specific context to the plugin trust warning shown before installation
+C:\Users\Administrator\.claude\cache\changelog.md:1338:- Fixed `.credentials.json` losing `subscriptionType` (showing "Claude API" instead of "Claude Pro"/"Claude Max") when the profile endpoint transiently fails during token refresh (anthropics/claude-code#30185)
+C:\Users\Administrator\.claude\cache\changelog.md:1382:- Fixed `/context` showing identical token counts for all MCP tools from a server
+C:\Users\Administrator\.claude\cache\changelog.md:1397:- Improved MCP binary content handling: tools returning PDFs, Office documents, or audio now save decoded bytes to disk with the correct file extension instead of dumping raw base64 into the conversation context. WebFetch also saves binary responses alongside its summary.
+C:\Users\Administrator\.claude\cache\changelog.md:1399:- Improved LSP tool rendering and memory context building to no longer read entire files
+C:\Users\Administrator\.claude\cache\changelog.md:1406:- Reduced token usage on multi-agent tasks with more concise subagent final reports
+C:\Users\Administrator\.claude\cache\changelog.md:1451:- Improved memory usage in long sessions with subagents by stripping heavy progress message payloads during context compaction
+C:\Users\Administrator\.claude\cache\changelog.md:1466:- Claude automatically saves useful context to auto-memory. Manage with /memory
+C:\Users\Administrator\.claude\cache\changelog.md:1471:- Fixed MCP OAuth token refresh race condition when running multiple Claude Code instances simultaneously
+C:\Users\Administrator\.claude\cache\changelog.md:1509:- Tool results larger than 50K characters are now persisted to disk (previously 100K). This reduces context window usage and improves conversation longevity.
+C:\Users\Administrator\.claude\cache\changelog.md:1523:- Fixed `CLAUDE_CODE_SIMPLE` to fully strip down skills, session memory, custom agents, and CLAUDE.md token counting
+C:\Users\Administrator\.claude\cache\changelog.md:1537:- Added `CLAUDE_CODE_DISABLE_1M_CONTEXT` environment variable to disable 1M context window support
+C:\Users\Administrator\.claude\cache\changelog.md:1538:- Opus 4.6 (fast mode) now includes the full 1M context window
+C:\Users\Administrator\.claude\cache\changelog.md:1558:- Sonnet 4.5 with 1M context is being removed from the Max plan in favor of our frontier Sonnet 4.6 model, which now has 1M context. Please switch in /model.
+C:\Users\Administrator\.claude\cache\changelog.md:1568:- Improved startup performance by reducing HTTP calls for analytics token counting
+C:\Users\Administrator\.claude\cache\changelog.md:1569:- Improved startup performance by batching MCP tool token counting into a single API call
+C:\Users\Administrator\.claude\cache\changelog.md:1572:- Improved permission prompts for path safety and working directory blocks to show the reason for the restriction instead of a bare prompt with no context
+C:\Users\Administrator\.claude\cache\changelog.md:1581:- Improved memory usage in long-running sessions by releasing API stream buffers, agent context, and skill state after use
+C:\Users\Administrator\.claude\cache\changelog.md:1615:- Fixed plan mode being lost after context compaction, causing the model to switch from planning to implementation mode (anthropics/claude-code#26061)
+C:\Users\Administrator\.claude\cache\changelog.md:1618:- Fixed session name being lost after context compaction — renamed sessions now preserve their custom title through compaction (anthropics/claude-code#26121)
+C:\Users\Administrator\.claude\cache\changelog.md:1637:- Fixed spinner showing "0 tokens" counter before any tokens have been received (anthropics/claude-code#26105)
+C:\Users\Administrator\.claude\cache\changelog.md:1660:- Fixed skills invoked by subagents incorrectly appearing in main session context after compaction
+C:\Users\Administrator\.claude\cache\changelog.md:1699:- Improved `/rename` to auto-generate session name from conversation context when called without arguments
+C:\Users\Administrator\.claude\cache\changelog.md:1765:- Added research preview agent teams feature for multi-agent collaboration (token-intensive feature, requires setting CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1)
+C:\Users\Administrator\.claude\cache\changelog.md:1772:- Skill character budget now scales with context window (2% of context), so users with larger context windows can see more skill descriptions without truncation
+C:\Users\Administrator\.claude\cache\changelog.md:1793:- Added `pages` parameter to the Read tool for PDFs, allowing specific page ranges to be read (e.g., `pages: "1-5"`). Large PDFs (>10 pages) now return a lightweight reference when `@` mentioned instead of being inlined into context.
+C:\Users\Administrator\.claude\cache\changelog.md:1797:- Added token count, tool uses, and duration metrics to Task tool results
+C:\Users\Administrator\.claude\cache\changelog.md:1799:- Fixed phantom "(no content)" text blocks appearing in API conversation history, reducing token waste and potential model confusion
+C:\Users\Administrator\.claude\cache\changelog.md:1815:- Fixed startup performance issues when resuming sessions that have `saved_hook_context`
+C:\Users\Administrator\.claude\cache\changelog.md:1820:- Fixed context management validation error for gateway users, ensuring `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` avoids the error
+C:\Users\Administrator\.claude\cache\changelog.md:1823:- Fixed /context command not displaying colored output
+C:\Users\Administrator\.claude\cache\changelog.md:1827:- VSCode: Fixed OAuth token expiration causing 401 errors after extended sessions
+C:\Users\Administrator\.claude\cache\changelog.md:1856:- Fixed auto-compact triggering too early on models with large output token limits
+C:\Users\Administrator\.claude\cache\changelog.md:1879:- Fixed duplicate output in some commands like `/context`
+C:\Users\Administrator\.claude\cache\changelog.md:1914:- Added customizable keyboard shortcuts. Configure keybindings per context, create chord sequences, and personalize your workflow. Run `/keybindings` to get started. Learn more at https://code.claude.com/docs/en/keybindings
+C:\Users\Administrator\.claude\cache\changelog.md:1926:- Fixed an issue where the "context remaining" warning was not hidden after running `/compact`
+C:\Users\Administrator\.claude\cache\changelog.md:1942:- Fixed a regression where the context window blocking limit was calculated too aggressively, blocking users at ~65% context usage instead of the intended ~98%
+C:\Users\Administrator\.claude\cache\changelog.md:1948:- Fixed `/context` command to show the same token count and percentage as the status line in verbose mode
+C:\Users\Administrator\.claude\cache\changelog.md:1949:- Fixed an issue where `/config`, `/context`, `/model`, and `/todos` command overlays could close unexpectedly
+C:\Users\Administrator\.claude\cache\changelog.md:1950:- Fixed slash command autocomplete selecting wrong command when typing similar commands (e.g., `/context` vs `/compact`)
+C:\Users\Administrator\.claude\cache\changelog.md:1953:- Improved backspace to delete pasted text as a single token instead of one character at a time
+C:\Users\Administrator\.claude\cache\changelog.md:1976:- Added `auto:N` syntax for configuring the MCP tool search auto-enable threshold, where N is the context window percentage (0-100)
+C:\Users\Administrator\.claude\cache\changelog.md:1994:- Fixed context window blocking limit being calculated using the full context window instead of the effective context window (which reserves space for max output tokens)
+C:\Users\Administrator\.claude\cache\changelog.md:2000:- Enabled MCP tool search auto mode by default for all users. When MCP tool descriptions exceed 10% of the context window, they are automatically deferred and discovered via the MCPSearch tool instead of being loaded upfront. This reduces context usage for users with many MCP tools configured. Users can disable this by adding `MCPSearch` to `disallowedTools` in their settings.
+C:\Users\Administrator\.claude\cache\changelog.md:2010:- Added `context_window.used_percentage` and `context_window.remaining_percentage` fields to status line input for easier context window display
+C:\Users\Administrator\.claude\cache\changelog.md:2026:- Updated "Help improve Claude" setting fetch to refresh OAuth and retry when it fails due to a stale OAuth token
+C:\Users\Administrator\.claude\cache\changelog.md:2039:- Fixed "Help improve Claude" setting fetch to refresh OAuth and retry when it fails due to a stale OAuth token
+C:\Users\Administrator\.claude\cache\changelog.md:2085:- Added support for running skills and slash commands in a forked sub-agent context using `context: fork` in skill frontmatter
+C:\Users\Administrator\.claude\cache\changelog.md:2091:- Fixed security issue where sensitive data (OAuth tokens, API keys, passwords) could be exposed in debug logs
+C:\Users\Administrator\.claude\cache\changelog.md:2115:- Added `CLAUDE_CODE_FILE_READ_MAX_OUTPUT_TOKENS` environment variable to override the default file read token limit
+C:\Users\Administrator\.claude\cache\changelog.md:2123:- Added Skills as a separate category in the context visualization
+C:\Users\Administrator\.claude\cache\changelog.md:2124:- Fixed OAuth token refresh not triggering when server reports token expired but local expiration check disagrees
+C:\Users\Administrator\.claude\cache\changelog.md:2127:- Fixed a race condition where stale OAuth tokens could be read from the keychain cache during concurrent token refresh attempts
+C:\Users\Administrator\.claude\cache\changelog.md:2129:- Fixed API context overflow when background tasks produce large output by truncating to 30K chars with file path reference
+C:\Users\Administrator\.claude\cache\changelog.md:2138:- Fixed slash commands passed as CLI arguments (e.g., `claude /context`) not being executed properly
+C:\Users\Administrator\.claude\cache\changelog.md:2142:- Fixed skill token estimates in `/context` to accurately reflect frontmatter-only loading
+C:\Users\Administrator\.claude\cache\changelog.md:2158:- Fixed spinner token counter to properly accumulate tokens from subagents during execution
+C:\Users\Administrator\.claude\cache\changelog.md:2170:- Improved Claude to automatically continue when response is cut off due to output token limit, instead of showing an error message
+C:\Users\Administrator\.claude\cache\changelog.md:2176:- Improved spinner feedback when waiting for the first response token
+C:\Users\Administrator\.claude\cache\changelog.md:2177:- Improved token count display in spinner to include tokens from background agents
+C:\Users\Administrator\.claude\cache\changelog.md:2179:- Improved permission prompt UX with Tab hint moved to footer, cleaner Yes/No input labels with contextual placeholders
+C:\Users\Administrator\.claude\cache\changelog.md:2188:- [VSCode] Added currently selected model name to the context menu
+C:\Users\Administrator\.claude\cache\changelog.md:2214:- Improved `/context` command visualization with grouped skills and agents by source, slash commands, and sorted token count
+C:\Users\Administrator\.claude\cache\changelog.md:2236:- Fixed `/context` command not respecting custom system prompts in non-interactive mode
+C:\Users\Administrator\.claude\cache\changelog.md:2250:- Bedrock: Environment variable `ANTHROPIC_BEDROCK_BASE_URL` is now respected for token counting and inference profile listing
+C:\Users\Administrator\.claude\cache\changelog.md:2258:- Added `current_usage` field to status line input, enabling accurate context window percentage calculations
+C:\Users\Administrator\.claude\cache\changelog.md:2298:- Added context window information to status line input
+C:\Users\Administrator\.claude\cache\changelog.md:2317:- Bedrock: Improve efficiency of token counting
+C:\Users\Administrator\.claude\cache\changelog.md:2481:- Fixed infinite token refresh loop that caused MCP servers with OAuth (e.g., Slack) to hang during connection
+C:\Users\Administrator\.claude\cache\changelog.md:2516:- Fixed a bug where `/context` would sometimes fail with "max_tokens must be greater than thinking.budget_tokens" error message
+C:\Users\Administrator\.claude\cache\changelog.md:2584:- Introducing the Explore subagent. Powered by Haiku it'll search through your codebase efficiently to save context!
+C:\Users\Administrator\.claude\cache\changelog.md:2623:- Reduced system prompt size by 1.4k tokens
+C:\Users\Administrator\.claude\cache\changelog.md:2645:- /context: Fix counting for thinking blocks
+C:\Users\Administrator\.claude\cache\changelog.md:2676:- Enable /context command for Bedrock and Vertex
+C:\Users\Administrator\.claude\cache\changelog.md:2691:- Fixed rendering performance degradation during token streaming
+C:\Users\Administrator\.claude\cache\changelog.md:2750:- MCP: OAuth tokens now proactively refresh before expiration
+C:\Users\Administrator\.claude\cache\changelog.md:2784:- Status line input now includes `exceeds_200k_tokens`
+C:\Users\Administrator\.claude\cache\changelog.md:2791:- Added /context to help users self-serve debug context issues
+C:\Users\Administrator\.claude\cache\changelog.md:2833:- Fix token limit errors in conversation summarization
+C:\Users\Administrator\.claude\cache\changelog.md:2855:- Performance: Optimized message rendering for better performance with large contexts
+C:\Users\Administrator\.claude\cache\changelog.md:2868:- Enhanced /doctor command with CLAUDE.md and MCP tool context for self-serve debugging
+C:\Users\Administrator\.claude\cache\changelog.md:2882:- Hooks: Added systemMessage field to hook JSON output for displaying warnings and context
+C:\Users\Administrator\.claude\cache\changelog.md:2956:- Add helper script settings for AWS token refresh: awsAuthRefresh (for foreground operations like aws sso login) and awsCredentialExport (for background operation with STS-like response).
+C:\Users\Administrator\.claude\cache\changelog.md:3035:- Web search now takes today's date into context
+C:\Users\Administrator\.claude\cache\changelog.md:3136:- Improved UI for authentication from API keys and Bedrock/Vertex/external auth tokens
+C:\Users\Administrator\.claude\cache\changelog.md:3256:- @-mention files to directly add them to context
+C:\Users\Administrator\.claude\cache\changelog.md:3267:- Updated spinner to indicate tokens loaded and tool usage
+C:\Users\Administrator\.claude\agents\planner.md:43:- Minimize context switching
+C:\Users\Administrator\.claude\statusline.js:1:// Claude Code StatusLine — real-time context + cost display
+C:\Users\Administrator\.claude\statusline.js:3:const pct = data.context_window?.used_percentage ?? 0;
+C:\Users\Administrator\.claude\agents\docs-lookup.md:4:tools: ["Read", "Grep", "mcp__context7__resolve-library-id", "mcp__context7__query-docs"]
+C:\Users\Administrator\.claude\agents\docs-lookup.md:20:The harness may expose Context7 tools under prefixed names (e.g. `mcp__context7__resolve-library-id`, `mcp__context7__query-docs`). Use the tool names available in your environment (see the agent’s `tools` list).
+C:\Users\Administrator\.claude\agents\docs-lookup.md:24:Call the Context7 MCP tool for resolving the library ID (e.g. **resolve-library-id** or **mcp__context7__resolve-library-id**) with:
+C:\Users\Administrator\.claude\agents\docs-lookup.md:33:Call the Context7 MCP tool for querying docs (e.g. **query-docs** or **mcp__context7__query-docs**) with:
+C:\Users\Administrator\.claude\agents\docs-lookup.md:58:Action: Call the resolve-library-id tool (e.g. mcp__context7__resolve-library-id) with libraryName "Next.js", query as above; pick `/vercel/next.js` or versioned ID; call the query-docs tool (e.g. mcp__context7__query-docs) with that libraryId and same query; summarize and include middleware example from docs.
+C:\Users\Administrator\.claude\commands\save-session.md:2:description: Save current session state to a dated file in ~/.claude/session-data/ so work can be resumed in a future session with full context.
+C:\Users\Administrator\.claude\commands\save-session.md:12:- Before hitting context limits (run this first, then start a fresh session)
+C:\Users\Administrator\.claude\commands\save-session.md:14:- Any time you need to hand off context to a future session
+C:\Users\Administrator\.claude\commands\save-session.md:18:### Step 1: Gather context
+C:\Users\Administrator\.claude\commands\save-session.md:83:context that someone with zero memory of this session can understand the goal.
+C:\Users\Administrator\.claude\commands\save-session.md:200:check for a valid token via middleware. The goal is session persistence across browser
+C:\Users\Administrator\.claude\commands\save-session.md:201:refreshes without exposing the token to JavaScript.
+C:\Users\Administrator\.claude\commands\save-session.md:210:  (`npm test -- auth.test.ts`), decoded token at jwt.io shows correct payload
+C:\Users\Administrator\.claude\commands\save-session.md:229:- Use `cookies()` from `next/headers` to read token in server components
+C:\Users\Administrator\.claude\commands\save-session.md:248:- **httpOnly cookie over localStorage** — reason: prevents XSS token theft, works with SSR
+C:\Users\Administrator\.claude\commands\save-session.md:262:cookie using `cookies().set('token', jwt, { httpOnly: true, secure: true, sameSite: 'strict' })`.
+C:\Users\Administrator\.claude\agents\code-reviewer.md:14:1. **Gather context** — Run `git diff --staged` and `git diff` to see all changes. If no diff, check recent commits with `git log --oneline -5`.
+C:\Users\Administrator\.claude\agents\code-reviewer.md:36:- **Hardcoded credentials** — API keys, passwords, tokens, connection strings in source
+C:\Users\Administrator\.claude\agents\code-reviewer.md:43:- **Exposed secrets in logs** — Logging sensitive data (tokens, passwords, PII)
+C:\Users\Administrator\.claude\agents\code-reviewer.md:105:- **Prop drilling** — Props passed through 3+ levels (use context or composition)
+C:\Users\Administrator\.claude\agents\code-reviewer.md:166:- **Synchronous I/O** — Blocking operations in async contexts
+C:\Users\Administrator\.claude\agents\code-reviewer.md:172:- **Poor naming** — Single-letter variables (x, tmp, data) in non-trivial contexts
+C:\Users\Administrator\.claude\commands\resume-session.md:2:description: Load the most recent session file from ~/.claude/session-data/ and resume work with full context from where the last session ended.
+C:\Users\Administrator\.claude\commands\resume-session.md:13:- After starting a fresh session due to context limits
+C:\Users\Administrator\.claude\commands\resume-session.md:124:User authentication with JWT tokens stored in httpOnly cookies.
+C:\Users\Administrator\.claude\commands\resume-session.md:130: In Progress: app/api/auth/login/route.ts (token works, cookie not set yet)
+C:\Users\Administrator\.claude\commands\resume-session.md:142:cookies().set('token', jwt, { httpOnly: true, secure: true, sameSite: 'strict' })
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:2:name: token-budget-advisor
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:6:  wants to control response length, depth, or token budget.
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:7:  TRIGGER when: "token budget", "token count", "token usage", "token limit",
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:10:  "cuántos tokens", "ahorrar tokens", "responde al 50%", "dame la versión
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:15:  "token" refers to auth/session/payment tokens rather than response size.
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:26:- User mentions tokens, budget, depth, or response length
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:34:### Step 1 — Estimate input tokens
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:36:Use the repository's canonical context-budget heuristics to estimate the prompt's token count mentally.
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:38:Use the same calibration guidance as [context-budget](../context-budget/SKILL.md):
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:53:| Medium-High  | 10× – 25×        | Code request with context                           |
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:57:Response window = `input_tokens × mult_min` to `input_tokens × mult_max` (but don’t exceed your model’s configured output-token limit).
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:66:Input: ~[N] tokens  |  Type: [type]  |  Complexity: [level]  |  Language: [lang]
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:70:[1] Essential   (25%)  ->  ~[tokens]   Direct answer only, no preamble
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:71:[2] Moderate    (50%)  ->  ~[tokens]   Answer + context + 1 example
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:72:[3] Detailed    (75%)  ->  ~[tokens]   Full answer with alternatives
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:73:[4] Exhaustive (100%)  ->  ~[tokens]   Everything, no limits
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:80:Level token estimates (within the response window):
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:91:| 50% Moderate     | 1-3 paragraphs      | Answer + necessary context + 1 example              | Deep analysis, edge cases, references             |
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:110:This skill uses heuristic estimation — no real tokenizer. Accuracy ~85-90%, variance ±15%. Always show the disclaimer.
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:117:- "How many tokens will your answer use?"
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:124:- "What is a JWT token?"
+C:\Users\Administrator\.claude\skills\token-budget-advisor\SKILL.md:125:- "The checkout flow uses a payment token."
+C:\Users\Administrator\.claude\commands\context-budget.md:2:description: Legacy slash-entry shim for the context-budget skill. Prefer the skill directly.
+C:\Users\Administrator\.claude\commands\context-budget.md:7:Use this only if you still invoke `/context-budget`. The maintained workflow lives in `skills/context-budget/SKILL.md`.
+C:\Users\Administrator\.claude\commands\context-budget.md:11:- Prefer the `context-budget` skill directly.
+C:\Users\Administrator\.claude\commands\context-budget.md:20:Apply the `context-budget` skill.
+C:\Users\Administrator\.claude\commands\context-budget.md:22:- Assume a 200K context window unless the user specified otherwise.
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:63:Before analyzing the prompt, detect the current project context:
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:192:- Use /save-session and /resume-session to preserve context between sessions
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:227:- Clear task description with context
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:304:- CSRF token
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:335:- Auth: require valid token, users can only update own profile
+C:\Users\Administrator\.claude\skills\prompt-optimizer\SKILL.md:396:| `strategic-compact` | Long session context management |
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:13:- active execution context lives in GitHub, Linear, and repo-local working-context files
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:14:- broader human-facing notes can live in a non-repo context/archive folder
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:36:- **Types:** user preferences, feedback, project context, reference
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:37:- **Use for:** quick-access context that persists across conversations
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:47:- **Rule:** this is the preferred durable store for cross-machine context when the content is not repo-owned code
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:53:### Layer 6: Local context/archive folder
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:107:- attach supporting docs to Linear when the work needs durable planning context
+C:\Users\Administrator\.claude\skills\knowledge-ops\SKILL.md:120:# Short-term: current session context
+
+[Showing results with pagination = limit: 250]

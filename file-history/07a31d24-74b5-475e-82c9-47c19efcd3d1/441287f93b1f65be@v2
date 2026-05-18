@@ -1,0 +1,79 @@
+# OKKI × AccioWork 协作架构分析
+
+日期：2026-05-18
+状态：方案论证
+
+---
+
+## 背景
+
+OKKI 目前完全在 Claude Code 上运行（脚本 + AI 分析）。AccioWork 是阿里国际站 2026 年 3 月推出的企业级 AI Agent 平台，原生接入 OKKI 数据。想把 OKKI 的能力分享给朋友使用，或在 AccioWork 上扩展能力。
+
+## 三种架构
+
+### 模型 A：AccioWork 取数 → Claude Code 分析（前后厂）
+
+```
+AccioWork（数据层）              Claude Code（分析层）
+─────────────────              ──────────────────
+定时拉 OKKI 数据                读取 JSON → 跑分析
+写成 JSON → 存共享目录           产出：因子基线 / SOON层 / 冷层分层 / 话术
+                               结果写回 → AccioWork 展示
+```
+
+- 优势：AccioWork 原生 OKKI 接入（不用 CDP 抓取），Claude Code 分析深度远超内置 agent
+- 问题：文件通信延迟和一致性，AccioWork 能否写外部存储待验证
+- 适合：自己用
+
+### 模型 B：Claude Code 规则工厂 → AccioWork 执行
+
+```
+Claude Code（开发环境）           AccioWork（生产环境）
+──────────────────              ──────────────────
+迭代规则 / 因子表 / 话术模板       导入规则包 → agent 自主运行
+历史数据验证规则质量              朋友各自跑，数据隔离
+导出标准规则包（JSON+Prompt）     用户角色："方法论供应商"
+```
+
+- 优势：唯一可分享的方案，朋友不需要 Claude Code
+- 问题：AccioWork 自定义 agent 深度未知，话术质量取决于 DeepSeek/Qwen（非 Claude），版本管理麻烦
+- 适合：分享给朋友
+
+### 模型 C：AccioWork 高频 + Claude Code 深度（分层）
+
+```
+AccioWork（日常层）               Claude Code（深度层）
+────────────────                ────────────────
+每日同步 TM                      每周/双周全量分析
+实时检测 NOW（新消息/超期）       因子基线重算 + 冷层分层 + 节奏校准
+简单提醒：催款/催地址/回复        复杂话术（需要工厂知识库）
+自动更新状态卡                   战略分析：客户结构/市场趋势
+```
+
+- 优势：高频低频分离，AccioWork 盯盘、Claude Code 会诊
+- 问题：两套系统并行维护成本，数据同步是瓶颈
+- 适合：自己深度使用
+
+## 推荐路径
+
+**短期（自己）**：模型 C。体力活（sync + heat 初筛）丢 AccioWork，Claude Code 专注因子推理 + 话术质量 + 工厂知识库驱动的深度分析。
+
+**中长期（分享）**：模型 B。前提是先验证 AccioWork 自定义 agent 能力边界：
+1. 自定义 skill 支持什么格式？纯 prompt 还是能写条件逻辑？
+2. 能不能引用外部知识库（工厂档案、话术模板）？
+3. 多 agent 间能不能共享状态（类似 factor_baselines.json）？
+
+## 验证路径
+
+最小可验证单元：S2 报价追问（OKKI 最简子功能）
+
+- 逻辑：[1,3,5,15,30] 节奏 + lastSender 判定
+- 试在 AccioWork 建 agent 复现
+- 跑通 → 逐步搬 S5a 双基线、冷层分层
+- 跑不通 → AccioWork 现阶段接不住 OKKI 复杂度，继续模型 A/C 自己跑
+
+## 关键风险
+
+1. AccioWork 底层模型不是 Claude，话术质量和推理深度可能降级
+2. 规则包版本管理——每次迭代朋友需手动更新
+3. 两套系统并行维护的认知负担

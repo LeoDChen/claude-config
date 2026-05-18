@@ -1,0 +1,203 @@
+// Phase 1 最后尝试: 修复登录 + 找消息 API
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 搜索页面中所有 script 标签，找消息 API URL ===
+    console.log('=== 搜索 JS 源码中的消息 API 路径 ===\n');
+
+    const searchSrc = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var scripts = document.querySelectorAll('script');
+                var patterns = [];
+                // 搜索所有 script 的文本内容
+                for (var i = 0; i < scripts.length; i++) {
+                    var text = scripts[i].textContent || '';
+                    // 找所有 /message/ 路径
+                    var matches = text.match(/\\/message\\/[a-zA-Z]+\\.htm/g);
+                    if (matches) {
+                        for (var j = 0; j < matches.length; j++) {
+                            if (patterns.indexOf(matches[j]) === -1) {
+                                patterns.push(matches[j]);
+                            }
+                        }
+                    }
+                }
+                return JSON.stringify(patterns);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(searchSrc.result?.value || '(无)');
+
+    // === 2. 尝试通过 webpack 找 f.b 的实现 ===
+    console.log('\n=== 通过 webpack 模块查找 ===\n');
+
+    const webpackSearch = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var result = {};
+
+                // 搜索全局 webpack 模块注册
+                var chunks = window.webpackChunkim_cloud_drive_cdn;
+                if (chunks) {
+                    result.chunkType = typeof chunks;
+                    result.isArray = Array.isArray(chunks);
+                    result.length = Array.isArray(chunks) ? chunks.length : 'N/A';
+                }
+
+                // 搜索 window 上的 webpack 相关对象
+                var wpKeys = Object.keys(window).filter(function(k) {
+                    return k.includes('webpack') || k.includes('__webpack');
+                });
+                result.webpackKeys = wpKeys;
+
+                return JSON.stringify(result);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(webpackSearch.result?.value || '(无)');
+
+    // === 3. 在看 initFromAccessToken ===
+    console.log('\n=== initFromAccessToken 源码 ===\n');
+
+    const initSrc = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var authSvc = window._imsdk.getAuthService();
+                var proto = Object.getPrototypeOf(authSvc);
+                while (proto) {
+                    if (proto.hasOwnProperty('initFromAccessToken')) {
+                        return proto.initFromAccessToken.toString().substring(0, 800);
+                    }
+                    if (proto.hasOwnProperty('init')) {
+                        return proto.init.toString().substring(0, 800);
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return 'NOT FOUND';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(initSrc.result?.value || '(无)');
+
+    // === 4. 尝试 getOpenId 获取更多认证信息 ===
+    console.log('\n=== getOpenId 详情 ===\n');
+
+    const openIdDetail = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var authSvc = window._imsdk.getAuthService();
+                var openId = authSvc.getOpenId({});
+                return {
+                    openId: openId,
+                    keys: openId ? Object.keys(openId) : [],
+                    serialized: JSON.stringify(openId).substring(0, 300)
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(openIdDetail.result?.value || '(无)');
+
+    // === 5. 统计现有数据质量 ===
+    console.log('\n=== 现有数据统计 ===\n');
+
+    const finalStats = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var data = window.__conversationListFullData__;
+                if (!data) return { error: 'no data' };
+
+                var stats = {
+                    total: data.length,
+                    withMessages: 0,
+                    messageTypes: {},
+                    totalMessageText: 0,
+                    sampleMessages: []
+                };
+
+                for (var i = 0; i < data.length; i++) {
+                    var c = data[i];
+                    var msg = c.latestMessage;
+                    if (msg && msg.content) {
+                        stats.withMessages++;
+                        var type = msg.msgType || msg.imMessageType || 'unknown';
+                        stats.messageTypes[type] = (stats.messageTypes[type] || 0) + 1;
+                        stats.totalMessageText += (msg.content || '').length;
+
+                        if (stats.sampleMessages.length < 10) {
+                            stats.sampleMessages.push({
+                                name: c.contact && c.contact.name,
+                                country: c.contact && c.contact.complianceCountryCode,
+                                type: type,
+                                content: (msg.content || '').substring(0, 120),
+                                time: msg.sendTime
+                            });
+                        }
+                    }
+                }
+
+                stats.avgMsgLength = stats.withMessages > 0 ?
+                    Math.round(stats.totalMessageText / stats.withMessages) : 0;
+                stats.totalMsgChars = stats.totalMessageText;
+
+                return stats;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(finalStats.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

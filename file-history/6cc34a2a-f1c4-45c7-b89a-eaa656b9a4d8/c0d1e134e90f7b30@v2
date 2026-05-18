@@ -1,0 +1,205 @@
+// Phase 1: 获取聊天消息历史
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 看 MessageService 的 listMessage 方法源码 ===
+    console.log('=== MessageService 方法源码 ===\n');
+
+    const msgSrc = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imsdk.getMessageService();
+                var srcs = {};
+                var proto = Object.getPrototypeOf(svc);
+                while (proto) {
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name.startsWith('listMessage') && typeof proto[name] === 'function') {
+                            srcs[name] = proto[name].toString().substring(0, 500);
+                        }
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return srcs;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(msgSrc.result?.value || '(无)');
+
+    // === 2. 用正确的参数格式调用 listMessageWithConversationCode ===
+    console.log('\n=== 调用 listMessageWithConversationCode ===\n');
+
+    const msgCall = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    try {
+                        var fullData = window.__conversationListFullData__;
+                        if (!fullData || !fullData[0]) {
+                            resolve('ERROR: no conversation data');
+                            return;
+                        }
+
+                        // 找一个有 latestMessage 的会话
+                        var conv = null;
+                        for (var i = 0; i < fullData.length; i++) {
+                            if (fullData[i].latestMessage && fullData[i].latestMessage.content) {
+                                conv = fullData[i];
+                                break;
+                            }
+                        }
+
+                        if (!conv) {
+                            resolve('ERROR: no conversation with messages');
+                            return;
+                        }
+
+                        var svc = window._imsdk.getMessageService();
+
+                        // 尝试不同的参数格式
+                        var paramSets = [
+                            { conversationCode: conv.cid },
+                            { cCode: conv.cid },
+                            { cid: conv.cid },
+                            { conversationCode: conv.cid, count: 10 },
+                            { cCode: conv.cid, count: 10 }
+                        ];
+
+                        var results = [];
+                        var completed = 0;
+
+                        function tryNext(index) {
+                            if (index >= paramSets.length) {
+                                resolve(JSON.stringify({
+                                    convName: conv.contact && conv.contact.name,
+                                    cid: conv.cid,
+                                    latestMsgPreview: conv.latestMessage && conv.latestMessage.content && conv.latestMessage.content.substring(0, 60),
+                                    attempts: results
+                                }));
+                                return;
+                            }
+
+                            var params = paramSets[index];
+                            try {
+                                var result = svc.listMessageWithConversationCode(params);
+                                if (result && result.then) {
+                                    result.then(function(data) {
+                                        results.push({
+                                            params: JSON.stringify(params),
+                                            success: true,
+                                            type: typeof data,
+                                            isArray: Array.isArray(data),
+                                            length: Array.isArray(data) ? data.length : 'N/A',
+                                            first: data && data[0] ? JSON.stringify(data[0]).substring(0, 300) : String(data).substring(0, 200)
+                                        });
+                                        tryNext(index + 1);
+                                    }).catch(function(err) {
+                                        results.push({
+                                            params: JSON.stringify(params),
+                                            error: err && (err.message || err.msg || String(err))
+                                        });
+                                        tryNext(index + 1);
+                                    });
+                                } else {
+                                    results.push({
+                                        params: JSON.stringify(params),
+                                        direct: true,
+                                        type: typeof result,
+                                        val: JSON.stringify(result).substring(0, 300)
+                                    });
+                                    tryNext(index + 1);
+                                }
+                            } catch(e) {
+                                results.push({
+                                    params: JSON.stringify(params),
+                                    exception: e.message || String(e)
+                                });
+                                tryNext(index + 1);
+                            }
+                        }
+
+                        tryNext(0);
+                    } catch(e) {
+                        resolve('ERROR: ' + (e.message || String(e)));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msgCall.result?.value || '(无)');
+
+    // === 3. 看有没有 listMessageWithConversationCodeForHistory 的源码 ===
+    console.log('\n=== listMessageWithConversationCodeForHistory 源码 ===\n');
+
+    const histSrc = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var svc = window._imsdk.getMessageService();
+                var proto = Object.getPrototypeOf(svc);
+                while (proto) {
+                    if (proto.hasOwnProperty('listMessageWithConversationCodeForHistory')) {
+                        return proto.listMessageWithConversationCodeForHistory.toString();
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return 'NOT FOUND in prototype chain';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(histSrc.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

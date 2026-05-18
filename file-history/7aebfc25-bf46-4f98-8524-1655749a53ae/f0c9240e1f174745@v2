@@ -1,0 +1,89 @@
+const fs = require('fs');
+const path = require('path');
+
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const SELF_UID = '2500000853693@icbu';
+
+const sysPatterns = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+];
+
+function isSystemMsg(content) {
+  if (!content) return true;
+  for (const p of sysPatterns) {
+    if (content.includes(p)) return true;
+  }
+  return false;
+}
+
+function isSelf(msg) {
+  return msg?.message?.sender?.uid === SELF_UID;
+}
+
+const TARGETS = [
+  { cid: '133756334970-2500000853693#11011@icbu', name: 'Mona almuharraqy', country: 'BH' },
+  { cid: '2500000853693-4500020103986#11011@icbu', name: 'ali Amjid', country: 'ZA' },
+  { cid: '2034012960891-2500000853693#11011@icbu', name: 'Christabel Kanunsha', country: 'ZM' },
+  { cid: '2500000853693-3500017223847#11011@icbu', name: 'jonathan aston', country: 'GH' },
+  { cid: '133712154113-2500000853693#11011@icbu', name: 'diego vargas', country: 'ES' },
+  { cid: '2500000853693-4500046370107#11011@icbu', name: 'Aloh Voma', country: 'US' },
+  { cid: '2500000853693-4500009336909#11011@icbu', name: 'Mezna Alawfi', country: 'OM' },
+  { cid: '2034038976476-2500000853693#11011@icbu', name: 'WELE Mounia', country: 'TG' },
+  { cid: '2500000853693-4500047334590#11011@icbu', name: 'Rosette Ngoy', country: 'CD' },
+  { cid: '133605767280-2500000853693#11011@icbu', name: 'Inderpreet kaur', country: 'US' },
+];
+
+for (const t of TARGETS) {
+  const fileName = t.cid.replace(/#/g, '_').replace(/@/g, '_') + '.json';
+  const filePath = path.join(chatDir, fileName);
+
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`${t.name} | ${t.country}`);
+  console.log(`${'='.repeat(60)}`);
+
+  if (!fs.existsSync(filePath)) {
+    console.log('FILE NOT FOUND');
+    continue;
+  }
+
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const messages = data.messages || [];
+
+  // Filter real messages
+  const realMessages = messages.filter(m => {
+    const ext = m?.message?.extension?.basicMessageInfo;
+    if (ext) {
+      try {
+        const info = JSON.parse(ext);
+        if (info.systemMessage === true || info.autoReply === true) return false;
+      } catch(e) {}
+    }
+    return !isSystemMsg(m?.message?.content?.text?.content || '');
+  });
+
+  // Show last 25 messages (chronological)
+  const recent = realMessages.slice(-25);
+  for (const m of recent) {
+    const content = (m?.message?.content?.text?.content || '').substring(0, 150);
+    const ts = m?.message?.createAt || 0;
+    const date = new Date(ts).toISOString().replace('T', ' ').substring(0, 19);
+    const isMe = isSelf(m);
+    const prefix = isMe ? '我方' : '客户';
+    console.log(`  [${date}] ${prefix}: ${content}`);
+  }
+
+  // Summary stats
+  const clientMsgs = realMessages.filter(m => !isSelf(m));
+  const selfMsgs = realMessages.filter(m => isSelf(m));
+  const lastClientTs = clientMsgs.length > 0 ? Math.max(...clientMsgs.map(m => m?.message?.createAt || 0)) : 0;
+  const lastSelfTs = selfMsgs.length > 0 ? Math.max(...selfMsgs.map(m => m?.message?.createAt || 0)) : 0;
+
+  console.log(`\n  统计: 总${messages.length}/有效${realMessages.length} | 客户${clientMsgs.length}条 | 我方${selfMsgs.length}条`);
+  console.log(`  最后客户消息: ${lastClientTs ? new Date(lastClientTs).toISOString().replace('T',' ').substring(0,19) : '无'}`);
+  console.log(`  最后我方消息: ${lastSelfTs ? new Date(lastSelfTs).toISOString().replace('T',' ').substring(0,19) : '无'}`);
+}

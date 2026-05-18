@@ -1,0 +1,62 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let allReqs = [];
+
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.method === 'Network.requestWillBeSent') {
+        const url = response.params.request.url;
+        const method = response.params.request.method;
+        const postData = response.params.request.postData;
+        allReqs.push({ method, url: url.substring(0, 250), postData: postData ? postData.substring(0, 500) : null });
+      }
+      if (response.method === 'Network.responseReceived') {
+        const url = response.params.response.url;
+        const status = response.params.response.status;
+        const mimeType = response.params.response.mimeType;
+        if (status !== 200 && status !== 204 && status !== 304) return; // skip non-success
+        allReqs.push({ type: 'RESP', status, mimeType, url: url.substring(0, 250) });
+      }
+    } catch (e) {}
+  });
+
+  // Enable Network
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 0, method: 'Network.enable', params: {} })
+  });
+
+  console.log('Listening for 5 seconds...');
+  await new Promise(r => setTimeout(r, 5000));
+
+  // Filter to interesting requests
+  const interesting = allReqs.filter(r => {
+    const url = r.url || '';
+    return url.includes('message') || url.includes('history') || url.includes('api') ||
+           url.includes('mtop') || url.includes('list') || url.includes('query') ||
+           url.includes('getMessage') || url.includes('fetch') || url.includes('im');
+  });
+
+  console.log('Total requests: ' + allReqs.length);
+  console.log('Interesting: ' + interesting.length);
+  interesting.forEach(r => console.log(JSON.stringify(r)));
+
+  // If nothing interesting, show last 10 requests
+  if (interesting.length === 0) {
+    console.log('\nLast 15 of all requests:');
+    allReqs.slice(-15).forEach(r => console.log(JSON.stringify(r)));
+  }
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

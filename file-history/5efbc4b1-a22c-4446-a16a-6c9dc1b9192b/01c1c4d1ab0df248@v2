@@ -1,0 +1,91 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = {};
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val !== null && val !== undefined) {
+          try { results[response.id] = JSON.parse(val); } catch(e) { results[response.id] = val; }
+        } else {
+          results[response.id] = response.result;
+        }
+      }
+    } catch (e) {}
+  });
+
+  // Get a test CID
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: {
+      expression: `(function(){var c=window.__conversationListFullData__;for(var i=0;i<c.length;i++){if(c[i].latestMessage&&c[i].latestMessage.content)return JSON.stringify({cid:c[i].cid,name:c[i].name,msgId:c[i].latestMessage.messageId})}return'[]'})()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  const testInfo = results[1];
+  console.log('Test conv:', JSON.stringify(testInfo));
+  const cid = testInfo.cid;
+
+  // Test 1: listPrevMsgs
+  console.log('\n=== Test 1: listPrevMsgs ===');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: {
+      expression: `(async function(){var imsdk=window._imsdk;var originSdk=imsdk.getOriginSdk();var paasMsgSvc=originSdk.getMsgService();try{var r=await paasMsgSvc.listPrevMsgs("${cid}",20,9007199254740991);return JSON.stringify({ok:true,cnt:r?r.length:0,isArr:Array.isArray(r),type:typeof r,sample:r&&r.length>0?JSON.stringify(r[0]).substring(0,500):'empty/null'})}catch(e){return JSON.stringify({ok:false,err:e.message})}})()`,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 10000));
+  console.log('listPrevMsgs:', JSON.stringify(results[2]));
+
+  // Test 2: listNextMsgs
+  console.log('\n=== Test 2: listNextMsgs ===');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 3, method: 'Runtime.evaluate', params: {
+      expression: `(async function(){var imsdk=window._imsdk;var originSdk=imsdk.getOriginSdk();var paasMsgSvc=originSdk.getMsgService();try{var r=await paasMsgSvc.listNextMsgs("${cid}",20,9007199254740991);return JSON.stringify({ok:true,cnt:r?r.length:0,isArr:Array.isArray(r),type:typeof r,sample:r&&r.length>0?JSON.stringify(r[0]).substring(0,500):'empty/null'})}catch(e){return JSON.stringify({ok:false,err:e.message})}})()`,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 10000));
+  console.log('listNextMsgs:', JSON.stringify(results[3]));
+
+  // Test 3: Try getMessage (to see the message format)
+  console.log('\n=== Test 3: getMessage ===');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 4, method: 'Runtime.evaluate', params: {
+      expression: `(async function(){var imsdk=window._imsdk;var originSdk=imsdk.getOriginSdk();var paasMsgSvc=originSdk.getMsgService();try{var r=await paasMsgSvc.getMessage("${cid}",9007199254740991);return JSON.stringify({ok:true,result:r?JSON.stringify(r).substring(0,500):'null'})}catch(e){return JSON.stringify({ok:false,err:e.message})}})()`,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 8000));
+  console.log('getMessage:', JSON.stringify(results[4]));
+
+  // Test 4: Try different parameter formats for listPrevMsgs
+  console.log('\n=== Test 4: listPrevMsgs with different params ===');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 5, method: 'Runtime.evaluate', params: {
+      expression: `(async function(){var imsdk=window._imsdk;var originSdk=imsdk.getOriginSdk();var paasMsgSvc=originSdk.getMsgService();var results={};try{var r1=await paasMsgSvc.listPrevMsgs("${cid}",20);results.count20=r1?r1.length:0}catch(e){results.count20Err=e.message}try{var r2=await paasMsgSvc.listPrevMsgs("${cid}");results.noLimit=r2?r2.length:0}catch(e){results.noLimitErr=e.message}try{var r3=await paasMsgSvc.listPrevMsgs("${cid}",50,9007199254740991);results.count50=r3?r3.length:0}catch(e){results.count50Err=e.message}return JSON.stringify(results)})()`,
+      awaitPromise: true
+    }})
+  });
+  await new Promise(r => setTimeout(r, 10000));
+  console.log('listPrevMsgs variants:', JSON.stringify(results[5]));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

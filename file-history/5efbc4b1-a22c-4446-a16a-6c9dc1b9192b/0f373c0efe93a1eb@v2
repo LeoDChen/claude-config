@@ -1,0 +1,100 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let wsFrames = [];
+  let wsCreated = [];
+  let httpReqs = [];
+
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const m = JSON.parse(msg.message);
+
+      if (m.method === 'Network.webSocketCreated') {
+        wsCreated.push({ url: m.params.url, initiator: m.params.initiator });
+      }
+      if (m.method === 'Network.webSocketFrameSent') {
+        wsFrames.push({ dir: 'SENT', data: m.params.response.payloadData });
+      }
+      if (m.method === 'Network.webSocketFrameReceived') {
+        wsFrames.push({ dir: 'RECV', data: m.params.response.payloadData.substring(0, 1000) });
+      }
+      if (m.method === 'Network.webSocketClosed') {
+        wsFrames.push({ dir: 'CLOSED', ts: m.params.timestamp });
+      }
+      if (m.method === 'Network.requestWillBeSent') {
+        const url = m.params.request.url;
+        if (!url.includes('aplus.alibaba.com') && !url.includes('sc.ma.im')) {
+          httpReqs.push({ method: m.params.request.method, url: url.substring(0, 200) });
+        }
+      }
+    } catch (e) {}
+  });
+
+  // Enable Network
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 0, method: 'Network.enable', params: {} })
+  });
+
+  console.log('Network monitoring enabled. Waiting 5s for existing WebSocket info...');
+  await new Promise(r => setTimeout(r, 5000));
+
+  console.log('\nWebSocket connections found:', wsCreated.length);
+  wsCreated.forEach(ws => console.log('  WS URL:', ws.url));
+
+  console.log('\nFrames captured so far:', wsFrames.length);
+
+  // Now trigger a message load by selecting a different conversation
+  console.log('\nTriggering conversation switch to load messages...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: {
+      expression: `(function(){var c=window.__conversationListFullData__;var target=null;for(var i=0;i<c.length;i++){if(c[i].latestMessage&&c[i].latestMessage.content&&c[i].cid!=='133756334970-2500000853693#11011@icbu'){target=c[i];break}}if(!target)return'no target';window.__testTargetCid=target.cid;return JSON.stringify({cid:target.cid,name:target.name})})()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Now programmatically select that conversation to trigger message loading
+  // The page uses BaasDataManager to select conversations
+  console.log('Selecting new conversation...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: {
+      expression: `(function(){var cid=window.__testTargetCid;var convs=window.__conversationListFullData__;var target=convs.find(function(c){return c.cid===cid});if(!target)return'conv not found';var baaS=window._imBaaSSDK;var convSvc=baaS.getConversationService();convSvc.setActiveCid(cid);return'selected: '+cid})()`
+    }})
+  });
+  await new Promise(r => setTimeout(r, 5000));
+
+  console.log('\n=== Captured WebSocket Frames (after trigger) ===');
+  console.log('Total frames:', wsFrames.length);
+  console.log('Total HTTP:', httpReqs.length);
+
+  // Show first few frames as samples
+  wsFrames.slice(0, 10).forEach((f, i) => {
+    console.log(`\nFrame ${i} [${f.dir}]:`, f.data.substring(0, 500));
+  });
+
+  // Save all frames to file for analysis
+  const outputPath = path.join(__dirname, '..', 'data', 'ws_frames_sniff.json');
+  fs.writeFileSync(outputPath, JSON.stringify({ wsCreated, wsFrames, httpReqs }, null, 2));
+  console.log('\nSaved all frames to:', outputPath);
+
+  // Show all unique WS URLs
+  console.log('\nAll WebSocket URLs:');
+  wsCreated.forEach(w => console.log(' ', w.url));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

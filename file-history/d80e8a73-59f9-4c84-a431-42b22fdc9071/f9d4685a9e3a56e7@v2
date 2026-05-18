@@ -1,0 +1,212 @@
+/**
+ * OKKI 全量同步 - 滚动加载所有会话后再提取
+ * 解决 __conversationListFullData__ 只包含可视范围会话的问题
+ */
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CDP_URL = 'http://localhost:9222';
+
+function ts() { return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19); }
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function main() {
+  let browser, page;
+
+  // ---- 连接或启动 Chrome ----
+  const http = require('http');
+  let cdpAvailable = false;
+  try {
+    await new Promise((resolve, reject) => {
+      const req = http.get('http://127.0.0.1:9222/json/version', (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => {
+          try { resolve(!!JSON.parse(data).webSocketDebuggerUrl); } catch (e) { resolve(false); }
+        });
+      });
+      req.on('error', () => resolve(false));
+      req.setTimeout(2000, () => { req.destroy(); resolve(false); });
+    });
+  } catch (e) {}
+
+  if (cdpAvailable) {
+    log('CDP连接已有Chrome...');
+    browser = await chromium.connectOverCDP(CDP_URL);
+    const pages = browser.contexts()[0].pages();
+    page = pages.find(p => p.url().includes('xiaoman') || p.url().includes('onetalk'));
+    if (!page) page = await browser.contexts()[0].newPage();
+  } else {
+    log('启动 Chrome (Profile 4)...');
+    browser = await chromium.launchPersistentContext(PROFILE, {
+      channel: 'chrome',
+      headless: false,
+      viewport: { width: 1440, height: 900 },
+    });
+    page = await browser.newPage();
+  }
+
+  // ---- 导航 + 登录检测 ----
+  if (!page.url().includes('xiaoman') && !page.url().includes('onetalk')) {
+    await page.goto('https://crm.xiaoman.cn/im/', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+  }
+
+  if (page.url().includes('login')) {
+    log('');
+    log('========================================');
+    log('  请在浏览器中登录 OKKI');
+    log('  登录后自动继续...');
+    log('========================================');
+    log('');
+    const start = Date.now();
+    while (Date.now() - start < 5 * 60 * 1000) {
+      if (!page.url().includes('login')) { log('登录成功！'); break; }
+      await sleep(2000);
+    }
+    if (page.url().includes('login')) { log('超时'); await browser.close(); return; }
+  } else {
+    log('已登录');
+  }
+
+  await sleep(3000);
+
+  // ---- 等 onetalk iframe ----
+  let otFrame = null;
+  for (let i = 0; i < 30; i++) {
+    const frames = page.frames();
+    otFrame = frames.find(f => f.url().startsWith('https://onetalk.alibaba.com/'));
+    if (otFrame) { log(`onetalk 已加载`); break; }
+    if (i === 0) {
+      log(`等待 onetalk... (${frames.length} frames)`);
+      for (const f of frames) log(`  ${f.url().slice(0, 100)}`);
+    }
+    await sleep(2000);
+  }
+
+  if (!otFrame) {
+    log('onetalk 未加载。请在OKKI中点击TM标签页，确保能看到会话列表。');
+    await sleep(30000);
+    const frames = page.frames();
+    otFrame = frames.find(f => f.url().startsWith('https://onetalk.alibaba.com/'));
+    if (!otFrame) { log('仍然未找到'); await browser.close(); return; }
+  }
+
+  // ---- 等初始数据 ----
+  await sleep(3000);
+  let initialCount = await otFrame.evaluate(() => (window.__conversationListFullData__ || []).length);
+  log(`初始会话数: ${initialCount}`);
+
+  // ---- 滚动加载全部会话 ----
+  log('开始滚动加载全部会话...');
+  let lastCount = initialCount;
+  let unchangedRounds = 0;
+
+  for (let round = 0; round < 50; round++) {
+    const scrollResult = await otFrame.evaluate(() => {
+      // 找会话列表容器（通常是一个有很多子div的可滚动div）
+      let best = null;
+      let bestScore = 0;
+      for (const el of document.querySelectorAll('div')) {
+        const childCount = el.children.length;
+        const scrollDiff = el.scrollHeight - el.clientHeight;
+        if (childCount > 20 && scrollDiff > 200) {
+          const score = childCount + scrollDiff;
+          if (score > bestScore) { best = el; bestScore = score; }
+        }
+      }
+      if (!best) return { done: true, count: (window.__conversationListFullData__ || []).length };
+
+      const before = (window.__conversationListFullData__ || []).length;
+      best.scrollTop = best.scrollHeight;
+      return { done: false, before, scrollH: best.scrollHeight, clientH: best.clientHeight };
+    });
+
+    if (scrollResult.done) { log('  找不到合适的滚动容器'); break; }
+
+    await sleep(2000);
+
+    const newCount = await otFrame.evaluate(() => (window.__conversationListFullData__ || []).length);
+    if (round % 3 === 0 || newCount !== lastCount) {
+      log(`  第${round+1}轮: ${scrollResult.before} → ${newCount}`);
+    }
+
+    if (newCount === lastCount) {
+      unchangedRounds++;
+      if (unchangedRounds >= 3) { log('  数据已稳定'); break; }
+    } else {
+      unchangedRounds = 0;
+    }
+    lastCount = newCount;
+  }
+
+  // ---- 提取全量数据 ----
+  const finalCount = await otFrame.evaluate(() => (window.__conversationListFullData__ || []).length);
+  log(`最终会话总数: ${finalCount} (初始: ${initialCount})`);
+
+  const fullData = await otFrame.evaluate(() => {
+    const convs = window.__conversationListFullData__ || [];
+    return convs.map(c => ({
+      cid: c.cid, name: c.name, loginId: c.loginId, aliId: c.aliId,
+      accountId: c.accountId, companyName: c.companyName,
+      country: c.country, level: c.level,
+      serviceType: c.serviceType, conversationType: c.conversationType,
+      unreadCount: c.unreadCount,
+      lastContactTime: c.lastContactTime,
+      lastContactTimeLong: c.lastContactTimeLong,
+      complianceCountryCode: c.complianceCountryCode,
+      latestMessage: c.latestMessage ? {
+        content: c.latestMessage.content,
+        messageType: c.latestMessage.messageType,
+        messageId: c.latestMessage.messageId,
+        contactRead: c.latestMessage.contactRead,
+      } : null,
+    }));
+  });
+
+  // 保存
+  const metaPath = path.join(DATA_DIR, 'tm_conversations_latest.json');
+  fs.writeFileSync(metaPath, JSON.stringify({ exportedAt: new Date().toISOString(), total: finalCount, conversations: fullData }, null, 2));
+  log(`已保存: tm_conversations_latest.json (${finalCount} 会话)`);
+
+  // ---- 搜索目标客户 ----
+  const targets = ['Abigail', 'Mutuku', 'Noslen', 'Gonzalez', 'ivy', 'quarcoo', 'Elton', 'Nadia', 'Samia', 'Guenad'];
+  const foundNames = new Set();
+  for (const t of targets) {
+    for (const c of fullData) {
+      const haystack = JSON.stringify([c.name, c.companyName, c.loginId]).toLowerCase();
+      if (haystack.includes(t.toLowerCase())) {
+        foundNames.add(c.name);
+      }
+    }
+  }
+
+  if (foundNames.size > 0) {
+    log(`找到匹配客户: ${[...foundNames].join(', ')}`);
+  } else {
+    log('未找到5个目标客户，列出所有有未读的:');
+    const unread = fullData.filter(c => c.unreadCount > 0);
+    if (unread.length === 0) {
+      log('  所有会话 unreadCount 均为 0 — 数据源可能不支持此字段');
+    } else {
+      for (const c of unread) {
+        log(`  [${c.unreadCount}] ${c.name} | ${(c.latestMessage?.content||'').slice(0, 70)}`);
+      }
+    }
+  }
+
+  // 打印前30个名字供对比
+  log('');
+  log('前30个会话:');
+  for (let i = 0; i < Math.min(30, fullData.length); i++) {
+    log(`  ${i+1}. ${fullData[i].name}`);
+  }
+
+  await browser.close();
+  log('完成。');
+}
+
+main().catch(e => { log(`错误: ${e.message}`); console.error(e); process.exit(1); });

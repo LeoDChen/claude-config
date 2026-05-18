@@ -1,0 +1,113 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+
+  if (!page) {
+    console.log('No xiaoman page found');
+    await browser.close();
+    process.exit(1);
+  }
+
+  console.log('=== Page URL ===');
+  console.log(page.url());
+  console.log('=== Page Title ===');
+  console.log(await page.title());
+
+  // Check frames
+  const frames = page.frames();
+  console.log(`\n=== Frames (${frames.length}) ===`);
+  frames.forEach((f, i) => {
+    console.log(`Frame ${i}: ${f.url().substring(0, 200)}`);
+  });
+
+  // Main page - explore sidebar and structural elements
+  const mainElements = await page.evaluate(() => {
+    const items = [];
+    const all = document.querySelectorAll('div[class*="menu"], div[class*="sidebar"], div[class*="nav"], a, button[class*="chat"], div[class*="chat"], div[class*="talk"], div[class*="message"], div[class*="conversation"]');
+    all.forEach(el => {
+      try {
+        const text = (el.textContent || '').trim().substring(0, 80);
+        const cls = typeof el.className === 'string' ? el.className.substring(0, 80) : 'non-string-class';
+        items.push({
+          tag: el.tagName,
+          text,
+          class: cls,
+          id: el.id,
+          visible: el.getBoundingClientRect().width > 0
+        });
+      } catch(e) {}
+    });
+    return items;
+  });
+
+  console.log(`\n=== Main Page Structure (${mainElements.length}) ===`);
+  mainElements.forEach(el => {
+    if (el.text || el.id) {
+      console.log(`[${el.tag}] "${el.text}" class=${el.class} id=${el.id}`);
+    }
+  });
+
+  // If there's an iframe for chat (talk/alibaba), explore it
+  const talkFrame = frames.find(f => f.url().includes('onetalk.alibaba') || f.url().includes('talk'));
+  if (talkFrame) {
+    console.log('\n=== Exploring Talk Frame ===');
+
+    // Get all buttons and clickable elements
+    const elements = await talkFrame.evaluate(() => {
+      const items = [];
+      // Look for conversation list, chat items
+      const selectors = [
+        'div[class*="conversation"]', 'div[class*="chat"]', 'div[class*="list"]',
+        'div[class*="session"]', 'li', 'div[class*="item"]',
+        'div[class*="contact"]', 'div[class*="recent"]',
+        'div[class*="msg"]', 'div[class*="dialog"]'
+      ];
+      selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          try {
+            const text = (el.textContent || '').trim().substring(0, 60);
+            if (text) {
+              items.push({
+                tag: el.tagName,
+                text,
+                class: (typeof el.className === 'string' ? el.className : '').substring(0, 60),
+                id: el.id,
+                w: el.getBoundingClientRect().width,
+                h: el.getBoundingClientRect().height
+              });
+            }
+          } catch(e) {}
+        });
+      });
+      return items;
+    });
+
+    console.log(`\nChat elements (${elements.length}):`);
+    elements.forEach(el => {
+      if (el.text && el.w > 0) {
+        console.log(`[${el.tag}] "${el.text}" class=${el.class} (${el.w}x${el.h})`);
+      }
+    });
+
+    // Also check inputs/search in the frame
+    const inputs = await talkFrame.evaluate(() => {
+      return Array.from(document.querySelectorAll('input, textarea, [contenteditable]')).map(i => ({
+        placeholder: i.placeholder || '',
+        type: i.type || i.getAttribute('type') || '',
+        id: i.id,
+        className: (typeof i.className === 'string' ? i.className : '').substring(0, 50),
+        role: i.getAttribute('role') || ''
+      }));
+    });
+    console.log(`\nInputs in talk frame:`);
+    inputs.forEach(i => console.log(JSON.stringify(i)));
+  }
+
+  await browser.disconnect();
+  console.log('\n=== Done ===');
+})().catch(err => {
+  console.error('Error:', err);
+  process.exit(1);
+});

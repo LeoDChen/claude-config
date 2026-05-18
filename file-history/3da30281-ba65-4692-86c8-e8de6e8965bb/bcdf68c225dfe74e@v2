@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "command": "node d:/ClaudeWorkspace/.claude/hooks/sync-config-to-ob.js",
+        "description": "修改配置文件后自动同步到OB备份目录"
+      }
+    ]
+  }
+}

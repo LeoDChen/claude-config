@@ -1,0 +1,208 @@
+/**
+ * 深抓 v6 — DOM 消息提取（修正选择器）
+ *
+ * 导航到 PWA 对话页（activeAccountId 参数会自动打开对话），
+ * 滚动加载历史消息，从 DOM 提取完整的消息列表。
+ */
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+function ts() {
+  return new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+}
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, page, talkFrame };
+}
+
+async function main() {
+  console.log('[deep-scrape-api v6] 连接小满...');
+  const { page, talkFrame } = await connect();
+
+  // Step 1: 提取全量客户原始数据
+  console.log('Step 1: 提取全量客户原始数据...');
+  const allRaw = await talkFrame.evaluate(() => {
+    const data = window.__conversationListFullData__;
+    if (!data || !Array.isArray(data)) return [];
+    return data
+      .filter(item => {
+        const name = item.contact?.name || '';
+        return name && !/Assistant\s*Eva/i.test(name) && !/系统通知/.test(name) && name.length > 1;
+      })
+      .map(item => {
+        const c = item.contact || {};
+        return {
+          name: c.name || item.name || '',
+          accountId: c.accountId || item.accountId || '',
+          accountIdEncrypt: c.accountIdEncrypt || item.accountIdEncrypt || '',
+          chatToken: c.chatToken || item.chatToken || '',
+          cid: item.cid || '',
+          aliIdEncrypt: c.aliIdEncrypt || item.aliIdEncrypt || '',
+          loginId: c.loginId || item.loginId || '',
+        };
+      });
+  });
+  console.log(`   ${allRaw.length} 个客户`);
+
+  function findRaw(name) {
+    let r = allRaw.find(r => r.name === name);
+    if (r) return r;
+    r = allRaw.find(r => r.name.includes(name) || name.includes(r.name));
+    return r;
+  }
+
+  // Step 2: 读取 P0 客户列表
+  console.log('Step 2: 读取 P0 客户列表...');
+  const files = readdirSync(DATA_DIR).filter(f => f.includes('全量客户分类'));
+  files.sort().reverse();
+  const latest = files[0];
+  if (!latest) { console.log('未找到分类数据'); return; }
+
+  const classified = JSON.parse(readFileSync(join(DATA_DIR, latest), 'utf-8'));
+  const p0Customers = classified.customers.filter(c => c.priority === 'P0');
+  console.log(`   ${p0Customers.length} 个 P0 客户`);
+
+  // Step 3: 逐个导航到对话页，从 DOM 提取消息
+  console.log('Step 3: 逐个获取对话...');
+  const results = [];
+  let successCount = 0;
+
+  for (let i = 0; i < p0Customers.length; i++) {
+    const c = p0Customers[i];
+    const raw = findRaw(c.name);
+
+    if (!raw || !raw.accountIdEncrypt || !raw.chatToken) {
+      console.log(`  [${i+1}/${p0Customers.length}] ${c.name} — 缺少加密ID，跳过`);
+      results.push({ name: c.name, error: '缺少 accountIdEncrypt/chatToken', messages: [] });
+      continue;
+    }
+
+    console.log(`  [${i+1}/${p0Customers.length}] ${c.name} (${c.countryCode})...`);
+
+    try {
+      const targetUrl = `https://onetalk.alibaba.com/message/weblitePWA.htm?relevanceAccountId=285526143&from=xiaoman&activeAccountId=${raw.accountId}&activeAccountIdEncrypt=${encodeURIComponent(raw.accountIdEncrypt)}&chatToken=${encodeURIComponent(raw.chatToken)}&version=2.0.0`;
+
+      await talkFrame.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+      await new Promise(r => setTimeout(r, 3000));
+
+      // 滚动加载更多历史消息
+      await talkFrame.evaluate(async () => {
+        const container = document.querySelector('.message-flow-container') ||
+                         document.querySelector('[class*="message-flow"]') ||
+                         document.querySelector('.messenger-content-container');
+        if (!container) return;
+        // 向上滚动5次以触发加载历史消息
+        for (let i = 0; i < 5; i++) {
+          container.scrollTop = 0;
+          await new Promise(r => setTimeout(r, 600));
+        }
+      });
+
+      // 从 DOM 提取消息
+      const messages = await talkFrame.evaluate(() => {
+        const result = [];
+        // 正确的选择器：message-item-wrapper
+        const items = document.querySelectorAll('.message-item-wrapper');
+        items.forEach(el => {
+          // 判断消息方向
+          const isRight = el.classList.contains('item-right');
+          const isLeft = el.classList.contains('item-left');
+          const side = isRight ? 'sent' : (isLeft ? 'received' : 'unknown');
+
+          // 提取纯文本内容（排除翻译、按钮等UI文本）
+          const textEl = el.querySelector('.text-content, .user-content, .target-content');
+          // 如果没有子元素，直接用 el 的文本
+          let content = '';
+          if (textEl) {
+            content = textEl.textContent?.trim() || '';
+          } else {
+            // 尝试提取不带UI标签的文本
+            const clone = el.cloneNode(true);
+            // 移除菜单按钮
+            clone.querySelectorAll('.message-flow-menu-box, .alicrm-buyerLoginId-text, .name-text, .content-header, button, [class*="feedback"], [class*="translat"]').forEach(n => n.remove());
+            content = clone.textContent?.trim() || '';
+          }
+
+          // 提取时间
+          const timeEl = el.querySelector('.send-time, .rec-time, [class*="time"], time');
+          const time = timeEl?.textContent?.trim() || '';
+
+          if (content && content.length > 1) {
+            // 清理消息文本：移除多余的空白和翻译残留
+            const cleaned = content.replace(/\s+/g, ' ').trim();
+            if (cleaned.length > 1) {
+              result.push({ side, time, content: cleaned });
+            }
+          }
+        });
+        return result;
+      });
+
+      results.push({
+        name: c.name,
+        accountId: raw.accountId,
+        messageCount: messages.length,
+        messages,
+      });
+      if (messages.length > 0) successCount++;
+      console.log(`    ${messages.length > 0 ? '✅' : '❌'} ${messages.length} 条消息`);
+
+      // 打印第一和最后一条作为预览
+      if (messages.length > 0) {
+        const first = messages[0];
+        const last = messages[messages.length - 1];
+        console.log(`       首: [${first.side}] ${first.content.substring(0, 60)}...`);
+        if (messages.length > 1) console.log(`       末: [${last.side}] ${last.content.substring(0, 60)}...`);
+      }
+
+    } catch(e) {
+      results.push({ name: c.name, error: e.message, messages: [] });
+      console.log(`    ❌ ${e.message}`);
+    }
+
+    await new Promise(r => setTimeout(r, 2000));
+  }
+
+  // Step 4: 保存结果
+  const output = {
+    scrapedAt: new Date().toISOString(),
+    method: 'dom-extraction-v6',
+    totalTargeted: p0Customers.length,
+    successCount,
+    results,
+  };
+
+  const outFile = `deep_scrape_api_${ts()}.json`;
+  writeFileSync(join(DATA_DIR, outFile), JSON.stringify(output, null, 2));
+  console.log(`\n✅ 已保存: ${outFile} (${successCount}/${p0Customers.length} 成功)`);
+
+  // 统计
+  console.log('\n── 结果概览 ──');
+  results.forEach(r => {
+    const icon = r.messageCount > 0 ? '✅' : '❌';
+    const lastMsg = r.messages.length > 0 ? r.messages[r.messages.length - 1].content.substring(0, 60) : (r.error || '无消息');
+    console.log(`  ${icon} ${r.name}: ${r.messageCount}条 | 最后: "${lastMsg}"`);
+  });
+
+  const totalMsgs = results.reduce((sum, r) => sum + r.messageCount, 0);
+  console.log(`\n  总计: ${totalMsgs} 条消息`);
+}
+
+main().catch(err => {
+  console.error('[deep-scrape-api v6] 错误:', err.message);
+  process.exit(1);
+});

@@ -1,0 +1,27 @@
+# Remove ONLY Desktop namespace entry from MyComputer, test, then restore
+$clsid = '{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}'
+$nsPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\$clsid"
+$wowPath = "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\$clsid"
+$backupFile = "D:\ClaudeWorkspace\backup_desktop_ns.reg"
+
+# Backup
+Write-Host "Backing up..."
+$exportCmd = "reg export `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\$clsid`" `"$backupFile`" /y"
+cmd /c $exportCmd 2>&1 | Out-Null
+Write-Host "  Backup: $backupFile"
+
+# Remove
+Write-Host "Removing Desktop from This PC..."
+Remove-Item -Path $nsPath -Force
+if (Test-Path $wowPath) { Remove-Item -Path $wowPath -Force }
+
+# Restart Explorer
+Stop-Process -Name explorer -Force
+Start-Sleep -Seconds 2
+Start-Process explorer.exe
+
+Write-Host ""
+Write-Host "TEST: Open This PC now."
+Write-Host "Does it work WITHOUT Desktop showing in the Folders section?"
+Write-Host ""
+Write-Host "To restore: double-click $backupFile"

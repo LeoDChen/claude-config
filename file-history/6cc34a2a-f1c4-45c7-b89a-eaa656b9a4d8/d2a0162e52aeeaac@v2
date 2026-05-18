@@ -1,0 +1,198 @@
+// Phase 1 v2: 用回调模式调用 SDK 获取消息
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 用回调模式调用 listMessageWithConversationCodeForHistory ===
+    console.log('=== 获取消息历史（回调模式）===\n');
+
+    const result = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var fullData = window.__conversationListFullData__;
+                    if (!fullData || !fullData[0]) {
+                        resolve(JSON.stringify({ error: 'no data' }));
+                        return;
+                    }
+
+                    // 找一个有 latestMessage 的会话
+                    var conv = fullData[0];
+                    var cid = conv.cid;
+
+                    var msgSvc = window._imsdk.getMessageService();
+
+                    // 使用正确的回调模式
+                    msgSvc.listMessageWithConversationCodeForHistory({
+                        conversationCode: cid,
+                        count: 5,
+                        dataCallback: function(result) {
+                            var data = result.data || [];
+                            var msgs = [];
+                            for (var i = 0; i < Math.min(3, data.length); i++) {
+                                var m = data[i];
+                                msgs.push({
+                                    keys: Object.keys(m).slice(0, 30),
+                                    content: m.content ? m.content.substring(0, 200) : '(no content)',
+                                    sendTime: m.sendTime,
+                                    type: m.msgType || m.imMessageType,
+                                    sender: m.from ? (m.from.name || m.from.accountId) : 'unknown'
+                                });
+                            }
+                            resolve(JSON.stringify({
+                                success: true,
+                                convName: conv.contact ? conv.contact.name : 'unknown',
+                                cid: cid,
+                                hasMore: result.hasMore,
+                                totalMessages: data.length,
+                                sampleMessages: msgs,
+                                firstMsgFull: data[0] ? JSON.stringify(data[0]).substring(0, 1000) : 'null'
+                            }));
+                        },
+                        errorCallBack: function(err) {
+                            resolve(JSON.stringify({
+                                error: 'SDK error',
+                                detail: err && (err.message || err.err || JSON.stringify(err))
+                            }));
+                        }
+                    });
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(result.result?.value || '(无)');
+
+    // === 再试试不同会话 ===
+    console.log('\n=== 多拿几个会话 ===\n');
+
+    const multiResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var fullData = window.__conversationListFullData__;
+                    var msgSvc = window._imsdk.getMessageService();
+
+                    // 拿前 5 个会话的最新几条消息
+                    var count = Math.min(5, fullData.length);
+                    var done = 0;
+                    var allResults = [];
+
+                    function fetchOne(index) {
+                        if (index >= count) {
+                            resolve(JSON.stringify(allResults));
+                            return;
+                        }
+
+                        var conv = fullData[index];
+                        if (!conv.latestMessage || !conv.latestMessage.content) {
+                            allResults.push({
+                                index: index,
+                                name: conv.contact && conv.contact.name,
+                                cid: conv.cid,
+                                skipped: true,
+                                reason: 'no latest message'
+                            });
+                            done++;
+                            fetchOne(index + 1);
+                            return;
+                        }
+
+                        msgSvc.listMessageWithConversationCodeForHistory({
+                            conversationCode: conv.cid,
+                            count: 3,
+                            dataCallback: function(result) {
+                                var data = result.data || [];
+                                var msgs = [];
+                                for (var i = 0; i < data.length; i++) {
+                                    msgs.push({
+                                        content: data[i].content ? data[i].content.substring(0, 150) : '(empty)',
+                                        type: typeof data[i].content,
+                                        time: data[i].sendTime,
+                                        from: data[i].from ? data[i].from.name || data[i].from.accountId : '?'
+                                    });
+                                }
+                                allResults.push({
+                                    index: index,
+                                    name: conv.contact && conv.contact.name,
+                                    country: conv.contact && conv.contact.complianceCountryCode,
+                                    cid: conv.cid,
+                                    msgCount: data.length,
+                                    hasMore: result.hasMore,
+                                    msgs: msgs
+                                });
+                                done++;
+                                fetchOne(index + 1);
+                            },
+                            errorCallBack: function(err) {
+                                allResults.push({
+                                    index: index,
+                                    name: conv.contact && conv.contact.name,
+                                    error: err && (err.message || err.err || JSON.stringify(err).substring(0, 200))
+                                });
+                                done++;
+                                fetchOne(index + 1);
+                            }
+                        });
+                    }
+
+                    fetchOne(0);
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(multiResult.result?.value || '(无)');
+
+    // 保存结果
+    ws.close();
+    console.log('\n完成');
+})();

@@ -1,0 +1,139 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-12（enhanced_classify.js 升级为双轴模型）
+> 🔴 旧 P0-P4 分类体系已废弃，新分类规则见 `knowledge/classification-rules.md`
+> 📌 2026-05-12：enhanced_classify.js 重写 — 双轴分类 + 提问/回复质量提取 + HTML看板
+> 📌 2026-05-11：新增第六章"双轴交叉策略"（生命周期×质量等级差异化）
+> 📌 2026-05-11：沉默策略重构 — "不放弃，降频维护"替代旧放弃/流失体系
+
+## 分类方案 v2（2026-05-11 确认）
+
+| 维度 | 内容 |
+|------|------|
+| 生命周期 | 8阶段（待回复→初询→报价已发→谈判/样品→PI已发→订单执行→已签收→售后）+ 沉默5级副状态 |
+| 质量 | S/A/B/C/D 五级，硬判定标准 |
+| 边缘情况 | 14条，遇则标注【需你决策】 |
+| 触发提醒 | 每次同步后输出"该跟进"清单 |
+| 线下同步 | `data/offline_chat_log.md` 手动维护 |
+| 进化机制 | 每次"分错了"→立即更新规则文件 |
+
+---
+## 历史同步记录
+
+> 上次同步：2026-05-11 09:11 | 最新：2026-05-12 11:42
+
+## 最新同步结果
+
+| 指标 | 数值 |
+|------|------|
+| 数据同步时间 | **2026-05-12 11:42** |
+| 总会话 | **477** (+2，上次475) |
+| 变动会话 | **17** 个 |
+| 增量消息 | +588条 (17个会话) |
+| 24h内活跃 | **9** 个会话 |
+| 7d内客户回复 | 242条 / 26人 |
+| 7d内我方发送 | 338条 |
+| 🔴 未读 | **0** |
+
+## 🆕 本次变动客户详情 (2026-05-12)
+
+| 客户 | 国家 | 变动 | 关键信号 |
+|------|------|:---:|------|
+| **ali Amjid** | ZA🇿🇦 | +259条 | 个人用途, pillow+clothes, SZ货代, 5/5后无互动 |
+| **Keinjol Tata** | IN🇮🇳 | +57条 | ⚠️ 运费报价拖了8天! 品牌ODM+Amazon+Uttarakhand地址 |
+| **maimouna cisse** | ML🇲🇱 | +41条 | 500件logo选择+尺码分配未回复, 4天沉默 |
+| **Elton daNadia** | MZ🇲🇿 | +32条 | 葡语问睡衣, 已发catalog, 客户说vou apreciar |
+| **RebeccaNytanieAude SEHE** | CI🇨🇮★ | +22条 | 自我介绍Aude Koffi, 等地址 |
+| **Samia Guenad** | FR🇫🇷 | +13条 | 客户给邮编Vernon 27200, DDP $242.6已发, 客户说OK |
+| **jonathan aston** | GH🇬🇭 | +11条 | 报价$536(200件)后5天沉默, 等地址 |
+| **fatmt alblwshy** | OM🇴🇲 | +10条 | 阿语客户说"اريد كلوكشن", 已回产品介绍 |
+| **Abigail Mutuku** | KE🇰🇪 | +9条 | KEBS CoC卡点缓解, 客户5/10分享Toto Stop Kenya计划 |
+| **Ernestina Afriyie** | GH🇬🇭 | +8条 | 🔥 问卡通睡衣! 5/12已回, 需要发产品推荐 |
+| **MAHE JUDITH** | CI🇨🇮 | +7条 | 仅系统消息, 无真实客户对话 |
+| **ivy quarcoo** | GH🇬🇭 | +7条 | 问现货, 已发现货清单 |
+| **Noslen Gonzalez** | US🇺🇸 | +5条 | 西班牙语首触, 我方已回 |
+| **EILEEN ARROYORODRIGUEZ** | CO🇨🇴 | +4条 | 新会话, 西班牙语模板已发 |
+| **Leen Hajyehia** | IL🇮🇱 | +4条 | onesie询盘, 我方已回产品详情 |
+| **Lohgah Sharon** | CM🇨🇲 | +3条 | 仅我方模板, 无实质对话 |
+
+## ⚠️ 待修正项（2026-05-09 用户反馈）
+
+| # | 客户 | 问题 | 修正方向 |
+|---|------|------|---------|
+| 1 | Mona | ✅ 已修正分析 | 真卡点：样品5周未达+霍尔木兹海峡危机。非逼单客户，等样品到自会转化。详见 reports/Mona_almuharraqy_深度分析_2026-05-09.md |
+| 2 | Aloh Voma | 未注意他反复强调运输标记 | 回复须体现到货凭证+运输标记确认 |
+| 3 | Inderpreet kaur | 替用户做了商业决策 | 只给框架选项，具体费用/条件留用户决策 |
+| 4 | Keinjol Tata | 等级偏低 | 品牌ODM 500件Amazon渠道，应提升 |
+| 5 | jonathan aston | 未分析报价后沉默原因 | 价格不满为最高概率，话术须覆盖 |
+| 6 | Asma Noor | 报价数据错误 | 实际$68.7（7件×$3.1+$47运费），非$75.21 |
+| 7 | Sara Dibes | PI已读未回分析太浅 | 须做心理分析，降低回复门槛 |
+| 8 | Abdulrhman alal | 未体现延迟回复致歉 | 话术第一步=致歉，再进正题 |
+
+后续客户（#9起）尚未分析，等待用户继续反馈。
+
+## 最新分析结果 (2026-05-12 双轴分类)
+
+| 梯队 | 人数 | 说明 |
+|------|:---:|------|
+| **🚨 今天** | **3** | Keinjol(运费拖8天!)/maimouna(500件logo未回)/Ernestina(卡通睡衣) |
+| **⏳ 48h** | **4** | Samia(PI确认)/ivy(现货跟进)/Elton(目录跟进)/Rebecca(等地址) |
+| **📅 本周** | **5** | Abigail(KEBS等回复)/jonathan(报价后沉默)/fatmt(阿语新客)/Noslen(西语)/Leen(onesie) |
+| **🔍 观察** | **5** | MAHE JUDITH(系统消息)/EILEEN(新会话)/Lohgah(无实质)/ali Amjid(个人用途)/Aloh Voma(10天无互动) |
+| **合计变动** | **17** | (另: Assistant Eva 为AI助手, 已排除) |
+
+### 双轴分布（变动客户）
+
+| 生命周期\质量 | S | A | B | C | D |
+|---------------|---|---|---|---|---|
+| 谈判/样品 | Keinjol | - | - | - | - |
+| 报价已发 | - | maimouna, Abigail | jonathan | - | - |
+| PI已发 | - | - | Samia | - | - |
+| 初询沟通 | - | - | Ernestina, Elton, Rebecca, ivy | fatmt, Noslen, Leen | EILEEN |
+| 仅系统消息 | - | - | - | - | MAHE JUDITH, Lohgah |
+
+变化：Keinjol从4天前的A→升级为A/S（品牌ODM确认），maimouna维持A级。Ernestina从"问价格"升级为"品类明确（卡通睡衣）"→关注升温。
+
+## 数据文件
+
+| 文件 | 说明 |
+|------|------|
+| `data/tm_conversations_latest.json` | **最新** 477会话元数据 (2026-05-12同步) |
+| `data/chat_history/*.json` | ~478个会话聊天历史 |
+| `data/customers/*.json` | 346 客户邮件+详情 |
+| `data/_metadata_pass1.json` | pass1中间数据 |
+
+## 一键同步脚本
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/sync_okki.js
+```
+
+## 下次分析启动指令
+
+> 继续OKKI分析。Keinjol Tata运费报价需优先处理。输出: `output/actions_2026-05-12.md`
+
+---
+
+## P0 当前详情 (2026-05-11)
+
+### P0 今天行动 (6人)
+
+| 客户 | 国家 | 未读 | 关键信号 | 下一步 |
+|------|------|:---:|------|------|
+| **maimouna cisse** | ML🇲🇱 | 4 | "500 unité, réduction?" | 报价500件价格, 今天回 |
+| **Keinjol Tata** | IN🇮🇳 | 1 | 品牌Kinjolluxe, 500+1000 MOQ, 地址已给, 要样品 | 出货样报价+运费 |
+| **Samia Guenad** | FR🇫🇷 | 0 | 客户给邮编Vernon 27200, 确认$242.6 | 确认订单细节 |
+| **Abigail Mutuku** | KE🇰🇪 | 0 | 20-30件EXW/FOB, KEBS CoC卡点 | KEBS方案回复 |
+| **ivy quarcoo** | GH🇬🇭 | 1 | "Which product are in stock" | 发现货清单 |
+| **Leen Hajyehia** | IL🇮🇱 | 1 | 询盘卡:10件romper, 问物流时间, 仅自动回复 | 真人回复+确认地址 |
+
+### P0 48h跟进 (4人)
+
+| 客户 | 国家 | 状态 | 下一步 |
+|------|------|------|------|
+| **Aloh Voma** | US🇺🇸 | 25件已发货→佛山仓 | 跟踪签收+索反馈 |
+| **ali Amjid** | ZA🇿🇦 | 177条, 16件选款完成~¥510 | 催确认付款 |
+| **Christabel Kanunsha** | ZM🇿🇲★ | 订单$7.70(2件) | 催付款 |
+| **WELE Mounia** | TG🇹🇬 | 老客户, 我方2d前重联 | 等回应 |
+
+> 历史关键发现、报告文件、已完成事项 → `reports/archive.md`

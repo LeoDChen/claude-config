@@ -1,0 +1,24 @@
+{
+  "model": "claude-sonnet-4-6[1m]",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kemikeai.1688.com)",
+      "WebSearch",
+      "Bash(python3 -c \"import pandas as pd; print\\('pandas available'\\)\")",
+      "Bash(python3 -c \"import openpyxl; print\\('openpyxl available'\\)\")",
+      "Bash(python3 -c \"import xlrd; print\\('xlrd available'\\)\")",
+      "Bash(npm install *)"
+    ]
+  },
+  "effortLevel": "max",
+  "theme": "light",
+  "statusLine": {
+    "type": "command",
+    "command": "node -e \"const d=require('fs').readFileSync(0,'utf8');const j=JSON.parse(d);const p=j.context_window?.used_percentage??0;const m=j.model?.display_name??'';const f=Math.round(p/10);const b='█'.repeat(f)+'░'.repeat(10-f);console.log(b+' '+p.toFixed(1)+'% | '+m)\""
+  }
+}

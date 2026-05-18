@@ -1,0 +1,79 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+    "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kemikeai.1688.com)",
+      "WebSearch",
+      "Bash(python3 *)",
+      "Bash(npm *)",
+      "Bash(node *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(curl *)",
+      "Bash(cd *)",
+      "Bash(taskkill *)",
+      "Bash(tasklist *)",
+      "Bash(sleep *)",
+      "Bash(cmd.exe *)",
+      "Bash(mkdir *)",
+      "Bash(rm *)",
+      "Bash(echo *)",
+      "Bash(find *)",
+      "Bash(grep -r \"bypass\\\\|permissionMode\\\\|permission.*mode\\\\|permissions.*bypass\" \"C:/Users/Administrator/AppData/Roaming/npm/node_modules/@anthropic-ai/claude-code/\" --include=\"*.md\" --include=\"*.json\" -l 2>/dev/null | head -20)",
+      "Read(//c/Users/Administrator/AppData/Roaming/npm/node_modules/@anthropic-ai/**)"
+    ]
+  },
+  "model": "claude-opus-4-7",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log(require('fs').readFileSync('d:/ClaudeWorkspace/.claude/hooks/inject-rules.txt','utf8'))\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node d:/ClaudeWorkspace/.claude/hooks/block-dangerous.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node d:/ClaudeWorkspace/.claude/hooks/warn-env-file.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node d:/ClaudeWorkspace/.claude/hooks/ensure-archive-dir.js"
+          }
+        ]
+      }
+    ]
+  },
+  "effortLevel": "xhigh",
+  "autoCompactThreshold": 70
+}

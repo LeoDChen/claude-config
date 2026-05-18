@@ -1,0 +1,90 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onetalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  const expr = `
+    (function() {
+      var convs = window.__conversationListFullData__;
+      var c = convs[0]; // First conversation
+
+      // Deep inspect the conversation object
+      var cKeys = Object.keys(c);
+      var cValues = {};
+      cKeys.forEach(function(k) {
+        try {
+          var v = c[k];
+          if (v === null || v === undefined) {
+            cValues[k] = String(v);
+          } else if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
+            cValues[k] = v;
+          } else if (Array.isArray(v)) {
+            cValues[k] = 'Array(' + v.length + ')';
+          } else if (typeof v === 'object') {
+            cValues[k] = 'Obj{' + Object.keys(v).join(',') + '}';
+          } else {
+            cValues[k] = String(v);
+          }
+        } catch(e) {}
+      });
+
+      // Check if there's a messages array anywhere in the data
+      var hasMsg = !!c.latestMessage;
+
+      // Check the ext field
+      var extKeys = c.ext ? Object.keys(c.ext) : [];
+      var extPreview = c.ext ? JSON.stringify(c.ext).substring(0, 300) : 'none';
+
+      // Check for any global message cache
+      var msgCacheGlobals = Object.keys(window).filter(function(k) {
+        return k.toLowerCase().indexOf('msg') >= 0 ||
+               k.toLowerCase().indexOf('message') >= 0 ||
+               k.toLowerCase().indexOf('chat') >= 0;
+      });
+
+      // Look for any Map or WeakMap that might store messages
+      var allWindowKeys = Object.keys(window).length;
+
+      return JSON.stringify({
+        convKeys: cKeys,
+        convValues: cValues,
+        extKeys: extKeys,
+        extPreview: extPreview,
+        msgCacheGlobals: msgCacheGlobals,
+        totalWindowKeys: allWindowKeys,
+        hasLatestMessage: hasMsg
+      });
+    })()
+  `;
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 3000));
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

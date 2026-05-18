@@ -1,0 +1,37 @@
+<h2>生命周期 v3：8 阶段 + 沉默/流失</h2>
+<p class="subtitle">任何活跃阶段都可能在某个时间点沉默</p>
+
+<div class="section">
+  <h3>活跃路径（8 阶段）</h3>
+  <table>
+    <tr><td style="padding:6px 10px;"><strong>1. 待回复</strong></td><td style="padding:6px 10px;color:#94a3b8;">客户发了消息我没回</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：24h 内回</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>2. 初询沟通</strong></td><td style="padding:6px 10px;color:#94a3b8;">互相了解需求/要目录/问MOQ</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：有效推进</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>3. 报价已发</strong></td><td style="padding:6px 10px;color:#94a3b8;">价格已给，等客户反应</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：3-5天跟进</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>4. 谈判/样品</strong></td><td style="padding:6px 10px;color:#94a3b8;">价格/规格/运费/样品</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：48h 跟进</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>5. PI已发</strong></td><td style="padding:6px 10px;color:#94a3b8;">PI发出，等付款</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：48h/7天催款</td></tr>
+    <tr style="border-top:2px solid #475569;"><td style="padding:6px 10px;"><strong>6. 订单执行中</strong></td><td style="padding:6px 10px;color:#94a3b8;">付款后→生产→发货</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：主动同步进度</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>7. 已签收</strong></td><td style="padding:6px 10px;color:#94a3b8;">货到，等反馈/复购</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：签收后3天回访</td></tr>
+    <tr><td style="padding:6px 10px;"><strong>8. 售后</strong></td><td style="padding:6px 10px;color:#94a3b8;">质量问题/投诉/退换</td><td style="padding:6px 10px;color:#94a3b8;text-align:right;">行动：24h 内响应</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>每个阶段都可能进入沉默</h3>
+  <table>
+    <tr><th style="text-align:left;padding:6px 10px;">沉默时长</th><th style="text-align:left;padding:6px 10px;">标签</th><th style="text-align:left;padding:6px 10px;">策略</th></tr>
+    <tr><td style="padding:6px 10px;">3-7 天</td><td style="padding:6px 10px;">⚠️ 短期沉默</td><td style="padding:6px 10px;color:#94a3b8;">温和提醒，给新信息（不是"你收到了吗"）</td></tr>
+    <tr><td style="padding:6px 10px;">7-14 天</td><td style="padding:6px 10px;">🔶 中期沉默</td><td style="padding:6px 10px;color:#94a3b8;">换策略重联，分析沉默根因</td></tr>
+    <tr><td style="padding:6px 10px;">14-30 天</td><td style="padding:6px 10px;">🔴 长期沉默</td><td style="padding:6px 10px;color:#94a3b8;">高价值客户专属重激活，低价值放弃</td></tr>
+    <tr><td style="padding:6px 10px;">30-90 天</td><td style="padding:6px 10px;">💤 休眠</td><td style="padding:6px 10px;color:#94a3b8;">仅高价值客户保留，其余归档</td></tr>
+    <tr><td style="padding:6px 10px;">90天+</td><td style="padding:6px 10px;">❌ 流失</td><td style="padding:6px 10px;color:#94a3b8;">不再主动联系，除非客户自己回来</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>关键规则</h3>
+  <p>1. 沉默不是独立阶段——它挂在活跃阶段后面。比如"报价已发→沉默14天"和"谈判中→沉默14天"是两种完全不同的情况</p>
+  <p>2. 已成交客户（阶段6/7）的沉默容忍度更长——签收后30天才算"休眠"，90天才算"流失"</p>
+  <p>3. 高质量客户在所有阶段的沉默容忍度都高于低质量客户</p>
+</div>
+
+<p style="margin-top:24px;color:#94a3b8;">这个方向对吗？下一步讨论质量分级的细节。</p>

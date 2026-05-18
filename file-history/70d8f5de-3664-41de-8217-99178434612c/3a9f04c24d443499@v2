@@ -1,0 +1,241 @@
+/**
+ * 小满CRM — 快照对比引擎
+ *
+ * 对比两次索引快照，识别状态变化并生成P0/P1/P2优先级清单。
+ * 可独立运行，也可被scheduler调用。
+ *
+ * 用法: node diff.mjs [昨天快照路径] [今天快照路径]
+ *       node diff.mjs  (自动找最近两次快照对比)
+ */
+
+import { readFileSync, readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SNAPSHOT_DIR = join(DATA_DIR, 'snapshots');
+const DIFF_DIR = join(DATA_DIR, 'diffs');
+
+if (!existsSync(DIFF_DIR)) mkdirSync(DIFF_DIR, { recursive: true });
+
+// ============================================================
+// P0-P3 分类规则引擎
+// ============================================================
+const P0_KEYWORDS = ['how much', 'price', 'quote', 'cost', '多少钱', 'كم', 'prix', 'precio',
+  'complaint', 'refund', 'return', 'damage', 'defect', 'quality', 'problem'];
+
+function classifyCustomer(customer, prevCustomer) {
+  const { name, isUnread, lastMessageSnippet, lastMsgDirection, lastTime } = customer;
+
+  // 售后关键词
+  const msg = lastMessageSnippet.toLowerCase();
+  const hasAfterSales = ['complaint', 'refund', 'return', 'damage', 'defect', 'quality issue', 'problem with']
+    .some(k => msg.includes(k));
+
+  // 报价/价格关键词
+  const hasPriceKeywords = P0_KEYWORDS.some(k => msg.includes(k));
+
+  // 判断消息方向（如果无法从DOM判断，用启发式）
+  const isFromClient = lastMsgDirection === 'received' ||
+    (!lastMessageSnippet.startsWith('我') &&
+     !lastMessageSnippet.includes('发送了') &&
+     !lastMessageSnippet.includes('以上内容'));
+
+  // ==================== P0: 紧急 ====================
+  if (hasAfterSales) {
+    return { priority: 'P0', categoryId: 'after_sales', tier: 'S', reason: '售后投诉/质量问题' };
+  }
+
+  // 客户最后发言 + 未读 → 我方未回复
+  if (isFromClient && isUnread) {
+    if (hasPriceKeywords) {
+      return { priority: 'P0', categoryId: 'awaiting_reply', tier: 'S', reason: '客户询价/砍价未回复' };
+    }
+    return { priority: 'P0', categoryId: 'awaiting_reply', tier: 'A', reason: '客户消息未回复' };
+  }
+
+  // 我方最后发言 + 未读 → 客户已读不回
+  if (!isFromClient && isUnread) {
+    if (hasPriceKeywords) {
+      return { priority: 'P0', categoryId: 'awaiting_reply', tier: 'A', reason: '报价后客户已读未回' };
+    }
+    return { priority: 'P0', categoryId: 'awaiting_reply', tier: 'B', reason: '我方消息客户已读未回' };
+  }
+
+  // 全部已读 + 客户最后发言 → 待报价/谈判中
+  if (isFromClient && !isUnread) {
+    if (hasPriceKeywords) {
+      return { priority: 'P0', categoryId: 'negotiating', tier: 'A', reason: '价格谈判中' };
+    }
+    return { priority: 'P1', categoryId: 'awaiting_quote', tier: 'B', reason: '待分析客户需求' };
+  }
+
+  // ==================== P1: 高优 ====================
+  if (msg.includes('sample') || msg.includes('test order')) {
+    return { priority: 'P1', categoryId: 'sample_request', tier: 'A', reason: '样品相关' };
+  }
+  if (msg.includes('payment') || msg.includes('deposit') || msg.includes('wire')) {
+    return { priority: 'P1', categoryId: 'awaiting_payment', tier: 'A', reason: '待付款' };
+  }
+  if (msg.includes('ship') || msg.includes('delivery') || msg.includes('tracking')) {
+    return { priority: 'P1', categoryId: 'awaiting_delivery', tier: 'A', reason: '物流/发货相关' };
+  }
+
+  // ==================== P2: 待回访 ====================
+  // 如果和上次快照比，lastTime相同（没新消息）且超过7天
+  // 这里不做时间判断，留给上层逻辑
+
+  // ==================== P3: 低优 ====================
+  return { priority: 'P3', categoryId: 'keep_warm', tier: 'C', reason: '常规维护' };
+
+  // 注意：P2 followup 和 P3 activate 的判断需要历史数据，在 compare() 中处理
+}
+
+// ============================================================
+// 快照对比
+// ============================================================
+function compare(prevSnapshot, currSnapshot) {
+  const prevMap = new Map(prevSnapshot.customers.map(c => [c.name, c]));
+  const currMap = new Map(currSnapshot.customers.map(c => [c.name, c]));
+
+  const newCustomers = [];
+  const changed = [];
+  const urgency = { P0: [], P1: [], P2: [], P3: [] };
+
+  for (const [name, curr] of currMap) {
+    const prev = prevMap.get(name);
+
+    // 新客户
+    if (!prev) {
+      const cls = classifyCustomer(curr, null);
+      newCustomers.push({ name, ...curr, classification: cls });
+      if (cls.priority === 'P0') urgency.P0.push({ name, ...curr, classification: cls });
+      else if (cls.priority === 'P1') urgency.P1.push({ name, ...curr, classification: cls });
+      else urgency.P3.push({ name, ...curr, classification: { ...cls, categoryId: 'activate', reason: '新线索待激活' } });
+      continue;
+    }
+
+    // 状态变化检测
+    const statusChanged = curr.isUnread !== prev.isUnread;
+    const messageChanged = curr.lastMessageSnippet !== prev.lastMessageSnippet;
+    const timeChanged = curr.lastTime !== prev.lastTime;
+
+    if (statusChanged || messageChanged || timeChanged) {
+      const cls = classifyCustomer(curr, prev);
+      changed.push({
+        name,
+        ...curr,
+        prevState: { isUnread: prev.isUnread, lastMessage: prev.lastMessageSnippet, lastTime: prev.lastTime },
+        currState: { isUnread: curr.isUnread, lastMessage: curr.lastMessageSnippet, lastTime: curr.lastTime },
+        changeType: statusChanged ? (curr.isUnread ? '变为未读' : '已读') : '消息更新',
+        classification: cls
+      });
+
+      if (urgency[cls.priority]) {
+        urgency[cls.priority].push({ name, ...curr, classification: cls });
+      }
+    }
+  }
+
+  // 检查消失的客户（可能被删除/归档）
+  const removed = [];
+  for (const [name, prev] of prevMap) {
+    if (!currMap.has(name)) {
+      removed.push({ name, lastState: prev });
+    }
+  }
+
+  return {
+    comparedAt: new Date().toISOString(),
+    prevSnapshot: { file: prevSnapshot._file, capturedAt: prevSnapshot.capturedAt, total: prevSnapshot.totalCustomers },
+    currSnapshot: { file: currSnapshot._file, capturedAt: currSnapshot.capturedAt, total: currSnapshot.totalCustomers },
+    summary: {
+      newCustomers: newCustomers.length,
+      changed: changed.length,
+      removed: removed.length,
+      unchanged: currSnapshot.totalCustomers - newCustomers.length - changed.length,
+      P0: urgency.P0.length,
+      P1: urgency.P1.length,
+      P2: urgency.P2.length,
+      P3: urgency.P3.length
+    },
+    urgency,
+    changed,
+    newCustomers: newCustomers.slice(0, 20), // 新客户太多的话只保留前20
+    removed
+  };
+}
+
+// ============================================================
+// 主入口
+// ============================================================
+function main() {
+  const args = process.argv.slice(2);
+
+  let prevPath, currPath;
+
+  if (args.length >= 2) {
+    prevPath = args[0];
+    currPath = args[1];
+  } else {
+    // 自动找最近两次快照
+    const files = readdirSync(SNAPSHOT_DIR)
+      .filter(f => f.startsWith('snapshot_') && f.endsWith('.json'))
+      .sort()
+      .reverse();
+
+    if (files.length < 2) {
+      console.log('[diff] 快照不足（需要至少2个），跳过对比');
+      console.log('[diff] 当前快照数:', files.length);
+      process.exit(0);
+    }
+
+    currPath = join(SNAPSHOT_DIR, files[0]);
+    prevPath = join(SNAPSHOT_DIR, files[1]);
+  }
+
+  console.log('[diff] 加载快照...');
+  const prevSnapshot = JSON.parse(readFileSync(prevPath, 'utf-8'));
+  const currSnapshot = JSON.parse(readFileSync(currPath, 'utf-8'));
+  prevSnapshot._file = prevPath;
+  currSnapshot._file = currPath;
+
+  console.log(`[diff] 对比: ${prevSnapshot.capturedAt} → ${currSnapshot.capturedAt}`);
+  console.log(`[diff] 客户数: ${prevSnapshot.totalCustomers} → ${currSnapshot.totalCustomers}`);
+
+  const result = compare(prevSnapshot, currSnapshot);
+
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const filename = `diff_${dateStr}.json`;
+  writeFileSync(join(DIFF_DIR, filename), JSON.stringify(result, null, 2));
+
+  // 打印摘要
+  console.log(`
+========================================
+  【小满客户变化报告】
+  时间: ${now.toLocaleString('zh-CN')}
+========================================
+  新客户:    ${result.summary.newCustomers}
+  状态变化:  ${result.summary.changed}
+  已移除:    ${result.summary.removed}
+  无变化:    ${result.summary.unchanged}
+----------------------------------------
+  🚨 P0 紧急: ${result.summary.P0}人`);
+  result.urgency.P0.forEach(c => {
+    console.log(`     [${c.classification.categoryId}] ${c.name} — ${c.classification.reason}`);
+  });
+  console.log(`  📌 P1 高优: ${result.summary.P1}人`);
+  result.urgency.P1.forEach(c => {
+    console.log(`     [${c.classification.categoryId}] ${c.name} — ${c.classification.reason}`);
+  });
+  console.log(`  📋 P2 中优: ${result.summary.P2}人`);
+  console.log(`  📎 P3 低优: ${result.summary.P3}人`);
+  console.log(`\n  完整报告: ${filename}\n`);
+
+  // 输出JSON摘要供CC读取
+  console.log(JSON.stringify(result.summary));
+}
+
+main();

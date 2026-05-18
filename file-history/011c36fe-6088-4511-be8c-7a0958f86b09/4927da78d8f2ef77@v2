@@ -1,0 +1,2 @@
+# Claude Code 声音控制快捷命令
+alias sound='bash "$HOME/.claude/scripts/sound_control.sh"'

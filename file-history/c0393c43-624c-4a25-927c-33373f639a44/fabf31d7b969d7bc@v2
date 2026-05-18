@@ -1,0 +1,99 @@
+# Session: 2026-05-17
+
+**Started:** ~afternoon
+**Last Updated:** 2026-05-17
+**Project:** OKKI 状态外脑 (D:\ClaudeWorkspace)
+**Topic:** SOON 层方案汇总仲裁 — 接收三个子对话结论、交叉审查、输出最终综合方案
+
+---
+
+## What We Are Building
+
+OKKI 状态外脑的 SOON 层提醒系统。NOW 层（R1-R6 紧急因子）已定稿，SOON 层是下一级——告诉用户"到时间了该做什么"。本对话是主对话（arbiter），职责是接收三个子对话的输出、检查一致性、合并冲突、输出最终统一方案。
+
+三个子对话：
+1. 9 阶段流转规则（三层框架：语义定义+边界判例+证据要求）
+2. 12→11 SOON 因子完整定义（含时间基线、节奏、终止条件）
+3. 脚本/AI 分工边界 + 自动化设计（经三轮审查到 V4）
+
+---
+
+## What WORKED (with evidence)
+
+- **子对话1审计** — 发现 PI 规则翻转冲突、谈判中判例标签错误、核心原则措辞矛盾。用户确认 PI 翻转，其余已修正。确认通过。
+- **子对话2审计** — 发现 R9 笔误（应为 R6）、5 个操作化缺口（时间基线/节奏终止/S6 N值/S9长期节奏/NOW-SOON交叉）。V2 全部闭合。确认通过。
+- **子对话3 V3审计** — 用四问框架+架构追踪+因子走查+数据流验证，发现 1 致命（S6频率公式数学反了：S/A÷4=6d vs D÷6=4d，D 反而高频）+3 重要（S4 Day7消失/S7a 无限/S5b 漏报）+3 中等+3 次要。不通过。V4 全部修正，再审查通过。
+- **综合方案输出** — 已写入 `D:\ClaudeWorkspace\08_客户跟进\Okki\output\soon-layer-comprehensive-plan.md`。11 因子、9 阶段、自动化设计、数据存储、交叉规则、实施路线图全部整合。
+
+---
+
+## What Did NOT Work (and why)
+
+- **S5b "连续2次兜底"机制与节奏"当天"不匹配** — S5b 节奏是单值"当天"，只触发一次，连续2次逻辑无法激活。此毛刺在 V4 审查中发现但未修正（中等，实际场景概率低）。下一轮需修。
+- **源文件间不一致** — `2-braistorming-compiled-tiger.md` 因子定义表中 S6 频率公式和 S5c 仍为旧值，未回写修正。综合方案以 V4 为准，建议同步修正源文件。
+
+---
+
+## What Has NOT Been Tried Yet
+
+- 初始化 factor_baselines.json（为 500 人建初始阶段+基线）
+- 用三层框架修正 38 张草稿卡阶段字段
+- 看板 HTML 接入真实数据
+- SOON 层建卡（~80 人）
+- 冷层清单（~360 人）
+- 冷冻层分层
+- 客户等级三层框架重构
+- 弹窗策略模板编写
+- 已读/未读字段可靠性实测
+- S5b 地址正则实测调整
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `08_客户跟进/Okki/output/soon-layer-comprehensive-plan.md` | ✅ 定稿 | 完整 SOON 层方案，本次产出 |
+| `08_客户跟进/Okki/knowledge/customer-lifecycle-rules.md` | ✅ 定稿 | 9 阶段流转规则，三层框架 |
+| `08_客户跟进/Okki/knowledge/soon-factor-automation-design.md` | ✅ 定稿 V4 | 脚本/AI 分工+数据流，三轮审查通过 |
+| `08_客户跟进/Okki/knowledge/review-attack-methodology.md` | ✅ 定稿 | 审查方法论（四问框架） |
+| `.claude/plans/2-braistorming-compiled-tiger.md` | ⚠️ 需同步 | 因子定义表中 S6 公式/S5c 仍为旧值，待回写修正 |
+| `.claude/plans/2026-05-16-okki-status-brain-progress.md` | 进度档案 | 需更新，加入本次 SOON 层定稿状态 |
+
+---
+
+## Decisions Made
+
+- **S6 频率公式修正：S/A÷6, B/C÷5, D÷4** — 原 S/A÷4, D÷6 导致 D 级客户反而获得最高频更新，与设计意图相反
+- **S5c 删除** — 待发货阶段人每天扫一眼即可，不需要独立因子
+- **S4 Day 7 后转每 7 天观察提醒** — 不自动放弃，保持看板可见
+- **S7a 加 60 天终态** — 3-15-15-30-30-60-60，达 60 天仅保留可见
+- **S5b 连续 2 次触发 → 自动 AI 兜底** — 覆盖客户沉默+正则漏报场景（但节奏"当天"需改为"当天-2"才生效）
+- **冷启动：首次运行 500 人全量入 AI 队列** — 仅一次
+- **采用自然日计算所有节奏**
+- **文件写入使用原子 rename 防脏读**
+
+---
+
+## Blockers & Open Questions
+
+- S5b 节奏"当天"与连续 2 次兜底不匹配（中等毛刺）
+- 消息 sender 字段可靠性未实测（影响 S1/R1 分流）
+- 客户等级 enhanced_classify.js 已知不准（待三层框架重构）
+- customer_type 判定规则暂用阶段进入路径推断（正式规则待定义）
+- `2-braistorming-compiled-tiger.md` 需同步修正 S6 公式和 S5c 删除
+
+---
+
+## Exact Next Step
+
+**新对话启动后第一步：** 读取 `D:\ClaudeWorkspace\08_客户跟进\Okki\output\soon-layer-comprehensive-plan.md` 和 `D:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\review-attack-methodology.md`，用四问框架对完整方案做一次独立审查攻击（不做修改，只出审查结论）。通过后按实施路线图开始落地：①初始化 factor_baselines.json → ②修正 38 张草稿卡阶段。
+
+---
+
+## Environment & Setup Notes
+
+- 工作目录：`D:\ClaudeWorkspace`
+- 项目 CLAUDE.md 包含 OKKI 业务命令路由
+- 工厂档案：`06_知识库/小星星工厂全息背景档案_V10.txt`
+- OKKI 脚本链路（7 个）已在 `scripts/` 目录

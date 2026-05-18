@@ -1,0 +1,252 @@
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-423-        "QHr5": "账号不存在",
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-1375-              "crm.functional.mk.auto",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-1376-              "crm.functional.notice",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-1377-              "crm.functional.notice.browser.senior",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:1378:              "crm.functional.notice.desktop.senior",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-1379-              "crm.functional.notice.mail.conflict",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-1380-              "crm.functional.okki.ai",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-1381-              "crm.functional.okki.ai.qc",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-2078-        "now": "2026-05-09 04:00:50",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-2079-        "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-2080-          "whatsapp_iframe_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:2081:          "whatsapp_desktop_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-2082-          "whatsapp_chat_group_flag": 1
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-2083-        }
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-2084-      }
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-3439-    {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-3440-      "time": "2026-05-08T20:00:51.524Z",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-3441-      "url": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:3442:      "fullUrl": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList?desktop_support_scenes[]=188&desktop_support_scenes[]=197",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-3443-      "status": 200,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-3444-      "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-3445-        "code": 0,
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-5098-            "page_size": "20",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-5099-            "open_view_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-5100-            "open_write_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:5101:            "desktop_notify_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-5102-            "update_time": "2025-12-17 15:48:43",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-5103-            "default_bcc": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-5104-            "attach_view_mode": "0",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-423-        "QHr5": "账号不存在",
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-1375-              "crm.functional.mk.auto",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-1376-              "crm.functional.notice",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-1377-              "crm.functional.notice.browser.senior",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:1378:              "crm.functional.notice.desktop.senior",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-1379-              "crm.functional.notice.mail.conflict",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-1380-              "crm.functional.okki.ai",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-1381-              "crm.functional.okki.ai.qc",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-2078-        "now": "2026-05-09 04:00:50",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-2079-        "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-2080-          "whatsapp_iframe_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:2081:          "whatsapp_desktop_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-2082-          "whatsapp_chat_group_flag": 1
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-2083-        }
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-2084-      }
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-3439-    {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-3440-      "time": "2026-05-08T20:00:51.524Z",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-3441-      "url": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:3442:      "fullUrl": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList?desktop_support_scenes[]=188&desktop_support_scenes[]=197",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-3443-      "status": 200,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-3444-      "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-3445-        "code": 0,
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-5098-            "page_size": "20",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-5099-            "open_view_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-5100-            "open_write_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:5101:            "desktop_notify_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-5102-            "update_time": "2025-12-17 15:48:43",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-5103-            "default_bcc": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-5104-            "attach_view_mode": "0",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-423-        "QHr5": "账号不存在",
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-1375-              "crm.functional.mk.auto",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-1376-              "crm.functional.notice",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-1377-              "crm.functional.notice.browser.senior",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:1378:              "crm.functional.notice.desktop.senior",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-1379-              "crm.functional.notice.mail.conflict",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-1380-              "crm.functional.okki.ai",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-1381-              "crm.functional.okki.ai.qc",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-2078-        "now": "2026-05-09 04:00:50",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-2079-        "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-2080-          "whatsapp_iframe_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:2081:          "whatsapp_desktop_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-2082-          "whatsapp_chat_group_flag": 1
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-2083-        }
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-2084-      }
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-3439-    {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-3440-      "time": "2026-05-08T20:00:51.524Z",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-3441-      "url": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:3442:      "fullUrl": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList?desktop_support_scenes[]=188&desktop_support_scenes[]=197",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-3443-      "status": 200,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-3444-      "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-3445-        "code": 0,
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-5098-            "page_size": "20",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-5099-            "open_view_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-5100-            "open_write_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:5101:            "desktop_notify_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-5102-            "update_time": "2025-12-17 15:48:43",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-5103-            "default_bcc": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-5104-            "attach_view_mode": "0",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6351-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-6352-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8375-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8376-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8377-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:8378:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8379-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8380-                "value_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-8381-                "hidden": 0
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-313-        "sYRX": "扫描二维码下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-314-        "0hon": "Android版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-315-        "ihHb": "立即下载",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:316:        "JVAH": "Mac桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:317:        "h96S": "Windows桌面版",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-318-        "THfc": "我的企业",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-319-        "7YBi": "星期一",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-320-        "MoLW": "星期二",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-417-        "3ZxK": "小满销售管理",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-418-        "PAfa": "小满企业中心",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-419-        "XUaT": "小满人力资源",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:420:        "xOf2": "小满即时通桌面",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-421-        "62Ph": "二维码已失效，请重新扫码！",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-422-        "FUr7": "二维码类型错误",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-423-        "QHr5": "账号不存在",
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-1375-              "crm.functional.mk.auto",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-1376-              "crm.functional.notice",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-1377-              "crm.functional.notice.browser.senior",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:1378:              "crm.functional.notice.desktop.senior",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-1379-              "crm.functional.notice.mail.conflict",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-1380-              "crm.functional.okki.ai",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-1381-              "crm.functional.okki.ai.qc",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-2078-        "now": "2026-05-09 04:00:50",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-2079-        "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-2080-          "whatsapp_iframe_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:2081:          "whatsapp_desktop_flag": 1,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-2082-          "whatsapp_chat_group_flag": 1
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-2083-        }
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-2084-      }
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-3439-    {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-3440-      "time": "2026-05-08T20:00:51.524Z",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-3441-      "url": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:3442:      "fullUrl": "https://crm.xiaoman.cn/api/aiAgentRead/aiAgentList?desktop_support_scenes[]=188&desktop_support_scenes[]=197",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-3443-      "status": 200,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-3444-      "data": {
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-3445-        "code": 0,
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-5098-            "page_size": "20",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-5099-            "open_view_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-5100-            "open_write_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:5101:            "desktop_notify_flag": "0",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-5102-            "update_time": "2025-12-17 15:48:43",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-5103-            "default_bcc": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-5104-            "attach_view_mode": "0",
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-6346-                "field_type": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-6347-                "refer_list": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-6348-                "label": "登录天数",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:6349:                "tip": "包含移动端、桌面端、web端登录，按照每天进入系统进行天数统计",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-6350-                "order": "",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-6351-                "value_type": "",
+
+[Showing results with pagination = limit: 250]

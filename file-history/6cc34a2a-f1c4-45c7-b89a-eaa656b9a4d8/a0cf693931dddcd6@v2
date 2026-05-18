@@ -1,0 +1,154 @@
+// 刷新页面重建 WebSocket 连接
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+    const events = [];
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+        if (msg.method) events.push(msg);
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+    await cmd('Network.enable');
+    await cmd('Page.enable');
+
+    // === 1. 刷新前注入 fetch 拦截 ===
+    console.log('=== 刷新页面 ===\n');
+
+    // 重载前先注入拦截器（刷新后会丢失，但可以看看在加载过程中发了什么请求）
+    await cmd('Page.reload');
+    console.log('已触发刷新，等待 15 秒...');
+    await new Promise(r => setTimeout(r, 15000));
+
+    // === 2. 检查连接状态 ===
+    console.log('\n=== 刷新后状态 ===\n');
+
+    const status = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var sdk = window._imsdk;
+                var auth = sdk ? sdk.getAuthService() : null;
+                var body = document.body ? document.body.textContent : '';
+
+                return {
+                    hasSdk: !!sdk,
+                    isLogin: auth ? auth.isLogin() : false,
+                    nick: auth ? auth.getLoginNick() : '',
+                    uid: auth ? auth.getLoginUid() : '',
+                    disconnected: body.includes('网络连接已经断开'),
+                    fullData: window.__conversationListFullData__ ? window.__conversationListFullData__.length : 0,
+                    ready: document.readyState
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(status.result?.value);
+
+    // === 3. 如果 SDK 已就绪，等10秒再试拉消息 ===
+    console.log('\n再等 10 秒...');
+    await new Promise(r => setTimeout(r, 10000));
+
+    const msgTest = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var sdk = window._imsdk;
+                    if (!sdk) { resolve('no sdk'); return; }
+
+                    var auth = sdk.getAuthService();
+                    if (!auth.isLogin()) {
+                        resolve(JSON.stringify({ error: 'not logged in', nick: auth.getLoginNick() }));
+                        return;
+                    }
+
+                    var fullData = window.__conversationListFullData__;
+                    if (!fullData || !fullData[0]) { resolve('no conversations yet'); return; }
+
+                    var msgSvc = sdk.getMessageService();
+                    msgSvc.listMessageWithConversationCodeForHistory({
+                        conversationCode: fullData[0].cid,
+                        count: 5,
+                        dataCallback: function(result) {
+                            resolve(JSON.stringify({
+                                count: (result.data||[]).length,
+                                hasMore: result.hasMore,
+                                sample: result.data&&result.data[0] ? (result.data[0].content||'').substring(0,100) : null
+                            }));
+                        },
+                        errorCallBack: function(err) {
+                            resolve(JSON.stringify({ error: 'SDK error: ' + (err&&err.message||err&&err.err||String(err)) }));
+                        }
+                    });
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log('消息测试:', msgTest.result?.value);
+
+    // === 4. 看网络请求（找出 IM 相关的） ===
+    console.log('\n=== IM 相关网络请求 ===\n');
+
+    const imReqs = events.filter(e =>
+        e.method === 'Network.requestWillBeSent' &&
+        (e.params.request.url.includes('im.') ||
+         e.params.request.url.includes('message/') ||
+         e.params.request.url.includes('mtop') ||
+         e.params.request.url.includes('chat'))
+    );
+
+    for (const evt of imReqs.slice(0, 15)) {
+        const url = evt.params.request.url;
+        const method = evt.params.request.method;
+        console.log(`  ${method} ${url.substring(0, 200)}`);
+        if (evt.params.request.postData) {
+            console.log(`    Post: ${evt.params.request.postData.substring(0, 200)}`);
+        }
+    }
+
+    ws.close();
+    console.log('\n完成');
+})();

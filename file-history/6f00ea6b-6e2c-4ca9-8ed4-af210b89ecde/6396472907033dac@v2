@@ -1,0 +1,169 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = {};
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val !== null && val !== undefined) {
+          try { results[response.id] = JSON.parse(val); } catch(e) { results[response.id] = val; }
+        } else {
+          results[response.id] = response.result;
+        }
+      }
+    } catch (e) {}
+  });
+
+  // Deep explore the PaaS (originSdk) layer
+  const expr = `
+    (async function() {
+      var r = {};
+      var imsdk = window._imsdk;
+      var originSdk = imsdk.getOriginSdk();
+
+      // 1. Explore getMsgService
+      var paasMsgSvc = originSdk.getMsgService();
+      if (paasMsgSvc) {
+        var allKeys = [];
+        for (var k in paasMsgSvc) allKeys.push(k);
+        r.paasMsgAllKeys = allKeys.slice(0, 50);
+
+        var ownKeys = Object.getOwnPropertyNames(paasMsgSvc);
+        r.paasMsgOwnKeys = ownKeys.slice(0, 50);
+
+        // Check for send, request, fetch methods
+        r.paasMsgHasSend = typeof paasMsgSvc.send === 'function';
+        r.paasMsgHasRequest = typeof paasMsgSvc.request === 'function';
+        r.paasMsgHasFetchMessages = typeof paasMsgSvc.fetchMessages === 'function';
+        r.paasMsgHasListMessages = typeof paasMsgSvc.listMessages === 'function';
+        r.paasMsgHasQueryMessages = typeof paasMsgSvc.queryMessages === 'function';
+
+        // Check for any method containing 'message' or 'send' or 'request' or 'lwp'
+        var relevantMethods = allKeys.filter(function(k) {
+          return k.toLowerCase().indexOf('message') >= 0 ||
+                 k.toLowerCase().indexOf('send') >= 0 ||
+                 k.toLowerCase().indexOf('request') >= 0 ||
+                 k.toLowerCase().indexOf('lwp') >= 0 ||
+                 k.toLowerCase().indexOf('fetch') >= 0 ||
+                 k.toLowerCase().indexOf('query') >= 0;
+        });
+        r.relevantPaasMsgMethods = relevantMethods;
+      }
+
+      // 2. Explore getConvService (PaaS level)
+      var paasConvSvc = originSdk.getConvService();
+      if (paasConvSvc) {
+        var allKeys = [];
+        for (var k in paasConvSvc) allKeys.push(k);
+        r.paasConvAllKeys = allKeys.slice(0, 50);
+      }
+
+      // 3. Explore getSearchService
+      var searchSvc = originSdk.getSearchService();
+      if (searchSvc) {
+        var allKeys = [];
+        for (var k in searchSvc) allKeys.push(k);
+        r.searchSvcAllKeys = allKeys.slice(0, 30);
+      }
+
+      // 4. Look for connection/channel/socket in originSdk
+      var connKeys = Object.keys(originSdk).filter(function(k) {
+        return k.toLowerCase().indexOf('connect') >= 0 ||
+               k.toLowerCase().indexOf('socket') >= 0 ||
+               k.toLowerCase().indexOf('channel') >= 0 ||
+               k.toLowerCase().indexOf('transport') >= 0 ||
+               k.toLowerCase().indexOf('ws') >= 0;
+      });
+      r.originSdkConnKeys = connKeys;
+
+      // 5. Look at the prototype chain of originSdk
+      var proto = Object.getPrototypeOf(originSdk);
+      var protoKeys = [];
+      for (var k in proto) protoKeys.push(k);
+      r.originSdkProtoAllKeys = protoKeys.slice(0, 50);
+
+      // 6. Try to find the actual PaaS SDK class name
+      r.originSdkConstructor = originSdk.constructor.name;
+
+      // 7. Check if there is a _paas, _channel, _connection on the page
+      ['_paas', '_channel', '_connection', '_transport', '_socket', '_ws', '_lwp'].forEach(function(key) {
+        if (window[key] !== undefined) {
+          r['window.' + key] = typeof window[key];
+        }
+      });
+
+      // 8. Also check on the originSdk directly with Object.getOwnPropertyNames
+      // Sometimes important internals are non-enumerable
+      try {
+        var desc = Object.getOwnPropertyDescriptors(originSdk);
+        var descKeys = Object.keys(desc);
+        r.originSdkDescriptorKeys = descKeys.slice(0, 30);
+      } catch(e) {
+        r.descriptorError = e.message;
+      }
+
+      // 9. Try to access Symbol properties
+      try {
+        var symbolKeys = Object.getOwnPropertySymbols(originSdk);
+        r.originSdkSymbolKeys = symbolKeys.length;
+      } catch(e) {}
+
+      return JSON.stringify(r, null, 2);
+    })()
+  `;
+
+  console.log('Exploring PaaS layer...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: expr, awaitPromise: true } })
+  });
+
+  await new Promise(r => setTimeout(r, 5000));
+  console.log(JSON.stringify(results[1], null, 2));
+
+  // Now try to call the actual fetchMessages on the PaaS msg service
+  if (results[1] && results[1].paasMsgHasFetchMessages) {
+    const expr2 = `
+      (async function() {
+        var imsdk = window._imsdk;
+        var originSdk = imsdk.getOriginSdk();
+        var paasMsgSvc = originSdk.getMsgService();
+
+        // Get first cid
+        var convs = window.__conversationListFullData__;
+        var cid = convs[0].cid;
+
+        try {
+          // Try calling fetchMessages with various parameter formats
+          var result = await paasMsgSvc.fetchMessages(cid, 20, 9007199254740991);
+          return JSON.stringify({ ok: true, count: result ? result.length : 0, type: typeof result, isArray: Array.isArray(result), sample: result && result.length > 0 ? JSON.stringify(result[0]).substring(0, 300) : 'empty' });
+        } catch(e) {
+          return JSON.stringify({ ok: false, error: e.message, stack: e.stack ? e.stack.substring(0, 300) : '' });
+        }
+      })()
+    `;
+
+    console.log('\nTrying paasMsgSvc.fetchMessages...');
+    await client.send('Target.sendMessageToTarget', {
+      sessionId,
+      message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: { expression: expr2, awaitPromise: true } })
+    });
+    await new Promise(r => setTimeout(r, 10000));
+    console.log('fetchMessages result:', JSON.stringify(results[2]));
+  }
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

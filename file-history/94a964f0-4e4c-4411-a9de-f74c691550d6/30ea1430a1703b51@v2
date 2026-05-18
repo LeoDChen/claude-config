@@ -1,0 +1,9 @@
+$desk = [Environment]::GetFolderPath('Desktop')
+$gitDesk = Join-Path $desk '.git'
+$gitWork = 'D:\ClaudeWorkspace\.git'
+
+Write-Host "Desktop .git: $gitDesk"
+Write-Host "Workspace .git: $gitWork"
+Write-Host "Same path? $($gitDesk -eq $gitWork)"
+Write-Host "Desktop .git exists: $(Test-Path $gitDesk)"
+Write-Host "Workspace .git exists: $(Test-Path $gitWork)"

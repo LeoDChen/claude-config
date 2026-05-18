@@ -1,0 +1,46 @@
+const fs = require('fs');
+
+const SELF_UID = '2500000853693@icbu';
+
+function extractAll(filePath) {
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const msgs = data.messages || [];
+
+  const sysPatterns = [
+    '自动接待将不再触发', 'Since you have read the conversation',
+    'Marco大模型翻译', '阿里国际Marco大模型翻译',
+    '买家有流失风险', 'Buyer has churn risk',
+    '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+    '反馈', 'AI给您生成了一条回复建议',
+    'You have a visitor', 'This buyer has been pre-screened',
+  ];
+
+  function isSys(content) {
+    if (!content) return true;
+    for (const p of sysPatterns) if (content.includes(p)) return true;
+    return false;
+  }
+
+  const real = msgs.filter(m => {
+    const ext = m?.message?.extension?.basicMessageInfo;
+    if (ext) {
+      try { const info = JSON.parse(ext); if (info.systemMessage || info.autoReply) return false; } catch(e) {}
+    }
+    return !isSys(m?.message?.content?.text?.content || '');
+  });
+
+  console.log(`Total: ${msgs.length}, Real: ${real.length}`);
+  console.log('');
+
+  for (const m of real) {
+    const content = m?.message?.content?.text?.content || '';
+    const ts = m?.message?.createAt || 0;
+    const date = new Date(ts).toISOString().replace('T', ' ').substring(0, 19);
+    const isMe = m?.message?.sender?.uid === SELF_UID;
+    const prefix = isMe ? '★我方' : '客户';
+    console.log(`[${date}] ${prefix}: ${content}`);
+  }
+}
+
+const target = process.argv[2];
+extractAll(target);

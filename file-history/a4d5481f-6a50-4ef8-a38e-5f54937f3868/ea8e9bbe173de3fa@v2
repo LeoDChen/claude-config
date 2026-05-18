@@ -1,0 +1,40 @@
+<h2>跟进时间 — 我之前写的 vs 外部专业标准</h2>
+<p class="subtitle">基于 B2B 销售响应时间研究 + 外贸 1-1-2-3-7-7-15 经典法则</p>
+
+<div class="section">
+  <h3>结论：我之前的数值基本合理，不需要大改</h3>
+  <table>
+    <tr><th style="text-align:left;padding:8px;">阶段</th><th style="text-align:left;padding:8px;">我之前写的</th><th style="text-align:left;padding:8px;">外部研究标准</th><th style="text-align:center;padding:8px;">判定</th></tr>
+    <tr><td style="padding:8px;">待回复</td><td style="padding:8px;">24h 内回</td><td style="padding:8px;color:#94a3b8;">24h 黄金窗口（初次接触）</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">初询沟通</td><td style="padding:8px;">有效推进</td><td style="padding:8px;color:#94a3b8;">客户回应后加速至 24h 内</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">报价已发</td><td style="padding:8px;">3-5 天跟进</td><td style="padding:8px;color:#94a3b8;">第3天第1次跟进，每2-3天一次</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">谈判/样品</td><td style="padding:8px;">48h 跟进</td><td style="padding:8px;color:#94a3b8;">意向明确客户每2-3天一次</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">PI已发</td><td style="padding:8px;">48h/7天催款</td><td style="padding:8px;color:#94a3b8;">48h确认收到 + 7天催款（经典催款节奏）</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">订单执行中</td><td style="padding:8px;">主动同步进度</td><td style="padding:8px;color:#94a3b8;">每周同步一次，关键节点主动通知</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">已签收</td><td style="padding:8px;">3天回访</td><td style="padding:8px;color:#94a3b8;">建议 7 天回访（让客户有时间验货）</td><td style="padding:8px;text-align:center;">⚠️ 调到7天</td></tr>
+    <tr><td style="padding:8px;">售后</td><td style="padding:8px;">24h 响应</td><td style="padding:8px;color:#94a3b8;">投诉类 ≤1h，常规售后 24h</td><td style="padding:8px;text-align:center;">✓</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>沉默阈值 — 需要调两处</h3>
+  <table>
+    <tr><th style="text-align:left;padding:8px;">沉默层级</th><th style="text-align:left;padding:8px;">我之前写的</th><th style="text-align:left;padding:8px;">研究建议</th><th style="text-align:center;padding:8px;">判定</th></tr>
+    <tr><td style="padding:8px;">短期沉默</td><td style="padding:8px;">3-7 天</td><td style="padding:8px;color:#94a3b8;">3-7 天（三次跟进无回复暂停）</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">中期沉默</td><td style="padding:8px;">7-14 天</td><td style="padding:8px;color:#94a3b8;">7-14 天（换策略重联）</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">长期沉默</td><td style="padding:8px;">14-30 天</td><td style="padding:8px;color:#94a3b8;">14-21 天（第4-5次跟进窗口）</td><td style="padding:8px;text-align:center;">✓</td></tr>
+    <tr><td style="padding:8px;">休眠</td><td style="padding:8px;">30-90 天</td><td style="padding:8px;color:#94a3b8;">外贸标准：持续跟进45天+ → 转入长期培育</td><td style="padding:8px;text-align:center;">⚠️ 30→45天</td></tr>
+    <tr><td style="padding:8px;">流失</td><td style="padding:8px;">90天+</td><td style="padding:8px;color:#94a3b8;">90天仍适用，与"每3月一次"的C级客户周期吻合</td><td style="padding:8px;text-align:center;">✓</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>三个关键的外部数据</h3>
+  <div style="background:#1e293b;border-radius:8px;padding:16px;margin:12px 0;">
+    <p><strong>1. 速度即收入</strong> — 78% 的客户会选择第一个联系他们的供应商。首次询盘 5 分钟内响应，转化率高 391%（来源：Close.com 2025年25家B2B品牌实测）</p>
+    <p><strong>2. 80% 的成交需要 5 次以上跟进</strong> — 但 44% 的销售在第 1 次后放弃，66% 在第 2 次后放弃。70% 成交发生在第 4-6 次跟进之间（来源：HeyReach 2025 SLA基准报告）</p>
+    <p><strong>3. 外贸经典节奏 1-1-2-3-7-7-15</strong> — 第1天→第3天→第7天→第15天→第30天→第45天。完整执行7次跟进的转化率（32%）是随机跟进的3倍（来源：连连国际/外贸日报 B2B跟进行业标准）</p>
+  </div>
+</div>
+
+<p style="margin-top:24px;color:#94a3b8;">结论：只有两处微调（已签收 3天→7天，休眠 30天→45天）。继续讨论质量分级？</p>

@@ -1,0 +1,16 @@
+@echo off
+echo Killing Chrome...
+taskkill /F /IM chrome.exe >nul 2>&1
+timeout /t 2 /nobreak >nul
+
+echo Cleaning lock files...
+del /F /Q "%LOCALAPPDATA%\Google\Chrome\User Data\SingletonLock" >nul 2>&1
+del /F /Q "%LOCALAPPDATA%\Google\Chrome\User Data\SingletonSocket" >nul 2>&1
+del /F /Q "%LOCALAPPDATA%\Google\Chrome\User Data\SingletonCookie" >nul 2>&1
+
+echo Starting Chrome with CDP...
+start "" "%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 https://crm.xiaoman.cn
+
+echo.
+echo Chrome started. Confirm OKKI login, then press any key to close this window.
+pause >nul

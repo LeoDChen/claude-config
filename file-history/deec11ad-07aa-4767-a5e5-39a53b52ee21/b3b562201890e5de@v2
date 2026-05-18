@@ -1,0 +1,301 @@
+/**
+ * 阶段1：规则引擎预分类
+ * 输入：data/cleaned_*.json（阶段0输出）
+ * 输出：data/classified_rules_<timestamp>.json
+ *
+ * 确定性规则（不依赖 AI）：
+ * - 纯系统消息 + 无实质对话 → P4
+ * - 我方发送 + 客户从未回复 + 超30天 → P4
+ * - 沉默超90天 + 无有效互动 → P3
+ * - 沉默超30天 + messageCount ≤ 3 → P3
+ * - 未读消息 + 客户最近发送 → P0/P1（待AI细分）
+ * - 规则覆盖不了的 → 标记 needAI: true
+ *
+ * 规则引擎只做确定判断，不确定的不猜，扔给 AI。
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+
+// ====== 优先级定义 ======
+const PRIORITY = {
+  P0_PAYMENT: 'P0-付款/售后',
+  P0_INTENT: 'P0-高意向',
+  P1: 'P1',
+  P2: 'P2',
+  P3: 'P3',
+  P4: 'P4',
+};
+
+// ====== 升级信号关键词 ======
+const UPGRADE_SIGNALS = [
+  { re: /下单|place\s*order|make\s*order|send\s*order|confirm\s*order/i, label: '下单信号' },
+  { re: /PI|proforma\s*invoice|形式发票|发票.*已发|invoice.*sent/i, label: 'PI相关' },
+  { re: /付款|payment|deposit|depósito|预付|TT|bank\s*transfer/i, label: '付款相关' },
+  { re: /样品|sample|muestra|échantillon|عينة/i, label: '样品阶段' },
+  { re: /地址.*已|address.*confirm|ship.*address|delivery.*address/i, label: '地址确认' },
+  { re: /partner|合伙|商量|discuss.*partner|conversation.*boss/i, label: '合伙商量' },
+  { re: /运费|shipping\s*cost|freight|FOB|CIF|DDP|EXW/i, label: '运费讨论' },
+  { re: /价格|price|pricing|quote|quotation|cotización|precio/i, label: '价格讨论' },
+  { re: /选.*款|select.*style|choose.*design|pick.*item/i, label: '选款' },
+  { re: /数量|quantity|pcs|pieces|units|qty/i, label: '数量讨论' },
+];
+
+// ====== 降级信号关键词 ======
+const DOWNGRADE_SIGNALS = [
+  { re: /not\s*interested|不感兴趣|no\s*thanks/i, label: '不感兴趣' },
+  { re: /店铺.*转让|sell.*shop|转让|transfer.*business/i, label: '非采购意图' },
+];
+
+// ====== 工具函数 ======
+
+function hasUpgradeSignals(text) {
+  if (!text || typeof text !== 'string') return [];
+  return UPGRADE_SIGNALS.filter((s) => s.re.test(text)).map((s) => s.label);
+}
+
+function hasDowngradeSignals(text) {
+  if (!text || typeof text !== 'string') return [];
+  return DOWNGRADE_SIGNALS.filter((s) => s.re.test(text)).map((s) => s.label);
+}
+
+function isPureSystemMessages(entry) {
+  const flags = entry._flags || {};
+  if (!flags.isLatestSystemMsg) return false;
+  const msgCount = entry._computedMessageCount || 0;
+  if (msgCount <= 1) return true;
+  if (Array.isArray(entry.messages) && entry.messages.every((m) => {
+    const text = m.text || m.latestMessageContent || '';
+    return text.trim().length === 0 || /^(自动接待|Marco|AI给您|反馈|Since you have)/.test(text);
+  })) return true;
+  return false;
+}
+
+function isValidInteraction(entry) {
+  const msg = entry.latestMessageContent || '';
+  if (!msg || msg.trim().length === 0) return false;
+  if (entry._flags?.isLatestSystemMsg && entry._computedMessageCount <= 1) return false;
+  if (msg === '[图片]' || msg === '[商品]' || msg === '[表情]') return true;
+  if (msg.length < 2) return false;
+  return true;
+}
+
+function customerNeverReplied(entry) {
+  if (entry._messageDirection) {
+    const dir = entry._messageDirection;
+    if (dir.received === 0 && dir.sent > 0) return true;
+  }
+  if (entry.latestMessageType === 'send' && !entry.msgFromCustomer) return true;
+  return false;
+}
+
+// ====== 主分类逻辑 ======
+
+function classifyCustomer(entry) {
+  const silenceDays = entry._silenceDays || 999;
+  const msgCount = entry._computedMessageCount || 0;
+  const flags = entry._flags || {};
+  const issues = entry._issues || [];
+  const reason = [];
+  const priority = { level: null, subType: null, confidence: 'deterministic' };
+
+  const effectiveMsg = flags.latestMsgReplaced ? (entry._replacedMessageContent || '') : (entry.latestMessageContent || '');
+  const isUnread = entry.isUnread || entry.unreadCount > 0;
+  const msgType = entry.latestMessageType;
+
+  // Rule 1: 纯系统消息 + 无实质对话 → P4
+  if (isPureSystemMessages(entry)) {
+    priority.level = 'P4';
+    reason.push('纯系统消息，无实质对话');
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 2: 我方发送 + 客户从未回复 + 超30天 → P4
+  if (customerNeverReplied(entry) && silenceDays > 30) {
+    priority.level = 'P4';
+    reason.push('我方单向发送，客户从未回复，超30天');
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 3: 沉默超90天 + 无有效互动 → P3
+  if (silenceDays > 90 && !isValidInteraction(entry)) {
+    priority.level = 'P3';
+    reason.push('沉默超90天，无有效互动');
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 4: 沉默超90天 + 有互动但无近期活跃 → P3
+  if (silenceDays > 90 && msgCount <= 3) {
+    priority.level = 'P3';
+    reason.push('沉默超90天，消息≤3条');
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 5: 沉默超30天 + 消息≤3条 + 非未读 → P3
+  if (silenceDays > 30 && msgCount <= 3 && !isUnread) {
+    priority.level = 'P3';
+    reason.push('沉默超30天，消息≤3条，非未读');
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 6: 非采购意图 → P4
+  const downgrade = hasDowngradeSignals(effectiveMsg);
+  if (downgrade.length > 0 && !isUnread) {
+    priority.level = 'P4';
+    reason.push(`降级信号: ${downgrade.join(', ')}`);
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 7: 30天内无互动 + 消息数≤10 → P3 (rule-based P3 fallback)
+  if (silenceDays > 30 && msgCount <= 10 && !isUnread) {
+    priority.level = 'P3';
+    reason.push('30天+无互动，消息少');
+    return { ...priority, reasons: reason, needAI: false };
+  }
+
+  // Rule 8: 30天内无互动 → P2/P3 边界 → needAI
+  if (silenceDays > 30 && !isUnread) {
+    priority.level = 'P2';
+    reason.push('30天内无互动（需AI确认是否降为P3）');
+    return { ...priority, reasons: reason, needAI: true };
+  }
+
+  // Rule 9: 未读消息 + 客户发送 → P0/P1 (待AI细分)
+  if (isUnread && msgType === 'received') {
+    const signals = hasUpgradeSignals(effectiveMsg);
+    if (signals.some((s) => s.includes('下单') || s.includes('PI') || s.includes('付款') || s.includes('地址确认'))) {
+      priority.level = 'P0';
+      priority.subType = '高意向';
+      reason.push('未读+客户消息+升级信号');
+      return { ...priority, reasons: reason, needAI: true };
+    }
+    priority.level = 'P1';
+    reason.push('未读消息，客户发送（需AI细分P0/P1）');
+    return { ...priority, reasons: reason, needAI: true };
+  }
+
+  // Rule 10: 未读消息 + 我方发送 → P1
+  if (isUnread && msgType === 'send') {
+    priority.level = 'P1';
+    reason.push('未读消息，我方发送（需AI确认）');
+    return { ...priority, reasons: reason, needAI: true };
+  }
+
+  // Rule 11: 有升级信号 + 近期活跃(≤7天) → P0/P1 (待AI细分)
+  const signals = hasUpgradeSignals(effectiveMsg);
+  if (signals.length > 0 && silenceDays <= 7) {
+    if (signals.some((s) => s.includes('下单') || s.includes('PI') || s.includes('付款'))) {
+      priority.level = 'P0';
+      priority.subType = '待确认';
+      reason.push(`强升级信号+7天内活跃: ${signals.slice(0, 3).join(', ')}`);
+      return { ...priority, reasons: reason, needAI: true };
+    }
+    priority.level = 'P1';
+    reason.push(`升级信号+7天内活跃: ${signals.slice(0, 3).join(', ')}`);
+    return { ...priority, reasons: reason, needAI: true };
+  }
+
+  // Rule 12: 近期活跃(≤14天) → P2
+  if (silenceDays <= 14) {
+    priority.level = 'P2';
+    reason.push('14天内活跃');
+    return { ...priority, reasons: reason, needAI: true };
+  }
+
+  // Rule 13: 有互动但在普通范围 → P2, needAI
+  if (silenceDays <= 30) {
+    priority.level = 'P2';
+    reason.push('30天内互动过');
+    return { ...priority, reasons: reason, needAI: true };
+  }
+
+  // Fallback: needAI
+  priority.level = 'P2';
+  reason.push('规则覆盖不全，需AI判断');
+  return { ...priority, reasons: reason, needAI: true };
+}
+
+// ====== 主处理 ======
+
+function processAll(data) {
+  const customers = data.customers || [];
+  const classified = customers.map((c) => {
+    const result = classifyCustomer(c);
+    return {
+      ...c,
+      _rulePriority: result.level,
+      _ruleSubType: result.subType || null,
+      _ruleReasons: result.reasons,
+      _needAI: result.needAI,
+      _ruleConfidence: result.confidence || 'deterministic',
+    };
+  });
+
+  const stats = {
+    total: classified.length,
+    byPriority: {},
+    needAI: classified.filter((c) => c._needAI).length,
+    deterministic: classified.filter((c) => !c._needAI).length,
+  };
+
+  for (const c of classified) {
+    stats.byPriority[c._rulePriority] = (stats.byPriority[c._rulePriority] || 0) + 1;
+  }
+
+  return {
+    classifiedAt: new Date().toISOString(),
+    source: data.processedAt || data.capturedAt || 'unknown',
+    stats,
+    customers: classified,
+  };
+}
+
+// ====== CLI ======
+
+function findLatestCleaned() {
+  const files = fs.readdirSync(DATA_DIR).filter((f) => f.startsWith('cleaned_') && f.endsWith('.json'));
+  if (files.length === 0) return null;
+  files.sort().reverse();
+  return files[0];
+}
+
+function main() {
+  const inputArg = process.argv[2];
+  let inputFile;
+
+  if (inputArg) {
+    inputFile = path.resolve(inputArg);
+  } else {
+    const latest = findLatestCleaned();
+    if (!latest) {
+      console.error('未找到 cleaned_*.json。请先运行 preprocess_cdp.js');
+      process.exit(1);
+    }
+    inputFile = path.join(DATA_DIR, latest);
+  }
+
+  if (!fs.existsSync(inputFile)) {
+    console.error(`文件不存在: ${inputFile}`);
+    process.exit(1);
+  }
+
+  console.log(`读取: ${path.basename(inputFile)}`);
+  const raw = JSON.parse(fs.readFileSync(inputFile, 'utf-8'));
+  const result = processAll(raw);
+
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const outFile = path.join(DATA_DIR, `classified_rules_${ts}.json`);
+  fs.writeFileSync(outFile, JSON.stringify(result, null, 2), 'utf-8');
+
+  console.log(`输出: ${path.basename(outFile)}`);
+  console.log(`统计: ${result.stats.total} 个客户`);
+  console.log(`优先级分布:`);
+  for (const [p, count] of Object.entries(result.stats.byPriority).sort()) {
+    console.log(`  ${p}: ${count}`);
+  }
+  console.log(`确定性分类: ${result.stats.deterministic} | 需AI: ${result.stats.needAI}`);
+}
+
+main();

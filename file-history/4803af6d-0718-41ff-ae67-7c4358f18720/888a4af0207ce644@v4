@@ -1,0 +1,100 @@
+# AI外贸顾问系统 — 项目重启
+
+**创建日期**：2026-04-29  
+**最后更新**：2026-04-29  
+**当前阶段**：Phase 2 分析引擎质量校准——单客户深度分析达标，已发现并修复数据污染问题
+
+---
+
+## 项目目标
+
+Claude Code 专属外贸军师——自动监控 300+ 小满客户，诊断卡点，生成话术和策略。
+
+## 核心文件
+
+### 方案
+`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+
+### 知识库（6个文件）
+```
+D:\ClaudeWorkspace\08_客户跟进\knowledge\
+├── factory.md              ← 工厂/品牌背书/技术/品类
+├── business-rules.md       ← 商务规则+交期+现货判断+报价区分
+├── value-translation.md    ← 16个卖点体感翻译
+├── market-psychology.md    ← 5区域客户心理
+├── hooks-library.md        ← 7类钩子×素材×话术
+└── system-prompt.md        ← 五步分析引擎
+```
+
+### 脚本
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\scripts\
+├── extract-all-v2.mjs        ← ⭐全量提取（window变量+DOM合并, 415人）
+├── deep-scrape-p0p1.mjs      ← ⭐P0/P1定向深抓（35/52人成功）
+├── daily-pipeline.mjs        ← ⭐一键管线（提取→分类→深抓→待分析）
+├── snapshot.mjs              ← 索引快照（60秒/39人DOM可见）
+├── snapshot-full.mjs         ← 增量滚动全量快照
+├── diff.mjs                  ← 对比引擎
+├── daily-check.mjs           ← 每日巡检调度
+├── generate-daily-report.mjs ← 每日战报Markdown
+├── generate-weekly-report.mjs← 每周巡检
+├── scraper.mjs               ← Playwright全量深挖
+├── run-scrape.mjs            ← 全流程（抓取→分类→Word报告）
+├── classifier.mjs            ← 11类S/A/B/C分类
+├── reporter.mjs              ← Word看板报告生成
+└── image-utils.mjs           ← 图片提取
+```
+
+### 工厂背景
+`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+
+---
+
+## 新对话重启指令
+
+复制以下发给 CC：
+
+> 我正在做AI外贸顾问系统项目。读取以下文件了解全貌：
+> 1. 方案：`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+> 2. 知识库：`D:\ClaudeWorkspace\08_客户跟进\knowledge\`（6个文件全部读）
+> 3. 工厂背景：`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+> 4. 最新快照：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\snapshots\`（找最新）
+> 5. 最新日报：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\daily-reports\`（找最新）
+>
+> 读完后告诉我当前状态和下一步。
+
+**处理具体客户时追加**：
+> 对客户{客户名}跑五步分析。从 `D:\ClaudeWorkspace\08_客户跟进\Okki\data\客户档案_*.json` 和 `deep_scrape_merged_*.json` 两个数据源交叉验证对话内容，不一致先问我。
+
+**关键教训**：
+- deep_scrape 数据存在 DOM 串位风险，消息可能被错误归到其他客户名下
+- 所有 P0 分析前必须交叉验证两个数据源，不一致立即停止，交由用户确认
+- 用不确定数据编造推断是最危险的错误——比不分析更糟
+
+---
+
+## 日常操作
+
+```
+每天早上 9:00:
+  node daily-check.mjs           ← 快照+对比
+  node generate-daily-report.mjs ← 生成战报
+  打开 reports/每日战报_*.md → 复制CC提示词 → CC分析 → 审核发送
+
+每周一:
+  node generate-weekly-report.mjs ← 休眠客户批量激活
+```
+
+## 进度
+
+| Phase | 状态 |
+|-------|------|
+| 1. 知识库构建 | ✅ |
+| 2. 分析引擎 | ✅（azaan ss 8.5, amer ly 8, DS双审通过） |
+| 3. 数据采集升级 | ✅ |
+| 4. 报告系统 | ✅ |
+| 5. 持续优化 | ⏳ |
+
+## 讨论记录
+
+方案讨论+DS协作：桌面 `0101.txt`

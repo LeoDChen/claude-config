@@ -1,0 +1,55 @@
+# OKKI 客户分析 — 启动指令
+
+## 对话一：同步数据
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js
+```
+
+## 对话二：分析（新对话，粘贴以下内容）
+
+```
+继续 OKKI CRM。读 STATE.md 和 knowledge/ 全部文件。
+
+读 data/tm_conversations_latest.json。消息在 message.content.text.content，
+发送者在 message.sender.uid，我方=2500000853693@icbu。
+过滤 systemMessage/autoReply。
+
+## S1: 输出五梯队分类清单
+
+含消息数。输出格式：
+
+P0（立即行动）
+1. 客户名 | 国家 | 消息数 | 最后联系 | 一句话理由
+...
+
+P1（本周跟进）
+...
+
+P2-P4 只给统计数字。
+
+## S2: 自动分批深度分析 P0/P1
+
+### 硬约束（违反任一条即停止）
+- **禁止写脚本截取对话**：必须用 Read 工具直接读 chat_history 文件原文，不可用 Node/Python 脚本提取"摘要"或"最近N条"代替
+- **每批 ≤5 人，总消息 ≤500 条**：超了就自动拆批，S1 末尾必须输出完整分批计划
+- **结论必须有原文锚点**：每个"阶段/卡点"判断后必须引用对话中具体句子
+
+### 阅读规则
+- ≤200 条：逐条读完整对话
+- >200 条：头部20条 + 尾部50条 + 全文搜索 PI/payment/invoice/address/quantity/price/sample/order 关键词
+- 消息≥10条的，lastMessage 是表情/单字/系统消息的 → 往前读至少3条有效消息
+
+### 输出格式（每客户）
+**客户名** | 国家 | 消息数 | 最后联系
+阶段：XXX | 证据：「原文句子」
+卡点：XXX | 证据：「原文句子」
+下一步：XXX（优先级：今天/48h/本周）
+话术：> [中文可复制版，含工厂背书]
+不确定：有/无（如有，列出）
+
+## S3: 自动生成报告
+
+汇总全部批次，输出 reports/客户五梯队分析_YYYY-MM-DD.docx。
+最后附：不确定事项清单。
+```

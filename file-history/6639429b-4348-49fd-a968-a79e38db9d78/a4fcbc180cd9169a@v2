@@ -1,0 +1,74 @@
+# Phase 1: TM 聊天 API 网络侦察
+
+## 目标
+
+找到阿里 TM 聊天消息的 API 端点、参数格式、响应结构。5 分钟决定全量抓取是否可行。
+
+## 执行步骤
+
+### 1. 关闭 Chrome + 带 CDP 启动
+
+```bash
+# PowerShell 或 CMD:
+taskkill /F /IM chrome.exe
+
+"C:/Users/Administrator/AppData/Local/Google/Chrome/Application/chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\tmp\cdp_session_v3" https://crm.xiaoman.cn/
+```
+
+### 2. 导航到 TM 聊天
+
+- 确认已登录 OKKI（可能需要手动输入子账号密码）
+- 左侧菜单 → "沟通" → "TM咨询"
+- 此时应看到联系人列表（约 20 个置顶 + 其他）
+
+### 3. DevTools 设置
+
+- 按 **F12** 打开 DevTools
+- 切换到 **Network** 标签
+- 勾选 **Preserve log**
+- 清空现有记录（点击 🚫 图标）
+- 在 Filter 框输入: `mtop`
+
+### 4. 触发聊天加载
+
+- 在左侧联系人列表中，**点击一个有聊天记录的联系人**
+- 观察 Network 面板
+
+### 5. 关键信息（截图保存）
+
+如果 Filter `mtop` 有结果：
+
+- **完整 URL**: `https://acs.h.alibaba.com/h5/mtop.xxx.xxx/1.0/`
+- **Request Method**: POST/GET
+- **Request Payload**: 最关键的——联系人 ID 怎么传的？分页参数？
+- **Response**: JSON 结构，消息列表在哪个字段？（`data.list`? `data.messages`? `data.records`?）
+
+如果 Filter `mtop` 是空的：
+
+- **去掉 filter**，看所有请求
+- 找任何包含 `alibaba` / `acs` / `onetalk` / `message` / `chat` 的请求
+- 截图所有返回较大 JSON 的请求
+
+## 你需要带给新对话的信息
+
+```
+1. API URL: 完整的请求地址
+2. Payload 格式: POST body 内容（URL-encoded? JSON?）
+3. 响应样例: 前 2-3 条消息的 JSON 结构
+4. 是否有签名/Token: 请求头里有特殊字段吗？（_m_h5_tk, data-sign 等）
+```
+
+## 两条路径
+
+| 情况 | 后续方案 |
+|------|---------|
+| ✅ MTOP API 可调 | `scrape_all.js` 自动翻页，全量 346 人聊天 |
+| ❌ WebSocket/签名校验 | 退而求其次：邮件+详情 API 自动抓 346 人，聊天仅对 20 置顶客户 DOM 提取 |
+
+## CDP 连接确认
+
+启动后验证端口：
+```bash
+curl -s http://localhost:9222/json/version
+# 应返回 Chrome 版本信息
+```

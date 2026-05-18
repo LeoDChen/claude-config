@@ -1,0 +1,147 @@
+/**
+ * 小满CRM — 每日战报生成器
+ *
+ * 读取 daily diff JSON，生成 CC 可读的 Markdown 报告。
+ * P0 客户附带 CC 分析提示词，复制即可启动五步分析。
+ *
+ * 用法: node generate-daily-report.mjs [日期]
+ *       node generate-daily-report.mjs          → 今天
+ *       node generate-daily-report.mjs 2026-04-29 → 指定日期
+ */
+
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const DAILY_DIR = join(DATA_DIR, 'daily-reports');
+const REPORTS_DIR = join(__dirname, '..', 'reports');
+
+if (!existsSync(REPORTS_DIR)) mkdirSync(REPORTS_DIR, { recursive: true });
+
+// ============================================================
+// 生成 Markdown 报告
+// ============================================================
+function generateMarkdown(dailyData) {
+  const { generatedAt, summary, P0, P1 } = dailyData;
+  const dateStr = generatedAt.substring(0, 10);
+
+  let md = `# 小星星外贸跟进日报 — ${dateStr}
+
+> 自动生成于 ${new Date(generatedAt).toLocaleString('zh-CN')}
+> 监控范围：${summary?.currTotal || '全量'} 客户 | 数据源：小满CRM
+
+---
+
+## 📊 今日概览
+
+| 指标 | 数量 |
+|------|------|
+| 新客户 | ${summary?.newCustomers || 0} |
+| 状态变化 | ${summary?.changed || 0} |
+| 🚨 P0 紧急 | **${P0?.length || 0}** |
+| 📌 P1 高优 | ${P1?.length || 0} |
+
+---
+
+`;
+
+  // ==================== P0 紧急 ====================
+  if (P0 && P0.length > 0) {
+    md += `## 🚨 P0 紧急 — 需立即处理 (${P0.length}人)
+
+`;
+    P0.forEach((c, i) => {
+      md += `### ${i + 1}. ${c.name}
+
+- **类别**：${c.categoryId} | **严重度**：${c.tier || 'A'}
+- **原因**：${c.reason}
+- **最后消息**：${c.lastMessage || '(无)'}
+
+> **CC 分析提示**：请读取 \`D:\\ClaudeWorkspace\\08_客户跟进\\Okki\\data\\客户档案_*.json\` 中该客户的完整对话，加载 knowledge/ 目录下所有知识文件，按五步框架输出分析方案。重点：客户画像→卡点诊断→策略推演→具体话术→分支预演。
+
+---
+`;
+    });
+  } else {
+    md += `## 🚨 P0 紧急 — 无
+
+✅ 当前没有需要立即处理的紧急客户。
+
+`;
+  }
+
+  // ==================== P1 高优 ====================
+  if (P1 && P1.length > 0) {
+    md += `## 📌 P1 高优 — 今日待跟进 (${P1.length}人)
+
+| # | 客户 | 类别 | 原因 |
+|---|------|------|------|
+`;
+    P1.forEach((c, i) => {
+      md += `| ${i + 1} | ${c.name} | ${c.categoryId} | ${c.reason} |\n`;
+    });
+    md += '\n';
+  }
+
+  // ==================== 操作指南 ====================
+  md += `---
+
+## 📋 操作指南
+
+1. **P0 客户**：复制上方"CC 分析提示"发给 Claude Code，获取完整五步分析+话术
+2. **P1 客户**：在"每日跟进"时间段内逐个处理
+3. **P2/P3 客户**：每周一运行 \`node generate-weekly-report.mjs\` 获取批量激活方案
+
+---
+
+*本报告由 AI外贸顾问系统自动生成 | ${generatedAt}*
+`;
+
+  return md;
+}
+
+// ============================================================
+// 主入口
+// ============================================================
+function main() {
+  const args = process.argv.slice(2);
+
+  let reportPath;
+  if (args.length > 0) {
+    reportPath = join(DAILY_DIR, `daily_${args[0]}.json`);
+  } else {
+    // 找最新的daily报告
+    const files = readdirSync(DAILY_DIR)
+      .filter(f => f.startsWith('daily_') && f.endsWith('.json'))
+      .sort()
+      .reverse();
+    if (files.length === 0) {
+      console.error('未找到每日报告。请先运行 node daily-check.mjs');
+      process.exit(1);
+    }
+    reportPath = join(DAILY_DIR, files[0]);
+  }
+
+  if (!existsSync(reportPath)) {
+    console.error(`报告不存在: ${reportPath}`);
+    process.exit(1);
+  }
+
+  console.log('[report] 读取每日数据...');
+  const dailyData = JSON.parse(readFileSync(reportPath, 'utf-8'));
+
+  const markdown = generateMarkdown(dailyData);
+  const dateStr = dailyData.generatedAt.substring(0, 10);
+  const outputPath = join(REPORTS_DIR, `每日战报_${dateStr}.md`);
+
+  writeFileSync(outputPath, markdown);
+  console.log(`[report] 每日战报已生成: ${outputPath}`);
+  console.log(`[report] P0: ${dailyData.P0?.length || 0}人 | P1: ${dailyData.P1?.length || 0}人`);
+
+  // 也打印到终端
+  console.log('\n' + markdown);
+}
+
+main();

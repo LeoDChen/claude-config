@@ -1,0 +1,713 @@
+const fs = require('fs');
+const path = require('path');
+
+const s1 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 's1_classification.json'), 'utf8'));
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const NOW = Date.now();
+const DAY = 86400000;
+const OUR_UID = '2500000853693@icbu';
+
+// ── 工具函数 ──
+const SYS_PATTERNS = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '有流失', 'Buyer has churn risk',
+  '一旦离开平台', '由于您介入该会话', 'Due to your intervention',
+  '平台规则提醒', '查看规则', '平台交易有保障', '平台已告知买家',
+  'AI智能判断该买家', '该买家已去除', '享受安全保障',
+  '翻译结果由买家发送', '由阿里翻译提供',
+  '买家进店', '访客接待',
+  '撤回了一条消息',
+  '反馈', 'AI给您生成了一条回复建议', 'AI给您生成',
+  'You have a visitor', 'This buyer has been pre-screened',
+  '当前买家首次给您发消息', '查看买家特征',
+];
+function isSys(c) { const t = c && c.text && c.text.content || ''; if (!t.trim()) return true; for (const p of SYS_PATTERNS) if (t.includes(p)) return true; return false; }
+function getText(c) { return c && c.text && c.text.content || ''; }
+
+const Q_PATTERNS = [/\?/, /(what|how|when|where|which|who|why|whom)/i, /(can you|could you|would you|will you|do you|is it|are you)/i, /(please.*(send|give|tell|quote|share|confirm|advise|provide|let me know))/i, /(i need|i want|i would like|i'm looking for|we need|we want|we are looking)/i, /[吗呢吧啊]/, /[？]/, /(价格|报价|多少钱|什么价)/, /(样品|sample|打样)/i, /(MOQ|起订量|最小.*量)/i, /(交期|delivery.*time|lead.*time)/i];
+function isQuestion(text) { if (!text || text.length < 3) return false; for (const p of Q_PATTERNS) if (p.test(text)) return true; return false; }
+
+function assessQuality(qText, rText) {
+  if (!rText || rText.trim().length === 0) return { q: '未回复', s: 0 };
+  const len = rText.trim().length;
+  if (/^(ok|okay|yes|no|thanks|thank you|got it|noted|well|sure|好的|收到|嗯|哦|知道了)[\s,.]*$/i.test(rText.trim()) || len < 15) return { q: '敷衍回复', s: 1 };
+  if (len < 50) return { q: '简短回复', s: 2 };
+  const qw = (qText || '').toLowerCase().replace(/[?？,.]/g, '').split(/\s+/).filter(w => w.length > 3);
+  const rl = rText.toLowerCase();
+  const m = qw.filter(w => rl.includes(w));
+  return (m.length / Math.max(qw.length, 1) >= 0.3 || len >= 100) ? { q: '充分回复', s: 3 } : { q: '简短回复', s: 2 };
+}
+
+// ── 生命周期判定 ──
+function determineLifecycle(e) {
+  const { hasPI, hasAddress, hasOrderSignal, hasPrice, hasSample, hasQuantity, realMsgs, customerMsgs, ourMsgs, daysAgo, lastCustomerMsgDays, questionUnanswered, lastCustQuestion } = e;
+  const fullText = ((e.latestOurMsg || '') + ' ' + (e.latestCustMsg || '') + ' ' + (e.lastCustQuestion || '')).toLowerCase();
+
+  // 订单执行中：付款确认+生产/发货讨论
+  if (hasPI && /(paid|payment.*done|deposit.*paid|生产|produc|ship.*out|on the way|tracking|dispatch)/i.test(fullText)) return { stage: 6, label: '订单执行中', icon: '📦' };
+
+  // 已签收
+  if (hasPI && /(received|arrived|delivered|got.*goods|收到.*货|签收)/i.test(fullText)) return { stage: 7, label: '已签收', icon: '✅' };
+
+  // PI已发（不限天数，只看信号）
+  if (hasPI) return { stage: 5, label: 'PI已发', icon: '📄' };
+
+  // 售后疑似标记：关键词命中只打标，不硬判。需人工/AI读对话确认
+  const custText = ((e.latestCustMsg || '') + ' ' + (e.lastCustQuestion || '')).toLowerCase();
+  e.afterSalesFlag = false;
+  const afterSalesRe = /(damage|broken|defect|complain|refund|bad quality|poor quality|not satisfied|not happy|send back|exchange|replace|有问题|坏的|退货|退款|投诉|质量差|不满意|换货|搞错了|发错了)/i;
+  if (realMsgs >= 3 && customerMsgs >= 1 && afterSalesRe.test(custText)) {
+    e.afterSalesFlag = true;
+  }
+
+  // 谈判/样品（不限天数）
+  if ((hasPrice || hasSample) && hasQuantity && realMsgs >= 10) return { stage: 4, label: '谈判/样品', icon: '🤝' };
+  if (hasSample && realMsgs >= 5) return { stage: 4, label: '谈判/样品', icon: '🤝' };
+
+  // 报价已发（不限天数）
+  if (hasPrice) return { stage: 3, label: '报价已发', icon: '💰' };
+
+  // 待回复：客户有新消息未回
+  if (questionUnanswered || (customerMsgs > ourMsgs && lastCustomerMsgDays <= 1)) return { stage: 1, label: '待回复', icon: '🔴' };
+
+  // 初询沟通（不限天数）
+  if (realMsgs >= 1) return { stage: 2, label: '初询沟通', icon: '📋' };
+
+  return { stage: 0, label: '待分类', icon: '❓' };
+}
+
+// ── 沉默副状态 ──
+function silenceLabel(days) {
+  if (days >= 90) return '沉淀(90d+)';
+  if (days >= 30) return '深度沉默(30-90d)';
+  if (days >= 14) return '长期沉默(14-30d)';
+  if (days >= 7) return '中期沉默(7-14d)';
+  if (days >= 3) return '短期沉默(3-7d)';
+  return '';
+}
+
+// ── 质量等级判定 ──
+function determineQuality(e, fullCustText, fullConvText) {
+  const ft = (fullConvText || '').toLowerCase();
+  const ct = (fullCustText || '').toLowerCase();
+
+  // ── 全量对话提取数量信息（从客户消息提取更可靠）──
+  // 支持英/中/法/西/阿语常见数量单位
+  const qtyMatches = ct.match(/(\d{3,})\s*(pcs|pieces|units?|unit[ée]s?|件|piece|pc|pce|paires?|douzaines?|qt[ée]|quantit[ée]s?|sets?|ensembles?)/gi) || [];
+  let maxQty = 0;
+  for (const qm of qtyMatches) {
+    const n = parseInt(qm.match(/\d+/)[0], 10);
+    if (n > maxQty) maxQty = n;
+  }
+
+  // ── 母婴品类信号（修正 D 误判用）──
+  const isBabyRelated = /(baby|kid|child|infant|toddler|newborn|bib|romper|bodysuit|onesie|swaddle|sleepsuit|blanket|crib|stroller|nursery|童|婴|幼|卡通|cartoon)/i.test(ft);
+
+  // ── S 级信号（严格版 — 优先用 ct 即客户消息）──
+  const sSignals = [];
+  // 品牌/ODM: 明确且有意图的组合（含法/西/阿语）
+  if (/(odm|oem|private\s*(label|brand)|own\s*(brand|design|label)|custom\s*(logo|packaging|packing|design|label|box|bag|tag)|hangtag|barcode|brand\s*name|brand\s*label|your\s*logo|my\s*logo|our\s*logo|marque|personnalis[ée]|personnaliser|[ée]tiquette.*perso|logo.*perso|votre.*logo|mon.*logo|mon.*design|mon.*propre)/i.test(ct))
+    sSignals.push('品牌/ODM');
+  // 分销渠道: 明确平台或分销语言（含法/西/阿语）
+  if (/(amazon|walmart|shopify|distributor|retail\s*(chain|store|shop)|wholesale\s*(channel|distributor|business)|sell\s*(on|through|in)\s*(amazon|walmart|shopify|online)|revendeur|distributeur|vendre.*(sur|en ligne|amazon)|boutique.*(en ligne|online)|tienda.*(online|en.linea)|mayorista)/i.test(ct))
+    sSignals.push('分销渠道');
+  if (maxQty >= 500) sSignals.push('大批量(' + maxQty + '件)');
+  // 公司资料: 客户主动分享
+  if (/(here.*(is|are).*(website|store|shop|link)|check.*(my|our).*(website|store|shop|page)|this\s*is\s*(my|our).*(website|store|shop)|find\s*(us|me).*(on|at).*(website|store))/i.test(ct) ||
+      /(https?:\/\/|www\.\w+\.(com|net|org|co))/i.test(ct))
+    sSignals.push('公司资料');
+  // 复购: 明确的复购/追加语言
+  if (/(reorder|restock|another\s*(order|shipment|batch|container)|second\s*(order|shipment)|repeat\s*order|buy\s*more|order\s*more|send\s*more|top\s*up)/i.test(ct))
+    sSignals.push('复购信号');
+
+  // ── A 级附加信号 ──
+  const aSignals = [];
+  if (maxQty >= 200 && maxQty < 500) aSignals.push('中批量(' + maxQty + '件)');
+  if (/(500.*ok|500.*fine|moq.*(ok|fine|accept|no.*problem)|accept.*(moq|500|minimum)|can.*(take|do|handle).*500|ok.*(with|about).*(500|moq)|no.*problem.*(500|moq)|(je|nous).*(prends?|commande|veux|voudrais).*500|500.*(va|marche|ok|d'accord)|pas.*probl[èe]me.*500)/i.test(ct))
+    aSignals.push('MOQ已接受');
+  if (/(sample.*(sent|shipped|sending|ready|prepar|made|done|making|proceed)|(sent|shipped|send|ready).*sample|样品.*(寄|发|做|准备))/i.test(ft))
+    aSignals.push('样品已寄/在准备');
+  if (e.realMsgs >= 15 && e.customerMsgs >= 3)
+    aSignals.push('深度沟通(' + e.realMsgs + '条)');
+  if (/(price.*(high|expensive|too much|negot|discount|lower|reduce|better.*price|best.*price|last.*price|final.*price)|便宜|贵|折扣|降价|便宜点|r[ée]duction|remise|rabais|n[ée]goci|trop.*(cher|[ée]lev[ée]|haut)|moins.*cher|prix.*(bas|moins)|descuento|rebaja|caro|muy.*caro|barato)/i.test(ct))
+    aSignals.push('价格谈判');
+  if (/(bsci|iso|audit|certif|认证|factory.*(video|tour|visit)|验厂|验货)/i.test(ct))
+    aSignals.push('关心认证/验厂');
+  if (/(freight|shipping|运费|物流|delivery.*cost|ship.*cost|transport.*cost|dhl|fedex|ups|aramex|courier|by sea|by air|container)/i.test(ct) && e.hasQuantity)
+    aSignals.push('讨论运费+数量');
+
+  // ── C 级降级信号 ──
+  const cSignals = [];
+  if (/(for myself|for my kid|for my baby|personal use|自用|送人|gift.*for|for.*gift|personal.*purchase|own.*use|just.*for.*(me|myself|my.*kid|my.*baby)|pour moi|pour mon|personnel|usage.*personnel|uso.*personal|para mi)/i.test(ct))
+    cSignals.push('个人自用');
+  if (/(just.*(few|a few|small|little|some)|small.*(quantity|order|business|little)|little.*(order|quantity|business|bit)|tiny|only.*(need|want).*\d{1,2}\s*(pcs|pieces)|petit.*(quantit[ée]|commande)|peu.*(de|commande)|juste.*(quelques|un peu)|solo.*(pocos?|pocas?|unos?|unas?))/i.test(ct))
+    cSignals.push('小批量暗示');
+  if (maxQty > 0 && maxQty <= 50) cSignals.push('明确小量(' + maxQty + '件)');
+  if (e.realMsgs <= 3 && e.customerMsgs === 1 && !e.hasPrice && !e.hasSample && !e.hasQuantity)
+    cSignals.push('单次浅层互动');
+
+  // ── D 级判定（修正版）──
+  if (e.realMsgs <= 2 && e.customerMsgs === 0)
+    return { grade: 'D', label: '无关/废弃', reason: '仅系统消息/无真实对话', auto: true };
+
+  // 品类不匹配：成人/非母婴 AND NOT 母婴相关
+  if (/(adult|成人|men.*wear|男装|sexy|lingerie|women.*dress|fashion.*(dress|wear)|wedding|evening.*(dress|wear)|not.*(baby|kid|child))/i.test(ft) && !isBabyRelated)
+    return { grade: 'D', label: '无关', reason: '品类不匹配(非母婴)', auto: true };
+
+  // 非采购意图
+  if (/(转让|加盟|franchise|找.*工作|job|hiring|recruit|sell.*business)/i.test(ft) && e.realMsgs <= 5)
+    return { grade: 'D', label: '无关', reason: '非采购意图', auto: true };
+
+  // ── 综合定级 ──
+  const totalSSignals = sSignals.length;
+  const totalASignals = aSignals.length;
+  const totalCSignals = cSignals.length;
+
+  // S: 2+ 个S级信号
+  if (totalSSignals >= 2)
+    return { grade: 'S', label: '战略客户', reason: sSignals.join('+'), auto: true };
+
+  // A: 1个S级信号 或 (2+个A级信号+有实质互动)
+  if (totalSSignals >= 1)
+    return { grade: 'A', label: '优质客户', reason: [...sSignals, ...aSignals].filter(Boolean).join('+') || sSignals.join('+'), auto: true };
+
+  if (totalASignals >= 2 && e.realMsgs >= 5)
+    return { grade: 'A', label: '优质客户', reason: aSignals.join('+'), auto: true };
+
+  // C: 明确降级信号 + 无上升信号
+  if (totalCSignals >= 2 && totalSSignals === 0 && totalASignals <= 1)
+    return { grade: 'C', label: '低价值', reason: cSignals.join('+'), auto: true };
+
+  if (maxQty > 0 && maxQty <= 30 && totalSSignals === 0 && totalASignals === 0)
+    return { grade: 'C', label: '低价值', reason: '明确小量≤30件', auto: true };
+
+  // 单次互动无后续 → C（而非B）
+  if (e.realMsgs <= 4 && e.customerMsgs >= 1 && e.customerMsgs <= 2 && !e.hasPrice && !e.hasSample && !e.hasQuantity && typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays > 30)
+    return { grade: 'C', label: '低价值', reason: '单次互动+30天无后续', auto: true };
+
+  // 浅互动+长期沉默 → C（"问完消失"模式）
+  if (e.realMsgs <= 5 && e.customerMsgs <= 2 && totalSSignals === 0 && totalASignals <= 1 && typeof e.lastCustomerMsgDays === 'number' && e.lastCustomerMsgDays > 60)
+    return { grade: 'C', label: '低价值', reason: '浅互动+长期沉默(' + e.lastCustomerMsgDays + 'd)', auto: true };
+
+  // B: 有实质互动，信号不足以升A/S也不足以降C/D
+  if (e.realMsgs >= 3 && e.customerMsgs >= 1)
+    return { grade: 'B', label: '普通客户', reason: '有互动但信号不足', auto: true };
+
+  if (e.hasPrice || e.hasSample || e.hasQuantity)
+    return { grade: 'B', label: '普通客户', reason: '有实质讨论', auto: true };
+
+  return { grade: 'B', label: '普通客户', reason: '信息不足', auto: true };
+}
+
+// ── 国家代码→中文映射 ──
+const COUNTRY_CN = {
+  'US':'美国','GB':'英国','DE':'德国','FR':'法国','IT':'意大利','ES':'西班牙','NL':'荷兰','BE':'比利时','PT':'葡萄牙','RU':'俄罗斯','TR':'土耳其',
+  'IN':'印度','PK':'巴基斯坦','BD':'孟加拉','JP':'日本','KR':'韩国','HK':'香港','ID':'印尼','MY':'马来西亚','PH':'菲律宾','VN':'越南','TH':'泰国',
+  'SD':'苏丹','EG':'埃及','CD':'刚果民主','ZM':'赞比亚','CI':'科特迪瓦','SA':'沙特','AE':'阿联酋','GH':'加纳','NG':'尼日利亚','KE':'肯尼亚','TZ':'坦桑尼亚',
+  'ZA':'南非','MA':'摩洛哥','DZ':'阿尔及利亚','TN':'突尼斯','LY':'利比亚','ET':'埃塞俄比亚','UG':'乌干达','RW':'卢旺达','CM':'喀麦隆','SN':'塞内加尔',
+  'ML':'马里','TG':'多哥','BJ':'贝宁','BF':'布基纳法索','CG':'刚果','GA':'加蓬','ZR':'刚果(金)','LR':'利比里亚','SL':'塞拉利昂','GN':'几内亚',
+  'IQ':'伊拉克','LB':'黎巴嫩','JO':'约旦','KW':'科威特','QA':'卡塔尔','OM':'阿曼','BH':'巴林','IL':'以色列','SY':'叙利亚','YE':'也门',
+  'BR':'巴西','AR':'阿根廷','CL':'智利','CO':'哥伦比亚','PE':'秘鲁','MX':'墨西哥','BO':'玻利维亚','VE':'委内瑞拉','EC':'厄瓜多尔','PY':'巴拉圭',
+  'AU':'澳大利亚','NZ':'新西兰','CA':'加拿大','PL':'波兰','UA':'乌克兰','RO':'罗马尼亚','HU':'匈牙利','CZ':'捷克','SE':'瑞典','DK':'丹麦',
+  'MD':'摩尔多瓦','PA':'巴拿马','ZW':'津巴布韦','DJ':'吉布提',
+};
+function countryCN(code) { return COUNTRY_CN[code] || code; }
+
+// ── 行动引擎 ──
+// 返回 { status: "当前状态描述", action: "行动方向", priority: "urgent|soon|watch|idle" }
+function getAction(e) {
+  const d = typeof e.lastCustomerMsgDays === 'number' ? e.lastCustomerMsgDays : 9999;
+  const g = e.grade;
+  const stage = e.stageLabel;
+
+  if (stage === '待回复') {
+    return { status: '客户消息待回复', action: '24h内回复（平台考核及时回复率）', priority: 'urgent' };
+  }
+
+  if (stage === '售后') {
+    const act = (g === 'S' || g === 'A') ? '≤1h响应，主动给补偿方案' : '24h内回复，标准处理流程';
+    return { status: '售后/投诉处理中', action: act, priority: 'urgent' };
+  }
+
+  if (stage === '订单执行中') {
+    if (d <= 7) return { status: '订单进行中，上次互动' + d + '天前', action: (g === 'S' || g === 'A') ? '每周同步进度，拍照/视频' : '关键节点通知（排产/发货）', priority: 'watch' };
+    return { status: '订单进行中，已' + d + '天未同步', action: '主动同步生产进度+发货时间', priority: 'soon' };
+  }
+
+  if (stage === '已签收') {
+    if (d <= 1) return { status: '刚签收', action: '当天回访：确认收货完好+问反馈', priority: 'urgent' };
+    if (d <= 3) return { status: '签收' + d + '天', action: '3天回访：问产品质量+使用情况', priority: 'soon' };
+    if (d <= 7) return { status: '签收' + d + '天', action: '7天回访：发新品目录+争取复购', priority: 'soon' };
+    if (d <= 30) return { status: '签收' + d + '天', action: '确认满意度+发新品，推动复购', priority: 'watch' };
+    return { status: '签收' + d + '天，进入复购周期', action: (g === 'S' || g === 'A') ? '定期同步新品+定制方案' : '节日/新品节点触达', priority: 'idle' };
+  }
+
+  if (stage === 'PI已发') {
+    // PI已发有独立节奏（不等同于前面快节奏阶段）
+    if (d <= 2) return { status: 'PI刚发' + d + '天，确认期', action: (g === 'S' || g === 'A') ? '48h内确认客户收到PI' : '确认PI已收到', priority: 'urgent' };
+    if (d <= 5) return { status: 'PI已发' + d + '天，首次提醒窗口', action: (g === 'S' || g === 'A') ? '提醒付款，附排产计划增加紧迫感' : '温和提醒PI到期时间', priority: 'soon' };
+    if (d <= 14) return { status: 'PI已发' + d + '天，催款窗口', action: (g === 'S' || g === 'A') ? '催款+问"是否需要调整PI"' : '确认是否继续+问是否有障碍', priority: 'soon' };
+    if (d <= 30) return { status: 'PI已发' + d + '天，需重新激活', action: (g === 'S' || g === 'A') ? '问"还在进行吗"+给替代方案/新选项' : '温和问"需要我重新报吗"', priority: 'idle' };
+    return { status: 'PI已发' + d + '天，长期未转化', action: (g === 'S' || g === 'A') ? '保持1-2月/次最低触达' : '降频触达，等新产品激活', priority: 'idle' };
+  }
+
+  // 初询沟通 / 报价已发 / 谈判样品 / 未分类 — 统一快节奏
+  const stageName = stage === '初询沟通' ? '初询' : stage === '报价已发' ? '报价后' : stage === '谈判/样品' ? '谈判中' : stage;
+  if (d <= 1) {
+    return { status: stageName + '，昨日互动', action: (g === 'S' || g === 'A') ? '今日跟进，带新信息推进' : '今日跟进，保持对话节奏', priority: 'urgent' };
+  }
+  if (d <= 3) {
+    return { status: stageName + '，沉默' + d + '天', action: (g === 'S' || g === 'A') ? '追问需求+发认证/案例增加信任' : '换切入点追问，保持存在感', priority: 'soon' };
+  }
+  if (d <= 5) {
+    return { status: stageName + '，沉默' + d + '天', action: (g === 'S' || g === 'A') ? '发新品/同行案例，换个角度推进' : '温和提醒+问是否有新需求', priority: 'soon' };
+  }
+  if (d <= 7) {
+    return { status: stageName + '，沉默' + d + '天', action: (g === 'S' || g === 'A') ? '定制激活：复盘卡点+针对性破局' : '发工厂动态/新品+问"还在找吗"', priority: 'idle' };
+  }
+  if (d <= 14) {
+    return { status: stageName + '，沉默' + d + '天，需激活', action: (g === 'S' || g === 'A') ? '发认证更新+同行案例+问"上次方向还继续吗"' : '发新品类/新到货，重新建立联系', priority: 'idle' };
+  }
+  if (d <= 30) {
+    return { status: stageName + '，长期沉默' + d + '天', action: (g === 'S' || g === 'A') ? '不催单。发工厂动态/节日/认证维存在感' : '降频15天/次，等新产品激活', priority: 'idle' };
+  }
+  return { status: stageName + '，沉淀' + d + '天', action: (g === 'S' || g === 'A') ? '保持1-2月最低触达' : '暂停触达，等新产品/新认证再激活', priority: 'idle' };
+}
+
+// ── 主循环 ──
+const allResults = [];
+for (let i = 0; i <= 4; i++) { if (s1.results[i]) allResults.push(...s1.results[i]); }
+const candidates = allResults;
+console.log('处理全部 ' + candidates.length + ' 个客户 (P0-P4)...\n');
+
+const enhanced = [];
+for (const c of candidates) {
+  const fid = c.cid ? c.cid.replace(/#/g, '_').replace(/@/g, '_') + '.json' : '';
+  const fp = path.join(chatDir, fid);
+
+  let msgCount = 0, customerMsgs = 0, ourMsgs = 0, sysMsgs = 0;
+  let hasPI = false, hasAddress = false, hasOrderSignal = false, hasPrice = false;
+  let hasSample = false, hasFreight = false, hasMOQ = false, hasQuantity = false;
+  let latestOurMsg = '', latestOurDate = '', latestCustMsg = '', latestCustDate = '';
+  let lastCustomerMsgDays = 9999;
+  let lastCustQuestion = '', lastCustQuestionDate = '', ourResponseQuality = 'N/A';
+  let responseGapDays = -1, questionUnanswered = false;
+  let fullCustText = '', fullConvText = '';
+
+  if (fs.existsSync(fp)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+      const msgs = data.messages || [];
+      msgCount = msgs.length;
+
+      for (const m of msgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const text = getText(msg.content);
+        const date = msg.createAt || '';
+        if (isSys(msg.content)) { sysMsgs++; continue; }
+
+        if (uid === OUR_UID) {
+          ourMsgs++; if (date > latestOurDate) { latestOurDate = date; latestOurMsg = text; }
+          if (text.trim()) fullConvText += '[我方] ' + text + ' | ';
+        } else if (uid) {
+          customerMsgs++;
+          if (date > latestCustDate) { latestCustDate = date; latestCustMsg = text; }
+          if (text.trim()) { fullCustText += text + ' | '; fullConvText += '[客户] ' + text + ' | '; }
+          if (date) lastCustomerMsgDays = Math.min(lastCustomerMsgDays, Math.floor((NOW - new Date(date).getTime()) / DAY));
+        }
+
+        const lc = text.toLowerCase();
+        if (/\bpi\b|proforma\s*invoice|invoice\s*sent|付款|deposit|定金|tt\s|wire\s*transfer|bank\s*transfer/.test(lc + text)) hasPI = true;
+        if (/(address|地址|city|country|delivery\s*address|where.*ship|send.*to|destination)/.test(lc)) hasAddress = true;
+        if (/(place.*order|make.*order|confirm.*order|下单|order.*confirmed|want.*to.*order|proceed.*order|ready.*order)/.test(lc)) hasOrderSignal = true;
+        if (/(price|quotation|quote|报价|unit.*price|each.*cost)/.test(lc)) hasPrice = true;
+        if (/(sample|样品)/.test(lc)) hasSample = true;
+        if (/(freight|shipping|运费|物流|delivery|transport|courier|dhl|fedex)/.test(lc)) hasFreight = true;
+        if (/(moq|minimum.*order|最低.*数量|500.*piece|最小.*订单)/.test(lc)) hasMOQ = true;
+        if (/(quantity|数量|how.*many|pieces|pcs|units)/.test(lc)) hasQuantity = true;
+      }
+
+      // 找最后的客户提问
+      const sortedMsgs = [...msgs].filter(m => !isSys((m.message || m).content)).sort((a, b) => ((b.message || b).createAt || 0) - ((a.message || a).createAt || 0));
+      for (const m of sortedMsgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const text = getText(msg.content);
+        if (uid && uid !== OUR_UID && isQuestion(text)) { lastCustQuestion = text; lastCustQuestionDate = msg.createAt || ''; break; }
+      }
+
+      if (lastCustQuestion && lastCustQuestionDate) {
+        const qTs = new Date(lastCustQuestionDate).getTime();
+        let respText = '', respDate = '';
+        for (const m of [...sortedMsgs].reverse()) {
+          const msg = m.message || m;
+          const ts = (msg.createAt || 0);
+          if ((msg.sender && msg.sender.uid) === OUR_UID && ts > qTs) { respText = getText(msg.content); respDate = msg.createAt || ''; break; }
+        }
+        if (respText) {
+          const gapH = (new Date(respDate).getTime() - qTs) / 3600000;
+          responseGapDays = Math.round(gapH / 24 * 10) / 10;
+          const a = assessQuality(lastCustQuestion, respText);
+          ourResponseQuality = a.q + ' (' + responseGapDays + 'd)';
+        } else {
+          ourResponseQuality = '未回复';
+          responseGapDays = Math.round((NOW - qTs) / DAY * 10) / 10;
+          questionUnanswered = true;
+        }
+      }
+    } catch (e) { /* skip corrupt */ }
+  }
+
+  const realMsgs = customerMsgs + ourMsgs;
+  const cRatio = realMsgs > 0 ? Math.round(customerMsgs / realMsgs * 100) : 0;
+  const country = c.country || '';
+  const coreMarkets = ['SD', 'EG', 'CD', 'ZM', 'CI', 'SA', 'AE'];
+  const isCore = coreMarkets.includes(country);
+
+  const obj = {
+    name: c.name || '(未知)', country, isCore, daysAgo: c.daysAgo,
+    msgCount, customerMsgs, ourMsgs, sysMsgs, realMsgs, cRatio,
+    lastCustomerMsgDays: lastCustomerMsgDays === 9999 ? '-' : lastCustomerMsgDays,
+    latestOurMsg: latestOurMsg.substring(0, 100), latestCustMsg: latestCustMsg.substring(0, 100),
+    hasPI, hasAddress, hasOrderSignal, hasPrice, hasSample, hasFreight, hasMOQ, hasQuantity,
+    lastCustQuestion: lastCustQuestion.substring(0, 200), ourResponseQuality, responseGapDays, questionUnanswered,
+    cid: c.cid, filename: fid,
+  };
+
+  // 双轴分类
+  const lc = determineLifecycle(obj);
+  const ql = determineQuality(obj, fullCustText, fullConvText);
+  const sil = silenceLabel(obj.lastCustomerMsgDays === '-' ? 999 : obj.lastCustomerMsgDays);
+
+  obj.stage = lc.stage;
+  obj.stageLabel = lc.label;
+  obj.stageIcon = lc.icon;
+  obj.grade = ql.grade;
+  obj.gradeLabel = ql.label;
+  obj.gradeReason = ql.reason;
+  obj.gradeAuto = ql.auto;
+  obj.silenceState = sil;
+
+  // 行动信号
+  const signals = [];
+  if (questionUnanswered) signals.push('提问未回复');
+  if (ourResponseQuality.startsWith('敷衍回复') && obj.daysAgo < 3) signals.push('敷衍回复需补救');
+  if (responseGapDays > 3 && questionUnanswered) signals.push('超3天未回');
+  if (ql.grade === 'S' || ql.grade === 'A') signals.push(ql.grade + '级客户');
+  if (sil && obj.stage >= 1 && obj.stage <= 5) signals.push(sil);
+  if (obj.afterSalesFlag) signals.push('⚠疑似售后');
+  obj.actionSignals = signals;
+
+  // 行动引擎
+  obj.countryCN = countryCN(obj.country);
+  const action = getAction(obj);
+  obj.actionStatus = action.status;
+  obj.actionText = action.action;
+  obj.actionPriority = action.priority;
+
+  enhanced.push(obj);
+}
+
+// ── 按紧急度排序 ──
+const urgencyOrder = { '待回复': 0, 'PI已发': 1, '谈判/样品': 2, '报价已发': 3, '初询沟通': 4, '订单执行中': 5, '已签收': 6, '售后': 7, '待分类': 8 };
+enhanced.sort((a, b) => (urgencyOrder[a.stageLabel] || 9) - (urgencyOrder[b.stageLabel] || 9) || a.daysAgo - b.daysAgo);
+
+// ── 控制台输出 ──
+const byStage = {};
+for (const e of enhanced) {
+  const k = e.stageLabel;
+  if (!byStage[k]) byStage[k] = [];
+  byStage[k].push(e);
+}
+for (const [stage, items] of Object.entries(byStage)) {
+  console.log('── ' + (items[0].stageIcon || '') + ' ' + stage + ': ' + items.length + '人 ──');
+  for (const e of items) {
+    const flags = [];
+    if (e.grade === 'S' || e.grade === 'A') flags.push(e.grade);
+    if (e.isCore) flags.push('★');
+    if (e.questionUnanswered) flags.push('⚠未回');
+    const flagStr = flags.length > 0 ? ' [' + flags.join(' ') + ']' : '';
+    const prioIcon = {urgent:'🔴', soon:'🟡', watch:'🟢', idle:'⚪'};
+    console.log('  ' + (prioIcon[e.actionPriority] || '') + ' ' + String(e.daysAgo).padStart(2) + 'd | ' + (e.countryCN || e.country || '??').padEnd(8) + ' | ' + (e.name || '(未知)').padEnd(24) + ' | ' + e.grade + '/' + e.stageLabel + flagStr);
+    console.log('    → ' + e.actionStatus + ' | ' + e.actionText);
+    if (e.lastCustQuestion) {
+      console.log('    ❓ ' + e.lastCustQuestion.substring(0, 80));
+      console.log('    💬 ' + e.ourResponseQuality + (e.silenceState ? ' | ' + e.silenceState : ''));
+    }
+  }
+  console.log('');
+}
+
+// 统计
+const gCount = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+const urgents = enhanced.filter(e => e.stageLabel === '待回复' || e.questionUnanswered);
+for (const e of enhanced) gCount[e.grade] = (gCount[e.grade] || 0) + 1;
+console.log('=== 双轴汇总 ===');
+console.log('质量: S=' + gCount.S + ' A=' + gCount.A + ' B=' + gCount.B + ' C=' + gCount.C + ' D=' + gCount.D);
+console.log('需立即行动: ' + urgents.length + '人 | 提问未回: ' + enhanced.filter(e => e.questionUnanswered).length + '人');
+const pCounts = [0,1,2,3,4].map(i => (s1.results[i] || []).length);
+console.log('总客户: ' + enhanced.length + ' (P0:' + pCounts[0] + ' P1:' + pCounts[1] + ' P2:' + pCounts[2] + ' P3:' + pCounts[3] + ' P4:' + pCounts[4] + ')\n');
+
+fs.writeFileSync(path.join(__dirname, '..', 'data', 's1_enhanced.json'), JSON.stringify(enhanced, null, 2));
+console.log('已保存 data/s1_enhanced.json (' + enhanced.length + '条)');
+
+// ── HTML 看板 ──
+generateDashboard(enhanced);
+
+function generateDashboard(data) {
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const timeStr = now.toLocaleString('zh-CN');
+
+  const byStage = {};
+  for (const e of data) { const k = e.stageLabel || '待分类'; if (!byStage[k]) byStage[k] = []; byStage[k].push(e); }
+
+  // 静默分级
+  const silenceTiers = [
+    { label: '近期活跃 <3天', color: '#27ae60', maxD: 3 },
+    { label: '近期活跃 3-7天', color: '#27ae60', maxD: 7, minD: 3 },
+    { label: '短期静默 7-14天', color: '#3498db', maxD: 14, minD: 7 },
+    { label: '中期静默 14-30天', color: '#f39c12', maxD: 30, minD: 14 },
+    { label: '长期静默 30-90天', color: '#e67e22', maxD: 90, minD: 30 },
+    { label: '沉淀 90天+', color: '#c0392b', maxD: 99999, minD: 90 },
+  ];
+  const silenceGroups = {};
+  for (const tier of silenceTiers) silenceGroups[tier.label] = [];
+  for (const e of data) {
+    const d = e.lastCustomerMsgDays === '-' ? 9999 : e.lastCustomerMsgDays;
+    for (const tier of silenceTiers) {
+      if (d < tier.maxD && (tier.minD === undefined || d >= tier.minD)) {
+        silenceGroups[tier.label].push(e);
+        break;
+      }
+    }
+  }
+
+  // KPI
+  const total = data.length;
+  const active3d = data.filter(e => e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays < 3).length;
+  const silent90p = data.filter(e => e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays >= 90).length;
+  const unread = data.filter(e => e.questionUnanswered).length;
+  const changedCount = data.filter(e => e.daysAgo <= 3).length;
+  const needsAction = data.filter(e => e.stageLabel === '待回复' || e.questionUnanswered || e.stageLabel === 'PI已发' || (e.stageLabel === '报价已发' && e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays <= 7)).length;
+
+  const kpiCards = [
+    { num: total, label: '总客户', color: '#1a5276' },
+    { num: active3d, label: '3天活跃', color: '#1a5276' },
+    { num: silent90p, label: '超90天无互动', color: '#c0392b' },
+    { num: unread, label: '未读消息', color: '#e67e22' },
+    { num: changedCount, label: '本期变动', color: '#27ae60' },
+    { num: needsAction, label: '需行动', color: '#8e44ad' },
+  ];
+
+  // 双轴矩阵 (生命周期 × 质量)
+  const stageOrder = ['待回复', '初询沟通', '报价已发', '谈判/样品', 'PI已发', '订单执行中', '已签收', '售后'];
+  const gradeOrder = ['S', 'A', 'B', 'C', 'D'];
+  const matrixData = {};
+  for (const s of stageOrder) {
+    matrixData[s] = {};
+    for (const g of gradeOrder) matrixData[s][g] = [];
+  }
+  for (const e of data) {
+    const s = e.stageLabel || '待分类';
+    const g = e.grade || 'D';
+    if (matrixData[s] && matrixData[s][g]) {
+      matrixData[s][g].push(e);
+    }
+  }
+
+  const actions = {
+    '待回复': { label: '待回复', byQuality: { S:'优先回复，搜索客户品牌/渠道背景后定制话术', A:'24h内回复，附工厂认证+大牌合作案例', B:'24h内回复，标准模板确认需求', C:'24h内回复，简要确认需求', D:'确认是否真实询盘后回复' }, defaultAction: '客户发来消息未回复，24小时内首次响应' },
+    '初询沟通': { label: '初询沟通', byQuality: { S:'研究客户品牌/店铺/渠道，定制话术，建立"同级别工厂伙伴"认知', A:'发送精选目录+工厂认证+BSCI/ISO证书，推进需求确认', B:'标准目录发送，确认MOQ和产品需求', C:'简要回复，对方表达需求后再深挖', D:'确认是否真实询盘，标准模板回复' }, defaultAction: '了解客户需求，发送目录/工厂资料' },
+    '报价已发': { label: '报价已发', byQuality: { S:'48h跟进，每次带新信息/价值（新品/案例/市场数据）', A:'48h跟进，附相关产品推荐或同行案例', B:'3-5天温和提醒，确认是否收到报价', C:'3-5天提醒一次，3轮无回应转入沉默管理', D:'5-7天一次，标准提醒' }, defaultAction: '跟进报价反馈，解答疑问' },
+    '谈判/样品': { label: '谈判/样品', byQuality: { S:'主动做mockup/方案，不等客户开口，48h跟进', A:'关注样品反馈/价格谈判进展，48h确认状态', B:'确认是否需调整报价或规格，48-72h跟进', C:'对方确认意向后才做额外方案', D:'跟进但不投入过多定制资源' }, defaultAction: '推动决策，解决疑虑' },
+    'PI已发': { label: 'PI已发', byQuality: { S:'PI发出48h确认收到，第5天提醒付款，第7天催款', A:'PI发出48h确认收到，第5天提醒，PI到期前提醒', B:'48h确认收到，PI有效期结束前提醒', C:'确认收到，到期前提醒一次', D:'确认收到即可' }, defaultAction: '确认PI收到，跟进付款' },
+    '订单执行中': { label: '订单执行中', byQuality: { S:'每周主动同步进度，拍照/视频，关键节点提前通知', A:'每周同步，关键节点通知', B:'关键节点通知（排产/发货）', C:'发货时通知', D:'发货时通知' }, defaultAction: '关键节点主动通知（排产/完成/发货）' },
+    '已签收': { label: '已签收', byQuality: { S:'签收7天回访，同步新品+定制方案，争取复购', A:'签收7天回访，发新品目录', B:'签收7天回访，确认满意度', C:'签收后回访一次', D:'签收后回访一次' }, defaultAction: '确认收货满意，推动复购' },
+    '售后': { label: '售后', byQuality: { S:'≤1h响应，主动提供补偿方案', A:'≤1h响应，24h内给方案', B:'24h响应', C:'24h内回复', D:'24h内回复' }, defaultAction: '快速响应，妥善处理' },
+  };
+
+  // 构建静默HTML
+  const silenceHtml = silenceTiers.map(tier => {
+    const items = silenceGroups[tier.label] || [];
+    if (items.length === 0) return '';
+    const itemsHtml = items.sort((a, b) => {
+      const da = a.lastCustomerMsgDays === '-' ? 9999 : a.lastCustomerMsgDays;
+      const db = b.lastCustomerMsgDays === '-' ? 9999 : b.lastCustomerMsgDays;
+      return db - da;
+    }).map(e => {
+      const d = e.lastCustomerMsgDays === '-' ? '?' : e.lastCustomerMsgDays;
+      return '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;"><span>' + esc(e.name) + ' <span style="color:var(--text-secondary);">' + esc(e.country || '??') + '</span></span><span>' + d + '天</span></div>';
+    }).join('');
+    return '<div>' +
+      '<div onclick="var d=this.nextElementSibling;d.style.display=d.style.display===\'block\'?\'none\':\'block\'" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;">' +
+      '<span>● <strong style="color:' + tier.color + ';">' + tier.label + '</strong></span>' +
+      '<strong style="font-size:16px;color:' + tier.color + ';">' + items.length + '</strong></div>' +
+      '<div style="display:none;padding:8px 14px;background:rgba(' + (tier.color === '#27ae60' ? '39,174,96' : tier.color === '#3498db' ? '52,152,219' : tier.color === '#f39c12' ? '243,156,18' : tier.color === '#e67e22' ? '230,126,34' : '192,57,43') + ',0.08);border-bottom:1px solid var(--border);">' + itemsHtml + '</div></div>';
+  }).filter(Boolean).join('');
+
+  // 市场分布
+  const coreMarkets = ['SD', 'EG', 'CD', 'ZM', 'CI', 'SA', 'AE'];
+  const coreNames = { SD:'苏丹', EG:'埃及', CD:'刚果民主', ZM:'赞比亚', CI:'科特迪瓦', SA:'沙特', AE:'阿联酋' };
+  const marketData = {};
+  for (const mk of coreMarkets) marketData[mk] = { count: 0, sa: 0, action: 0 };
+  for (const e of data) {
+    const c = e.country || '';
+    if (marketData[c] !== undefined) {
+      marketData[c].count++;
+      if (e.grade === 'S' || e.grade === 'A') marketData[c].sa++;
+      if (e.stageLabel === '待回复' || e.questionUnanswered || e.stageLabel === 'PI已发') marketData[c].action++;
+    }
+  }
+  const marketRows = coreMarkets.filter(mk => marketData[mk].count > 0).map(mk => {
+    const md = marketData[mk];
+    return '<tr><td style="padding:8px;border:1px solid var(--border);font-weight:600;">' + coreNames[mk] + '</td>' +
+      '<td style="text-align:center;padding:8px;border:1px solid var(--border);">' + md.count + '</td>' +
+      '<td style="text-align:center;padding:8px;border:1px solid var(--border);">' + md.sa + '</td>' +
+      '<td style="text-align:center;padding:8px;border:1px solid var(--border);color:#c0392b;font-weight:bold;">' + md.action + '</td></tr>';
+  }).join('');
+
+  // 矩阵表格行
+  const matrixRows = stageOrder.map(s => {
+    const cells = gradeOrder.map(g => {
+      const items = matrixData[s] ? (matrixData[s][g] || []) : [];
+      const n = items.length;
+      if (n === 0) return '<td style="text-align:center;padding:6px 8px;border:1px solid var(--border);color:var(--text-tertiary);">0</td>';
+      let opacity = Math.min(0.5, 0.15 + n * 0.005);
+      if (g === 'S') opacity = Math.min(0.5, 0.2 + n * 0.02);
+      return '<td style="text-align:center;padding:6px 8px;border:1px solid var(--border);cursor:pointer;background:rgba(255,159,10,' + opacity + ');font-weight:600;" onclick="openModal(\'' + s + '\',\'' + g + '\')">' + n + '</td>';
+    }).join('');
+    return '<tr><td class="rl">' + s + '</td>' + cells + '</tr>';
+  }).join('');
+
+  // 构建 MATRIX JSON (简化版，只含展示所需)
+  const matrixJson = {};
+  for (const s of stageOrder) {
+    matrixJson[s] = {};
+    for (const g of gradeOrder) {
+      matrixJson[s][g] = (matrixData[s][g] || []).map(e => ({
+        n: e.name,
+        c: e.countryCN || e.country || '??',
+        d: e.lastCustomerMsgDays === '-' ? 999 : e.lastCustomerMsgDays,
+        g: e.grade,
+        as: e.afterSalesFlag || false,
+        st: e.actionStatus || '',
+        ac: e.actionText || '',
+        pr: e.actionPriority || 'idle'
+      }));
+    }
+  }
+
+  const html = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="utf-8">\n<title>OKKI 客户管道看板 — ' + today + '</title>\n' +
+'<style>\n' +
+'  :root { --bg-primary: #f5f5f7; --bg-secondary: #ffffff; --bg-tertiary: #e5e5e7; --border: #d1d1d6;\n' +
+'    --text-primary: #1d1d1f; --text-secondary: #86868b; --text-tertiary: #aeaeb2;\n' +
+'    --accent: #0071e3; --success: #34c759; --warning: #ff9f0a; --error: #ff3b30; }\n' +
+'  @media (prefers-color-scheme: dark) {\n' +
+'    :root { --bg-primary: #1d1d1f; --bg-secondary: #2d2d2f; --bg-tertiary: #3d3d3f;\n' +
+'      --border: #424245; --text-primary: #f5f5f7; --text-secondary: #86868b;\n' +
+'      --text-tertiary: #636366; --accent: #0a84ff; }\n' +
+'  }\n' +
+'  * { box-sizing: border-box; margin: 0; padding: 0; }\n' +
+'  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;\n' +
+'    background: var(--bg-primary); color: var(--text-primary); line-height: 1.5;\n' +
+'    padding: 20px 24px; max-width: 1400px; margin: 0 auto; }\n' +
+'  h1 { font-size: 1.3rem; margin-bottom: 4px; }\n' +
+'  .subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px; }\n' +
+'  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }\n' +
+'  .kpi { color: #fff; padding: 14px 12px; border-radius: 8px; text-align: center; }\n' +
+'  .kpi .num { font-size: 28px; font-weight: 700; }\n' +
+'  .kpi .lbl { font-size: 11px; opacity: 0.9; }\n' +
+'  .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }\n' +
+'  .card-hd { background: var(--bg-tertiary); padding: 10px 14px; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }\n' +
+'  .card-hd span { font-weight: normal; font-size: 11px; color: var(--text-secondary); }\n' +
+'  table.mx { width: 100%; border-collapse: collapse; font-size: 12px; }\n' +
+'  table.mx th { padding: 6px 8px; border: 1px solid var(--border); background: var(--bg-tertiary); font-weight: 600; }\n' +
+'  table.mx td { border: 1px solid var(--border); }\n' +
+'  table.mx td.rl { text-align: center; font-weight: 600; padding: 6px 4px; width:64px; font-size:11px; }\n' +
+'  .flex { display: flex; gap: 16px; margin-bottom: 16px; }\n' +
+'  .flex-1 { flex: 1; }\n' +
+'  .flex-320 { flex: 0 0 340px; }\n' +
+'  table.sub { width: 100%; border-collapse: collapse; font-size: 12px; }\n' +
+'  table.sub th { padding: 8px; border: 1px solid var(--border); text-align: left; background: var(--bg-tertiary); font-weight: 600; }\n' +
+'  table.sub td { padding: 8px; border: 1px solid var(--border); }\n' +
+'  .trend-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }\n' +
+'  .trend-row .det { font-size: 11px; color: var(--text-secondary); }\n' +
+'  .footer { margin-top: 24px; padding: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-secondary); text-align: center; }\n' +
+'  .footer a { color: var(--accent); }\n' +
+'  .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.45); z-index:9999; justify-content:center; align-items:center; }\n' +
+'  .modal-overlay.show { display:flex; }\n' +
+'  .modal-box { background:var(--bg-secondary); border-radius:10px; width:700px; max-width:92vw; max-height:75vh; overflow-y:auto; box-shadow:0 8px 30px rgba(0,0,0,0.25); }\n' +
+'  @media (prefers-color-scheme: dark) { .modal-box { box-shadow:0 8px 30px rgba(0,0,0,0.6); } }\n' +
+'  .modal-hd { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--border); font-weight:600; font-size:15px; position:sticky; top:0; background:var(--bg-secondary); border-radius:10px 10px 0 0; z-index:1; }\n' +
+'  .modal-close { cursor:pointer; font-size:20px; color:var(--text-secondary); line-height:1; padding:0 4px; border:none; background:none; }\n' +
+'  .modal-close:hover { color:var(--text-primary); }\n' +
+'  .modal-body { padding:14px 18px; }\n' +
+'  .modal-body table { width:100%; border-collapse:collapse; font-size:12px; }\n' +
+'  .modal-body th { padding:6px 8px; border:1px solid var(--border); background:var(--bg-tertiary); text-align:left; font-weight:600; }\n' +
+'  .modal-body td { padding:6px 8px; border:1px solid var(--border); }\n' +
+'</style>\n</head>\n<body>\n\n' +
+'<h1>OKKI 客户管道看板</h1>\n' +
+'<div class="subtitle">生成时间：' + timeStr + ' | 数据源：s1_classification.json + chat_history | 全覆盖 ' + total + ' 客户</div>\n\n' +
+'<div class="kpi-grid">\n' +
+  kpiCards.map(c => '<div class="kpi" style="background:' + c.color + ';"><div class="num">' + c.num + '</div><div class="lbl">' + c.label + '</div></div>').join('\n') + '\n</div>\n\n' +
+'<div class="card">\n  <div class="card-hd">客户双轴矩阵 <span>（生命周期 × 质量）— 点击格子展开客户名单 + 标准动作</span></div>\n' +
+'  <div style="overflow-x:auto;">\n    <table class="mx">\n      <tr><th style="text-align:center;width:64px;">阶段 \\ 等级</th><th>S</th><th>A</th><th>B</th><th>C</th><th>D</th></tr>\n' +
+'      ' + matrixRows + '\n    </table>\n  </div>\n' +
+'  <div style="padding:6px 14px;font-size:10px;color:var(--text-secondary);">颜色越深=该格客户越多 | 点击数字弹出详情（标准动作 + 客户名单）</div>\n</div>\n\n' +
+'<div class="flex">\n  <div class="flex-320 card">\n    <div class="card-hd">静默风险分级</div>\n    <div>\n    ' + silenceHtml + '\n    </div>\n  </div>\n' +
+'  <div class="flex-1 card" style="align-self:flex-start;">\n    <div class="card-hd">本期变动（相较上次运行）</div>\n' +
+'    <div style="padding:10px 14px;font-size:13px;">\n' +
+'      <div class="trend-row"><span>📈 升级</span><strong style="color:#27ae60;">0人</strong><span class="det">-</span></div>\n' +
+'      <div class="trend-row"><span>📉 降级</span><strong style="color:#e74c3c;">0人</strong><span class="det">-</span></div>\n' +
+'      <div class="trend-row"><span>🆕 新进入</span><strong style="color:#3498db;">0人</strong><span class="det">-</span></div>\n' +
+'      <div class="trend-row" style="border-bottom:none;"><span>⏸️ 流失</span><strong style="color:var(--text-secondary);">0人</strong><span class="det">-</span></div>\n' +
+'    </div>\n  </div>\n</div>\n\n' +
+'<div class="card">\n  <div class="card-hd">核心市场管道密度</div>\n' +
+'  <table class="sub">\n    <tr><th>市场</th><th style="text-align:center;">客户数</th><th style="text-align:center;">S/A级</th><th style="text-align:center;">需行动</th></tr>\n    ' + marketRows + '\n  </table>\n</div>\n\n' +
+'<div class="footer">管道看板 — 脚本自动生成，覆盖全部 ' + total + ' 客户 | 深度分析请新开对话 | 生成时间：' + timeStr + '</div>\n\n' +
+'<div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">\n' +
+'  <div class="modal-box"><div class="modal-hd"><span id="modal-title"></span><button class="modal-close" onclick="closeModal()">✕</button></div>\n' +
+'    <div class="modal-body" id="modal-body"></div></div>\n</div>\n\n' +
+'<script>\n' +
+'window.MATRIX = ' + JSON.stringify(matrixJson) + ';\n' +
+'window.ACTIONS = ' + JSON.stringify(actions) + ';\n' +
+'function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }\n' +
+'function gradeTag(g) {\n' +
+'  var colors = {S:"#ff9f0a",A:"#0a84ff",B:"#636366",C:"#86868b",D:"#48484a"};\n' +
+'  return \'<span style="background:\' + (colors[g]||\"#636366\") + \';color:\' + (g===\"S\"?\"#1d1d1f\":\"#fff\") + \';padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:4px;\">\' + esc(g) + \'</span>\';\n' +
+'}\n' +
+'function prioIcon(p) {\n' +
+'  var icons = {urgent:"🔴",soon:"🟡",watch:"🟢",idle:"⚪"};\n' +
+'  return icons[p] || "";\n' +
+'}\n' +
+'function openModal(ls, q) {\n' +
+'  var data = window.MATRIX[ls][q];\n' +
+'  var action = window.ACTIONS[ls];\n' +
+'  var actionText = action ? (action.byQuality[q] || action.defaultAction) : "";\n' +
+'  document.getElementById("modal-title").innerHTML = esc(ls) + " × " + esc(q) + "级 — " + data.length + "人";\n' +
+'  var rows = "";\n' +
+'  for (var i = 0; i < data.length; i++) {\n' +
+'    var c = data[i];\n' +
+'    rows += "<tr><td style=\\"white-space:nowrap;\\">" + gradeTag(c.g) + "<strong>" + esc(c.n) + "</strong></td><td style=\\"text-align:center;white-space:nowrap;font-size:11px;\\">" + esc(c.c) + " · " + c.d + "d</td><td style=\\"font-size:12px;\\">" + (c.as ? \'⚠️ 售后待确认 — \' : \'\') + esc(c.st) + "</td><td style=\\"color:var(--success);font-weight:600;font-size:12px;\\">" + prioIcon(c.pr) + " " + esc(c.ac) + "</td></tr>";\n' +
+'  }\n' +
+'  document.getElementById("modal-body").innerHTML =\n' +
+'    \'<div style="padding:8px 12px;margin-bottom:12px;background:var(--bg-tertiary);border-radius:6px;color:var(--accent);font-size:12px;">📋 标准动作参考：\' + esc(actionText) + \'</div>\' +\n' +
+'    \'<div style="max-height:55vh;overflow-y:auto;"><table><tr><th style="width:140px;">客户</th><th style="text-align:center;width:100px;">国家 · 静默</th><th>当前状态</th><th>行动方向</th></tr>\' + rows + \'</table></div>\' +\n' +
+'    \'<div style="margin-top:8px;font-size:10px;color:var(--text-tertiary);">💡 🔴今天必须 🟡今明可做 🟢正常等待 ⚪暂不行动 | ESC/点击遮罩关闭</div>\';\n' +
+'  document.getElementById("modal-overlay").classList.add("show"); }\n' +
+'function closeModal() { document.getElementById("modal-overlay").classList.remove("show"); }\n' +
+'document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeModal(); });\n' +
+'</script>\n</body>\n</html>';
+
+  const outPath = path.join(__dirname, '..', 'output', 'dashboard_' + today + '.html');
+  fs.writeFileSync(outPath, html, 'utf-8');
+  console.log('看板 → ' + outPath);
+
+  // 同时保存增强后的全量JSON
+  fs.writeFileSync(path.join(__dirname, '..', 'data', 's1_enhanced_full.json'), JSON.stringify(data, null, 2));
+  console.log('全量数据 → data/s1_enhanced_full.json (' + data.length + '条)');
+}

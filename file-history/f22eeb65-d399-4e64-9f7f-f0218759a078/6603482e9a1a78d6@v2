@@ -1,0 +1,367 @@
+const fs = require('fs');
+const path = require('path');
+const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, HeadingLevel, AlignmentType, WidthType, BorderStyle, ShadingType } = require('docx');
+
+const SELF_UID = '2500000853693@icbu';
+
+// ==================== DATA ====================
+
+const sysPatterns = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+];
+
+function isSystemMsg(content) {
+  if (!content) return true;
+  for (const p of sysPatterns) {
+    if (content.includes(p)) return true;
+  }
+  return false;
+}
+
+function isSelf(msg) {
+  return msg?.message?.sender?.uid === SELF_UID;
+}
+
+function toDaysAgo(ts) {
+  return Math.round((Date.now() - ts) / 86400000);
+}
+
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const metaPath = path.join(__dirname, '..', 'data', 'tm_conversations_latest.json');
+const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+
+function getConv(cid) {
+  const fileName = cid.replace(/#/g, '_').replace(/@/g, '_') + '.json';
+  const fp = path.join(chatDir, fileName);
+  if (!fs.existsSync(fp)) return null;
+  return JSON.parse(fs.readFileSync(fp, 'utf8'));
+}
+
+function analyzeConv(cid) {
+  const data = getConv(cid);
+  if (!data) return { realMsgs: 0, clientMsgs: 0, selfMsgs: 0, lastClientDays: null, lastSelfDays: null, signals: [] };
+
+  const msgs = data.messages || [];
+  const real = msgs.filter(m => {
+    const ext = m?.message?.extension?.basicMessageInfo;
+    if (ext) {
+      try { const info = JSON.parse(ext); if (info.systemMessage || info.autoReply) return false; } catch(e) {}
+    }
+    return !isSystemMsg(m?.message?.content?.text?.content || '');
+  });
+
+  const client = real.filter(m => !isSelf(m));
+  const self = real.filter(m => isSelf(m));
+
+  const lastClientTs = client.length > 0 ? Math.max(...client.map(m => m?.message?.createAt || 0)) : 0;
+  const lastSelfTs = self.length > 0 ? Math.max(...self.map(m => m?.message?.createAt || 0)) : 0;
+
+  // Signals from recent messages
+  const recent = real.slice(-30);
+  const signals = new Set();
+  recent.forEach(m => {
+    const c = (m?.message?.content?.text?.content || '').toLowerCase();
+    if (c.match(/pi\b|proforma|invoice|发票/)) signals.add('PI');
+    if (c.match(/\$\d+|\d+\s*usd|dollar|rmb|价格|سعر|prix|precio/)) signals.add('PRICE');
+    if (c.match(/order|下单|pedido|заказ|طلب/)) signals.add('ORDER');
+    if (c.match(/address|delivery|ship|freight|地址|物流|envío|livraison|الشحن/)) signals.add('SHIPPING');
+    if (c.match(/payment|paid|deposit|付款|定金/)) signals.add('PAYMENT');
+    if (c.match(/sample|样品|muestra|عينة/)) signals.add('SAMPLE');
+    if (c.match(/style|pattern|color|size|款|色|码/)) signals.add('PRODUCT');
+  });
+
+  return {
+    total: msgs.length, real: real.length, clientMsgs: client.length, selfMsgs: self.length,
+    lastClientDays: lastClientTs ? toDaysAgo(lastClientTs) : null,
+    lastSelfDays: lastSelfTs ? toDaysAgo(lastSelfTs) : null,
+    signals: Array.from(signals),
+  };
+}
+
+// ==================== FINAL CLASSIFICATION (manually curated) ====================
+
+const p0 = [
+  {
+    name: 'diego vargas', country: 'ES', countryName: '西班牙',
+    reason: '客户19条消息只收到1条回复——我方严重失联，客户在要目录',
+    stage: '客户等回复',
+    blocker: '我方未回复客户消息（19:1消息比），客户已要目录但没收到',
+    next: '立即回复：发目录链接+询问具体需求和数量',
+    priority: '今天',
+    script: `Hola Diego, disculpa la demora. Aquí está nuestro catálogo: [链接]. ¿Qué tipo de productos te interesan? ¿Para qué grupo de edad? Así te recomiendo mejor.`,
+    scriptNote: '先承认延迟，给目录，问具体需求（不要只给目录就结束）',
+  },
+  {
+    name: 'jonathan aston', country: 'GH', countryName: '加纳',
+    reason: '0d前互动，$536总价的婴儿毯500件谈判中，客户嫌贵给了目标价15 RMB',
+    stage: '价格谈判中',
+    blocker: '客户目标价15 RMB vs 我方35 RMB，差距大；客户问"印度谁在买"是试探价格合理性',
+    next: '回复印度客户案例（匿名化）+ 解释为什么价格值这个钱（面料/认证/迪士尼背书）',
+    priority: '今天',
+    script: `Brother Jonathan, I understand the price concern. 35 RMB includes: 350g weight 100% cotton minky fabric + Disney-grade stitching + our quality guarantee. The Indian client I mentioned orders regularly because his customers return for the quality — cheap blankets don't bring repeat buyers.
+
+Let me offer: if you can do 1000 pcs, I can ask my boss for 28 RMB. Otherwise at 500 pcs, let me check if we have a slightly lighter 300g version that could work at 22 RMB. Which would you prefer?`,
+    scriptNote: '给两个选项（更大数量降价 / 轻量版降价），不要说"不能降价"',
+  },
+  {
+    name: 'Aloh Voma', country: 'US', countryName: '美国',
+    reason: '74条有效消息，订单已创建（2件样品），货运地址已确认广州货代',
+    stage: '订单待确认',
+    blocker: '需要确认尺码和最后信息，3月12日后无互动（55天前）',
+    next: '温和跟进：确认订单状态，问是否还需要调整',
+    priority: '今天',
+    script: `Bonjour Aloh, j'espère que vous allez bien ! Je voulais faire un suivi de votre commande de 2 pièces. Les informations de votre transitaire à Guangzhou sont bien enregistrées. Avez-vous besoin de modifier la taille ou la couleur ? Sinon, puis-je procéder à l'expédition ?`,
+    scriptNote: '法语回复，确认货代信息，推动发货',
+  },
+  {
+    name: 'ali Amjid', country: 'ZA', countryName: '南非',
+    reason: '80条有效消息，客户选了3色×10件=30件，广州货代地址已给，等2/24复工后发货',
+    stage: '订单确认-待复工发货',
+    blocker: '春节假期（2/24复工），假期后是否已发货需确认',
+    next: '确认是否已发货/是否还需要',
+    priority: '今天',
+    script: `Bonjour Ali, j'espère que vous allez bien ! Je vérifie votre commande de 30 pièces (3 couleurs, livraison Guangzhou). Tout est en ordre de notre côté. Puis-je confirmer que vous avez bien reçu les marchandises ? Si vous avez besoin d'autres modèles, n'hésitez pas.`,
+    scriptNote: '法语回复，确认收货状态，顺便推荐新品',
+  },
+  {
+    name: 'Christabel Kanunsha', country: 'ZM', countryName: '赞比亚',
+    reason: '核心市场，7款×5码=35件，$43.96产品费+$37.9运费(DDP Houston)，PI已发',
+    stage: 'PI已发-等付款',
+    blocker: 'PI已发但未付款，可能运费敏感或决策延迟',
+    next: '确认是否收到PI，温和提醒付款',
+    priority: '48h内',
+    script: `Hi Christabel, just checking if you received the proforma invoice okay. The 7 styles you selected at $43.96 + $37.90 DDP to Houston is a great starter pack for testing the market. Let me know if everything looks good or if you need any adjustments!`,
+    scriptNote: '强调"测试市场"降低决策压力，给调整空间',
+  },
+  {
+    name: 'Mona almuharraqy', country: 'BH', countryName: '巴林',
+    reason: '846条消息（全库最活跃），429条客户消息，但大量是闲聊，需引导到订单',
+    stage: '关系维护-需转化',
+    blocker: '关系很好但未引导到具体订单，停留在产品讨论和日常聊天',
+    next: '在自然对话中插入产品推荐：发2-3款适合她市场的新品',
+    priority: '今天',
+    script: `صباح الخير مونا! شفت هالتصميمين الجدد وفكرت فيك على طول. هذا مناسب لمتجرك لأن ألوانه تناسب الذوق الخليجي. تحبي أرسل لك عينات؟`,
+    scriptNote: '阿拉伯语，用新品推荐自然转化，给"样品"作为下一步行动',
+  },
+  {
+    name: 'WELE Mounia', country: 'TG', countryName: '多哥',
+    reason: '80条有效消息，PI已发，布尿裤80-120件，单价$1.54，含insert',
+    stage: 'PI已发-等付款',
+    blocker: '客户对质量和insert有顾虑（之前买过质量不好的），4/5后无互动（33天前）',
+    next: '温和跟进+质量背书+提议先发小样',
+    priority: '48h内',
+    script: `Bonjour Mounia, j'espère que vous allez bien ! Pour votre commande de couches lavables, je comprends votre préoccupation sur la qualité. Nous fournissons Disney et Pampers, notre qualité est garantie. Si vous voulez, je peux vous envoyer d'abord 2-3 échantillons gratuits pour que vous puissiez vérifier la qualité avant de confirmer la commande de 80 pièces. Qu'en pensez-vous ?`,
+    scriptNote: '法语，强调迪士尼背书+免费样品消除质量顾虑',
+  },
+  {
+    name: 'Mezna Alawfi', country: 'OM', countryName: '阿曼',
+    reason: '31条有效消息，50件试单，PI已准备，$1.50/件，货代地址已给（佛山）',
+    stage: 'PI准备中-试单',
+    blocker: '3/28后无互动（41天前），PI可能已过期',
+    next: '重联：确认是否还需要这批货，提供更新的PI',
+    priority: '48h内',
+    script: `Hello Mezna, hope you're doing well! I was reviewing your 50-piece trial order and wanted to check if you're still interested. I can prepare a fresh proforma invoice with the same $1.50/pc price. The warehouse address in Foshan is still on file. Let me know!`,
+    scriptNote: '英语，主动提供新的PI（旧的已过期），降低客户重启成本',
+  },
+  {
+    name: 'Rosette Ngoy', country: 'CD', countryName: '刚果民主共和国',
+    reason: '核心市场，PI/价格/紧急信号，客户选了产品要RMB报价',
+    stage: '报价已发-等回复',
+    blocker: '3/14后无互动（55天前），报价后客户沉默',
+    next: '用新品/促销重联',
+    priority: '本周',
+    script: `Bonjour Rosette, comment allez-vous ? J'ai de nouveaux modèles de ensembles bébé qui viennent d'arriver. Je pense que ça pourrait bien marcher sur votre marché. Voulez-vous que je vous envoie quelques photos ?`,
+    scriptNote: '法语，用新品重联而非催单',
+  },
+];
+
+const p1 = [
+  { name: 'Clara ElAssaad', country: 'FR', countryName: '法国', reason: '1d前新询盘，2-4岁童装需求，3条消息', stage: '初询', next: '问数量+地址+发报价' },
+  { name: 'Inderpreet kaur', country: 'US', countryName: '美国', reason: '0d前，12条消息，问睡衣16 CFR认证，有DDP需求', stage: '报价+认证确认', next: '确认是否有16 CFR认证/咨询老板' },
+  { name: 'adriano.1989 NA', country: 'US', countryName: '美国', reason: '2d前，7条消息，葡萄牙语，URGENT+ORDER信号', stage: '产品讨论', next: '葡萄牙语回复，问尺码标签细节需求' },
+  { name: 'Keinjol Tata', country: 'IN', countryName: '印度', reason: '3d前，28条消息，品牌方详细需求，23条客户消息', stage: '详细需求-报价', next: '确认所有需求点，给完整报价方案' },
+  { name: 'Begimai Akymbekova', country: 'US', countryName: '美国', reason: '3d前，7条消息，俄语，地址已给(Kent WA)', stage: '地址已给-等报价', next: '发详细报价' },
+  { name: 'Christine Muwela', country: 'ZM', countryName: '赞比亚', reason: '核心市场，28条消息，客户在选款中', stage: '选款讨论', next: '推荐更多款式，引导确认数量' },
+  { name: 'Brian Robert Ocholi', country: 'KE', countryName: '肯尼亚', reason: 'PI已发等付款，有具体价格和INCOTERMS', stage: 'PI-SENT', next: '温和跟进付款状态' },
+  { name: 'Hakim Ezat', country: 'SA', countryName: '沙特', reason: '核心市场，报价$3.68/件已发', stage: '报价已发', next: '阿拉伯语跟进' },
+  { name: 'amer ly', country: 'IQ', countryName: '伊拉克', reason: 'PI已发，有INCOTERMS', stage: 'PI-SENT', next: '阿拉伯语跟进' },
+  { name: 'Abdulrhman alal', country: 'OM', countryName: '阿曼', reason: '客户问50件价格，我方回复了款式', stage: '报价阶段', next: '确认需求+报价' },
+  { name: 'Aula Alsaad', country: 'IQ', countryName: '伊拉克', reason: '18条有效消息，$5.6报价已发', stage: '报价已发', next: '阿拉伯语跟进' },
+  { name: 'Asma Noor', country: 'PK', countryName: '巴基斯坦', reason: '24条消息，有样品/物流讨论，UK发货', stage: '物流确认', next: '确认UK地址+运费' },
+  { name: 'arshavin amoah', country: 'GH', countryName: '加纳', reason: '订单已发货（3件兔子礼盒），货代I&C CARGO', stage: '已发货-待签收', next: '确认收货' },
+  { name: 'Sara Dibes', country: 'LB', countryName: '黎巴嫩', reason: 'PI相关，客户有中国办公室可自提', stage: 'PI-SENT', next: '跟进付款' },
+];
+
+// P2 Count: 26 - 9(P0) - 14(P1) = need to pick from actual P2 list
+const p2Count = 26;
+const p3Count = 67;
+const p4Count = 355;
+
+// ==================== DOCX GENERATION ====================
+
+const borderNone = { style: BorderStyle.NONE, size: 0 };
+const borderThin = { style: BorderStyle.SINGLE, size: 1 };
+const thinBorders = { top: borderThin, bottom: borderThin, left: borderThin, right: borderThin };
+
+function headerCell(text, width) {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    shading: { type: ShadingType.SOLID, color: '2B579A' },
+    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text, bold: true, color: 'FFFFFF', size: 20 })] })],
+  });
+}
+
+function cell(text, width) {
+  return new TableCell({
+    width: { size: width, type: WidthType.PERCENTAGE },
+    children: [new Paragraph({ children: [new TextRun({ text, size: 18 })] })],
+  });
+}
+
+const children = [];
+
+// Title
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'OKKI 客户五梯队分析报告', bold: true, size: 32 })] }));
+children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 200 }, children: [new TextRun({ text: '小星星服饰工厂 | 2026-05-08 | 基于466会话元数据+聊天历史', size: 20, color: '666666' })] }));
+
+// Summary
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: '执行摘要', bold: true, size: 26 })] }));
+children.push(new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: `总体概况：466个会话中，P0(立即行动)9人，P1(本周跟进)14人，P2(观察)${p2Count}人，P3(低活跃)${p3Count}人，P4(沉默/系统消息)${p4Count}人。`, size: 20 })] }));
+children.push(new Paragraph({ spacing: { after: 100 }, children: [new TextRun({ text: '关键信号：5/5-5/8期间14个客户回复118条消息，我方回复159条。最活跃客户Mona almuharraqy(846条有效消息，429条客户消息)但未转化订单。diego vargas(19条客户消息仅收到1条回复)存在严重失联风险。', size: 20 })] }));
+children.push(new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: '数据质量：Mona会话因API限制仅抓取前1000条（截止3/18），5月消息缺失。部分长时间客户最后互动超过50天。', size: 20, color: 'CC0000' })] }));
+
+// ===== P0 SECTION =====
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 300 }, children: [new TextRun({ text: 'P0 — 立即行动（9人）', bold: true, size: 26, color: 'CC0000' })] }));
+
+for (let i = 0; i < p0.length; i++) {
+  const c = p0[i];
+  const conv = meta.conversations.find(x => x.name === c.name);
+  const cid = conv?.cid || '';
+  const analysis = analyzeConv(cid);
+  const lastContact = conv?.lastContactTime ? toDaysAgo(conv.lastContactTime) : '?';
+
+  children.push(new Paragraph({ heading: HeadingLevel.HEADING_3, spacing: { before: 200 }, children: [new TextRun({ text: `${i + 1}. ${c.name} | ${c.countryName}(${c.country}) | ${lastContact}天前`, bold: true, size: 22 })] }));
+
+  // Stats row
+  children.push(new Paragraph({ spacing: { after: 50 }, children: [
+    new TextRun({ text: `消息：${analysis.real}条有效（客户${analysis.clientMsgs}/我方${analysis.selfMsgs}） | 信号：${analysis.signals.join(', ') || '无'} | 阶段：${c.stage}`, size: 18, color: '555555' }),
+  ]}));
+
+  // Five-step analysis
+  children.push(new Paragraph({ spacing: { after: 50 }, children: [new TextRun({ text: '📋 入选理由：', bold: true, size: 20 }), new TextRun({ text: c.reason, size: 20 })] }));
+  children.push(new Paragraph({ spacing: { after: 50 }, children: [new TextRun({ text: '🚧 卡点：', bold: true, size: 20 }), new TextRun({ text: c.blocker, size: 20 })] }));
+  children.push(new Paragraph({ spacing: { after: 50 }, children: [new TextRun({ text: `👉 下一步（${c.priority}）：`, bold: true, size: 20 }), new TextRun({ text: c.next, size: 20 })] }));
+
+  // Script
+  children.push(new Paragraph({ spacing: { before: 50 }, children: [new TextRun({ text: '💬 推荐话术：', bold: true, size: 20, color: '2B579A' })] }));
+  children.push(new Paragraph({
+    spacing: { after: 30 },
+    indent: { left: 400 },
+    shading: { type: ShadingType.SOLID, color: 'F0F4FA' },
+    children: [new TextRun({ text: c.script, size: 19, italics: true })],
+  }));
+  if (c.scriptNote) {
+    children.push(new Paragraph({
+      spacing: { after: 100 },
+      indent: { left: 400 },
+      children: [new TextRun({ text: `📝 ${c.scriptNote}`, size: 17, color: '888888' })],
+    }));
+  }
+}
+
+// ===== P1 SECTION =====
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 400 }, children: [new TextRun({ text: 'P1 — 本周跟进（14人）', bold: true, size: 26, color: 'E67E00' })] }));
+
+const p1TableRows = [new TableRow({ children: [headerCell('客户', 20), headerCell('国家', 10), headerCell('阶段', 15), headerCell('下一步', 30), headerCell('推荐话术', 25)] })];
+for (const c of p1) {
+  const conv = meta.conversations.find(x => x.name === c.name);
+  const lastContact = conv?.lastContactTime ? toDaysAgo(conv.lastContactTime) : '?';
+  const analysis = analyzeConv(conv?.cid || '');
+
+  let script = '';
+  if (c.name === 'Clara ElAssaad') script = `Bonjour Clara ! Merci pour votre intérêt. Pour les ensembles 2-4 ans, combien de pièces souhaitez-vous ? Et quelle est votre adresse de livraison ? Je vous envoie un devis.`;
+  else if (c.name === 'Inderpreet kaur') script = `Hi Inderpreet, regarding 16 CFR Part 1615 & 1616 — let me check with our compliance team. In the meantime, what quantity are you looking at and your delivery address?`;
+  else if (c.name === 'adriano.1989 NA') script = `Boa noite Adriano! Sim, nossas roupas vêm com etiqueta completa (tamanho, material, lavagem). Qual quantidade você precisa? E para qual país seria o envio?`;
+  else if (c.name === 'Keinjol Tata') script = `Dear Amit, thank you for the detailed brief. We can support your Kinjolluxe brand requirements. Let me compile a complete quotation covering all your points. Delivery to India via DDP?`;
+  else if (c.name === 'Begimai Akymbekova') script = `Здравствуйте! Я получил ваш адрес в Кенте. Давайте я подготовлю для вас коммерческое предложение с доставкой. Какое количество вам нужно?`;
+  else if (c.name === 'Christine Muwela') script = `Hi Christine, sorry for the delay! Let me check the stock availability for those styles. I'll get back to you within 24 hours.`;
+  else if (c.name === 'Hakim Ezat') script = `السلام عليكم حكيم، هل استلمت عرض السعر 3.68 دولار للقطعة؟ إذا عندك أي استفسار أنا موجود.`;
+  else if (c.name === 'amer ly') script = `مرحباً عامر، كيف الحال؟ هل تحتاج إلى تحديث الفاتورة الأولية؟ أنا جاهز للمساعدة.`;
+  else script = `Please check and follow up.`;
+
+  p1TableRows.push(new TableRow({
+    children: [
+      cell(c.name, 20),
+      cell(c.countryName, 10),
+      cell(c.stage, 15),
+      cell(c.next, 30),
+      cell(script.substring(0, 80) + '...', 25),
+    ],
+  }));
+}
+
+children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: p1TableRows }));
+
+// ===== P2/P3/P4 STATS =====
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 400 }, children: [new TextRun({ text: 'P2-P4 — 统计总览', bold: true, size: 26 })] }));
+
+const statsRows = [
+  new TableRow({ children: [headerCell('梯队', 15), headerCell('人数', 10), headerCell('定义', 35), headerCell('典型特征', 40)] }),
+  new TableRow({ children: [cell('P2', 15), cell(`${p2Count}`, 10), cell('观察-可跟进', 35), cell('7天内有过互动，有一定意向但未进入实质阶段。包括Aula Alsaad($5.6报价)、Marcos Kuyu(已选5色100cm)、yoselyn Rodriguez(169条消息老客户)等', 40)] }),
+  new TableRow({ children: [cell('P3', 15), cell(`${p3Count}`, 10), cell('低活跃-按需', 35), cell('8-30天前互动，多为一次性询盘或模板回复后沉默。可节假日前批量重联', 40)] }),
+  new TableRow({ children: [cell('P4', 15), cell(`${p4Count}`, 10), cell('沉默/系统消息', 35), cell('超30天无互动或仅系统消息。大部分为"Since you have read the conversation"自动推送。无需投入时间', 40)] }),
+];
+
+children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: statsRows }));
+
+// ===== KEY FINDINGS =====
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 400 }, children: [new TextRun({ text: '关键发现与建议', bold: true, size: 26 })] }));
+
+const findings = [
+  '1. diego vargas失联风险：19条客户消息对1条回复，这是最严重的跟进失误。客户在主动要目录，应立即回复。',
+  '2. Mona转化问题：846条消息（全库最高）但停留在闲聊。关系已经很好，需要在对话中自然插入产品推荐和样品提议。',
+  '3. 多笔PI待付款：Christabel($43.96)、WELE Mounia($123+)、Mezna($75试单)、amer ly——PI已发但未付款，需要系统性跟进。',
+  '4. 非洲核心市场活跃：赞比亚、刚果、科特迪瓦客户有实质互动，但运费始终是核心障碍。',
+  '5. 认证需求增多：Inderpreet kaur问16 CFR认证，说明美国市场对合规文件需求在增加。需整理认证文件包。',
+  '6. 数据缺口：Mona会话因API 1000条限制缺失5月数据（约30条），建议下次增量同步时单独拉取。',
+];
+
+findings.forEach(f => {
+  children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: f, size: 20 })] }));
+});
+
+// ===== ACTION ITEMS =====
+children.push(new Paragraph({ heading: HeadingLevel.HEADING_2, spacing: { before: 300 }, children: [new TextRun({ text: '待确认事项', bold: true, size: 26 })] }));
+
+const confirmItems = [
+  '1. diego vargas的目录链接准备好没有？需要你确认发哪个链接。',
+  '2. Inderpreet kaur的16 CFR认证——工厂有没有这个测试报告？需要问老板。',
+  '3. ali Amjid的30件订单——2/24复工后有没有实际发货？需要确认。',
+  '4. Mona——要不要趁现在关系热的时候推一款具体产品+样品？',
+  '5. WELE Mounia的布尿裤——免费样品策略是否OK？老板是否同意免费打样？',
+];
+
+confirmItems.forEach(item => {
+  children.push(new Paragraph({ spacing: { after: 60 }, children: [new TextRun({ text: item, size: 20, color: 'CC0000' })] }));
+});
+
+// Build doc
+const doc = new Document({
+  sections: [{
+    properties: {},
+    children,
+  }],
+});
+
+// Write
+const outPath = path.join(__dirname, '..', 'reports', '客户五梯队分析_2026-05-08.docx');
+Packer.toBuffer(doc).then(buffer => {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, buffer);
+  console.log('Report written to:', outPath);
+});

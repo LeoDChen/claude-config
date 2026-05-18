@@ -1,0 +1,129 @@
+const fs = require('fs');
+const path = require('path');
+
+const dataPath = path.join(__dirname, '..', 'data', 'tm_conversations_latest.json');
+const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+const now = Date.now();
+const DAY = 86400000;
+
+// System message patterns to filter
+const sysPatterns = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+];
+
+function isSystemMsg(content) {
+  if (!content) return true;
+  for (const p of sysPatterns) {
+    if (content.includes(p)) return true;
+  }
+  return false;
+}
+
+function classify(conv) {
+  const lastContact = conv.lastContactTime || 0;
+  const daysAgo = Math.round((now - lastContact) / DAY);
+  const isUnread = conv.unreadCount > 0;
+  const latestContent = conv.latestMessage?.content || '';
+  const latestType = conv.latestMessage?.messageType || '';
+  const country = conv.complianceCountryCode || '';
+  const isSys = isSystemMsg(latestContent);
+
+  // Core markets
+  const coreMarkets = ['SD','EG','CD','ZM','CI','SA','AE'];
+  const isCore = coreMarkets.includes(country);
+
+  let priority = 4;
+  let signals = [];
+
+  // P0 signals
+  if (isUnread && latestType === 'received' && daysAgo <= 2) {
+    priority = 0; signals.push('unread+客户消息+2天内');
+  }
+  if (isUnread && daysAgo <= 1) {
+    priority = Math.min(priority, 0); signals.push('unread+1天内');
+  }
+  if (daysAgo <= 1 && latestType === 'received' && !isSys) {
+    priority = Math.min(priority, 0); signals.push('24h内客户回复');
+  }
+
+  // P1 signals
+  if (isUnread) {
+    priority = Math.min(priority, 1); signals.push('unread');
+  }
+  if (daysAgo <= 3 && latestType === 'received' && !isSys) {
+    priority = Math.min(priority, 1); signals.push('3天内客户回复');
+  }
+  if (isCore && daysAgo <= 7) {
+    priority = Math.min(priority, 1); signals.push('核心市场活跃');
+  }
+  if (daysAgo <= 1) {
+    priority = Math.min(priority, 1); signals.push('24h有互动');
+  }
+
+  // P2 signals
+  if (daysAgo <= 7 && !isSys) {
+    priority = Math.min(priority, 2); signals.push('7天内有互动');
+  }
+  if (daysAgo <= 14 && isCore) {
+    priority = Math.min(priority, 2); signals.push('核心市场2周内');
+  }
+
+  // P3: older but had interaction
+  if (daysAgo <= 30 && !isSys) {
+    priority = Math.min(priority, 3);
+  }
+
+  // Downgrade: system message only + old
+  if (isSys && daysAgo > 7) priority = Math.max(priority, 4);
+
+  return { priority, signals, daysAgo, isUnread, latestType, isSys, country, isCore };
+}
+
+const results = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+const all = data.conversations.map(c => {
+  const r = classify(c);
+  return {
+    ...r,
+    cid: c.cid,
+    name: c.name,
+    latestContent: (c.latestMessage?.content || '').substring(0, 100),
+    daysAgo: r.daysAgo,
+    companyName: c.companyName,
+    tagInfo: c.tagInfo || [],
+  };
+});
+
+all.forEach(r => results[r.priority].push(r));
+
+// Sort each tier by daysAgo ascending
+for (let i = 0; i <= 4; i++) results[i].sort((a, b) => a.daysAgo - b.daysAgo);
+
+// Output summary
+console.log('=== S1 METADATA CLASSIFICATION ===');
+console.log('Total:', all.length, 'conversations');
+console.log('');
+
+for (let i = 0; i <= 4; i++) {
+  console.log('--- P' + i + ' Candidates: ' + results[i].length + ' ---');
+  results[i].forEach(r => {
+    const flags = [];
+    if (r.isUnread) flags.push('UNREAD');
+    if (r.isCore) flags.push('核心');
+    if (r.isSys) flags.push('SYSMSG');
+    const sigStr = r.signals.join(';');
+    console.log(`  [${r.daysAgo}d][${r.country}] ${r.name} | ${r.latestContent.substring(0, 60)} | ${flags.join(',')} | ${sigStr}`);
+  });
+  console.log('');
+}
+
+// Export for S2 use
+fs.writeFileSync(
+  path.join(__dirname, '..', 'data', 's1_classification.json'),
+  JSON.stringify({ exportedAt: new Date().toISOString(), results }, null, 2)
+);
+console.log('Exported to data/s1_classification.json');

@@ -1,0 +1,756 @@
+---
+#1 | Mona almuharraqy | BH | 脚本判级:A | bucket:2
+总消息:480 | 客户:222 | 我方:251
+最后客户消息:8天前 | 方向:to_them
+  [客户] 2026-05-06 | اول تجربة معهم
+  [我方] 2026-05-06 | قد لا يكون هذا مشكلتهم بالضرورة، ففي الآونة الأخيرة، تأثرت الأمور بالوضع الدولي، وستزداد أوقات الشحن بشكل كبير.
+  [我方] 2026-05-06 | أتمنى أن تنتهي الحرب قريباً.
+  [客户] 2026-05-06 | يارب
+  [客户] 2026-05-06 | اتمني لان كل شىء ارتفع
+  [我方] 2026-05-06 | /:fighting.حسنًا، سأرتاح الآن، وسنتحدث غدًا.
+  [客户] 2026-05-06 | طيب
+  [我方] 2026-05-06 | /:handshake.
+---
+#2 | WELE Mounia | TG | 脚本判级:A | bucket:2
+总消息:111 | 客户:39 | 我方:70
+最后客户消息:8天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | Voici ce qui pourrait vous intéresser.
+  [我方] 2026-05-08 | WELE, bonjour ! Je suis ravi d'avoir reçu ton message disant que tu as bien reçu la marchandise et que tu en es satisfait. Comment se sont vendues les 30 pièces de la dernière fois ? Nous avons lancé 
+---
+#3 | yoselyn Rodriguez | US | 脚本判级:A | bucket:2
+总消息:230 | 客户:85 | 我方:138
+最后客户消息:13天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [我方] 2026-04-29 | ¿Hay algo en lo que pueda ayudarte en particular?
+  [客户] 2026-04-30 | hola 👋
+  [客户] 2026-04-30 | me encantaron los conjuntos todos preciosos sin duda volvería a pedirlos
+  [我方] 2026-05-01 | You haven't responded to this buyer yet, which may risk losing this lead. Enable AI Auto Reception to instantly respond to new business opportunities.
+  [我方] 2026-05-01 | /:yeah. ¡Muchas gracias por su reconocimiento! Me alegra que le gusten estos conjuntos y que los considere bonitos. Su satisfacción es muy importante para nosotros. Esperamos su próxima visita y, si n
+  [客户] 2026-05-01 | hola como estas disculpa
+  [客户] 2026-05-01 | ropa de mujer venden ?
+  [我方] 2026-05-02 | Solo fabricamos ropa para bebés y niños pequeños.
+---
+#4 | Chloé St-Germain | US | 脚本判级:S | bucket:2
+总消息:1000 | 客户:489 | 我方:483
+最后客户消息:30天前 | 方向:to_them
+  [客户] 2026-04-13 | So?
+  [我方] 2026-04-14 | Bonjour, 
+ 
+ Merci de votre confirmation. 
+ 
+ Je suis en train de confirmer les derniers détails du certificat GOTS avec le fournisseur de tissus. Je veux m'assurer que toutes les informations sont ex
+  [客户] 2026-04-14 | Ok
+  [我方] 2026-04-14 | /:handshake./:handshake.
+  [我方] 2026-04-14 | Bonjour, 
+ 
+ Après vérification auprès des fournisseurs de tissus et de l'usine, voici la situation réelle : 
+ 
+ 1. Certificat GOTS : Mon fournisseur de tissus n'a pas de certificat GOTS. Je ne peux p
+  [我方] 2026-04-16 | Bonjour, 
+ 
+ Je vais juste relancer pour faire un suivi, sans te mettre de pression. Vous devrez peut-être prendre le temps de vérifier avec l'équipe. 
+ 
+ Pour vous aider à prendre une décision, voici
+  [我方] 2026-04-16 | [产品卡片]
+  [我方] 2026-04-16 | [产品卡片]
+---
+#5 | Rocio L | US | 脚本判级:A | bucket:2
+总消息:324 | 客户:146 | 我方:175
+最后客户消息:30天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [我方] 2026-04-10 | 新款定制整理 -002.xls
+  [客户] 2026-04-10 | Thank you so much. I’ll review throughout the weekend.
+  [我方] 2026-04-11 | Hi, Rosio, I hope you have a productive weekend. If you need any further information or assistance with your comments, please let me know
+  [我方] 2026-04-13 | Hi, Rossio, I hope you have a great weekend! Do you have time to check the file I sent? If you have any questions or need further assistance, please let me know.
+  [客户] 2026-04-13 | yes picking patterns now, might take me a few days
+  [我方] 2026-04-14 | Hello Rocio, 
+ 
+ No problem, take your time to choose, there's no rush. 
+ 
+ If there's anything I can help with during the selection process, such as: 
+ 
+ A photo of the actual item with a specific fl
+  [客户] 2026-04-14 | Do you do custom made patterns?
+  [我方] 2026-04-14 | Yes, that would be best; we have a very rich selection of existing patterns
+---
+#6 | SKYHIGH COMPANY | IN | 脚本判级:A | bucket:2
+总消息:112 | 客户:65 | 我方:46
+最后客户消息:33天前 | 方向:to_them
+  [客户] 2026-04-11 | this is my we chat ID 
+  [我方] 2026-04-11 | Yes, I have sent the request
+  [我方] 2026-04-11 | Are you busy? If you have time, please get in touch.
+  [客户] 2026-04-11 | Okay 
+  [客户] 2026-04-11 | Let me pass it 
+  [我方] 2026-04-11 | Did you receive the request information?
+  [客户] 2026-04-11 | passed
+  [我方] 2026-04-11 | Okay, I received it
+---
+#7 | Karl brown | US | 脚本判级:A | bucket:2
+总消息:6 | 客户:2 | 我方:3
+最后客户消息:42天前 | 方向:to_them
+  [客户] 2026-04-03 | Hi,I’m considering placing an order for this product soon.Hello,
+
+I would like to develop a custom baby diaper similar to the attached reference image, but with my own branding.
+
+Here are the specific
+  [客户] 2026-04-03 | Your business product has not been quoted, you can quickly open the automatic reception quotation capability.
+  [我方] 2026-04-03 | Our product uses microfiber with snap button closure; Velcro may be possible. Sizes M/L available; newborn size needs confirmation. MOQ is 100 pieces. Sample lead time is 3-7 days. Customization inclu
+  [我方] 2026-04-03 | I have seen your inquiry information and will respond to you accordingly
+  [我方] 2026-04-10 | Dear Karl, we sincerely apologize for the delay I have already sent all your relevant questions via email. Please confirm your packaging preferences so that we can proceed further.
+---
+#8 | Abdou Salam Kane | SN | 脚本判级:A | bucket:2
+总消息:253 | 客户:98 | 我方:152
+最后客户消息:40天前 | 方向:to_them
+  [我方] 2026-03-12 | [产品卡片]
+  [客户] 2026-04-04 | hello
+  [我方] 2026-04-05 | Je suis désolé(e), je suis en congé aujourd'hui et je n'ai pas pu répondre à temps.
+  [我方] 2026-04-05 | Nous avons lancé une nouvelle gamme de couches.
+  [我方] 2026-04-05 | [产品卡片]
+  [我方] 2026-04-05 | [产品卡片]
+  [我方] 2026-04-05 | [产品卡片]
+  [我方] 2026-04-05 | L'effet anti-fuite est plutôt bon.
+---
+#9 | emmanuel maguma | ZW | 脚本判级:A | bucket:2
+总消息:94 | 客户:35 | 我方:55
+最后客户消息:40天前 | 方向:to_them
+订单: 交易取消 | undefined | undefined
+  [我方] 2026-04-04 | $14.96
+2.0000
+10000039414903
+$3
+294577074501025039
+100%
+seller_confirmed
+express
+[{"quantity":2.0000,"productId":10000039414903,"productName":"Cotton Worsted Children Set Sleeveless Vest Shorts Print 
+  [我方] 2026-04-04 | The modification has been successful, please confirm
+  [客户] 2026-04-04 | Is this one available
+  [我方] 2026-04-04 | Yes, there are
+  [客户] 2026-04-04 | Ok good
+  [我方] 2026-04-04 | Okay, we will arrange for shipment as soon as possible after payment
+  [客户] 2026-04-04 | that's good
+  [我方] 2026-04-04 | /:handshake./:handshake./:handshake./:handshake.
+---
+#10 | SONIYA PAUL | IN | 脚本判级:A | bucket:2
+总消息:173 | 客户:67 | 我方:103
+最后客户消息:92天前 | 方向:to_them
+  [客户] 2026-02-11 | or this ?
+  [我方] 2026-02-11 | The first style
+  [客户] 2026-02-11 | ok thats what i said.. i received ordered product only 5 ps .. 14 ps are another model
+  [客户] 2026-02-11 | its ok ..please take care next time 
+  [我方] 2026-02-11 | Okay 👌, next time I will communicate the details clearly with you
+  [我方] 2026-02-25 | Hi SONIYA, 
+ 
+ It's been about 2 weeks since we last connected! 
+ 
+ Because you're a valued repeat client, I've reserved exclusive restock pricing for you: 
+ 
+    5% off repeat orders of cloth diaper 
+  [我方] 2026-03-04 | [产品卡片]
+  [我方] 2026-04-02 | Hello
+---
+#11 | Soujeeta reetoo | MU | 脚本判级:A | bucket:2
+总消息:464 | 客户:199 | 我方:263
+最后客户消息:49天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [我方] 2026-03-26 | Let me check
+  [我方] 2026-03-26 | There are a total of 92 items
+  [客户] 2026-03-26 | ok thx. can you pks update yhe proforma invoice for it to be 92
+  [我方] 2026-03-26 | Okay, is tomorrow okay?
+  [客户] 2026-03-26 | yes
+  [我方] 2026-03-26 | /:handshake./:handshake./:handshake.
+  [我方] 2026-03-28 | [产品卡片]
+  [我方] 2026-03-28 | This is the revised invoice with the product quantity changed to 92. Please check if you are satisfied
+---
+#12 | Mbam Oluchi | NG | 脚本判级:A | bucket:2
+总消息:49 | 客户:21 | 我方:27
+最后客户消息:61天前 | 方向:to_them
+  [客户] 2026-03-14 | Name: 张先生转TCA4189
+Contact Number: 13539992136
+Province: 广东省
+City: 广州市
+District: 白云区
+Zip code: 510000
+Full Address: 广东省 广州市 白云区 走马岗中心巷16号9-2转仓张先生转TCA4189
+  [客户] 2026-03-14 | price in RMB
+  [我方] 2026-03-14 | Is this the delivery address?
+  [客户] 2026-03-14 | yes
+  [我方] 2026-03-14 | I will send you the RMB price right away
+  [我方] 2026-03-14 | [产品卡片]
+  [我方] 2026-03-14 | These are the RMB prices corresponding to different sizes
+  [我方] 2026-03-14 | These are the prices of RMB in different denominations. Do you have any other questions or requests?
+---
+#13 | OUSMANHANGATA HALIMA | CM | 脚本判级:A | bucket:2
+总消息:179 | 客户:79 | 我方:95
+最后客户消息:63天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [客户] 2026-03-11 | okay
+  [我方] 2026-03-11 | /:handshake.
+  [我方] 2026-03-12 | La commande a été consultée, elle est en cours de livraison et devrait être livrée aujourd'hui.
+  [我方] 2026-03-12 | [产品卡片]
+  [我方] 2026-03-12 | [产品卡片]
+  [我方] 2026-03-12 | Le colis a été réceptionné.
+  [客户] 2026-03-12 | d'accord
+  [我方] 2026-03-12 | Parfait. N'hésitez pas à me contacter si vous avez d'autres questions. Merci de votre compréhension.
+---
+#14 | Dania Sanchez | MX | 脚本判级:B | bucket:2
+总消息:14 | 客户:4 | 我方:10
+最后客户消息:63天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [我方] 2026-03-11 | [产品卡片]
+  [我方] 2026-03-11 | Por favor, confirma la dirección de envío, hoy mismo voy a preparar el envío.
+  [我方] 2026-03-12 | Hola, el producto ya ha sido enviado, el número de guía de logística es: ALS01458702612.
+  [客户] 2026-03-12 | Gracias
+  [客户] 2026-03-12 | Cuando llegaría?
+  [我方] 2026-03-12 | wo
+  [我方] 2026-03-12 | [产品卡片]
+  [我方] 2026-03-12 | Tiempo estimado de entrega: 10-25 días hábiles.
+---
+#15 | Sarah nell roly Othayi MAMALHY | GA | 脚本判级:A | bucket:2
+总消息:54 | 客户:21 | 我方:32
+最后客户消息:64天前 | 方向:to_them
+  [我方] 2026-03-08 | [产品卡片]
+  [我方] 2026-03-08 | Le produit a été expédié, voici une photo du colis.
+  [我方] 2026-03-08 | Prévue pour arriver dans environ 3 jours.
+  [客户] 2026-03-09 | Merci beaucoup ☺️
+  [我方] 2026-03-09 | [产品卡片]
+  [我方] 2026-03-11 | Good morning, the order has been marked as delivered. Has your freight forwarder sent it to your country yet?
+  [客户] 2026-03-11 | Oui c’est en chemin
+  [我方] 2026-03-11 | N'oubliez pas de me faire un retour après réception de la commande./:smile./:smile.
+---
+#16 | Grace Kanku | CD | 脚本判级:B | bucket:2
+总消息:83 | 客户:39 | 我方:42
+最后客户消息:71天前 | 方向:to_them
+  [客户] 2026-03-04 | oui son vol qui lui complique pour l'instant
+  [客户] 2026-03-04 | vu que la situation du monde
+  [我方] 2026-03-04 | En effet, en raison de la situation récente, nous ne parvenons pas à effectuer les livraisons pour certains clients dans certaines régions.
+  [我方] 2026-03-04 | J'espère une paix mondiale et qu'il n'y ait plus jamais de guerre.
+  [客户] 2026-03-04 | oui oui
+  [我方] 2026-03-04 | Je vais me reposer maintenant, j'attends de tes nouvelles demain.
+  [我方] 2026-03-11 | [产品卡片]
+  [我方] 2026-03-11 | Pourriez-vous me communiquer l'adresse de votre transitaire ? Je vous enverrai immédiatement le lien de commande officiel pour le paiement via Orange Money afin d'accélérer le processus. Merci !
+---
+#17 | Laura McGlade. | UK | 脚本判级:A | bucket:2
+总消息:110 | 客户:42 | 我方:67
+最后客户消息:73天前 | 方向:to_them
+  [客户] 2026-03-02 | Does foot fold to cover feet?
+  [我方] 2026-03-02 | Yes, the hands and feet of both models can be folded
+  [我方] 2026-03-02 | I'm glad the feature meets your needs Please confirm the following information so that we can provide you with a quote: 
+ 1. Style: Two types of white one-piece outfits 
+ 2. Size: All are newborn size
+  [我方] 2026-03-04 | Good morning! I hope you are doing well. Did you have a chance to check the detailed information I sent about the white jumpsuit? If you have any feedback or need further assistance, please let me kno
+  [我方] 2026-03-04 | [产品卡片]
+  [我方] 2026-03-05 | I see you've read it~ Could you please reply when you have a moment or let me know the progress? It'll just take a second
+  [我方] 2026-03-06 | Hi, I hope you are doing well! If you have any questions or need more details about the white jumpsuit, I'm here to help. Let me know how I can assist!
+  [我方] 2026-03-11 | Good morning, regarding the baby onesies we discussed earlier, do you have any thoughts on the two styles?
+---
+#18 | Salome Ambali | CG | 脚本判级:A | bucket:2
+总消息:30 | 客户:13 | 我方:16
+最后客户消息:83天前 | 方向:to_them
+订单: 待收款 | undefined | undefined
+  [客户] 2026-02-20 | Normalement je suis entrain de faire de achats pour mon futur bébé, comme je suis primipare je ne connais rien je sélectionne juste ce qu’il peut porter pour ses premièrs mois jusqu’à ses 1ans
+  [我方] 2026-02-20 | D'accord, alors je vous recommande les tailles suivantes : 
+ Premier produit : 4 pièces de 73 cm, 1 pièce de 80 cm. 
+ Deuxième produit : 2 pièces de 80 cm, 2 pièces de 90 cm. 
+ Troisième produit : 1 p
+  [我方] 2026-02-20 | Est-ce possible ?
+  [客户] 2026-02-20 | Je suis d’accord
+  [我方] 2026-02-21 | D'accord, je vais créer une commande pour vous.
+  [我方] 2026-02-21 | $31.09
+4.0000
+1601690639342
+$3
+292020111001020635
+100%
+seller_confirmed
+express
+[{"quantity":4.0000,"productId":1601690639342,"productName":"Custom Kids Short Sleeve Set 100 Cotton Animal Stripe Carto
+  [我方] 2026-02-21 | Éléments à vérifier : le montant total de la commande, les informations d'adresse et les remarques.
+  [我方] 2026-03-11 | [产品卡片]
+---
+#19 | Lujayna Dida | TZ | 脚本判级:B | bucket:2
+总消息:83 | 客户:31 | 我方:51
+最后客户消息:64天前 | 方向:to_them
+订单: 交易成功 | undefined | undefined
+  [我方] 2026-03-09 | Tracking number: 773409364754839 
+ Courier: Shentong Express
+  [客户] 2026-03-09 | ok
+  [我方] 2026-03-09 | Expected to be delivered to the freight forwarder's address within two days
+  [客户] 2026-03-09 | OK thank you
+  [我方] 2026-03-09 | OK
+  [我方] 2026-03-11 | Lujayna, good morning, your order has been delivered to the freight forwarder's address, and the freight forwarder's staff have sent it to your country
+  [客户] 2026-03-11 | ok
+  [我方] 2026-03-11 | What I mean is that it has already arrived at the freight forwarder's address, and I'm asking you if it has been sent to your country?
+---
+#20 | Asselya Marina | US | 脚本判级:S | bucket:2
+总消息:457 | 客户:220 | 我方:232
+最后客户消息:69天前 | 方向:to_them
+订单: 待收款 | undefined | undefined
+  [客户] 2026-03-06 | Leo, i want to sell this products in amazon. Amazon requires 16 CFR Part 1615 for kids products. If u have CPC (Children’s Product Certificate) it is great. If not it is very expensive
+  [客户] 2026-03-06 | Which products have CPC, please check and let me know
+  [我方] 2026-03-06 | Yes, let me think about whether there is a more suitable way
+  [客户] 2026-03-06 | Ok
+  [我方] 2026-03-06 | Please wait a moment
+  [我方] 2026-03-06 | Regarding the CPC certificate for your Amazon store 
+ 
+ Thank you for your patience. I have carefully checked all the products you selected. 
+ 
+ I need to be completely honest with you: 
+ 
+ These prod
+  [客户] 2026-03-06 | Thank you very much, Leo. Let me think about it and I’ll come back. I appreciate your support.
+  [我方] 2026-03-06 | Thank you for your trust, I will wait for you
+---
+#21 | Taylah Wolff | AU | 脚本判级:A | bucket:2
+总消息:108 | 客户:28 | 我方:79
+最后客户消息:69天前 | 方向:to_them
+  [客户] 2026-03-06 | No worries at all
+  [我方] 2026-03-06 | Okay 👌, I reviewed the conversation, and you need a custom-made jumpsuit, such as the following styles
+  [我方] 2026-03-06 | [产品卡片]
+  [我方] 2026-03-06 | [产品卡片]
+  [我方] 2026-03-06 | You can provide me with the design files for this style, including detailed measurements such as bust, sleeve length, garment length, waist circumference, and other specific dimensions for each detail
+  [我方] 2026-03-06 | We will produce samples according to your design
+  [我方] 2026-03-06 | If you just want to get a style similar to the picture, then I can send you the two product images I shared before, as shown below. If you think that's okay, I can directly send these two in-stock pro
+  [我方] 2026-03-06 | Are you there?
+---
+#22 | Oliver Rivera | CL | 脚本判级:A | bucket:2
+总消息:27 | 客户:7 | 我方:18
+最后客户消息:99天前 | 方向:to_them
+  [我方] 2026-02-04 | Comenzamos a trabajar oficialmente el 24 de febrero.
+  [我方] 2026-02-28 | Hello, I have prepared a formal quote for you. Please let me know if you need any further details or assistance. Looking forward to your reply!
+  [我方] 2026-02-28 | We have already ended our vacation
+  [我方] 2026-02-28 | COTIZACIÓN FORMAL.pdf
+  [我方] 2026-03-02 | Hello, Oliver. We apologize for the delay. We are ready to fulfill your order with guaranteed quality and delivery. If you have any questions or need further assistance, please feel free to let us kno
+  [我方] 2026-03-02 | [产品卡片]
+  [我方] 2026-03-04 | Hello, Oliver, I hope you are doing well. We value your interest and are eager to support your business. If you have any questions or need further assistance, please let us know. We are committed to p
+  [我方] 2026-03-05 | I see you've read it~ Could you please reply when you have a moment or let me know the progress? It'll just take a second
+---
+#23 | Linda Vaage | NO | 脚本判级:A | bucket:2
+总消息:63 | 客户:25 | 我方:37
+最后客户消息:103天前 | 方向:to_them
+  [客户] 2026-01-31 | 200 pcs pr design
+  [我方] 2026-01-31 | Thank you for sharing your target of 200 pieces per design. Although our MOQ ensures the best quality and price, let's explore possible solutions to meet your needs. Can we consider combining orders o
+  [我方] 2026-01-31 | Could you please specify the sizes and patterns for the 200 pieces? I will then communicate with the factory to determine if they can accommodate your requirements.
+  [我方] 2026-02-03 | Good day! To help move forward, could you please confirm the sizes and patterns for the 200 pieces? Your input is key. Thanks, [Salesman]
+  [我方] 2026-02-05 | Hi Linda, checking in—did you have any other concerns about the order? Many clients with 200pcs MOQ benefited from our design assistance & cost-saving solutions. Happy to address specific needs to hel
+  [我方] 2026-02-28 | [产品卡片]
+  [我方] 2026-03-04 | Hi! It's been a while. Hope everything is going well for you. We've recently launched some exciting new products that might interest you. Would love to catch up and see how we can support your current
+  [我方] 2026-03-05 | I see you've read it~ Could you please reply when you have a moment or let me know the progress? It'll just take a second
+---
+#24 | Roseline Roseline | US | 脚本判级:B | bucket:2
+总消息:95 | 客户:30 | 我方:61
+最后客户消息:73天前 | 方向:to_them
+  [我方] 2026-03-02 | [产品卡片]
+  [我方] 2026-03-02 | [产品卡片]
+  [我方] 2026-03-02 | Est-ce que ça va comme ça ?
+  [我方] 2026-03-02 | [产品卡片]
+  [我方] 2026-03-02 | [产品卡片]
+  [客户] 2026-03-02 | voilà c'est sa je veut
+  [我方] 2026-03-03 | Excellente choix ! Pourriez-vous me fournir la quantité exacte et l'adresse de livraison pour une offre précise ?
+  [我方] 2026-03-05 | Bonjour ! J'espère que vous allez bien. Avez-vous eu l'occasion de définir les quantités de la commande et l'adresse de livraison ? Si vous avez des questions ou besoin d'aide supplémentaire, n'hésite
+---
+#25 | Anabel Gevorgyan | GE | 脚本判级:A | bucket:2
+总消息:227 | 客户:102 | 我方:123
+最后客户消息:76天前 | 方向:to_them
+  [我方] 2026-02-28 | 435051056113880, this is the tracking number for Yunda Express.
+  [我方] 2026-02-28 | This is the logistics information: [Foshan City] Your package has been delivered, recipient: G888 
+ International transit warehouse, if you have any questions, please contact courier Zhu Wan by phone.
+  [我方] 2026-02-28 | Display: It was signed for the day before yesterday
+  [我方] 2026-02-28 | I have already communicated with your freight forwarder, and the goods have been signed for. However, they only started working yesterday and are now preparing to ship. I have urged them to send the g
+  [我方] 2026-02-28 | [产品卡片]
+  [我方] 2026-03-02 | Good morning! I hope everything is going well for you. Do you have a chance to review the model I sent earlier? I'd love to hear your thoughts. How long will it take for the product to arrive?
+  [我方] 2026-03-04 | [产品卡片]
+  [我方] 2026-03-04 | How long does it take for the shipment to arrive in your country after the freight forwarder sends it out?
+---
+#26 | alnwd alnwd | IQ | 脚本判级:B | bucket:2
+总消息:2 | 客户:1 | 我方:1
+最后客户消息:6天前 | 方向:to_them
+  [客户] 2026-05-08 | مرحبًا،لدي اهتمام بهذا المنتج.
+[{"quantity":"2.000 قطعة","id":1601600287717,"title":"Korean Style Fashion Short-Sleeved 100% Cotton Breathable O-Neck T-Shirt Shorts 2-Piece Set Kids Boys Girls Summer 
+  [我方] 2026-05-08 | مرحباً، هذا المنتج مصنوع من القطن الخالص، ومناسب للأطفال الرضع من عمر 9 أشهر إلى 6 سنوات تقريباً. هل تحتاج إلى منتج جاهز أم مُصمم حسب الطلب؟
+---
+#27 | Inderpreet kaur | US | 脚本判级:A | bucket:2
+总消息:40 | 客户:18 | 我方:20
+最后客户消息:0天前 | 方向:to_them
+  [我方] 2026-05-14 | No problem, this style can be made
+  [客户] 2026-05-14 | 👍
+  [我方] 2026-05-14 | Okay, I will now send you the style selection
+  [我方] 2026-05-14 | Pattern_Reference_002.pdf
+  [我方] 2026-05-14 | Pattern_Reference_004.pdf
+  [我方] 2026-05-14 | Pattern_Reference_003.pdf
+  [我方] 2026-05-14 | Pattern_Reference_001.pdf
+  [我方] 2026-05-14 | Hi, Inderpreet, 
+ So, our plan here is as follows: 
+ This plan is perfect—you test the samples on your side, and once they pass, we will proceed further. This is a straightforward and clear method, an
+---
+#28 | diego vargas | ES | 脚本判级:B | bucket:2
+总消息:40 | 客户:26 | 我方:13
+最后客户消息:7天前 | 方向:to_them
+  [我方] 2026-05-07 | Sí, podemos hacer los conjuntos de verano en talla 1 año para niña tal como en tus fotos. Para personalizar con logos o marcas necesitamos aprobación y un pedido mínimo de 100 piezas. ¿Me confirmas qu
+  [客户] 2026-05-07 | 100 piezas ?
+  [客户] 2026-05-07 | y 5 pedidos mínimos de que sería entonces ?
+  [我方] 2026-05-07 | El pedido mínimo de 5 piezas aplica para pedidos normales sin personalización de material o color. Para personalizar con logos o marcas, el mínimo es de 100 piezas. ¿Quieres que hablemos más sobre tus
+  [客户] 2026-05-07 | yo lo necesito para uso personal no para revender entonces como entenderas no me viene bien comprar tanto
+  [我方] 2026-05-07 | Para uso personal, puedes pedir desde 5 piezas si no deseas personalización. Si quieres logos o marcas, el mínimo es 100. ¿Quieres continuar con productos estándar o prefieres que exploremos otras opc
+  [客户] 2026-05-07 | no tienes stock de marca ?
+  [我方] 2026-05-08 | Lo sentimos, no tenemos existencias de esa marca.
+---
+#29 | jonathan aston | GH | 脚本判级:B | bucket:2
+总消息:13 | 客户:4 | 我方:8
+最后客户消息:3天前 | 方向:to_them
+  [客户] 2026-05-07 | I need a standard version of 200 piece of children clothes
+  [我方] 2026-05-08 | The unit price for 200 pieces is $2.68
+  [我方] 2026-05-08 | The total product cost is $536. What is your delivery address?
+  [我方] 2026-05-08 | Hello, Jonathan, 
+ 
+ Just following up to confirm whether you received the quote for 200 pieces at $2.68 per piece (total price $536). 
+ 
+ If there are budget concerns, you can change your approach: i
+  [客户] 2026-05-11 | ok
+  [我方] 2026-05-12 | Great! Please provide your delivery address so I can calculate the shipping cost for you.
+  [我方] 2026-05-13 | Jonathan, both shipping options to Ghana:
+
+Option A — Sea Freight (DDP, tax included)
+
+Pickup at our Accra warehouse
+~70 days after sailing
+Shipping: $335 | Total with goods: $871
+Option B — Express t
+  [我方] 2026-05-14 | Hi Jonathan, just checking in — did you have a chance to look at the two shipping options? Happy to answer any questions.
+---
+#30 | Aloh Voma | US | 脚本判级:A | bucket:2
+总消息:107 | 客户:45 | 我方:60
+最后客户消息:7天前 | 方向:to_them
+订单: 待发货 | undefined | undefined
+  [客户] 2026-05-06 | It can be replaced with 1
+  [我方] 2026-05-06 | Okay 👌, I will arrange it as soon as possible and expect to ship within 2 days
+  [客户] 2026-05-07 | Please kindly send me the receipt from the warehouse after the delivery of the goods so I can confirm with the warehouse as well. Thanks
+  [我方] 2026-05-08 | [产品卡片]
+  [我方] 2026-05-08 | [产品卡片]
+  [我方] 2026-05-08 | Already packed and shipped
+  [我方] 2026-05-08 | Expected to arrive within 3 days
+  [我方] 2026-05-08 | I will communicate with your freight forwarder and then send you the receipt
+---
+#31 | Ernestina Afriyie | GH | 脚本判级:B | bucket:2
+总消息:9 | 客户:3 | 我方:5
+最后客户消息:3天前 | 方向:to_them
+  [客户] 2026-05-07 | 1601670179202
+$1.80-3.03
+Children's Thermal Long Sleeve Pajama Set 2PC Winter Warm Sleepwear Cartoon Print Unisex Cotton Breathable Pajamas Boys Girls
+2.0
+1601670179202
+US$1.80-3.03
+儿童保暖长袖睡衣套装 2 件套冬季保
+  [客户] 2026-05-07 | How much is this
+  [我方] 2026-05-07 | Thank you for your inquiry. The price of this product mainly depends on the order quantity and target market. To provide you with the most accurate quote, could you please let me know your expected pu
+  [我方] 2026-05-08 | Ernestina, I sent you the price you asked for last time, did you see it? If you still need it, let me know the quantity you want and the delivery city, and I'll recalculate the total price including s
+  [客户] 2026-05-11 | Do you have cartoon character sleepwear
+  [我方] 2026-05-12 | Yes, I can recommend some for you
+  [我方] 2026-05-12 | [产品卡片]
+  [我方] 2026-05-13 | Ernestina, sorry for being late. This is the price you wanted: 
+ 
+ The thermal pajamas you asked about: $4.38/piece (10-50)   $4.15 (50-500)   $3.78 (500+) 
+ 
+ 3 Recommended Cartoon Pajamas: 
+ 
+ Style
+---
+#32 | Clara ElAssaad | FR | 脚本判级:B | bucket:2
+总消息:6 | 客户:3 | 我方:3
+最后客户消息:7天前 | 方向:to_them
+  [客户] 2026-05-07 | bjr svp je veux ces emsembles pour des enfants de 2 à 4ans
+  [客户] 2026-05-07 | [产品卡片]
+  [客户] 2026-05-07 | 1601695762597
+$2.85-3.11
+Cotton Children Set Cartoon Print Quick Dry Breathable Durable Summer Outfit Boys Girls
+5
+1601695762597
+US$2.85-3.11
+棉质儿童套装卡通印花速干透气耐用夏季服装男童女童
+5
+  [我方] 2026-05-07 | Convient
+  [我方] 2026-05-07 | Est-ce que vous en avez besoin pour un usage personnel ou pour la vente ?
+  [我方] 2026-05-13 | Bonjour Clara, je suis Leo. Désolé pour la réponse trop courte et peu professionnelle la dernière fois. Les tailles des ensembles pour enfants sont de 73 à 130 cm, couvrant parfaitement les 2 à 4 ans.
+---
+#33 | ali Amjid | ZA | 脚本判级:A | bucket:2
+总消息:269 | 客户:127 | 我方:140
+最后客户消息:2天前 | 方向:to_them
+订单: 待收款 | undefined | undefined
+  [我方] 2026-05-12 | Hello
+  [我方] 2026-05-12 | Regarding the shipping issue with the order, I have already communicated with the warehouse. There have been a lot of orders recently, so they are being processed in sequence. It is expected that the 
+  [客户] 2026-05-12 | Ok. But u chcek and make sure the delivery date pls
+  [我方] 2026-05-12 | Okay, I asked the warehouse yesterday, it won't take long
+  [客户] 2026-05-12 | Ok
+  [我方] 2026-05-12 | /:handshake./:handshake./:handshake.
+  [客户] 2026-05-12 | Lady & boy. Sizes and design chcek carefully before sending
+  [我方] 2026-05-12 | Okay, I will confirm it again at that time
+---
+#34 | Rosette Ngoy | CD | 脚本判级:B | bucket:2
+总消息:28 | 客户:11 | 我方:16
+最后客户消息:8天前 | 方向:to_them
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | Le prix unitaire de ce produit est de 5,3 dollars américains.
+  [我方] 2026-05-06 | Avez-vous un transitaire en Chine ?
+  [我方] 2026-05-06 | Nous sommes fournisseurs de Disney et de Pampers, avec une base de production d'environ 6000 mètres carrés, spécialisés dans les vêtements pour bébés et jeunes enfants.
+  [客户] 2026-05-06 | Oui j’ai transitaires
+  [客户] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | C'est parfait, il serait plus avantageux d'avoir un transitaire.
+  [我方] 2026-05-06 | Ce n'est pas un produit de notre magasin, n'est-ce pas ?
+---
+#35 | Aboulaye Rabiatou | CI | 脚本判级:A | bucket:2
+总消息:9 | 客户:7 | 我方:2
+最后客户消息:8天前 | 方向:to_them
+  [客户] 2026-05-06 | 1601699647629
+$3.10-3.30
+Kids Clothing Set Solid Color Waffle Fabric Polyester Cotton Short Sleeve Shorts Casual 2-7 Years
+5
+1601699647629
+US$3.10-3.30
+儿童服装套装纯色华夫格面料涤棉短袖短裤休闲款适合2-7岁
+5
+  [客户] 2026-05-06 | 1601714093531
+$2.50-3.20
+Children's Boutique Vest Suits Summer Pure Cotton New Style Girls' Shorts Outfit Baby Korean Version Boys' Sleeveless Clothing
+5
+1601714093531
+US$2.50-3.20
+儿童精品背心套装夏季纯棉新款女童短裤套
+  [客户] 2026-05-06 | 1601700231464
+$3.20-3.50
+Wholesale Soft Cotton/Polyester Baby Pajamas Set OEM Custom Infant Loungewear Bulk Kids Home Wear 2-Piece Outfits Factory
+5
+1601700231464
+US$3.20-3.50
+批发柔软棉质/涤纶婴儿睡衣套装 OEM 定制婴儿
+  [客户] 2026-05-06 | 1601709630973
+$2.20-2.80
+Children's Sports Suit Summer New Style Boys' Girls' Western Style Cartoon Casual Two-piece Set Baby Short-sleeved Shorts Neck
+10
+1601709630973
+US$2.20-2.80
+儿童运动套装夏季新款男童女童洋气卡通
+  [客户] 2026-05-06 | 1601693660104
+$2.85-3.11
+Cotton Soft Shell Boys Clothing Set Cartoon Print Short Sleeve Eco Friendly High Quality Outfit
+5
+1601693660104
+US$2.85-3.11
+棉质软壳男童服装套装卡通印花短袖环保高品质套装
+5
+  [客户] 2026-05-06 | 1601689894251
+$1.75-3.40
+Summer Boys Outfit Set, Premium Worsted Polyester Short Sleeve & Shorts, Fashion Print for Cool Comfort 3-8 Years
+10.0
+1601689894251
+US$1.75-3.40
+夏季男童套装，优质精纺涤纶短袖上衣和短裤，时尚印花，凉爽舒
+  [我方] 2026-05-06 | Je suis désolé, j'ai été retardé aujourd'hui en raison d'une affaire urgente. Je répondrai à votre message plus tard. Je suis vraiment désolé.
+  [我方] 2026-05-06 | Avez-vous besoin de produits en stock ou de produits sur mesure ?
+---
+#36 | Christabel Kanunsha | ZM | 脚本判级:B | bucket:2
+总消息:42 | 客户:16 | 我方:25
+最后客户消息:8天前 | 方向:to_them
+订单: 待收款 | undefined | undefined
+  [客户] 2026-05-06 | ooh okay i hear you
+  [我方] 2026-05-06 | Let me see which product you have chosen
+  [我方] 2026-05-06 | The unit price of the product you selected is $3.1. So the total cost of the order is $7.7. Please reply with the number 1 to confirm, and I will create the order now
+  [客户] 2026-05-06 | i have sent the pics
+  [我方] 2026-05-06 | Okay, I will create the order and send it to you now
+  [我方] 2026-05-06 | $7.70
+1.0000
+1601695569784
+$1.50
+301045662001026942
+100%
+seller_confirmed
+express
+[{"quantity":1.0000,"productId":1601695569784,"productName":"Kids Set 2 Pieces 100 Cotton Cartoon Print Tee Shorts Sum
+  [我方] 2026-05-06 | We will arrange shipment as soon as possible after payment
+  [我方] 2026-05-08 | Hello, Christabel, 
+ 
+ Your 2 items (selected style, 90cm/2-year-old size) are ready, total price $7.70. 
+ 
+ The item will be shipped as soon as it arrives, and the tracking number will be sent to you
+---
+#37 | Marcos Kuyu | US | 脚本判级:B | bucket:2
+总消息:17 | 客户:7 | 我方:9
+最后客户消息:8天前 | 方向:to_them
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | Got it. For 5 sets in 100cm, where should I ship?
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | Got it! To help with the order, where should we ship these?
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | Got it. Size 100cm for all 5 colors. Where to?
+  [我方] 2026-05-06 | Bonjour, vous avez besoin de ces modèles, pourriez-vous me communiquer les quantités exactes ?
+  [我方] 2026-05-06 | Veuillez me communiquer la quantité et l'adresse de livraison, et je vous enverrai une offre complète.
+---
+#38 | Mezna Alawfi | OM | 脚本判级:B | bucket:2
+总消息:52 | 客户:15 | 我方:36
+最后客户消息:8天前 | 方向:to_them
+  [我方] 2026-05-06 | دعني أرى.
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | [产品卡片]
+  [我方] 2026-05-06 | هذه كلها من نفس الخامة، وإذا كنت مهتمًا، يمكنني تخصيص هذه القماشة.
+  [客户] 2026-05-06 | نعم نفس هذي الخامه
+  [我方] 2026-05-06 | لدينا أكثر من 300 تصميم مخصص للاختيار من بينها لهذه الخامة.
+  [客户] 2026-05-06 | للنساء كبار
+  [我方] 2026-05-06 | ما هو الفئة العمرية؟
+---
+#39 | Esther Chola | ZM | 脚本判级:B | bucket:2
+总消息:3 | 客户:1 | 我方:2
+最后客户消息:8天前 | 方向:to_them
+  [客户] 2026-05-06 | Hi,I’m ready to start an inquiry about this item.
+[{"quantity":"2.000 piece","id":1601695897100,"title":"Cotton Children Sleepwear Set Thermal Printed Cartoon Design Warm Moisture Wicking Soft Comfort
+  [我方] 2026-05-06 | Thank you for your inquiry. The price of this product mainly depends on the order quantity and target market. To provide you with the most accurate quote, could you please let me know your expected pu
+  [我方] 2026-05-08 | Hello Esther! We are the factory that collaborates with Pampers on the Olympic gift box, specializing in OEM/ODM for baby and children's clothing. What style do you need? Let me know the quantity and 
+---
+#40 | Christelle ITwite | US | 脚本判级:B | bucket:2
+总消息:2 | 客户:1 | 我方:1
+最后客户消息:8天前 | 方向:to_them
+  [客户] 2026-05-06 | Bonjour,j'aimerais entamer des discussions à propos de cet article.
+[{"quantity":"5.000 pièce","id":10000039414903,"title":"Cotton Worsted Children Set Sleeveless Vest Shorts Print Durable Fashion Sum
+  [我方] 2026-05-06 | Bonjour, nous sommes des fournisseurs de Disney et de Pampers, et nous pouvons personnaliser les tissus, les tailles, les procédés de fabrication, l'emballage, etc. pour vous. Avez-vous besoin de prod
+---
+#41 | Bamba Ami | CI | 脚本判级:A | bucket:2
+总消息:2 | 客户:1 | 我方:1
+最后客户消息:8天前 | 方向:to_them
+  [客户] 2026-05-06 | Bonjour,je cherche à établir un partenariat au sujet de ce produit. Quel est le meilleur prix que vous pouvez offrir ?
+[{"quantity":"100.000 pièce","id":1601637404027,"title":"OEM Custom Wholesale Bab
+  [我方] 2026-05-06 | Merci pour votre demande de prix. Le prix de ce produit dépend principalement de la quantité commandée et du marché cible. Pour vous fournir une offre la plus précise possible, pourriez-vous nous indi
+---
+#42 | Tahar benmohamed | CA | 脚本判级:A | bucket:2
+总消息:4 | 客户:1 | 我方:2
+最后客户消息:8天前 | 方向:to_them
+  [客户] 2026-05-06 | Hi,I’d like to learn more about this product.more models
+[{"quantity":"100.000 piece","id":1601637404027,"title":"OEM Custom Wholesale Baby Clothing Set Bulk Infant Pajamas 100% Cotton Children Homewe
+  [我方] 2026-05-06 | This baby clothing set is made of 100% cotton and comes in a casual style. It's available in 4 colors and sizes from 90 to 120 cm. The minimum order quantity is 100 pieces. Do you have any color prefe
+  [我方] 2026-05-06 | Hello, do you need in-stock items or custom-made products?
+---
+#43 | adriano.1989 NA | US | 脚本判级:B | bucket:2
+总消息:12 | 客户:7 | 我方:4
+最后客户消息:8天前 | 方向:to_them
+  [我方] 2026-05-04 | Sim, a etiqueta traz tamanho, material e instruções de lavagem no padrão brasileiro. Quer saber mais detalhes ou receber uma cotação?
+  [客户] 2026-05-04 | Qual o valor do frete econômico para a Rua Antônio Caldeira Dantas, 654, centro, Tabatinga, São Paulo, Brasil, CEP 14910-005?
+  [客户] 2026-05-04 | 100 conjuntos
+  [我方] 2026-05-04 | Recebemos seu pedido de 100 conjuntos. Vou confirmar o valor do frete econômico para Tabatinga, São Paulo, e retorno em breve.
+  [我方] 2026-05-05 | Olá! Obrigado pelo interesse.
+
+Antes de confirmar o frete, preciso entender melhor: você está interessado em um produto que já está pronto no nosso catálogo (pronta entrega), ou deseja um pedido perso
+  [客户] 2026-05-06 | Boa noite!
+produto em estoque, sem personalização
+  [客户] 2026-05-06 | frete aéreo simplificado, courier
+  [我方] 2026-05-06 | Desculpe, fui atrasado hoje devido a um assunto urgente. Responderei à sua mensagem mais tarde. Sinto muito.
+---
+#44 | Keinjol Tata | IN | 脚本判级:S | bucket:2
+总消息:57 | 客户:28 | 我方:28
+最后客户消息:4天前 | 方向:to_them
+  [客户] 2026-05-05 | Hello, thank you for your response. I would also like to know if you have other related products available, such as period panties, seamless panties, or similar women’s innerwear products.
+If availabl
+  [我方] 2026-05-05 | Our factory mainly produces textile products for infants and toddlers, such as cloth diapers, sleeping bags, swaddles, sets, bibs, etc. If you need to customize these types of period panties or other 
+  [客户] 2026-05-05 | When will you be able to provide me with this information?
+  [我方] 2026-05-05 | By tomorrow morning at the latest
+  [客户] 2026-05-05 | What position do you hold in the company, and who are you?
+  [我方] 2026-05-05 | I am the manager of the company's foreign trade department
+  [客户] 2026-05-10 | hello
+  [我方] 2026-05-11 | Amit, sorry to keep you waiting. I am the head of the foreign trade department at Little Star Factory, and I will be directly handling your project from now on. 
+ 
+ Let me clarify first: you asked abo
+---
+#45 | Alina Svinchuk | UK | 脚本判级:B | bucket:2
+总消息:9 | 客户:4 | 我方:5
+最后客户消息:9天前 | 方向:to_them
+  [我方] 2026-05-05 | Hello, are you selling for retail or wholesale? What is your delivery address? I will send you a complete quote
+  [客户] 2026-05-05 | Hi
+  [客户] 2026-05-05 | I is this comes with hat?
+  [我方] 2026-05-05 | Hello, I am here
+  [客户] 2026-05-05 | I have an e-commerce shop
+  [我方] 2026-05-05 | Okay, the hat needs to be photographed separately
+  [我方] 2026-05-05 | All the items in the link are without hats
+  [我方] 2026-05-05 | Could you please briefly introduce the product categories and sales channels you are currently working with?
+---
+#46 | Celeste Albarracin | AR | 脚本判级:B | bucket:2
+总消息:4 | 客户:2 | 我方:2
+最后客户消息:9天前 | 方向:to_them
+  [客户] 2026-05-05 | 1601698147807
+$3.10-4.70
+Autumn Winter Fleece-Lined Thickened Warm Printed Polyester Korean-Style Boys' Girls' Oli Velvet Two-Piece Set for Middle Older
+2.0
+1601698147807
+US$3.10-4.70
+秋冬抓绒加厚保暖印花涤纶韩版男童
+  [我方] 2026-05-05 | Hola, ¿necesitas muestras?
+  [客户] 2026-05-05 | Si
+  [我方] 2026-05-05 | De acuerdo, el precio unitario del producto es de 6 dólares. ¿Cuántas unidades necesitas que te enviemos?
+---
+#47 | Begimai Akymbekova | US | 脚本判级:B | bucket:2
+总消息:9 | 客户:4 | 我方:4
+最后客户消息:9天前 | 方向:to_them
+  [客户] 2026-05-05 | Здравствуйте,я ищу делового партнера.
+[{"quantity":"null шт.","id":1601662271021,"title":"Casual Spring Baby Bodysuit Cartoon Pattern Knitted Romper Soft Newborn One-Piece Snap Buttons Unisex Infant 1
+  [我方] 2026-05-05 | Здравствуйте.
+  [我方] 2026-05-05 | Дорогая Бегимай, 
+ 
+ Спасибо за ваш заказ. 
+ 
+ Вы выбрали следующие товары на складе: 
+ 
+ Цвет 	 Размер 	 Возраст 	 Кол-во 
+ АЕ-1 	 90 см 	 Стандарт 	 1 
+ З-2 	 90 см 	 Стандарт 	 1 
+ З-16 	 90 см 	 С
+  [客户] 2026-05-05 | Address: 23000 military Road south, Apt. 3305
+Kent, WA 98032
+  [客户] 2026-05-05 | Express
+  [我方] 2026-05-05 | Хорошо 👌, я отправлю вам полную смету. Вы сами продаете в своем магазине?
+  [客户] 2026-05-05 | Да
+  [我方] 2026-05-05 | Мы являемся партнерской фабрикой Disney и Pampers, уровень брака продукции ниже 1%, качество - наша самая низкая планка./:handshake.
+---
+#48 | sarah alnajar | IQ | 脚本判级:B | bucket:2
+总消息:18 | 客户:8 | 我方:8
+最后客户消息:10天前 | 方向:to_them
+  [客户] 2026-05-04 | [产品卡片]
+  [我方] 2026-05-04 | I see you've shared the product cards again. Whenever you have any specific questions or need assistance, just let me know—I'm here to help! 
+  [客户] 2026-05-04 | احتاج الى ملابس الصيف قطني
+  [我方] 2026-05-04 | Thank you for letting me know you need cotton summer clothing!  Could you please share more details such as the quantity you're looking to purchase or any particular styles or sizes you prefer?
+  [客户] 2026-05-04 | هذه الانماط المرسلة اعلاه المفضله لدي
+  [客户] 2026-05-04 | عينات الآن
+  [我方] 2026-05-04 | هل يمكنك تحديد الكمية والأنماط التي تريد عينات منها؟ سأوضح لك خطوات طلب العينات.
+  [我方] 2026-05-05 | مرحباً سارة، 
+ 
+ خيارات رائعة! جميع الأنماط الخمسة مصنوعة من القطن 100%، وهي ملابس صيفية، تمامًا ما تبحث عنه. إليك ملخص سريع: 
+ 
+ أسلوب 	 سعر الوحدة (FOB) 
+ النمط 01 	 $0.98 
+ النمط 02 	 $6.10 
+ النمط
+---
+#49 | Aula Alsaad | IQ | 脚本判级:A | bucket:2
+总消息:37 | 客户:17 | 我方:19
+最后客户消息:10天前 | 方向:to_them
+  [我方] 2026-05-05 | [产品卡片]
+  [我方] 2026-05-05 | سعر الوحدة لهذا المنتج هو 3.15 دولار أمريكي.
+  [我方] 2026-05-05 | [产品卡片]
+  [我方] 2026-05-05 | سعر الوحدة لهذا المنتج هو 3.84 دولار أمريكي.
+  [我方] 2026-05-05 | [产品卡片]
+  [我方] 2026-05-05 | سعر الوحدة لهذا المنتج هو 2.5 دولار أمريكي.
+  [我方] 2026-05-05 | [产品卡片]
+  [我方] 2026-05-05 | سعر الوحدة لهذا المنتج هو 5.6 دولار أمريكي.
+---
+#50 | Christine Muwela | ZM | 脚本判级:A | bucket:2
+总消息:54 | 客户:24 | 我方:29
+最后客户消息:10天前 | 方向:to_them
+  [我方] 2026-05-04 | [产品卡片]
+  [我方] 2026-05-04 | [产品卡片]
+  [我方] 2026-05-04 | Good morning, here are the actual photos of the product for you to check the quality and fabric
+  [客户] 2026-05-04 | okay
+  [我方] 2026-05-04 | Thank you for confirming! Would you like to proceed with the order or need any additional details? 😊
+  [客户] 2026-05-04 | the other one u dint send
+  [客户] 2026-05-04 | the pink shirt with white collar and pink skirt
+  [我方] 2026-05-04 | Sorry, I'll check tomorrow if the factory has any stock available. If there is, I'll finish shooting it and send it to you as soon as possible

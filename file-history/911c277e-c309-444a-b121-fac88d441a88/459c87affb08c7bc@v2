@@ -1,0 +1,45 @@
+const { spawn, execSync } = require('child_process');
+const http = require('http');
+
+const CHROME = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe';
+
+// Kill existing Chrome
+try { execSync('taskkill /F /IM chrome.exe', { timeout: 5000 }); } catch (e) {}
+console.log('Chrome killed, waiting...');
+
+setTimeout(() => {
+  console.log('Launching Chrome with CDP...');
+  const child = spawn(CHROME, [
+    '--remote-debugging-port=9222',
+    'https://crm.xiaoman.cn'
+  ], {
+    detached: true,
+    stdio: 'ignore'
+  });
+  child.unref();
+
+  // Poll for the debug port
+  let attempts = 0;
+  const check = setInterval(() => {
+    attempts++;
+    http.get('http://127.0.0.1:9222/json/version', (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => {
+        console.log(`✅ CDP ready after ${attempts}s`);
+        console.log(data.substring(0, 300));
+        clearInterval(check);
+        console.log('\nNow run: node scripts/diagnose_api.js');
+        process.exit(0);
+      });
+    }).on('error', () => {
+      if (attempts <= 15) {
+        console.log(`  Waiting... (${attempts}s)`);
+      } else {
+        console.log('❌ CDP port not responding after 15s');
+        clearInterval(check);
+        process.exit(1);
+      }
+    });
+  }, 1000);
+}, 2000);

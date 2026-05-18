@@ -1,0 +1,55 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+  if (!page) { console.log('XiaoMan page not found'); return; }
+
+  // Find chat frame
+  let chatFrame = page.frames().find(f => f.url().includes('onetalk'));
+  if (!chatFrame) {
+    for (let i = 0; i < 10; i++) {
+      await new Promise(r => setTimeout(r, 1000));
+      chatFrame = page.frames().find(f => f.url().includes('onetalk'));
+      if (chatFrame) break;
+    }
+  }
+  if (!chatFrame) { console.log('Chat frame not found'); return; }
+
+  console.log('Frame found:', chatFrame.url().substring(0,100));
+
+  // Wait for content
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Get ALL text content from the frame
+  const text = await chatFrame.evaluate(() => document.body.innerText);
+
+  // Save to file for analysis
+  fs.writeFileSync('all_chats.txt', text, 'utf8');
+  console.log('Saved all_chats.txt, length:', text.length);
+
+  // Also try to get the full conversation list with all details
+  const chatList = await chatFrame.evaluate(() => {
+    const items = [];
+    // Find all conversation items
+    const convos = document.querySelectorAll('[class*="conversation"], [class*="chat-item"], [class*="message-item"], li[class]');
+    convos.forEach(c => {
+      if (c.textContent.trim().length > 5) {
+        items.push({
+          text: c.textContent.trim().substring(0, 500),
+          html: c.innerHTML.substring(0, 300)
+        });
+      }
+    });
+    return items;
+  });
+
+  console.log('Conversations found:', chatList.length);
+  chatList.slice(0, 5).forEach((c, i) => {
+    console.log(`\n--- Conv ${i+1} ---`);
+    console.log('Text:', c.text.substring(0, 300));
+  });
+
+  await browser.disconnect();
+})().catch(err => console.error('Error:', err.message));

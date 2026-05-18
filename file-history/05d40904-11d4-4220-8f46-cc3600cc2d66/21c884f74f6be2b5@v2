@@ -1,0 +1,178 @@
+/**
+ * OKKI 订单页 DOM 探查
+ * 找出正确的选择器来提取订单数据
+ */
+const { chromium } = require('playwright');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const CDP_URL = 'http://localhost:9222';
+
+async function main() {
+  let browser, page;
+
+  // 尝试 CDP 连接
+  let useCdp = false;
+  try {
+    const http = require('http');
+    const cdpOk = await new Promise(r => {
+      http.get('http://127.0.0.1:9222/json/version', res => r(true)).on('error', () => r(false));
+    });
+    if (cdpOk) {
+      browser = await chromium.connectOverCDP(CDP_URL);
+      const pages = browser.contexts()[0].pages();
+      page = pages[0];
+      useCdp = true;
+      console.log('CDP 已连接');
+    }
+  } catch (e) {}
+
+  if (!useCdp) {
+    console.log('启动 Chrome...');
+    browser = await chromium.launchPersistentContext(PROFILE, {
+      channel: 'chrome', headless: false,
+      viewport: { width: 1440, height: 900 },
+      args: ['--remote-debugging-port=9222'],
+    });
+    page = await browser.newPage();
+  }
+
+  // 导航到订单页
+  console.log('导航到订单页...');
+  await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 3000));
+
+  console.log('当前 URL:', page.url());
+
+  if (page.url().includes('login')) {
+    console.log('需要登录！请在浏览器中登录，然后按回车继续...');
+    await new Promise(r => {
+      process.stdin.once('data', r);
+    });
+    await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 3000));
+    console.log('重新导航后 URL:', page.url());
+  }
+
+  // 等待页面渲染
+  await new Promise(r => setTimeout(r, 2000));
+
+  // === DOM 探查 ===
+  const info = await page.evaluate(() => {
+    const result = {};
+
+    // 1. 查找所有可能的滚动/列表容器
+    const containers = [];
+    const selectors = [
+      '.vue-recycle-scroller__item-view',
+      '.vue-recycle-scroller__item-wrapper',
+      '.vue-recycle-scroller',
+      '[class*=virtual]',
+      '[class*=scroll]',
+      '[class*=list]',
+      '.el-table',
+      '.el-table__body',
+      'table',
+      '[class*=order]',
+      '[class*=table]',
+    ];
+    for (const sel of selectors) {
+      const els = document.querySelectorAll(sel);
+      if (els.length > 0) {
+        containers.push({ selector: sel, count: els.length });
+      }
+    }
+    result.containers = containers;
+
+    // 2. 找表格结构
+    const tables = document.querySelectorAll('table');
+    result.tableCount = tables.length;
+    if (tables.length > 0) {
+      const t = tables[0];
+      result.firstTableHTML = t.outerHTML.substring(0, 2000);
+      // 表头
+      const ths = t.querySelectorAll('th');
+      result.headers = Array.from(ths).map(th => th.textContent?.trim());
+    }
+
+    // 3. 找所有 class 中含 "cell" 的元素
+    const cellEls = document.querySelectorAll('[class*=cell]');
+    result.cellCount = cellEls.length;
+
+    // 4. 找分页器
+    const pagers = [];
+    const pagerEls = document.querySelectorAll('[class*=pagination], [class*=pager], .el-pagination');
+    pagerEls.forEach(el => {
+      pagers.push({ tag: el.tagName, class: el.className, text: el.textContent?.trim()?.substring(0, 100) });
+    });
+    result.pagers = pagers;
+
+    // 5. 直接搜 "订单号" "订单名称" 等关键词附近的 DOM
+    const body = document.body.innerText;
+    result.hasOrderText = body.includes('订单号') || body.includes('订单名称');
+
+    // 6. 搜 vue-recycle-scroller 结构
+    const scroller = document.querySelector('.vue-recycle-scroller');
+    if (scroller) {
+      result.scrollerChildren = scroller.children.length;
+      result.scrollerHTML = scroller.outerHTML.substring(0, 1500);
+    }
+
+    // 7. 任意有意义的列表项
+    const anyItems = document.querySelectorAll('[class*=item]');
+    result.anyItemCount = anyItems.length;
+
+    return result;
+  });
+
+  console.log('\n=== DOM 探查结果 ===');
+  console.log(JSON.stringify(info, null, 2));
+
+  // 如果找到了 scroller item，提取第一条数据看看
+  if (info.containers.some(c => c.selector === '.vue-recycle-scroller__item-view' && c.count > 0)) {
+    const sample = await page.evaluate(() => {
+      const rows = document.querySelectorAll('.vue-recycle-scroller__item-view');
+      const result = [];
+      for (let i = 0; i < Math.min(3, rows.length); i++) {
+        const row = rows[i];
+        result.push({
+          html: row.outerHTML.substring(0, 1000),
+          text: row.textContent?.trim()?.substring(0, 300),
+          classes: row.className,
+          childCount: row.children.length,
+        });
+      }
+      return result;
+    });
+    console.log('\n=== Scroller Item 样本 ===');
+    console.log(JSON.stringify(sample, null, 2));
+  }
+
+  // 如果没找到 vue-recycle-scroller，尝试其他结构
+  if (!info.containers.some(c => c.selector === '.vue-recycle-scroller__item-view')) {
+    console.log('\n⚠️ 未找到 .vue-recycle-scroller__item-view，尝试其他选择器...');
+    // 尝试找 tbody tr
+    const tbodyInfo = await page.evaluate(() => {
+      const tbodies = document.querySelectorAll('tbody');
+      const result = [];
+      tbodies.forEach((t, i) => {
+        const rows = t.querySelectorAll('tr');
+        if (rows.length > 0) {
+          const sampleRow = rows[0];
+          result.push({
+            tbodyIndex: i,
+            rowCount: rows.length,
+            sampleHTML: sampleRow.outerHTML.substring(0, 800),
+            sampleText: sampleRow.textContent?.trim()?.substring(0, 300),
+          });
+        }
+      });
+      return result;
+    });
+    console.log('\n=== tbody 探查 ===');
+    console.log(JSON.stringify(tbodyInfo, null, 2));
+  }
+
+  console.log('\n完成。浏览器保持打开。');
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

@@ -1,0 +1,50 @@
+$desk = [Environment]::GetFolderPath('Desktop')
+Write-Host "Looking for files starting with ca4b3 on Desktop..."
+$files = Get-ChildItem $desk -Force | Where-Object { $_.Name -like 'ca4b3*' }
+
+if (-not $files) {
+    Write-Host "No files found starting with ca4b3"
+} else {
+    foreach ($f in $files) {
+        Write-Host ""
+        Write-Host "Name: $($f.Name)"
+        Write-Host "FullName: $($f.FullName)"
+        Write-Host "Extension: $($f.Extension)"
+        Write-Host "Size: $([math]::Round($f.Length/1KB, 1)) KB ($($f.Length) bytes)"
+        Write-Host "Attributes: $($f.Attributes)"
+        Write-Host "LastModified: $($f.LastWriteTime)"
+
+        # Check if it's actually an executable or something else
+        $bytes = [System.IO.File]::ReadAllBytes($f.FullName)
+        $firstBytes = ($bytes[0..15] | ForEach-Object { $_.ToString('X2') }) -join ' '
+        Write-Host "First 16 bytes (hex): $firstBytes"
+
+        # Check file signature
+        $sig = ($bytes[0..3] | ForEach-Object { $_.ToString('X2') }) -join ''
+        $fileType = switch ($sig) {
+            'FFD8FFE0' { 'JPEG image' }
+            'FFD8FFE1' { 'JPEG image (EXIF)' }
+            'FFD8FFE2' { 'JPEG image (ICC)' }
+            '89504E47' { 'PNG image' }
+            '47494638' { 'GIF image' }
+            '52494646' { 'WEBP or AVI' }
+            '424D' { 'BMP image' }
+            '4D5A' { 'EXECUTABLE - DANGER!' }
+            default { "Unknown: $sig" }
+        }
+        Write-Host "File type: $fileType"
+
+        # For images, try to get dimensions
+        if ($f.Extension -match '\.(jpg|jpeg|png|bmp|gif|webp)$') {
+            try {
+                Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
+                $img = [System.Drawing.Image]::FromFile($f.FullName)
+                Write-Host "Dimensions: $($img.Width) x $($img.Height)"
+                Write-Host "Resolution: $($img.HorizontalResolution) x $($img.VerticalResolution) DPI"
+                $img.Dispose()
+            } catch {
+                Write-Host "Failed to read image: $_"
+            }
+        }
+    }
+}

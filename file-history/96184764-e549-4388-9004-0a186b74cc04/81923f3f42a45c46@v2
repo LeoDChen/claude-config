@@ -1,0 +1,16 @@
+#!/bin/bash
+# PostToolUse hook: 配置文件修改后自动同步到 OB 备份目录
+FILE="$1"
+OB_BASE="E:/道友的宝贝/道友的宝贝/对话归档/CC/CC配置备份"
+
+# 全局配置 → OB/全局/
+if [[ "$FILE" == *"/Administrator/.claude/CLAUDE.md" ]] || [[ "$FILE" == *"/Administrator/.claude/settings.json" ]]; then
+  DEST="$OB_BASE/全局/$(basename "$FILE")"
+  cp "$FILE" "$DEST"
+fi
+
+# 项目配置 → OB/项目/
+if [[ "$FILE" == *"/ClaudeWorkspace/.claude/CLAUDE.md" ]] || [[ "$FILE" == *"/ClaudeWorkspace/.claude/rules/"* ]] || [[ "$FILE" == *"/ClaudeWorkspace/.claude/settings"* ]]; then
+  DEST="$OB_BASE/项目/$(basename "$FILE")"
+  cp "$FILE" "$DEST"
+fi

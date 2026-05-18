@@ -1,0 +1,185 @@
+# CC+OB 协作系统 — 配置瘦身审核文档 V2
+
+> 更新：2026-05-10 | 状态：待用户逐项确认
+
+---
+
+## 一、Skills 完整分类与保留清单
+
+### 业务核心（9 个 ✅ 保留）
+
+| 技能 | 命令 | 用途 |
+|------|------|------|
+| p4p-optimization | /p4p | P4P 两计划优化 |
+| inquiry-analysis | /inquiry | 询盘分析与回复 |
+| customer-pitch | /pitch | 客户展示方案 |
+| b2b-visual-design | /design | B2B 视觉设计 |
+| copywriting | /copy | 文案框架 |
+| product-listing | /product | 产品上架优化 |
+| order-followup | /order | 订单跟进 |
+| logistics | /logistics | 物流查询 |
+| office-tools | /docs | PPT/PDF 办公 |
+
+### 手动层工具（7 个 ✅ 保留）
+
+| 技能 | 触发方式 | 用途 |
+|------|---------|------|
+| brainstorming | 说"先 brainstorm" | 复杂任务先设计方案，你批准再执行 |
+| grill-me | 说"grill me" | 模糊需求深度追问，把半句话逼成清晰规格 |
+| writing-plans | 说"写个执行计划" | 大任务拆成 2-5 分钟可完成的精确步骤 |
+| to-prd | 说"输出成 PRD" | 讨论结果转结构化文档 |
+| writing-skills | 说"改进 XX 技能" | 升级/新建自定义技能 |
+| systematic-debugging | 出错时自动 | 四阶段根因调试，不找根因不修复 |
+| using-superpowers | 会话开始自动 | 技能调度中心，决定何时调用哪个技能 |
+
+### 可能对你有用的（5 个 ⚠️ 需确认）
+
+| 技能 | 用途 | 建议 |
+|------|------|------|
+| deep-research | 多源深度调研，搜索网络→综合→输出带引用报告 | **保留**：市场调研、竞品分析 |
+| search-first | "先搜索再动手"，写代码前先搜现有方案 | **保留**：通用好习惯 |
+| knowledge-ops | 跨存储层知识管理（本地/记忆/向量库/Git） | **保留**：管理你的知识库 |
+| claude-code-guide | Claude Code 使用帮助（hooks/命令/设置/IDE） | **保留**：遇到功能不会时查 |
+| claude-mem | 跨会话自动记忆（hooks 捕获→向量存储→自动注入） | ⚠️ 这不是 skill，是独立插件。需确认是否已安装 |
+
+### 你问的两个
+
+| 技能 | 用途 | 对你有用？ |
+|------|------|-----------|
+| claude-api | 编写调用 Claude API 的代码时用 | ❌ 不写 Claude API 代码，删 |
+| claude-code-guide | Claude Code 本身的使用帮助 | ✅ 保留 |
+
+### 其余 ~140 个 → 全部删除
+
+全部是编程/前端/DevOps/区块链/医疗等专业领域，与你无关。不逐个列出。
+
+---
+
+## 二、系统命令解释与保留
+
+| 命令 | 干什么 | 保留？ |
+|------|--------|--------|
+| /plan | 进入规划模式：先出方案给你审批，确认后才动手 | ✅ |
+| /checkpoint | 保存当前对话快照，之后可回退 | ✅ |
+| /cleanup | 清理工作区垃圾文件（临时文件、中间产物） | ✅ |
+| /save-session | 把当前对话保存为文件 | ✅ 长任务跨对话 |
+| /resume-session | 恢复之前保存的对话 | ✅ 同上 |
+| /projects | 管理多个项目目录切换 | ❌ 你只有一个项目 |
+
+---
+
+## 三、Agents 保留清单（修正后）
+
+> **"语言专用型"** = 只懂某一门编程语言的 agent。比如 cpp-reviewer 只审 C++、rust-reviewer 只审 Rust。你不写这些语言，永远用不到。
+
+### 保留（8 个）
+
+| Agent | 用途 | 理由 |
+|-------|------|------|
+| code-explorer | 大规模搜索代码/文件 | 查找配置文件、搜索知识库 |
+| code-reviewer | 审查代码质量（不限语言） | 写 Python/Node 脚本后自动审查 |
+| security-reviewer | 检查安全漏洞 | 处理敏感数据、文件操作的脚本 |
+| docs-lookup | 查库/API 最新文档 | 写脚本时查库的正确用法 |
+| silent-failure-hunter | 查找被静默吞掉的错误 | 脚本调试、错误排查 |
+| doc-updater | 更新文档和 CODEMAPS | 生成和更新 OB 笔记 |
+| planner | 复杂任务先规划方案 | 运营方案设计 |
+| general-purpose | 通用任务执行 | 系统自带，兜底用 |
+
+### 删除（42 个）
+
+所有语言专用 agent + 行业专用 agent：
+`a11y-architect` `architect` `build-error-resolver` `chief-of-staff` `code-architect` `code-simplifier` `comment-analyzer` `conversation-analyzer` `cpp-build-resolver` `cpp-reviewer` `csharp-reviewer` `dart-build-resolver` `database-reviewer` `e2e-runner` `flutter-reviewer` `gan-evaluator` `gan-generator` `gan-planner` `go-build-resolver` `go-reviewer` `harness-optimizer` `healthcare-reviewer` `java-build-resolver` `java-reviewer` `kotlin-build-resolver` `kotlin-reviewer` `loop-operator` `opensource-forker` `opensource-packager` `opensource-sanitizer` `performance-optimizer` `pr-test-analyzer` `python-reviewer` `pytorch-build-resolver` `refactor-cleaner` `rust-build-resolver` `rust-reviewer` `seo-specialist` `tdd-guide` `type-design-analyzer` `typescript-reviewer`
+
+---
+
+## 四、全局 Rules（目标 0 文件）
+
+### 已删除（8 个目录，已备份）
+
+`common/` `zh/` `typescript/` `python/` `golang/` `swift/` `php/` `web/`
+
+### 待删除（7 个目录 + 1 个文件）
+
+`cpp/` `csharp/` `dart/` `java/` `kotlin/` `perl/` `rust/` `operations-rules.md`
+
+> operations-rules.md 项目级已有，全局不需要重复。
+
+---
+
+## 五、全局 CLAUDE.md 精简对比
+
+### 当前版本（188 行）
+
+```
+# 交互原则（8 条，含第一性原理、指令质量驱动）
+# 强制自检（统计/验证规范，约 15 行）
+# 经验沉淀到 OB（3 个经验库文件的写入规则，约 12 行）
+# 持久化指令
+  - 工作产出目录
+  - 执行前必查清单
+  - Obsidian 对话保存规则
+  - 用户背景要点（工厂档案路径、硬性规则引用，约 25 行）
+# 技能系统
+  - 9 个命令列表
+  - 9 个技能索引表（带文件路径）
+  - operations-rules.md 加载说明
+```
+
+### 精简后版本（30 行）
+
+```
+# 交互原则
+1. 不废话，直接干
+2. 有立场，不迎合
+3. 第一性原理
+4. 我的时间比算力值钱
+5. 指令质量驱动
+6. 不多做，不越界
+7. 复杂任务先出框架
+8. 不确定绝不猜测
+
+# 强制自检
+输出定量/分析结论前必须从源数据验证，不凭记忆。
+
+# 输出语言
+默认中文。英文/双语仅在用户明确要求时输出。
+
+# 经验沉淀
+有价值信息记录到 OB vault: E:\道友的宝贝\道友的宝贝\对话归档\CC\
+
+# 项目
+工作产出 → D:\ClaudeWorkspace\ 对应子目录。
+项目专属的规则、技能、知识库由各项目 .claude/ 目录管理。
+```
+
+### 差异说明
+
+| 删除的内容 | 移到哪里 |
+|-----------|---------|
+| 用户背景要点（工厂档案路径、硬性规则） | 项目 CLAUDE.md |
+| 技能索引表（9 个命令+文件路径） | 项目 CLAUDE.md |
+| 工厂信息硬性规则（必须先读档案原文） | 项目 CLAUDE.md |
+| Obsidian 对话保存详细规则 | 项目 CLAUDE.md（简化版） |
+| 经验库文件详细说明 | OB 知识库 |
+| 执行前必查清单 | 已由 inject-rules hook 注入 |
+
+---
+
+## 六、执行计划（确认后按序执行）
+
+| 步骤 | 操作 | 影响 |
+|------|------|------|
+| 1 | 全局 rules：删 7 个剩余目录 + operations-rules.md | 已有备份 |
+| 2 | 全局 skills：160→17（9 业务+7 手动+1 claude-code-guide） | claude-mem 是插件，不在此列 |
+| 3 | 全局 commands：86→~20 | 与 skills 对应 |
+| 4 | 全局 agents：50→8 | 通用型 8 个 |
+| 5 | 全局 CLAUDE.md：188→30 行 | 见上面对比 |
+| 6 | 项目 rules：90→1（operations-rules.md） | 业务唯一规则 |
+| 7 | 项目 skills/commands/agents：与全局同步 | 消除重复 |
+| 8 | 项目 CLAUDE.md：指针化改造 | 内嵌知识→路径引用 |
+| 9 | 写入 OB 笔记：记录修改+决策框架+同步机制 | 后续可追溯 |
+
+### 风险控制
+- 所有删除前先备份到 `backups/20260510/`
+- 每步完成后暂停，等你验证
+- 分对话执行，避免上下文污染

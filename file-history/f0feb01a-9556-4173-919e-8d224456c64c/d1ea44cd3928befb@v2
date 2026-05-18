@@ -1,0 +1,7 @@
+// SessionStart: Load OKKI STATE.md into context
+const fs = require('fs');
+const f = 'd:/ClaudeWorkspace/08_客户跟进/Okki/STATE.md';
+if (fs.existsSync(f)) {
+  const s = fs.readFileSync(f, 'utf8');
+  console.log('\n=== OKKI 项目状态 ===\n' + s.slice(0, 2000) + '\n==================\n');
+}

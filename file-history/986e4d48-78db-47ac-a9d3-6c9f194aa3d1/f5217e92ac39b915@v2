@@ -1,0 +1,523 @@
+/**
+ * 阶段2：AI 分类 + 证据摘要 + 置信度评分
+ *
+ * 输入：阶段1 classify_rules.js 的输出 (classified_rules_*.json)
+ * 输出：全量 P0-P4 名单 + 证据链 + 置信度 + 两遍差异报告 + 自检清单
+ *
+ * 两遍法：
+ *   第一遍 — metadata 粗筛（unread/recent/消息方向/沉默天数）
+ *   第二遍 — latestMessageContent 内容信号修正
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const DATA_DIR = path.join(__dirname, "..", "data");
+const inputFile = path.join(DATA_DIR, "classified_rules_2026-05-04T07-48-48.json");
+const outputFile = path.join(
+  DATA_DIR,
+  `classified_ai_${new Date().toISOString().replace(/[:.]/g, "-")}.json`
+);
+
+// ============================================================
+// 升级信号关键词
+// ============================================================
+const UPGRADE_SIGNALS = {
+  orderReady: {
+    pattern:
+      /下单|place order|make order|сделаем заказ|确认订单|confirm order|proceed with order|create.*order|ready.*order|start.*order/i,
+    weight: 2,
+    desc: "下单信号",
+  },
+  piSent: {
+    pattern: /PI|proforma invoice|形式发票|发票.*已发|PI.*sent|send.*PI/i,
+    weight: 2,
+    desc: "PI相关",
+  },
+  payment: {
+    pattern:
+      /付款|payment|deposit|定金|预付|advance|bank transfer|TT|wire transfer|paypal|paid|已付款|balance/i,
+    weight: 2,
+    desc: "付款相关",
+  },
+  addressGiven: {
+    pattern:
+      /地址|address|delivery.*address|shipping.*address|收货地址|deliver to|ship to|postal code|zip code|country.*city|port of|destination/i,
+    weight: 1,
+    desc: "地址已给",
+  },
+  quantityConfirmed: {
+    pattern:
+      /(\d+)\s*(pieces|pcs|units|件|个|套|sets).*(?:确认|confirm|need|want|order|需要|要)/i,
+    weight: 1,
+    desc: "数量讨论",
+  },
+  samples: {
+    pattern:
+      /样品|sample|打样|prototype|寄样|send.*sample|sample.*ready|sample.*sent/i,
+    weight: 1,
+    desc: "样品阶段",
+  },
+  priceDiscussion: {
+    pattern:
+      /价格|price|quote|报价|quotation|USD|FOB|CIF|DDP|EXW|运费|shipping.*cost|freight|每件|per piece|unit price/i,
+    weight: 1,
+    desc: "价格/运费讨论",
+  },
+  productSelection: {
+    pattern:
+      /(CO-\d+|PO-\d+|[A-Z]{2}-\d{2})|选款|choose|select|pick|model|style|款式|颜色|color|size|尺码|码数/i,
+    weight: 1,
+    desc: "选款/产品讨论",
+  },
+  partnerConsult: {
+    pattern:
+      /partner|商量|consult|discuss.*partner|合伙|определюсь с партнером|wait.*partner|check.*partner/i,
+    weight: 1,
+    desc: "等合伙人商量",
+  },
+};
+
+// ============================================================
+// 降级信号关键词
+// ============================================================
+const DOWNGRADE_SIGNALS = {
+  templateQuestion: {
+    pattern:
+      /what is your|how many|MOQ|minimum order|what country|please let me know|feel free to|could you please|may I know/i,
+    desc: "模板提问式消息",
+  },
+  genericGreeting: {
+    pattern:
+      /^(hi|hello|hey|dear)\b.{0,30}$/i,
+    desc: "仅打招呼无实质",
+  },
+  onlyEmoji: {
+    pattern: /^\/:[\w]+\.?\s*(\/:[\w]+\.?\s*)*$/,
+    desc: "仅表情",
+  },
+};
+
+// ============================================================
+// 核心市场（高优先级）
+// ============================================================
+const CORE_MARKETS = [
+  "SD", "EG", "CD", "ZM", "CI", "SA", "AE", // 主市场
+  "IQ", "OM", "BH", "KW", "QA", "JO", "LY", "LB", // 中东扩展
+  "GH", "SN", "KE", "TZ", "CM", "ML", "GN", "ZW", // 非洲扩展
+];
+
+// ============================================================
+// 分析函数
+// ============================================================
+
+function detectSignals(text) {
+  if (!text) return { upgrades: [], downgrades: [] };
+  const upgrades = [];
+  const downgrades = [];
+
+  for (const [key, sig] of Object.entries(UPGRADE_SIGNALS)) {
+    if (sig.pattern.test(text)) {
+      upgrades.push({ key, weight: sig.weight, desc: sig.desc });
+    }
+  }
+
+  for (const [key, sig] of Object.entries(DOWNGRADE_SIGNALS)) {
+    if (sig.pattern.test(text)) {
+      downgrades.push({ key, desc: sig.desc });
+    }
+  }
+
+  return { upgrades, downgrades };
+}
+
+function isOurMessage(c) {
+  return c.latestType === "send";
+}
+
+function isCustomerMessage(c) {
+  return c.latestType === "received";
+}
+
+function isPureSystemOrBot(c) {
+  // 纯系统消息 + 无实质对话
+  if (c.flags.isLatestSystemMsg) return true;
+  if (c.direction.total <= 1 && isOurMessage(c) && !c.latestMsg) return true;
+  return false;
+}
+
+function classifyCustomer(c) {
+  const signals = detectSignals(c.latestMsg);
+  const totalUpgradeWeight = signals.upgrades.reduce((s, u) => s + u.weight, 0);
+  const hasDowngrade = signals.downgrades.length > 0;
+  const isCore = CORE_MARKETS.includes(c.country);
+  const ourMsg = isOurMessage(c);
+  const custMsg = isCustomerMessage(c);
+  const silenceDays = c.silenceDays;
+
+  let priority = c._rulePriority; // 从规则优先级开始
+  let confidence = 3; // 1=低 2=中 3=高
+  let evidence = [];
+  let checks = [];
+  let actions = [];
+
+  // ---- 第一遍：Metadata 粗筛 ----
+
+  // 纯系统消息/机器人 → 大幅降级
+  if (isPureSystemOrBot(c)) {
+    if (silenceDays > 30) {
+      priority = "P4";
+      evidence.push("纯系统消息+超30天无互动→P4");
+      confidence = 3;
+    } else if (silenceDays > 14) {
+      priority = "P3";
+      evidence.push("纯系统消息+超14天无互动→P3");
+      confidence = 2;
+    } else {
+      priority = "P3";
+      evidence.push("纯系统消息+近期互动→P3（需确认是否为真人对话）");
+      confidence = 1;
+    }
+    checks.push("系统消息确认");
+    return { priority, confidence, evidence, checks, actions, tier: "C" };
+  }
+
+  // hasAddress + 我方追问地址/运费 → 谈判活跃
+  if (c.flags.hasAddress && totalUpgradeWeight >= 2 && silenceDays <= 5) {
+    priority = "P0";
+    evidence.push("地址已确认+多重升级信号+近期活跃→P0");
+    confidence = 2;
+  }
+  // 强升级信号 (PI/付款/下单)
+  else if (totalUpgradeWeight >= 3 && silenceDays <= 7) {
+    priority = "P0";
+    evidence.push(`强升级信号(权重${totalUpgradeWeight})+${silenceDays}天内→P0`);
+    confidence = 2;
+  }
+  // 中强升级 + 核心市场
+  else if (totalUpgradeWeight >= 2 && silenceDays <= 7 && isCore) {
+    priority = "P1";
+    evidence.push(`升级信号(权重${totalUpgradeWeight})+核心市场+${silenceDays}天内→P1`);
+    confidence = 2;
+  }
+  // 中强升级
+  else if (totalUpgradeWeight >= 2 && silenceDays <= 7) {
+    priority = "P1";
+    evidence.push(`升级信号(权重${totalUpgradeWeight})+${silenceDays}天内→P1`);
+    confidence = 2;
+  }
+  // 未读消息 + 我方发送 → 需要看是否有客户之前发过消息
+  else if (c.isUnread && ourMsg && silenceDays <= 3) {
+    priority = "P1";
+    evidence.push(`未读消息+我方最近发送+${silenceDays}天→P1（需确认客户是否有回应）`);
+    confidence = 1;
+  }
+  // 未读消息 + 客户发送 → 可能重要
+  else if (c.isUnread && custMsg) {
+    priority = "P0";
+    evidence.push("未读消息+客户发送→P0（客户主动联系，高优先）");
+    confidence = 2;
+  }
+  // 有地址标记 + 近期活跃
+  else if (c.flags.hasAddress && silenceDays <= 7) {
+    priority = "P1";
+    evidence.push(`有地址+${silenceDays}天内活跃→P1`);
+    confidence = 2;
+  }
+  // 核心市场 + 近期活跃 + 有实质内容
+  else if (isCore && silenceDays <= 7 && c.latestMsg && c.latestMsg.length > 30) {
+    priority = "P1";
+    evidence.push(`核心市场+${silenceDays}天内活跃+有实质内容→P1`);
+    confidence = 2;
+  }
+  // needLookback → 最后一条是表情/单字，数据不够
+  else if (c.flags.needLookback) {
+    priority = "P2";
+    evidence.push("最后消息为表情/单字+无法判断真实阶段→暂P2");
+    confidence = 1;
+  }
+  // 我方模板提问 + 客户沉默>3天 → 降级
+  else if (hasDowngrade && ourMsg && silenceDays > 3) {
+    if (silenceDays > 14) {
+      priority = "P3";
+      evidence.push("模板提问+客户沉默超14天→P3");
+      confidence = 2;
+    } else {
+      priority = "P2";
+      evidence.push("模板提问+客户沉默${silenceDays}天→P2");
+      confidence = 2;
+    }
+  }
+  // 长期沉默
+  else if (silenceDays > 60) {
+    priority = "P4";
+    evidence.push(`沉默${silenceDays}天→P4`);
+    confidence = 3;
+  } else if (silenceDays > 30) {
+    priority = "P3";
+    evidence.push(`沉默${silenceDays}天→P3`);
+    confidence = 2;
+  }
+  // 我方消息 + 客户从未回复
+  else if (ourMsg && c.direction.total <= 1 && silenceDays > 7) {
+    priority = "P3";
+    evidence.push("我方单向发送+客户无回应超7天→P3");
+    confidence = 2;
+  }
+  // 默认：保持规则分类 + 降低置信度
+  else {
+    evidence.push("信号不足，维持规则分类");
+    confidence = 1;
+  }
+
+  // ---- 修正不合理分类 ----
+  // 如果规则分了P0但最新消息只是我方模板提问 → 降级
+  if (c._rulePriority === "P0" && hasDowngrade && ourMsg) {
+    if (silenceDays <= 3) {
+      priority = "P1";
+      evidence.push("规则P0但实为我方模板提问→降为P1");
+      confidence = 2;
+    } else {
+      priority = "P2";
+      evidence.push("规则P0但实为我方模板提问+已沉默→降为P2");
+      confidence = 2;
+    }
+  }
+
+  // 如果规则分了P1但实际是需要往前看才能判断 → 降低置信度
+  if (c._rulePriority === "P1" && c.flags.needLookback && !totalUpgradeWeight) {
+    priority = "P2";
+    evidence.push("规则P1但最后消息为表情/单字+无升级信号→降为P2");
+    confidence = 1;
+  }
+
+  // ---- 构建证据链 ----
+  checks.push(`系统消息:${c.flags.isLatestSystemMsg ? "是" : "否"}`);
+  checks.push(`产品代码:${c.flags.hasProductSelection ? "有" : "无"}`);
+  checks.push(`地址:${c.flags.hasAddress ? "有" : "无"}`);
+  checks.push(`消息数:${c.direction.total}`);
+  checks.push(`升级信号:${signals.upgrades.map((u) => u.desc).join("+") || "无"}`);
+  checks.push(`降级信号:${signals.downgrades.map((d) => d.desc).join("+") || "无"}`);
+
+  // 置信度标记
+  const stars = confidence === 3 ? "★★★" : confidence === 2 ? "★★☆" : "★☆☆";
+
+  // 层级
+  let tier;
+  if (priority === "P0") tier = "A";
+  else if (priority === "P1") tier = "B";
+  else tier = "C";
+
+  return {
+    priority,
+    confidence,
+    stars,
+    evidence,
+    checks,
+    actions,
+    tier,
+    upgradeSignals: signals.upgrades,
+    downgradeSignals: signals.downgrades,
+  };
+}
+
+// ============================================================
+// 主流程
+// ============================================================
+
+console.log("=".repeat(60));
+console.log("阶段2：AI 分类 + 证据摘要 + 置信度评分");
+console.log("=".repeat(60));
+
+const data = JSON.parse(fs.readFileSync(inputFile, "utf8"));
+const needAI = data.customers.filter((c) => c._needAI);
+const deterministic = data.customers.filter((c) => !c._needAI);
+
+console.log(`\n总客户: ${data.customers.length}`);
+console.log(`确定性分类(阶段1): ${deterministic.length}`);
+console.log(`需AI复核: ${needAI.length}`);
+
+// 对needAI客户执行AI分类
+const aiResults = [];
+const diffReport = [];
+const lowConfidence = [];
+
+for (const c of needAI) {
+  const result = classifyCustomer(c);
+
+  const aiEntry = {
+    ...c,
+    _aiPriority: result.priority,
+    _aiConfidence: result.confidence,
+    _aiStars: result.stars,
+    _aiEvidence: result.evidence,
+    _aiChecks: result.checks,
+    _aiTier: result.tier,
+    _aiUpgrades: result.upgradeSignals,
+    _aiDowngrades: result.downgradeSignals,
+    // 最终分类（AI修正后）
+    priority: result.priority,
+    tier: result.tier,
+    reasons: result.evidence,
+  };
+
+  aiResults.push(aiEntry);
+
+  // 差异报告
+  if (result.priority !== c._rulePriority) {
+    diffReport.push({
+      name: c.name,
+      country: c.countryCode,
+      rulePriority: c._rulePriority,
+      aiPriority: result.priority,
+      reason: result.evidence.join(" | "),
+      confidence: result.stars,
+    });
+  }
+
+  // 低置信度清单
+  if (result.confidence <= 1) {
+    lowConfidence.push({
+      name: c.name,
+      country: c.countryCode,
+      priority: result.priority,
+      reason: result.evidence.join(" | "),
+      issue: "需要完整对话数据才能准确判断",
+    });
+  }
+}
+
+// ---- 合并确定性分类和AI分类 ----
+const allClassified = [
+  ...deterministic.map((c) => ({
+    ...c,
+    _aiPriority: c.priority,
+    _aiConfidence: 3,
+    _aiStars: "★★★",
+    _aiEvidence: c._ruleReasons || c.reasons,
+  })),
+  ...aiResults,
+];
+
+// ---- 统计 ----
+const byPriority = {};
+allClassified.forEach((c) => {
+  const p = c.priority;
+  byPriority[p] = (byPriority[p] || 0) + 1;
+});
+
+console.log("\n--- AI分类后分布 ---");
+for (const [p, count] of Object.entries(byPriority).sort()) {
+  console.log(`  ${p}: ${count}`);
+}
+
+console.log(`\n--- 差异报告（阶段1规则 vs 阶段2 AI）---`);
+console.log(`差异数: ${diffReport.length}`);
+if (diffReport.length === 0) {
+  console.log("  ⚠️ 差异为0！第二遍可能未真正执行。请检查。");
+} else {
+  diffReport.forEach((d) => {
+    console.log(
+      `  ${d.rulePriority}→${d.aiPriority} | ${d.name} (${d.country}) | ${d.confidence} | ${d.reason.slice(0, 80)}`
+    );
+  });
+}
+
+console.log(`\n--- ★☆☆ 低置信度清单（需用户确认）---`);
+console.log(`数量: ${lowConfidence.length}`);
+lowConfidence.forEach((l) => {
+  console.log(`  ${l.name} (${l.country}) | ${l.priority} | ${l.issue}`);
+});
+
+// ---- 自检清单 ----
+console.log("\n--- 自检清单 ---");
+const checklist = [];
+// 1. 检查latestMessageContent为空的
+const emptyMsg = allClassified.filter(
+  (c) => !c.latestMessageContent || c.latestMessageContent.trim() === ""
+);
+checklist.push({
+  item: "latestMessageContent为空的条目",
+  status: emptyMsg.length > 0 ? "⚠️ 有" : "✓ 无",
+  count: emptyMsg.length,
+  names: emptyMsg.map((c) => c.name).slice(0, 5),
+});
+
+// 2. 检查P0但消息都是我方发的
+const p0OurMsg = allClassified.filter(
+  (c) => c.priority === "P0" && c.latestMessageType === "send" && c.direction.total <= 1
+);
+checklist.push({
+  item: "P0但仅我方单条消息（可能虚高）",
+  status: p0OurMsg.length > 0 ? "⚠️ 有" : "✓ 无",
+  count: p0OurMsg.length,
+  names: p0OurMsg.map((c) => c.name),
+});
+
+// 3. 检查纯系统消息被分为P0/P1的
+const sysHigh = allClassified.filter(
+  (c) =>
+    (c.priority === "P0" || c.priority === "P1") && c.flags?.isLatestSystemMsg
+);
+checklist.push({
+  item: "P0/P1中仍有纯系统消息",
+  status: sysHigh.length > 0 ? "⚠️ 有" : "✓ 无",
+  count: sysHigh.length,
+  names: sysHigh.map((c) => c.name),
+});
+
+// 4. 表情/单字导致误判
+const emojiIssue = allClassified.filter(
+  (c) =>
+    (c.priority === "P0" || c.priority === "P1") && c.flags?.needLookback
+);
+checklist.push({
+  item: "P0/P1中最后消息为表情/单字（需往前看）",
+  status: emojiIssue.length > 0 ? "⚠️ 有" : "✓ 无",
+  count: emojiIssue.length,
+  names: emojiIssue.map((c) => c.name),
+});
+
+// 5. P0超过5天无互动
+const p0Old = allClassified.filter(
+  (c) => c.priority === "P0" && c._silenceDays > 5
+);
+checklist.push({
+  item: "P0但超5天无互动",
+  status: p0Old.length > 0 ? "⚠️ 有" : "✓ 无",
+  count: p0Old.length,
+  names: p0Old.map((c) => c.name),
+});
+
+checklist.forEach((cl) => {
+  console.log(`  [${cl.status}] ${cl.item}: ${cl.count}条`);
+  if (cl.names && cl.names.length > 0 && cl.names.length <= 10) {
+    console.log(`    → ${cl.names.join(", ")}`);
+  }
+});
+
+// ---- 输出 ----
+const output = {
+  classifiedAt: new Date().toISOString(),
+  source: path.basename(inputFile),
+  method: "AI两遍法（metadata粗筛 + 内容信号修正）",
+  stats: {
+    total: allClassified.length,
+    byPriority,
+    needAI: needAI.length,
+    deterministic: deterministic.length,
+    diffCount: diffReport.length,
+    lowConfidenceCount: lowConfidence.length,
+    dataLimitation:
+      "CDP未抓取完整对话历史，仅基于latestMessageContent+metadata。消息数标记为0为抓取限制，非实际无消息。",
+  },
+  diffReport,
+  lowConfidence,
+  checklist,
+  customers: allClassified,
+};
+
+fs.writeFileSync(outputFile, JSON.stringify(output, null, 2));
+console.log(`\n✅ 输出: ${outputFile}`);
+console.log(`   总客户: ${allClassified.length}`);
+console.log(`   差异: ${diffReport.length} | 低置信度: ${lowConfidence.length}`);

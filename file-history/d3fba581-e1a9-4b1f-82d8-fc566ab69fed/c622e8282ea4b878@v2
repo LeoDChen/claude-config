@@ -1,0 +1,108 @@
+# Claude Code 工作环境 — 项目重启
+
+**创建日期**：2026-05-09
+**最后更新**：2026-05-09
+**当前阶段**：持续维护
+
+---
+
+## 项目目标
+
+维护和优化 Claude Code 开发/运营环境，包括模型代理、ECC 插件、MCP 服务器、技能系统、规则系统、hooks。
+
+---
+
+## 核心文件
+
+### 全局配置
+```
+C:\Users\Administrator\.claude\
+├── CLAUDE.md                  ← 全局交互原则+自检协议+技能索引+工厂规则
+├── settings.json              ← 模型/端点/权限/hooks 配置
+├── scheduled_tasks.json       ← 定时任务
+├── mcp-servers/               ← MCP 服务器安装
+│   └── grsai/server.mjs       ← GrsAI 图片生成
+├── skills/                    ← 定制技能（9个）
+├── agents/                    ← 48 个 Agent
+├── rules/                     ← 通用+中文+语言规则
+└── plans/                     ← 8 个历史 plan 文件
+
+C:\Users\Administrator\.claude\projects\D--ClaudeWorkspace\memory\
+├── MEMORY.md                  ← 记忆索引（23个文件）
+└── *.md                       ← 各类记忆文件
+```
+
+### 项目配置
+```
+D:\ClaudeWorkspace\.claude\
+├── CLAUDE.md                  ← 项目级交互原则
+├── settings.json              ← 项目级设置（xhigh effort）
+├── hooks/                     ← 自定义 hooks
+│   ├── inject-rules.txt       ← 执行前检查注入
+│   ├── block-dangerous.js     ← 危险命令阻断
+│   ├── warn-env-file.js       ← env 文件警告
+│   └── ensure-archive-dir.js  ← 归档目录创建
+├── commands/                  ← 84 个命令
+├── skills/                    ← 166 个技能包
+├── agents/                    ← 48 个 Agent
+├── rules/                     ← 规则副本
+└── mcp-configs/mcp-servers.json ← 28 个 MCP 服务器定义
+```
+
+---
+
+## 架构
+
+### 模型代理
+- 端点：`http://127.0.0.1:15721`
+- 模型：`claude-sonnet-4-6[1m]`
+- 最大上下文：1,000,000 tokens
+- 推断深度：xhigh（项目）/ medium（全局）
+
+### ECC 插件
+- 版本：v1.10.0（2026-04-25 安装）
+- 模块：20 个（rules-core、agents-core、commands-core、hooks-runtime 等）
+
+### 定制技能（9大斜杠命令）
+| 命令 | 用途 |
+|------|------|
+| `/p4p` | P4P 两计划优化 |
+| `/inquiry` | 询盘分析与回复 |
+| `/pitch` | 客户展示方案 |
+| `/design` | B2B 视觉设计 |
+| `/copy` | 文案框架 |
+| `/product` | 产品上架优化 |
+| `/order` | 订单跟进 |
+| `/logistics` | 物流查询 |
+| `/docs` | PPT/PDF 办公 |
+
+### MCP 服务器（28个配置）
+Jira、GitHub、Firecrawl、Supabase、memory、ClickHouse、Exa、Context7、Playwright、fal-ai、Browserbase、devfleet 等
+
+### NPM 依赖
+`docx`、`exceljs`、`xlsx`、`pdfkit`、`pptxgenjs`、`tesseract.js`、`playwright`
+
+---
+
+## OB Vault
+```
+E:\道友的宝贝\道友的宝贝\对话归档\CC\
+├── 项目总览.md
+├── 经验库/
+│   ├── 分析踩坑记录.md
+│   ├── 流程优化记录.md
+│   ├── 客户模式发现.md
+│   ├── 技术参考汇总.md
+│   └── 规则配置汇总.md
+└── 项目-*/项目重启提示词.md
+```
+
+---
+
+## 新对话重启指令
+
+**环境问题排查**：
+> 帮我检查 Claude Code 环境配置。先读 `~/.claude/settings.json` 和 `D:\ClaudeWorkspace\.claude\settings.json`，确认模型端点、权限、hooks 状态。
+
+**工作区清理**：
+> 执行工作区文件清理。检查 `D:\ClaudeWorkspace\` 各目录，识别垃圾文件，列出待清理清单。

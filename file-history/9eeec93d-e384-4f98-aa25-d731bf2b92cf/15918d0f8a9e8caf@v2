@@ -1,0 +1,101 @@
+# OKKI 单一路径系统重构
+
+## Context
+
+OKKI CRM 客户分析项目经过多轮迭代后，存在三个核心问题：
+1. **指令矛盾**：CLAUDE.md、STATE.md、NEXT_START.md、NEXT_BATCH.md 对同一件事给出不同甚至相反的指令，新对话 AI 每次选不同的路走
+2. **历史垃圾堆积**：scripts/ 有 66 个文件（实际只用 5 个），gen_s3_rules.js 删了但 STATE.md 还在引用
+3. **新客户不抓**：同步逻辑可能只覆盖已有会话
+4. **分类被脚本跑而非 AI**：因为有歧义的指令引向 gen_s3_rules.js
+
+目标：精简到最小集，CLAUDE.md 为唯一指令源，每次新对话走完全相同的路径。
+
+## 清理清单
+
+### 删除
+- `NEXT_START.md` — 过时工作流描述，与 CLAUDE.md 矛盾
+- `NEXT_BATCH.md` — 5月9日数据，已过时
+- `DESIGN.md` — 设计文档，已过时
+- `RUNBOOK.md` — 操作手册，内容已整合进 CLAUDE.md
+- `PHASE1_执行指令.md` — 过时
+- `P0_第三批_分析结果.md` — 过时
+- `accio_work_客户开发指令.md` — 不属于 OKKI 项目
+- `_launch_chrome.bat` / `启动CDP_Chrome.bat` — 脚本中已处理
+- `generate_p0_report.js` / `generate_today_report.js` / `p0_analysis_data.json` — 过期根目录脚本
+- `数据_2026-04-29T11-49-16.json` / `看板报告_2026-04-29T11-49-16.docx` — 过期数据
+- `客户开发信_BlissfulDiary_Trucare_Kerma.md` / `客户开发清单_小星星服饰.pdf` — 不属于 OKKI
+- `新对话启动_抓取今日数据.txt` — 过时指令
+- `d:ClaudeWorkspace08_客户跟进Okkidata_needAI_analysis_input.json` — 命名异常的文件
+
+### 归档到 scripts/_archive/
+scripts/ 下除以下 5 个脚本外全部移入 _archive/：
+- `sync_okki.js`
+- `sync_orders.js`
+- `enhanced_classify.js`
+- `gen_tracker_v2.js`
+- `gen_mobile_report.js`
+
+### 修改
+
+**CLAUDE.md** — 重写为唯一指令源：
+- 去掉自检清单（有 66 个文件时根本过不了），改为精简后的硬约束
+- 明确四步流程，无可选分支
+- 去掉引用 gen_s3_rules.js 或 NEXT_START.md 的任何内容
+- 加新客户发现检查（第二步中强制标记从未出现过的新会话）
+
+**STATE.md** —  只存数据，不给命令：
+- 删除一键同步命令（含 gen_s3_rules.js 引用）
+- 删除关键文件表
+- 删除两段式分类系统描述
+- 删除已知限制（AI判断为规则推断）
+- 只保留：同步指标、质量分布、紧急跟进列表、待深度分析列表
+
+**enhanced_classify.js**（按需）— 检查是否正确处理新客户：
+- 确认 `bucketFilter()` 或分类逻辑是否漏掉了首次出现的会话
+- 如果不区分新旧，给新会话加标记位
+
+**knowledge/ 目录** — 保留 4 个文件不变：
+- `classification-rules.md`
+- `business-rules.md`
+- `system-prompt.md`
+- `factory.md`
+- 删除 `security.md`（CDP 安全内容已过时，sync_okki 已加固）
+- 删除 `analysis-framework.md`（7问框架已整合进 system-prompt.md）
+
+### 保持不变
+- `config/` — 4 个文件
+- `data/` — 所有数据文件
+- `output/` — 所有产出
+- `reports/` — 历史报告
+- `.claude/` — hooks 和 settings
+
+## 统一流程（写入 CLAUDE.md）
+
+```
+Step 1: 同步
+  node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js
+  失败即停，不继续。
+
+Step 2: AI 判定
+  读 data/s2_ai_input.json
+  读 knowledge/classification-rules.md
+  标记新客户（首次出现在会话列表中的人）
+  逐人判定生命周期阶段 + 优先级 + grade
+  每 50 人写一次 data/s3_ai_judgments.json（增量写入）
+  完成后自检：阶段分布是否少于 5 种？是 → 重判
+
+Step 3: 看板
+  node scripts/enhanced_classify.js --dashboard-only
+
+Step 4: 行动清单
+  从 s3 提取 urgent + soon 客户
+  输出今日行动清单到 output/actions_YYYY-MM-DD.md
+  更新 STATE.md 同步指标
+```
+
+## 验证方式
+
+1. 删完后 `ls scripts/` 应看到 5 个 .js 文件 + 1 个 `_archive/` 目录
+2. `ls` 根目录应看到：CLAUDE.md, STATE.md, scripts/, knowledge/, config/, data/, output/, reports/, package.json, package-lock.json
+3. 新对话启动 → 只读 CLAUDE.md → 按四步流程执行 → 产出看板和行动清单
+4. 两次不同对话，相同输入，产出应一致（阶段分布差异 <10%）

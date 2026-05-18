@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v \"^\\\\.\\\\.\\\\?$\")",
+      "Bash(ls -la /opt /usr/local/bin)",
+      "Read(//usr/**)",
+      "Bash(dpkg -l)",
+      "Bash(npm list *)"
+    ]
+  }
+}

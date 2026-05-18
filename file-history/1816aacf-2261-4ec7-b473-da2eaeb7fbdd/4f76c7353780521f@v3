@@ -1,0 +1,92 @@
+# OKKI 项目三项优化
+
+## 背景
+
+用户确认三项优化：① STATE.md 拆分 ② 同步脚本预计算 ③ 知识库去重。
+
+---
+
+## 优化1：STATE.md 拆分为操作文件 + 档案文件
+
+### 现状
+STATE.md 17KB，前 121 行是当前操作数据（同步状态、P0/P1 清单、待修正项），后 50 行是历史档案（13 项历史发现、已完成事项、报告文件列表）。每次 OKKI 分析必须读 STATE.md，但只用到前半部分。
+
+### 做法
+1. STATE.md 第 123 行起的"历史关键发现"和"已完成事项"移到新文件 `reports/archive.md`
+2. STATE.md 底部加一行 `> 历史发现和已完成事项见 reports/archive.md`
+3. OKKI CLAUDE.md 的"启动必读"不变（仍然说先读 STATE.md）
+
+### 涉及文件
+- `08_客户跟进/Okki/STATE.md` — 删除后半段
+- `08_客户跟进/Okki/reports/archive.md` — 新建，接收移动的内容
+
+---
+
+## 优化2：同步脚本预计算信号
+
+### 现状
+`scripts/sync_okki.js` 保存的 `tm_conversations_latest.json` 只有原始元数据。两遍法第一遍时，我要逐个判断 475 个会话的 `latestMessage.content` 是不是系统消息、有没有 chat_history 文件。这些是机械判断，不需要 AI。
+
+### 做法
+在 sync_okki.js 保存元数据后（第 252 行之后），增加一个后处理步骤，为每个会话追加 `preComputed` 字段：
+
+```json
+{
+  "cid": "xxx",
+  "name": "xxx",
+  "preComputed": {
+    "isLatestMessageSystem": true/false,
+    "hasRealMessages": true/false,
+    "hasChatHistoryFile": true/false,
+    "isUnread": true/false,
+    "daysSinceLastContact": 3
+  }
+}
+```
+
+计算逻辑：
+- `isLatestMessageSystem`: 检查 `latestMessage.content` 是否匹配已知系统消息关键词列表（从 business-rules.md 消息过滤列表提取）
+- `hasRealMessages`: 存在 chat_history 文件且其中有非系统消息
+- `hasChatHistoryFile`: chat_history 目录下存在对应文件
+- `isUnread`: `unreadCount > 0`
+- `daysSinceLastContact`: `(now - lastContactTimeLong) / 86400000`
+
+### 涉及文件
+- `08_客户跟进/Okki/scripts/sync_okki.js` — 在 `printSummary` 前插入 `computePreComputed()` 函数
+
+### 风险
+JSON 文件会变大（475 × 200 bytes ≈ 95KB 额外），但这是数据文件不是上下文指令，不吃 AI 上下文窗口。
+
+---
+
+## 优化3：知识库去重
+
+### 现状
+`business-rules.md` 和 `classification-rules.md` 都维护了生命周期阶段表、质量等级速查、沉默阈值。改一处容易忘改另一处。更严重的是 business-rules.md 的沉默阈值用的是旧版数字（30-45d 休眠、45d+ 流失），和 classification-rules.md 的新 v2 体系（30-90d 深度沉默、90d+ 沉淀）不一致。
+
+### 做法
+business-rules.md 删除三个重复段落，替换为引用：
+- 删除"生命周期阶段速查"（第 11-19 行）→ 替换为 `> 完整定义见 classification-rules.md`
+- 删除"质量等级速查"（第 32-35 行）→ 同上
+- 删除"沉默副状态"旧版表（第 22-29 行）→ 同上
+- 删除"沉默风险阈值"旧版表（第 37-43 行）→ 同上
+
+保留独有内容：消息过滤列表、报价原则、催款原则、国家沟通节奏、升级/降级触发器、latestMessage 提取规则。
+
+### 涉及文件
+- `08_客户跟进/Okki/knowledge/business-rules.md` — 删除 4 块重复内容
+
+---
+
+## 执行顺序
+
+1. 先做优化3（知识库去重）— 最安全，纯删减
+2. 再做优化1（STATE.md 拆分）— 安全，纯剪切
+3. 最后做优化2（同步脚本）— 需谨慎，涉及脚本改动
+
+## 验证
+
+- [ ] business-rules.md 无死引用，独有内容完整
+- [ ] STATE.md 前半段操作数据无丢失
+- [ ] archive.md 正确接收历史内容
+- [ ] sync_okki.js 运行不报错，`tm_conversations_latest.json` 包含 `preComputed` 字段

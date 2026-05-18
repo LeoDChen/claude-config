@@ -1,0 +1,95 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  // The LWP protocol uses the SDK's internal WebSocket.
+  // Let's find the WebSocket and send messages through it.
+  const expr = `
+    (async function() {
+      var results = {};
+      var convs = window.__conversationListFullData__;
+
+      // Find the WebSocket connection used by the SDK
+      // The SDK stores it internally. Let's look for it.
+      var wsInstance = null;
+
+      // Check _imBaaSSDK internals
+      var baaS = window._imBaaSSDK;
+      var baaSKeys = Object.keys(baaS).filter(function(k) {
+        return typeof baaS[k] !== 'function';
+      });
+      results.baaSProps = baaSKeys;
+
+      // Check _imsdk internals
+      var imsdk = window._imsdk;
+      var imsdkKeys = Object.keys(imsdk).filter(function(k) {
+        return typeof imsdk[k] !== 'function';
+      });
+      results.imsdkProps = imsdkKeys;
+
+      // Look for WebSocket in global scope or SDK internals
+      // Try to find it through the conversation service
+      var convSvc = imsdk.getConversationService();
+      if (convSvc) {
+        var convKeys = [];
+        for (var k in convSvc) {
+          if (typeof convSvc[k] !== 'function') convKeys.push(k);
+        }
+        results.convSvcProps = convKeys;
+
+        // Also check its prototype
+        var proto = Object.getPrototypeOf(convSvc);
+        var protoKeys = [];
+        for (var k in proto) {
+          protoKeys.push(k);
+        }
+        results.convSvcProtoMethods = protoKeys.slice(0, 30);
+      }
+
+      // Also get msg service internals
+      var msgSvc = imsdk.getMessageService();
+      if (msgSvc) {
+        var msgKeys = [];
+        for (var k in msgSvc) {
+          if (typeof msgSvc[k] !== 'function') msgKeys.push(k);
+        }
+        results.msgSvcProps = msgKeys;
+      }
+
+      return JSON.stringify(results);
+    })()
+  `;
+
+  console.log('Exploring SDK internals for WebSocket instance...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 3000));
+  console.log(JSON.stringify(results, null, 2));
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

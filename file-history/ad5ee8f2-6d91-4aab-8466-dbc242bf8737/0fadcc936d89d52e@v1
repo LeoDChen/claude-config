@@ -1,0 +1,48 @@
+---
+name: OKKI CRM 客户分析系统
+description: OKKI CRM 432客户五阶段分析流水线——CDP双路径均不可行，下一步用Chrome Network面板手动获取API cURL
+type: project
+originSessionId: cef2ee12-1043-427d-bb47-d4f89760e4cd
+---
+项目位于 d:\ClaudeWorkspace\08_客户跟进\Okki\
+
+**Why:** 从OKKI CRM 432个客户中精准分类、深度分析高优客户、输出每日跟进战报。
+
+## 当前进度（2026-05-05）
+
+**数据抓取方案设计阶段。CDP两条路径均确认不可行。已转向Chrome DevTools Network面板手动复制方案。**
+
+### CDP最终结论
+
+| 路径 | 状态 | 根因 |
+|------|------|------|
+| `--remote-debugging-port=9222` | ❌ 不监听 | Chrome 147.0.7727.138 接受参数但不绑定端口 |
+| `--remote-debugging-pipe` | ❌ 不支持 | Windows平台报错 `pipe file descriptors are not open` |
+| Console注入脚本 | ⚠️ 半可用 | SPA+Service Worker导致拦截漏请求，每次刷新消失 |
+
+### 已完成
+- 阶段0-1-2-5脚本就绪并通过21人版测试
+- `scripts/classify_ai.js` 字段映射已修复，5/4运行通过
+- Profile识别：Profile 4 = 云超数码（OKKI登录用）
+
+### 新增工具文件（5/5）
+- `scripts/test_pipe.js` — pipe模式测试（退出码13）
+- `scripts/test_pipe_clean.js` — pipe清洁环境测试（确认报错）
+- `scripts/extract_playwright.js` — Playwright方案（未用，有SSO风险）
+- `scripts/inject_intercept.js` — Console注入v3（可用但操作繁琐）
+
+## 下次会话启动指令
+
+> 继续OKKI CRM数据抓取方案。先读STATE.md和knowledge/下四个文件。
+> CDP和pipe路径均已确认不可行（Chrome 147.x + Win10）。
+> 下一步：用户需在Chrome F12 Network面板中、在"全部客户"页面过滤 `customer` 请求，复制cURL。
+> 拿到cURL后立即提取endpoint+cookie，编写纯HTTP调用脚本直接拉全量432人数据。
+> Profile 4 = 云超数码。
+
+## 关键文件
+
+- 设计文档：DESIGN.md
+- 全量432人（5/3快照）：`data/2026-05-03T01-19-12_全量客户分类.json`
+- AI分类脚本：`scripts/classify_ai.js`
+- API诊断脚本：`scripts/diagnose_api.js`（依赖CDP，已废弃）
+- 最新STATE.md已更新为5/5状态

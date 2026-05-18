@@ -1,0 +1,265 @@
+// Phase 1 v5: 加等待 + 更详细探测
+
+const fs = require('fs');
+
+function log(msg) { console.log(msg); }
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+
+    if (!onetalk) { log('找不到 onetalk'); process.exit(1); }
+
+    log(`目标: ${onetalk.id}\n`);
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+    const events = [];
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+        if (msg.method) events.push(msg);
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Network.enable');
+    await cmd('Runtime.enable');
+    await cmd('Page.enable');
+    await cmd('DOM.enable');
+
+    log('已连接, 等页面渲染...\n');
+    await new Promise(r => setTimeout(r, 3000));
+
+    // === 探测 1: 基本信息 ===
+    log('=== 页面基本信息 ===');
+
+    const info = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var r = {
+                    url: location.href,
+                    title: document.title,
+                    ready: document.readyState,
+                    bodyKids: document.body ? document.body.children.length : -1,
+                    all: document.querySelectorAll('*').length
+                };
+                return JSON.stringify(r);
+            })()
+        `,
+        returnByValue: true
+    });
+    log(info.result?.value || '(无)');
+
+    // === 探测 2: 找所有有 children 的元素 ===
+    log('\n=== 容器元素 ===');
+
+    const containers = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var arr = [];
+                var all = document.querySelectorAll('*');
+                for (var i = 0; i < all.length; i++) {
+                    var el = all[i];
+                    if (el.children.length >= 3 && el.children.length <= 100) {
+                        var first = el.children[0];
+                        var text = (first.textContent || '').trim().substring(0, 60);
+                        var cls = (el.className?.baseVal || el.className || el.getAttribute('class') || '').toString();
+                        if (cls.length > 80) cls = cls.substring(0, 80);
+                        arr.push({
+                            tag: el.tagName,
+                            cls: cls,
+                            kids: el.children.length,
+                            firstTag: first.tagName,
+                            firstText: text
+                        });
+                    }
+                    if (arr.length >= 30) break;
+                }
+                return arr;
+            })())
+        `,
+        returnByValue: true
+    });
+    log(containers.result?.value || '(无)');
+
+    // === 探测 3: 用 DOM.querySelectorAll 找特定元素 ===
+    log('\n=== 元素探测 (DOM API) ===');
+
+    // 先获取 body nodeId
+    const doc = await cmd('DOM.getDocument', { depth: 1 });
+    const bodySel = await cmd('DOM.querySelector', {
+        nodeId: doc.root.nodeId,
+        selector: 'body'
+    });
+
+    if (bodySel.nodeId) {
+        // 尝试找 recycle-scroller
+        const recycleQ = await cmd('DOM.querySelectorAll', {
+            nodeId: bodySel.nodeId,
+            selector: '[class*="recycle"], .vue-recycle-scroller'
+        });
+        log(`recycle scroller 元素: ${recycleQ.nodeIds?.length || 0} 个`);
+
+        // 尝试找 ul
+        const ulQ = await cmd('DOM.querySelectorAll', {
+            nodeId: bodySel.nodeId,
+            selector: 'ul'
+        });
+        log(`ul 元素: ${ulQ.nodeIds?.length || 0} 个`);
+
+        // 尝试找 div[class*=item]
+        const itemQ = await cmd('DOM.querySelectorAll', {
+            nodeId: bodySel.nodeId,
+            selector: 'div[class*="item"], div[class*="Item"]'
+        });
+        log(`div[class*=item] 元素: ${itemQ.nodeIds?.length || 0} 个`);
+
+        // 获取 body 的 outerHTML 片段
+        const bodyHTML = await cmd('DOM.getOuterHTML', { nodeId: bodySel.nodeId });
+        const html = bodyHTML.outerHTML || '';
+        log(`\nBODY HTML 长度: ${html.length}`);
+        log(`前 2000 字符:\n${html.substring(0, 2000)}`);
+    }
+
+    // === 尝试点击 ===
+    log('\n=== 点击尝试 ===');
+
+    // JS 点击
+    const jsClick = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var results = [];
+
+                // 找所有可能是联系人的元素
+                var candidates = document.querySelectorAll('li, [class*="item"], [class*="Item"], .vue-recycle-scroller__item-view');
+                results.push('总候选: ' + candidates.length);
+
+                var clicked = 'none';
+                for (var i = 0; i < candidates.length; i++) {
+                    var el = candidates[i];
+                    var text = (el.textContent || '').trim();
+                    if (text.length > 2 && el.offsetHeight > 10 && !clicked !== 'none') {
+                        // 只是记录，不要全点
+                        if (!clicked || clicked === 'none') {
+                            results.push('候选[' + i + ']: ' + el.tagName + ' h=' + el.offsetHeight + ' text=' + text.substring(0, 40));
+                        }
+                    }
+                }
+
+                // 尝试第一个 li
+                var lis = document.querySelectorAll('ul > li');
+                for (var j = 0; j < lis.length; j++) {
+                    var t = (lis[j].textContent || '').trim();
+                    if (t.length > 2 && lis[j].offsetHeight > 15) {
+                        results.push('点击 li[' + j + ']: ' + t.substring(0, 50));
+                        lis[j].click();
+                        clicked = 'li[' + j + ']';
+                        break;
+                    }
+                }
+
+                if (!clicked || clicked === 'none') {
+                    // 试 recycle item
+                    var items = document.querySelectorAll('.vue-recycle-scroller__item-view');
+                    for (var k = 0; k < items.length; k++) {
+                        var tt = (items[k].textContent || '').trim();
+                        if (tt.length > 2) {
+                            items[k].click();
+                            clicked = 'recycle[' + k + ']';
+                            results.push('点击 recycle[' + k + ']: ' + tt.substring(0, 50));
+                            break;
+                        }
+                    }
+                }
+
+                results.push('最终: ' + (clicked || 'none'));
+                return JSON.stringify(results);
+            })()
+        `,
+        returnByValue: true
+    });
+    log('JS 点击:', jsClick.result?.value);
+
+    // 等网络请求
+    log('\n等待 8 秒...');
+    await new Promise(r => setTimeout(r, 8000));
+
+    // === 分析结果 ===
+    log('\n' + '='.repeat(70));
+    log('网络请求分析');
+    log('='.repeat(70));
+
+    const reqs = {};
+    for (const evt of events) {
+        if (evt.method === 'Network.requestWillBeSent') {
+            const url = evt.params.request.url;
+            // 跳过静态和 analytics
+            if (url.match(/\.(js|css|png|jpg|gif|svg|woff2?|ico|ttf)/i)) continue;
+            if (url.includes('aplus.alibaba.com')) continue;
+
+            let cat = 'other';
+            if (url.includes('mtop')) cat = 'MTOP';
+            else if (url.includes('acs.h.alibaba')) cat = 'ACS';
+            else if (url.includes('im.')) cat = 'IM';
+            else if (url.match(/\/(message|chat|contact|history)/i)) cat = 'CHAT';
+
+            if (!reqs[cat]) reqs[cat] = [];
+            reqs[cat].push({
+                url,
+                method: evt.params.request.method,
+                postData: evt.params.request.postData
+            });
+        }
+    }
+
+    for (const [cat, items] of Object.entries(reqs)) {
+        log(`\n--- ${cat} (${items.length}) ---`);
+        for (const r of items) {
+            log(`  ${r.method} ${r.url.substring(0, 250)}`);
+            if (r.postData) log(`    Payload: ${r.postData.substring(0, 350)}`);
+        }
+    }
+
+    const total = Object.values(reqs).reduce((s, a) => s + a.length, 0);
+    log(`\n总计: ${total} 个有意义的请求`);
+
+    fs.writeFileSync(
+        'd:/ClaudeWorkspace/08_客户跟进/Okki/data/phase1_events.json',
+        JSON.stringify(reqs, null, 2)
+    );
+
+    ws.close();
+    log('\n完成');
+})();

@@ -1,0 +1,53 @@
+# 依赖
+node_modules/
+
+# 环境变量和密钥
+.env
+.env.*
+*.pem
+*.key
+
+# 日志
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.cache
+.DS_Store
+Thumbs.db
+
+# 大数据文件（可重新抓取）
+08_客户跟进/Okki/data/*.json
+08_客户跟进/Okki/data/_debug*
+
+# IDE
+.vscode/
+.idea/
+
+# 备份
+*.bak
+*.backup
+~*
+
+# 压缩包
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# 图片和视频（太大）
+*.mp4
+*.mov
+*.avi
+*.png
+*.jpg
+*.jpeg
+!**/logo*
+!**/icon*
+
+# Office 临时文件
+~$*.docx
+~$*.xlsx
+~$*.pptx

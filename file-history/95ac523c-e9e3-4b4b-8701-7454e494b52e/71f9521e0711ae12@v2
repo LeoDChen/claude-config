@@ -1,0 +1,35 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const pages = browser.contexts()[0].pages();
+
+  console.log('所有页面:');
+  pages.forEach((p, i) => console.log(`  Page ${i}: ${p.url().substring(0, 150)}`));
+
+  // Use page that has xiaoman
+  let page = pages.find(p => p.url().includes('xiaoman'));
+  if (!page) page = pages[0];
+
+  console.log('\n所有frames:');
+  async function dumpFrames(frame, depth = 0) {
+    const indent = '  '.repeat(depth);
+    console.log(`${indent}Frame: ${frame.url().substring(0, 200) || '(empty)'}`);
+    try {
+      const hasContent = await frame.evaluate(() => {
+        const text = document.body?.innerText || '';
+        return { len: text.length, preview: text.substring(0, 200) };
+      }).catch(() => ({ len: 0, preview: 'unreachable' }));
+      if (hasContent.len > 10) {
+        console.log(`${indent}  内容(${hasContent.len}): ${hasContent.preview.substring(0, 300)}`);
+      }
+    } catch(e) {}
+    for (const child of frame.childFrames()) {
+      await dumpFrames(child, depth + 1);
+    }
+  }
+  await dumpFrames(page);
+
+})().catch(err => {
+  console.log('Fatal:', err.message?.substring(0, 300));
+});

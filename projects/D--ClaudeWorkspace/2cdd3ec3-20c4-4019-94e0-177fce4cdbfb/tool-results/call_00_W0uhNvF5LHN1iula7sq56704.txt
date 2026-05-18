@@ -1,0 +1,252 @@
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-11-- 05/05主动联系"还有别的吗？"
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-12-- 05/06确认收货满意："j'ai reçu mon colis c'est ok merci bien"
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-13-- 下一步：整理法语版全品类目录，突出Disney/Pampers背书
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-14-- 关键发现：高价值老客户，45天海运接受，可成为西非法语区地推
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-15-
+08_客户跟进\Okki\P0_第三批_分析结果.md:16:## 3. Keinjol Tata | 印度 | 品牌ODM谈判中
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-17-- Kinjolluxe品牌(Amit Saini)，500件首单，精品包装+条码(Amazon)
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-18-- 客户给了全部信息(logo/包装参考/地址/MOQ)，我们在等自己出mockup+报价
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-19-- 05/05后客户3天未回复——是因为我们在拖
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-20-- 下一步：今天必须出设计mockup初稿+完整报价
+d:\ClaudeWorkspace\08_客户跟进\Okki\P0_第三批_分析结果.md-21-- 关键发现：品牌方品类扩张(女内衣→婴童)，有现成渠道，高价值
+--
+08_客户跟进\Okki\data\_metadata_pass1.json-26-      "unread": 1,
+08_客户跟进\Okki\data\_metadata_pass1.json-27-      "lmContent": "Which product are in stock",
+08_客户跟进\Okki\data\_metadata_pass1.json-28-      "reason": "未读+真实消息"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\_metadata_pass1.json-29-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\_metadata_pass1.json-30-    {
+08_客户跟进\Okki\data\_metadata_pass1.json:31:      "name": "Keinjol Tata",
+08_客户跟进\Okki\data\_metadata_pass1.json-32-      "country": "IN",
+08_客户跟进\Okki\data\_metadata_pass1.json-33-      "cid": "2500000853693-3500001141060#11011@icbu",
+08_客户跟进\Okki\data\_metadata_pass1.json-34-      "daysSince": 0,
+08_客户跟进\Okki\data\_metadata_pass1.json-35-      "unread": 1,
+08_客户跟进\Okki\data\_metadata_pass1.json-36-      "lmContent": "hello",
+--
+08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md:1:# Keinjol Tata (Amit Saini) — 深度分析
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-2-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-3-> 分析时间：2026-05-12 | 57条消息 | 来源：OKKI chat_history 全文
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-4-> 品牌：Kinjolluxe | 国家：印度 | 渠道：Amazon
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-5-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-6----
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-27-- ✅ 定制包装/吊牌/条形码 — 完整品牌化需求
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-28-- ✅ 客户主动提供logo/包装参考图/公司信息
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-29-- ✅ 长期合作表态 — "long-term partnership for future expansion"
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-30-- ⚠️ 首单500件，未达累计1000件（不适用，首单S级已满足）
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-31-
+08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md:32:> 用户上次反馈（#4修正）："Keinjol Tata等级偏低，品牌ODM 500件Amazon渠道，应提升"。已确认S级。
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-33-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-34----
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-35-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-36-## Step 2：沟通阶段
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\Keinjol_Tata_深度分析_2026-05-12.md-37-
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7473-              "company_id": 94260122872485,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7474-              "ai_company_info": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7475-                "国家地区",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7476-                "客户类型"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7477-              ],
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json:7478:              "company_name": "Keinjol Tata",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7479-              "serial_id": "678",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7480-              "feed_time": "1778016062144",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7481-              "swarm_id": 105
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7482-            },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-04-04.json-7483-            {
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-76-
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-77-| 客户 | 质量 | 阶段 | 信号 |
+08_客户跟进\Okki\STATE.md-78-|------|:---:|------|------|
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-79-| **Inderpreet kaur** | A | PI已发 | ⚠提问未回 |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-80-| **maimouna cisse** | A | PI已发 | 500件+降价, 上次联系16d前 |
+08_客户跟进\Okki\STATE.md:81:| **Keinjol Tata** | S | PI已发 | 品牌ODM+Amazon+2000件, 上次联系3d前 |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-82-| **Chloé St-Germain** | S | PI已发 | 品牌ODM+公司资料, 845条消息高互动 |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-83-
+08_客户跟进\Okki\STATE.md:84:> ✅ 已知误判四个全部修正：Keinjol B→S / Ernestina D→B / maimouna B→A / Inderpreet B→A
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-85-
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-86-## 看板输出
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-87-
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-88-| 文件 | 说明 |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-89-|------|------|
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-119-| # | 客户 | 问题 | 状态 |
+08_客户跟进\Okki\STATE.md-120-|---|------|------|:---:|
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-121-| 1 | Mona | 样品5周未达+霍尔木兹海峡危机 | ✅ |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-122-| 2 | Aloh Voma | 运输标记确认 | ⏳ |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-123-| 3 | Inderpreet kaur | 替用户做了商业决策 | ⏳ |
+08_客户跟进\Okki\STATE.md:124:| 4 | Keinjol Tata | 等级偏低→应S/A | ✅ V3已修正→S |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-125-| 5 | jonathan aston | 报价后沉默原因分析 | ⏳ |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-126-| 6 | Asma Noor | 报价数据错误 | ⏳ |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-127-| 7 | Sara Dibes | PI已读未回心理分析 | ⏳ |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-128-| 8 | Abdulrhman alal | 延迟回复致歉 | ⏳ |
+d:\ClaudeWorkspace\08_客户跟进\Okki\STATE.md-129-| 9 | Ernestina Afriyie | D→卡通睡衣=母婴正品 | ✅ V3已修正→B |
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-79-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-80-<div class="flex">
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-81-  <div class="flex-320 card">
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-82-    <div class="card-hd">静默风险分级</div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-83-    <div>
+08_客户跟进\Okki\output\dashboard_2026-05-13.html:84:[Omitted long matching line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-85-    </div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-86-  </div>
+08_客户跟进\Okki\output\dashboard_2026-05-13.html-87-  <div class="flex-1 card" style="align-self:flex-start;">
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-88-    <div class="card-hd">本期变动（相较上次运行）</div>
+08_客户跟进\Okki\output\dashboard_2026-05-13.html-89-    <div style="padding:10px 14px;font-size:13px;">
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-109-  <div class="modal-box"><div class="modal-hd"><span id="modal-title"></span><button class="modal-close" onclick="closeModal()">✕</button></div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-110-    <div class="modal-body" id="modal-body"></div></div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-111-</div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-112-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-113-<script>
+08_客户跟进\Okki\output\dashboard_2026-05-13.html:114:[Omitted long matching line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-115-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-116-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html-117-function statusBadge(s) {
+08_客户跟进\Okki\output\dashboard_2026-05-13.html-118-  if (s === "attention") return '<span style="background:#e67e22;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">关注</span>';
+08_客户跟进\Okki\output\dashboard_2026-05-13.html-119-  if (s === "watch") return '<span style="background:#f39c12;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">观察</span>';
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7473-              "company_id": 94260122872485,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7474-              "ai_company_info": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7475-                "国家地区",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7476-                "客户类型"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7477-              ],
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json:7478:              "company_name": "Keinjol Tata",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7479-              "serial_id": "678",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7480-              "feed_time": "1778016062144",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7481-              "swarm_id": 105
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7482-            },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-34.json-7483-            {
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7473-              "company_id": 94260122872485,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7474-              "ai_company_info": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7475-                "国家地区",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7476-                "客户类型"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7477-              ],
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json:7478:              "company_name": "Keinjol Tata",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7479-              "serial_id": "678",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7480-              "feed_time": "1778016062144",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7481-              "swarm_id": 105
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7482-            },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-04.json-7483-            {
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7473-              "company_id": 94260122872485,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7474-              "ai_company_info": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7475-                "国家地区",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7476-                "客户类型"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7477-              ],
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json:7478:              "company_name": "Keinjol Tata",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7479-              "serial_id": "678",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7480-              "feed_time": "1778016062144",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7481-              "swarm_id": 105
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7482-            },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-01-34.json-7483-            {
+--
+08_客户跟进\Okki\data\s1_classification.json-455-        "latestType": "send",
+08_客户跟进\Okki\data\s1_classification.json-456-        "isSys": false,
+08_客户跟进\Okki\data\s1_classification.json-457-        "country": "IN",
+08_客户跟进\Okki\data\s1_classification.json-458-        "isCore": false,
+08_客户跟进\Okki\data\s1_classification.json-459-        "cid": "2500000853693-3500001141060#11011@icbu",
+08_客户跟进\Okki\data\s1_classification.json:460:        "name": "Keinjol Tata",
+08_客户跟进\Okki\data\s1_classification.json-461-        "latestContent": "I am the manager of the company's foreign trade department",
+08_客户跟进\Okki\data\s1_classification.json:462:        "companyName": "Keinjol Tata",
+08_客户跟进\Okki\data\s1_classification.json-463-        "tagInfo": []
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_classification.json-464-      },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_classification.json-465-      {
+08_客户跟进\Okki\data\s1_classification.json-466-        "priority": 2,
+08_客户跟进\Okki\data\s1_classification.json-467-        "signals": [
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7473-              "company_id": 94260122872485,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7474-              "ai_company_info": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7475-                "国家地区",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7476-                "客户类型"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7477-              ],
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json:7478:              "company_name": "Keinjol Tata",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7479-              "serial_id": "678",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7480-              "feed_time": "1778016062144",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7481-              "swarm_id": 105
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7482-            },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-03-34.json-7483-            {
+--
+08_客户跟进\Okki\data\tm_conversations_latest.json-1420-        "hasRealMessages": true
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_latest.json-1421-      }
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_latest.json-1422-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_latest.json-1423-    {
+08_客户跟进\Okki\data\tm_conversations_latest.json-1424-      "cid": "2500000853693-3500001141060#11011@icbu",
+08_客户跟进\Okki\data\tm_conversations_latest.json:1425:      "name": "Keinjol Tata",
+08_客户跟进\Okki\data\tm_conversations_latest.json-1426-      "loginId": "in19066229080fzmm",
+08_客户跟进\Okki\data\tm_conversations_latest.json-1427-      "aliId": 3500001141060,
+08_客户跟进\Okki\data\tm_conversations_latest.json-1428-      "accountId": 7064308101,
+08_客户跟进\Okki\data\tm_conversations_latest.json:1429:      "companyName": "Keinjol Tata",
+08_客户跟进\Okki\data\tm_conversations_latest.json-1430-      "serviceType": "ifm",
+08_客户跟进\Okki\data\tm_conversations_latest.json-1431-      "conversationType": 1,
+08_客户跟进\Okki\data\tm_conversations_latest.json-1432-      "unreadCount": 0,
+08_客户跟进\Okki\data\tm_conversations_latest.json-1433-      "stayTop": false,
+08_客户跟进\Okki\data\tm_conversations_latest.json-1434-      "lastContactTime": 1777977565303,
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-79-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-80-<div class="flex">
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-81-  <div class="flex-320 card">
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-82-    <div class="card-hd">静默风险分级</div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-83-    <div>
+08_客户跟进\Okki\output\dashboard_2026-05-12.html:84:[Omitted long matching line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-85-    </div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-86-  </div>
+08_客户跟进\Okki\output\dashboard_2026-05-12.html-87-  <div class="flex-1 card" style="align-self:flex-start;">
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-88-    <div class="card-hd">本期变动（相较上次运行）</div>
+08_客户跟进\Okki\output\dashboard_2026-05-12.html-89-    <div style="padding:10px 14px;font-size:13px;">
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-109-  <div class="modal-box"><div class="modal-hd"><span id="modal-title"></span><button class="modal-close" onclick="closeModal()">✕</button></div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-110-    <div class="modal-body" id="modal-body"></div></div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-111-</div>
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-112-
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-113-<script>
+08_客户跟进\Okki\output\dashboard_2026-05-12.html:114:[Omitted long matching line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-115-[Omitted long context line]
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-116-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-12.html-117-function statusBadge(s) {
+08_客户跟进\Okki\output\dashboard_2026-05-12.html-118-  if (s === "attention") return '<span style="background:#e67e22;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">关注</span>';
+08_客户跟进\Okki\output\dashboard_2026-05-12.html-119-  if (s === "watch") return '<span style="background:#f39c12;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">观察</span>';
+--
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7473-              "company_id": 94260122872485,
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7474-              "ai_company_info": [
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7475-                "国家地区",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7476-                "客户类型"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7477-              ],
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json:7478:              "company_name": "Keinjol Tata",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7479-              "serial_id": "678",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7480-              "feed_time": "1778016062144",
+08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7481-              "swarm_id": 105
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7482-            },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\okki_capture_2026-05-08T20-02-04.json-7483-            {
+--
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_enhanced.json-401-      "敷衍回复需补救",
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_enhanced.json-402-      "A级客户"
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_enhanced.json-403-    ]
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_enhanced.json-404-  },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\s1_enhanced.json-405-  {
+08_客户跟进\Okki\data\s1_enhanced.json:406:    "name": "Keinjol Tata",
+08_客户跟进\Okki\data\s1_enhanced.json-407-    "country": "IN",
+08_客户跟进\Okki\data\s1_enhanced.json-408-    "isCore": false,
+08_客户跟进\Okki\data\s1_enhanced.json-409-    "daysAgo": 3,
+08_客户跟进\Okki\data\s1_enhanced.json-410-    "msgCount": 57,
+08_客户跟进\Okki\data\s1_enhanced.json-411-    "customerMsgs": 24,
+--
+08_客户跟进\Okki\data\tm_conversations_full.json-1148-        "contactRead": true
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_full.json-1149-      }
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_full.json-1150-    },
+d:\ClaudeWorkspace\08_客户跟进\Okki\data\tm_conversations_full.json-1151-    {
+08_客户跟进\Okki\data\tm_conversations_full.json-1152-      "cid": "2500000853693-3500001141060#11011@icbu",
+08_客户跟进\Okki\data\tm_conversations_full.json:1153:      "name": "Keinjol Tata",
+08_客户跟进\Okki\data\tm_conversations_full.json-1154-      "loginId": "in19066229080fzmm",
+08_客户跟进\Okki\data\tm_conversations_full.json-1155-      "aliId": 3500001141060,
+08_客户跟进\Okki\data\tm_conversations_full.json-1156-      "accountId": 7064308101,
+08_客户跟进\Okki\data\tm_conversations_full.json:1157:      "companyName": "Keinjol Tata",
+08_客户跟进\Okki\data\tm_conversations_full.json-1158-      "serviceType": "ifm",
+08_客户跟进\Okki\data\tm_conversations_full.json-1159-      "conversationType": 1,
+08_客户跟进\Okki\data\tm_conversations_full.json-1160-      "unreadCount": 0,
+08_客户跟进\Okki\data\tm_conversations_full.json-1161-      "lastContactTime": 1777977565303,
+08_客户跟进\Okki\data\tm_conversations_full.json-1162-      "lastContactTimeLong": 1777977565303,
+--
+08_客户跟进\Okki\output\.dashboard_snapshot.json-1441-      "country": "US",
+08_客户跟进\Okki\output\.dashboard_snapshot.json-1442-      "lifecycle": "初询沟通",
+
+[Showing results with pagination = limit: 250]

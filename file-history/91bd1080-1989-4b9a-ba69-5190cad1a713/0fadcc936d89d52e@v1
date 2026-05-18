@@ -1,0 +1,25 @@
+---
+name: OKKI CRM 客户分析系统
+description: OKKI CRM 432客户五阶段分析流水线项目，当前进度、脚本、数据文件
+type: project
+originSessionId: deec11ad-07aa-4767-a5e5-39a53b52ee21
+---
+项目位于 d:\ClaudeWorkspace\08_客户跟进\Okki\
+
+**Why:** 从OKKI CRM 432个客户中精准分类、深度分析高优客户、输出每日跟进战报（Word文档）。
+
+**当前阶段:** 脚本就绪，待跑阶段2 AI分类。
+
+**已完成:**
+- DESIGN.md 完整设计（5梯队P0-P4、5阶段流水线、7道质量关卡）
+- scripts/preprocess_cdp.js（阶段0数据预处理，已测试）
+- scripts/classify_rules.js（阶段1规则引擎预分类，已测试：P0:4/P1:13/P2:100/P3:4/P4:311，需AI复核117）
+- scripts/generate_report.js（阶段5 Word战报，docx包已安装）
+
+**待完成:**
+- 阶段2（新会话）：AI两遍法分类+证据摘要+置信度，输入classified_rules_*.json
+- 阶段3：P0+P1深度分析（分批5-8人/组）
+- 阶段4：全量生命周期监控
+- 阶段5：合并结果生成Word战报
+
+**How to apply:** 新会话启动时只需"继续 OKKI CRM 客户分析，跑阶段2"，CLAUDE.md会自动引导加载DESIGN.md+knowledge/+STATE.md。

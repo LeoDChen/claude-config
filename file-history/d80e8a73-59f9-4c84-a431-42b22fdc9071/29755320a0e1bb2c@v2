@@ -1,0 +1,539 @@
+/**
+ * OKKI 每日全量检查 — 统一起始脚本
+ *
+ * 每次启动 OKKI 项目时运行此脚本，输出最新全量分类。
+ *
+ * 解决之前三个问题：
+ * 1. 不是真抓取 → 每次重新从 OKKI 拉取
+ * 2. 只对比上次变化 → 全量扫描所有会话
+ * 3. 没区分状态 → 输出：未读未回 / 已读未回 / 系统消息 标注
+ *
+ * 用法：node scripts/check_all.js
+ */
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CHAT_DIR = path.join(DATA_DIR, 'chat_history');
+const CDP_URL = 'http://localhost:9222';
+const MSG_COUNT = 60;
+const MAX_PAGES = 8;
+
+function ts() { return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19); }
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ===================== 系统消息过滤 =====================
+
+const SYSTEM_PATTERNS = [
+  '自动接待将不再触发',
+  'Since you have read the conversation',
+  'automatic reception will no longer',
+  'Marco大模型翻译',
+  '阿里国际Marco大模型翻译',
+  '买家有流失风险',
+  'Buyer has churn risk',
+  '一旦离开平台发生纠纷',
+  '由于您介入该会话',
+  'Due to your intervention',
+  'AI给您生成了一条回复建议',
+  'You have a visitor',
+  'This buyer has been pre-screened',
+  '自动接待已到达上限',
+  'The automatic reception has engaged',
+  'automatic reception has engaged upper limit',
+  '反馈',
+];
+
+function isSystemMessage(content) {
+  if (!content || !content.trim()) return false;
+  for (const p of SYSTEM_PATTERNS) {
+    if (content.includes(p)) return true;
+  }
+  return false;
+}
+
+// ===================== CDP / LWP 工具 =====================
+
+async function sendToTarget(cdpClient, sessionId, id, expression, awaitPromise) {
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(null), 35000);
+    const handler = (msg) => {
+      if (sessionId && msg.sessionId !== sessionId) return;
+      try {
+        const m = JSON.parse(msg.message);
+        if (m.id === id) {
+          clearTimeout(timeout);
+          cdpClient.off('Target.receivedMessageFromTarget', handler);
+          if (m.result?.result?.value !== null && m.result?.result?.value !== undefined) {
+            resolve(m.result.result.value);
+          } else {
+            resolve(m.result);
+          }
+        }
+      } catch (e) { clearTimeout(timeout); resolve(null); }
+    };
+    cdpClient.on('Target.receivedMessageFromTarget', handler);
+    cdpClient.send('Target.sendMessageToTarget', {
+      sessionId: sessionId,
+      message: JSON.stringify({
+        id, method: 'Runtime.evaluate',
+        params: { expression, awaitPromise: !!awaitPromise, returnByValue: true }
+      })
+    }).catch(() => { clearTimeout(timeout); resolve(null); });
+  });
+}
+
+async function evalInIframe(cdpClient, sessionId, id, expression, awaitPromise) {
+  const raw = await sendToTarget(cdpClient, sessionId, id, expression, awaitPromise);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (e) { return raw; }
+}
+
+// ===================== 主流程 =====================
+
+async function main() {
+  const startTime = Date.now();
+  let browser, page;
+
+  // ====== Step 1: 连接/启动 Chrome ======
+  let cdpAvailable = await new Promise((resolve) => {
+    const req = http.get('http://127.0.0.1:9222/json/version', (res) => {
+      let data = '';
+      res.on('data', c => data += c);
+      res.on('end', () => {
+        try { resolve(!!JSON.parse(data).webSocketDebuggerUrl); } catch (e) { resolve(false); }
+      });
+    });
+    req.on('error', () => resolve(false));
+    req.setTimeout(2000, () => { req.destroy(); resolve(false); });
+  });
+
+  if (cdpAvailable) {
+    log('CDP 连接已有 Chrome...');
+    browser = await chromium.connectOverCDP(CDP_URL);
+    const pages = browser.contexts()[0].pages();
+    page = pages.find(p => p.url().includes('xiaoman') || p.url().includes('onetalk'));
+    if (!page) page = await browser.contexts()[0].newPage();
+  } else {
+    log('启动 Chrome (Profile 4)...');
+    browser = await chromium.launchPersistentContext(PROFILE, {
+      channel: 'chrome',
+      headless: false,
+      viewport: { width: 1440, height: 900 },
+    });
+    page = await browser.newPage();
+  }
+
+  // ====== Step 2: 导航 + 登录 ======
+  if (!page.url().includes('xiaoman') && !page.url().includes('onetalk')) {
+    await page.goto('https://crm.xiaoman.cn/im/', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+  }
+
+  if (page.url().includes('login')) {
+    log('');
+    log('========================================');
+    log('  请在浏览器中登录 OKKI，登录后自动继续');
+    log('========================================');
+    log('');
+    const t0 = Date.now();
+    while (Date.now() - t0 < 5 * 60 * 1000) {
+      if (!page.url().includes('login')) { log('登录成功！'); break; }
+      await sleep(2000);
+    }
+    if (page.url().includes('login')) { log('超时'); await browser.close(); return; }
+  }
+
+  await sleep(3000);
+
+  // ====== Step 3: 等 onetalk iframe ======
+  let otFrame = null;
+  for (let i = 0; i < 30; i++) {
+    otFrame = page.frames().find(f => f.url().startsWith('https://onetalk.alibaba.com/'));
+    if (otFrame) { log('onetalk 已加载'); break; }
+    await sleep(2000);
+  }
+  if (!otFrame) { log('onetalk 未找到，请确认 TM 面板已打开'); await browser.close(); return; }
+
+  // ====== Step 4: 等数据并滚动全量加载 ======
+  await sleep(5000);
+  let convCount = await otFrame.evaluate(() => (window.__conversationListFullData__ || []).length);
+  log(`初始加载: ${convCount} 会话`);
+
+  // 尝试滚动
+  for (let round = 0; round < 40; round++) {
+    const r = await otFrame.evaluate(() => {
+      let best = null, bestScore = 0;
+      for (const el of document.querySelectorAll('div')) {
+        const cc = el.children.length;
+        const sd = el.scrollHeight - el.clientHeight;
+        if (cc > 20 && sd > 200) { const s = cc + sd; if (s > bestScore) { best = el; bestScore = s; } }
+      }
+      if (!best) return { done: true };
+      const before = (window.__conversationListFullData__ || []).length;
+      best.scrollTop = best.scrollHeight;
+      return { done: false, before };
+    });
+    if (r.done) break;
+    await sleep(1500);
+    const nc = await otFrame.evaluate(() => (window.__conversationListFullData__ || []).length);
+    if (nc === r.before && round > 2) break;
+    convCount = nc;
+  }
+  log(`全量加载: ${convCount} 会话`);
+
+  // ====== Step 5: 提取全量元数据 ======
+  const fullMeta = await otFrame.evaluate(() => {
+    const convs = window.__conversationListFullData__ || [];
+    return convs.map(c => ({
+      cid: c.cid, name: c.name, loginId: c.loginId, aliId: c.aliId,
+      accountId: c.accountId, companyName: c.companyName,
+      country: c.country, level: c.level, unreadCount: c.unreadCount || 0,
+      lastContactTime: c.lastContactTime, lastContactTimeLong: c.lastContactTimeLong,
+      complianceCountryCode: c.complianceCountryCode,
+      latestMessage: c.latestMessage ? {
+        content: c.latestMessage.content,
+        messageType: c.latestMessage.messageType,
+        messageId: c.latestMessage.messageId,
+        contactRead: c.latestMessage.contactRead,
+      } : null,
+    }));
+  });
+
+  fs.writeFileSync(path.join(DATA_DIR, 'tm_conversations_latest.json'),
+    JSON.stringify({ exportedAt: new Date().toISOString(), total: fullMeta.length, conversations: fullMeta }, null, 2));
+  log(`元数据已保存: ${fullMeta.length} 会话`);
+
+  // ====== Step 6: 识别需要拉取聊天历史的会话 ======
+  const KNOWN_PATH = path.join(DATA_DIR, 'known_customers.json');
+  let knownCids = new Set();
+  if (fs.existsSync(KNOWN_PATH)) {
+    knownCids = new Set(JSON.parse(fs.readFileSync(KNOWN_PATH, 'utf-8')).cids || []);
+  }
+
+  const now = Date.now();
+  const DAY = 86400000;
+
+  // 需要拉取的：①有未读 ②新客户(7d内) ③最近活跃但无chat_history
+  const pullList = [];
+  const existingChatFiles = new Set(
+    fs.readdirSync(CHAT_DIR).filter(f => f.endsWith('.json') && f !== '_summary.json')
+  );
+
+  for (const c of fullMeta) {
+    const age = (now - (c.lastContactTime || 0)) / DAY;
+    const sanitized = c.cid.replace(/[<>:"/\\|?*#@]/g, '_').substring(0, 200);
+    const hasFile = existingChatFiles.has(sanitized + '.json');
+    const isNew = !knownCids.has(c.cid);
+
+    let reason = null;
+    if (c.unreadCount > 0) reason = '有未读';
+    else if (isNew && age <= 7) reason = '新客户';
+    else if (!hasFile && age <= 14) reason = '无历史文件';
+
+    if (reason) pullList.push({ ...c, reason });
+  }
+
+  log(`需要拉取聊天历史: ${pullList.length} 个 (有未读: ${pullList.filter(p=>p.unreadCount>0).length}, 新客户: ${pullList.filter(p=>p.reason==='新客户').length})`);
+
+  // ====== Step 7: 用 LWP 拉取聊天历史 ======
+  if (pullList.length > 0) {
+    const cdpClient = await page.context().newCDPSession(page);
+    const targets = await cdpClient.send('Target.getTargets');
+    const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+    if (ot) {
+      const attached = await cdpClient.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+      const sessionId = attached.sessionId;
+
+      // 安装 LWP
+      await sendToTarget(cdpClient, sessionId, 1, `
+        (function() {
+          var _send = WebSocket.prototype.send;
+          var _ae = WebSocket.prototype.addEventListener;
+          window.__lwpPending = {}; window.__lwpSeq = 0;
+          WebSocket.prototype.send = function(data) {
+            if (!window.__lwpWs && this.readyState === 1) {
+              window.__lwpWs = this;
+              _ae.call(this, 'message', function(event) {
+                try {
+                  var raw = typeof event.data === 'string' ? event.data : '';
+                  if (raw.indexOf('"code"') < 0) return;
+                  var parsed = JSON.parse(raw);
+                  var mid = parsed.headers && parsed.headers.mid;
+                  if (mid && window.__lwpPending[mid]) {
+                    var p = window.__lwpPending[mid];
+                    delete window.__lwpPending[mid];
+                    p.resolve(parsed);
+                  }
+                } catch(e) {}
+              });
+            }
+            return _send.call(this, data);
+          };
+          window.__lwpRequest = function(lwpPath, body) {
+            return new Promise(function(resolve, reject) {
+              var ws = window.__lwpWs;
+              if (!ws || ws.readyState !== 1) { reject(new Error('WS not ready')); return; }
+              var mid = Date.now() + ' ' + (++window.__lwpSeq);
+              var req = JSON.stringify({ lwp: lwpPath, headers: { mid: mid }, body: body });
+              window.__lwpPending[mid] = { resolve: resolve, reject: reject };
+              ws.send(req);
+              setTimeout(function() {
+                if (window.__lwpPending[mid]) { delete window.__lwpPending[mid]; reject(new Error('timeout')); }
+              }, 30000);
+            });
+          };
+          return 'ok';
+        })()
+      `);
+      await sleep(3000);
+
+      // 等 WS 连接
+      const wsOk = await evalInIframe(cdpClient, sessionId, 2,
+        `(function(){return JSON.stringify({ws:!!window.__lwpWs})})()`
+      );
+      if (!wsOk?.ws) {
+        log('等待 WebSocket 连接...');
+        await sleep(15000);
+      }
+
+      let msgId = 100;
+      let pulled = 0, errs = 0;
+
+      for (let i = 0; i < pullList.length; i++) {
+        const c = pullList[i];
+        try {
+          const allMessages = [];
+          let cursor = 9007199254740991;
+          let pageNum = 0;
+
+          while (pageNum < MAX_PAGES) {
+            const raw = await evalInIframe(cdpClient, sessionId, msgId++,
+              `(async function() {
+                try {
+                  var result = await window.__lwpRequest('/r/MessageManager/listUserMessages', ['${c.cid}', false, ${cursor}, ${MSG_COUNT}, false]);
+                  return JSON.stringify(result);
+                } catch(e) { return JSON.stringify({ __error: e.message }); }
+              })()`,
+              true
+            );
+            await sleep(1200);
+
+            if (!raw || raw.__error) break;
+            let response;
+            try { response = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { break; }
+            if (response.code !== 200) break;
+
+            const body = response.body;
+            if (!body?.userMessageModels || body.userMessageModels.length === 0) break;
+            allMessages.push(...body.userMessageModels);
+            if (body.userMessageModels.length < MSG_COUNT || !body.nextCursor) break;
+            cursor = body.nextCursor;
+            pageNum++;
+          }
+
+          const safeName = c.cid.replace(/[<>:"/\\|?*#@]/g, '_').substring(0, 200);
+          fs.writeFileSync(path.join(CHAT_DIR, safeName + '.json'), JSON.stringify({
+            cid: c.cid, name: c.name, fetchedAt: new Date().toISOString(),
+            totalMessages: allMessages.length, messages: allMessages,
+          }, null, 2));
+          pulled++;
+        } catch (e) { errs++; }
+      }
+      log(`聊天历史拉取完成: ${pulled} 成功, ${errs} 失败`);
+    } else {
+      log('警告: 未找到 onetalk CDP target，跳过聊天历史拉取');
+    }
+  }
+
+  // ====== Step 8: 分析分类 ======
+  log('');
+  log('========== 分析分类 ==========');
+  log('');
+
+  // 分类逻辑:
+  // - 未读未回: unreadCount>0 且 我方最后一条非真实人工回复（或是系统消息、或是客户最后发言）
+  // - 未读已回: unreadCount>0 且 我方已有人工回复
+  // - 已读未回: unreadCount=0 且 客户最后发言 且 我方无后续人工回复
+  // - 已读已回: unreadCount=0 且 我方最后发言（人工回复）
+
+  const classified = {
+    unread_no_reply: [],   // 未读未回
+    unread_replied: [],    // 未读已回（已有人工回复但客户又发了新消息）
+    read_no_reply: [],     // 已读未回
+    read_replied: [],      // 已读已回
+    new_unknown: [],       // 新客户待定性
+    silent: [],            // 沉默/低活跃
+  };
+
+  const UID_ME = '2500000853693@icbu';
+
+  for (const c of fullMeta) {
+    const age = (now - (c.lastContactTime || 0)) / DAY;
+    const isUnread = c.unreadCount > 0;
+
+    // 尝试读 chat_history
+    const sanitized = c.cid.replace(/[<>:"/\\|?*#@]/g, '_').substring(0, 200);
+    const chatFile = path.join(CHAT_DIR, sanitized + '.json');
+    let messages = [];
+    if (fs.existsSync(chatFile)) {
+      try {
+        messages = JSON.parse(fs.readFileSync(chatFile, 'utf-8')).messages || [];
+      } catch (e) {}
+    }
+
+    // 找最后一条客户消息 和 最后一条人工回复
+    let lastCustMsg = null;
+    let lastHumanReply = null;
+    let lastSysReply = null;
+
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      const content = m.message?.content?.text?.content || '';
+      const senderUid = m.message?.sender?.uid || '';
+      const isFromMe = senderUid === UID_ME;
+
+      if (isFromMe) {
+        if (!lastHumanReply && !isSystemMessage(content) && content.trim().length > 5) {
+          // 排除空消息和纯图片消息
+          lastHumanReply = { content, time: m.message?.createAt || 0 };
+        }
+        if (!lastSysReply && isSystemMessage(content)) {
+          lastSysReply = { content, time: m.message?.createAt || 0 };
+        }
+      } else {
+        if (!lastCustMsg) {
+          lastCustMsg = { content, time: m.message?.createAt || 0 };
+          break; // 找到最近客户消息即可
+        }
+      }
+    }
+
+    // 如果 chat_history 中没有，用 latestMessage 推断
+    if (!lastCustMsg && !lastHumanReply) {
+      const lm = c.latestMessage;
+      if (lm) {
+        if (lm.messageType === 'received') {
+          lastCustMsg = { content: lm.content, time: c.lastContactTime || 0 };
+        } else if (!isSystemMessage(lm.content || '')) {
+          lastHumanReply = { content: lm.content, time: c.lastContactTime || 0 };
+        } else {
+          lastSysReply = { content: lm.content, time: c.lastContactTime || 0 };
+        }
+      }
+    }
+
+    const custTime = lastCustMsg?.time || 0;
+    const replyTime = lastHumanReply?.time || 0;
+    const custAfterReply = custTime > replyTime; // 客户在我们回复后又发了消息
+    const hasRealHumanReply = lastHumanReply && lastHumanReply.content.trim().length > 5;
+
+    let status, detail;
+
+    if (isUnread && custAfterReply && !hasRealHumanReply) {
+      status = 'unread_no_reply';
+      detail = '客户新消息未被回复';
+    } else if (isUnread && !custAfterReply && hasRealHumanReply) {
+      status = 'unread_replied';
+      detail = '已人工回复';
+    } else if (isUnread && !custAfterReply && !hasRealHumanReply) {
+      status = 'unread_no_reply';
+      detail = '有未读但无人工回复(仅系统消息)';
+    } else if (!isUnread && custTime > replyTime && age <= 7) {
+      status = 'read_no_reply';
+      detail = '已读但客户最新消息未回复';
+    } else if (!isUnread && replyTime >= custTime && age <= 7) {
+      status = 'read_replied';
+      detail = '已回复，状态正常';
+    } else if (age > 30) {
+      status = 'silent';
+      detail = '超30天无互动';
+    } else if (age > 14 && !lastCustMsg) {
+      status = 'silent';
+      detail = '无有效客户消息';
+    } else if (!knownCids.has(c.cid) && age <= 14) {
+      status = 'new_unknown';
+      detail = '新客户待分析';
+    } else {
+      status = 'silent';
+      detail = '低活跃';
+    }
+
+    classified[status].push({
+      name: c.name,
+      country: c.complianceCountryCode || c.country || '?',
+      unread: c.unreadCount,
+      age: age.toFixed(1) + 'd',
+      isNew: !knownCids.has(c.cid),
+      lastCustContent: (lastCustMsg?.content || '').slice(0, 80),
+      lastMyContent: (lastHumanReply?.content || (lastSysReply ? '⚠️系统:' + lastSysReply.content.slice(0,40) : '')).slice(0, 80),
+      detail,
+    });
+  }
+
+  // ====== Step 9: 输出 ======
+  const labels = {
+    unread_no_reply: '未读未回',
+    unread_replied: '未读已回',
+    read_no_reply: '已读未回',
+    read_replied: '已读已回（活跃）',
+    new_unknown: '新客户待分析',
+    silent: '沉默/低活跃',
+  };
+
+  for (const [key, label] of Object.entries(labels)) {
+    const items = classified[key];
+    if (items.length === 0) continue;
+
+    // 排序：未读的按未读数倒序，其他的按时间倒序
+    items.sort((a, b) => {
+      if (key.startsWith('unread')) return b.unread - a.unread;
+      return parseFloat(b.age) - parseFloat(a.age);
+    });
+
+    console.log(`## ${label} (${items.length}人)`);
+    for (const it of items.slice(0, 25)) {
+      const parts = [];
+      if (it.unread > 0) parts.push(`${it.unread}条未读`);
+      parts.push(it.age + '前');
+      if (it.isNew) parts.push('🆕');
+      const prefix = parts.join(' | ');
+
+      const custPreview = it.lastCustContent ? ' ←客:' + it.lastCustContent : '';
+      const myPreview = it.lastMyContent ? ' →我:' + it.lastMyContent : '';
+
+      console.log(`  ${it.name} | ${it.country} | ${prefix}`);
+      if (custPreview) console.log(`    ${custPreview}`);
+      if (myPreview) console.log(`    ${myPreview}`);
+    }
+    if (items.length > 25) console.log(`  ... 共${items.length}人`);
+    console.log('');
+  }
+
+  // ====== Step 10: 保存分类结果 + 更新已知客户 ======
+  const result = {
+    exportedAt: new Date().toISOString(),
+    totalConversations: fullMeta.length,
+    classified,
+  };
+  fs.writeFileSync(path.join(DATA_DIR, 'classification_latest.json'), JSON.stringify(result, null, 2));
+  log('分类结果已保存: classification_latest.json');
+
+  // 更新已知客户
+  const allCids = fullMeta.map(c => c.cid);
+  fs.writeFileSync(KNOWN_PATH, JSON.stringify({ updatedAt: new Date().toISOString(), cids: allCids }, null, 2));
+  log(`已知客户基准已更新: ${allCids.length} 个`);
+
+  // ====== 清理旧的 chat_history (保留最近) ======
+  // 不清理，保持完整历史
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+  log(`全部完成，耗时 ${elapsed}s`);
+
+  await browser.close();
+}
+
+main().catch(e => { log(`错误: ${e.message}`); console.error(e); process.exit(1); });

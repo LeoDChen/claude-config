@@ -1,0 +1,31 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+
+  // Find the chat frame (index 1 is usually the one with content)
+  const frames = page.frames();
+  const chatFrame = frames[1]; // Second frame has the OneTalk content
+
+  if (!chatFrame) {
+    console.log('Chat frame not found');
+    return;
+  }
+
+  console.log('Chat frame URL:', chatFrame.url());
+
+  // Click on Rehema's conversation
+  await chatFrame.click('text=rehema kiseyu');
+  console.log('Clicked on Rehema');
+
+  // Wait for the conversation to open
+  await page.waitForTimeout(3000);
+
+  // Now read the full conversation content
+  const conversationText = await chatFrame.evaluate(() => document.body.innerText);
+  console.log('=== 对话内容 ===\n', conversationText);
+
+})().catch(err => {
+  console.log('Error:', err.message?.substring(0, 500));
+});

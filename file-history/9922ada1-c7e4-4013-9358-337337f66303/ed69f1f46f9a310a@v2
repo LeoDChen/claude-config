@@ -1,0 +1,481 @@
+const fs = require('fs');
+const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, HeadingLevel, AlignmentType, WidthType, BorderStyle, ShadingType } = require('docx');
+
+// ===== Helper Functions =====
+function h1(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 32, color: '1F4E79' })],
+    spacing: { before: 400, after: 200 },
+    heading: HeadingLevel.HEADING_1
+  });
+}
+function h2(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 28, color: '2E75B6' })],
+    spacing: { before: 300, after: 150 },
+    heading: HeadingLevel.HEADING_2
+  });
+}
+function h3(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 24, color: '333333' })],
+    spacing: { before: 200, after: 100 },
+    heading: HeadingLevel.HEADING_3
+  });
+}
+function p(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, size: 21 })],
+    spacing: { after: 120 }
+  });
+}
+function pb(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 21 })],
+    spacing: { after: 120 }
+  });
+}
+function pi(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, italics: true, size: 21, color: '2E75B6' })],
+    spacing: { after: 120, left: 400 }
+  });
+}
+function hr() {
+  return new Paragraph({
+    children: [new TextRun({ text: '─'.repeat(50), color: 'CCCCCC', size: 16 })],
+    spacing: { before: 200, after: 200 }
+  });
+}
+
+function makeTable(headers, rows) {
+  const headerRow = new TableRow({
+    tableHeader: true,
+    children: headers.map(h => new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text: h, bold: true, size: 18, color: 'FFFFFF' })] })],
+      shading: { type: ShadingType.SOLID, color: '1F4E79' },
+      width: { size: 9000 / headers.length, type: WidthType.DXA }
+    }))
+  });
+  const dataRows = rows.map(row => new TableRow({
+    children: row.map(cell => new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text: String(cell), size: 18 })] })],
+      width: { size: 9000 / headers.length, type: WidthType.DXA }
+    }))
+  }));
+  return new Table({ rows: [headerRow, ...dataRows], width: { size: 9000, type: WidthType.DXA } });
+}
+
+// ===== Build Document Content =====
+const children = [];
+
+// Title
+children.push(new Paragraph({ children: [new TextRun({ text: '外贸客户跟进方案 · 完整版', bold: true, size: 48, color: '1F4E79' })], alignment: AlignmentType.CENTER, spacing: { after: 200 } }));
+children.push(new Paragraph({ children: [new TextRun({ text: '益阳市小星星服饰有限公司', size: 28, color: '2E75B6' })], alignment: AlignmentType.CENTER, spacing: { after: 100 } }));
+children.push(new Paragraph({ children: [new TextRun({ text: '数据快照：2026-04-29 | 分析日期：2026-04-30 | V3四层模型', size: 22, color: '808080' })], alignment: AlignmentType.CENTER, spacing: { after: 400 } }));
+children.push(hr());
+
+// ============================================================
+// 一、数据源交叉验证报告
+// ============================================================
+children.push(h1('一、数据源交叉验证报告'));
+children.push(pb('以下问题在分析前必须标注。部分严重问题需要用户确认后方可继续。'));
+
+children.push(h2('1.1 严重问题：对话数据重复'));
+children.push(pb('问题1：Lisa Ketelsen（德国）与 Euzito Carlos（莫桑比克）对话完全一致'));
+children.push(p('两部手机在 2026-04-17 22:11 同时收到两张相同产品卡（Unisex Baby Onesie Bamboo + OEM Custom Baby Romper Cotton），系统在 22:12 和 23:57 发送了完全相同的葡语+英语回复。时间戳精确到秒一致。'));
+children.push(p('→ 可能原因：同一买家使用两个账号；或数据系统合并时出现 bug。需用户确认是否合并或区分。'));
+children.push(pb('问题2：Vanilla Balite（美国）与 Nanthini Rss（阿联酋）收到相同的模板回复'));
+children.push(p('两人在 2026-04-15 14:50 同时发来相同产品卡（BABY Rompers Hooded Coral），系统在 14:51 和 14:52 发送了完全相同的英文回复。时间戳一致到秒，同一产品卡不可能同时被两个不同国家的客户发送。'));
+children.push(p('→ 可能是系统测试账号、数据重复采集、或爬虫 bug。需确认。'));
+
+children.push(h2('1.2 中等问题：P0 名单不一致'));
+children.push(p('JSON 数据中 P0 共 12 人，用户指定 P0 名单也是 12 人，但人员不完全一致：'));
+children.push(p('  JSON 有但用户名单无：Josh Martinez（美国，S级，售后/投诉）、yoselyn Rodriguez（美国，A级，未读+3天内）'));
+children.push(p('  用户名单有但 JSON 无：ShudeshB Thapa、Vanessa Arroyomejias'));
+children.push(p('→ 本次分析按用户指定名单执行。Josh Martinez 和 yoselyn Rodriguez 如需补充分析可后续追加。'));
+
+children.push(h2('1.3 数据源说明'));
+children.push(p('所有分析基于 deep_scrape_merged_v2_2026-04-29 单一数据源。仅 39 个 DOM 可见客户有数据，标注"未经交叉验证"。'));
+
+children.push(hr());
+
+// ============================================================
+// 二、P0 批次 1 — 5人
+// ============================================================
+children.push(h1('二、P0 客户分析 — 批次 1（5人）'));
+
+// --- 2.1 syf khdr ---
+children.push(h2('2.1 syf khdr — 叙利亚市场（注册地US）→ A级'));
+
+children.push(h3('对话概要（16条消息，按时间正序）'));
+children.push(p('2026-04-17 10:17: 客户发产品卡（OEM Custom Girls Summer Homewear Set, $2.70-3.20, MOQ 200pcs）→ 我方"Hello! Thanks for the new product card" → "We focus on baby clothes..." → 客户用阿拉伯语问"كم سعر القطعه"（多少钱一件？）→ 我方反问数量 → 客户答"50" → 客户问"هل يوجد توصيل إلى سوريه"（能发到叙利亚吗？）→ 我方问详细地址 → 客户再次问"كم سعر القطعه"（再次催价）→ 客户说"اريد الاستفسار فقط"（我只想了解价格）→ 我方4/17报价：$3.95/pc × 50件 + 运费$445(DAP Express 7-9天) = 总价$642.50 → 4/17催看报价，至今13天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段3：已报价，待回复。报价已发出13天。'));
+
+children.push(h3('第二层：意图判断'));
+children.push(pb('→ 真比价。给了数量（50件）、两次追问单价、问了发叙利亚物流。但客户在报价前就说"我只是想了解价格"——说明心理价位偏低。'));
+
+children.push(h3('第三层：卡点诊断'));
+children.push(pb('核心卡点：运费/物流。50件货值$197.50，DAP Express运费$445——运费是货值的2.25倍。叙利亚市场对总成本极度敏感。'));
+children.push(p('次要卡点：单价。$3.95/pc是产品链接标价区间$2.70-3.20的高端，客户可能预期$3.00左右。'));
+
+children.push(h3('第四层：下一步话术'));
+children.push(pb('目标：阶段3 → 阶段4（谈判中）'));
+children.push(p('策略：先回应运费卡点，提供加量摊薄运费方案。不催单、不降价。'));
+children.push(pi('"I checked your quote again — the main cost is express shipping to Syria at $445 for just 50 pcs. If you can increase to 200 pcs (the link MOQ), per-piece shipping drops significantly. Also — do you have a Chinese freight forwarder? I can ship to their warehouse for much less. Many of our Middle East clients work this way."'));
+children.push(p('钩子：不抛钩子。客户问了具体价格和物流问题，直接回答。'));
+children.push(p('⚠️物流：叙利亚物流线路需用户确认——是否有海运到叙利亚的线路？客户是否有中国货代？'));
+
+children.push(h3('S/A/B 分流：A级'));
+children.push(p('$200 < $642.50 < $5,000，有明确采购需求（数量+目的国）→ A级。不跑策略推演表和分支预演。'));
+children.push(pb('一句话：运费是货值2.25倍，加量+换运输方式是唯一出路。'));
+
+children.push(hr());
+
+// --- 2.2 BuyLi Now ---
+children.push(h2('2.2 BuyLi Now — 利比亚→肯尼亚蒙巴萨 → A级'));
+
+children.push(h3('对话概要（8条消息）'));
+children.push(p('2026-04-19: 客户发产品卡（OEM Custom Girls Summer Homewear Set, $2.70-3.20, MOQ 200）→ 我方英文打招呼+发3字母问题（数量/市场/身份）→ 客户仅回"ADB" → 我方再问地址 → 客户回"mombasa kenya" → 我方未经客户确认按300件出报价：$3.95/pc × 300件 + 运费$165(DAP Express 7-9天到肯尼亚) = 总价$1,350 → 标注"中国到肯尼亚目前无DDP线路" → 4/20至今10天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段3：已报价，待回复。报价已发10天。'));
+
+children.push(h3('第二层：意图判断'));
+children.push(pb('→ 随便问问/比价。客户仅回了"ADB"三个字母（A=100-500件是个模糊区间），给了蒙巴萨地址。但他从未说"我要XX件"。"ADB"可能是为了拿到报价随口答的。'));
+
+children.push(h3('第三层：卡点诊断'));
+children.push(pb('核心卡点：报价跳跃 + 信息不足。我方在客户仅回3个字母的情况下直接按300件出$1,350报价。客户可能：1) 被$1,350总额吓到（他可能只想试几十件）；2) 觉得我方太急不信任；3) 同时在比价。'));
+children.push(p('次要：无DDP到肯尼亚，客户需要自己清关，可能是障碍。'));
+
+children.push(h3('第四层：下一步话术'));
+children.push(pb('目标：阶段3 → 回到阶段2（重新确认需求）'));
+children.push(p('策略：退一步承认跳太快，重新问他真实需求。给试单方案降门槛。'));
+children.push(pi('"Hi, I realized I jumped ahead with the 300 pcs quote — you may have been looking at a much smaller trial order. What quantity did you actually have in mind for Mombasa? Even 20-50 pcs mixed styles is fine to start — I can work out a trial package with shipping so you can test the market first. No pressure."'));
+children.push(p('钩子：hook_fabric_compare（✅可用，静态对比图）——客户不理你，抛品质钩子激活。'));
+children.push(pi('"By the way, our fabric is pre-washed combed cotton — I have a side-by-side photo with regular cotton. The texture difference is visible even in a still shot. Want to see?"'));
+
+children.push(h3('S/A/B 分流：A级'));
+children.push(p('总价$1,350在$200-$5,000区间 → A级。'));
+children.push(pb('一句话：报价太快没确认需求，退回去问真实数量+给试单方案。'));
+
+children.push(hr());
+
+// --- 2.3 fatmt mtr ---
+children.push(h2('2.3 fatmt mtr — 伊拉克 → B级'));
+
+children.push(h3('对话概要（12条消息）'));
+children.push(p('2026-04-21: 客户发产品卡（Winter Warm Coral Fleece Onesie, $4-4.50, MOQ 2）→ 同时问"how much for 10 pieces?" → 我方问规格 → 客户"just ordinary but good quality" → 我方"10 pcs ordinary good quality ok" → 客户指定：0-12个月、棕蓝白灰色 → 我方告知棕白粉有现货，蓝灰需确认 → 客户"yes please show me the samples" → 我方报价$4.50/pc × 10 = $45 + 问发货地址 → 对话停在4/21。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段3：客户要求看样品，我方没发样品图而是跳到报价和运费。卡在"要样品→没给"。'));
+
+children.push(h3('第三层：卡点诊断'));
+children.push(pb('卡点：样品交付。客户明确说"yes please show me the samples"，但我方没有发任何样品图/实拍，直接跳到报价。10件$45小单，运费可能是下一个卡点但尚未触发。'));
+
+children.push(h3('第四层：话术（B级：一行判断 + 一句简短话术）'));
+children.push(pb('判断：客户要样品图但没给，报价后不回复是正常的——他还没看到产品。'));
+children.push(pi('"Here are the actual photos of the coral fleece onesie in brown and white — 0-12 months in stock. Soft fleece, good for Iraq winters. For 10 pcs I can ship within 3 days. What\'s your city in Iraq for the shipping cost?"'));
+
+children.push(h3('S/A/B 分流：B级'));
+children.push(p('订单金额$45 < $200 → B级。仅一行判断+一句话术。'));
+
+children.push(hr());
+
+// --- 2.4 Peggy Hamungala ---
+children.push(h2('2.4 Peggy Hamungala — 赞比亚→加纳 → B级'));
+
+children.push(h3('对话概要（20条消息）'));
+children.push(p('2026-04-03: 首触（发了产品图）→ 客户"我会计算订单" → 20天后（4/20）客户重新联系"Good afternoon Leo" → 问5件多少钱 → 我方报$4.20/pc × 5 = $26 + 运费另计 → 客户问运费 → 我方问地址 → "shipping to Ghana" → 运费$66 DAP Express = 总价$92 → 客户要求人民币报价 → 28.5元/pc × 5 + 449元运费 = 591.5元 → 4/22发帮宝适+迪士尼自我介绍。至今8天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段3：已报价（美元+人民币双币种），8天未回。'));
+
+children.push(h3('第三层：卡点诊断'));
+children.push(pb('卡点：运费。5件货值$26/142.5元，运费$66/449元——运费是货值的2.5倍。Peggy要人民币报价说明她在计算加纳落地总成本。拿到报价不回复，说明落地成本超出她的市场价格承受范围。'));
+
+children.push(h3('第四层：话术（B级）'));
+children.push(pb('判断：运费是货值2.5倍，Peggy算完加纳落地价觉得不划算。'));
+children.push(pi('"Hi Peggy, 5 pcs has high per-piece shipping. 20 pcs mixed styles cuts per-piece shipping by more than half. Or if you have a Chinese freight forwarder, I can ship to their warehouse for much less. Want me to work out a 20-pc option?"'));
+
+children.push(h3('S/A/B 分流：B级'));
+children.push(p('订单金额$92 < $200 → B级。'));
+
+children.push(hr());
+
+// --- 2.5 martin wamundila ---
+children.push(h2('2.5 martin wamundila — 赞比亚→科特迪瓦（法语）→ B级'));
+
+children.push(h3('对话概要（17条消息，法语对话）'));
+children.push(p('2026-04-10: 客户发产品卡（Korean Style 2-Piece Set, $1.30-2, MOQ 2）→ 我方英文推夏秋款 → 客户"deux pièces de vêtements font combien"（两件多少钱？）→ 我方报$3/pc × 2 = $6 → 我方问自用还是销售 → "pour la vente"（用于销售）→ 我方问科特迪瓦是否有中国货代 → 客户关注"la qualité et la texture"（品质和质感）→ "je ne veux pas quelque chose de populaire juste un truc unique"（不要流行款只要独特的东西）→ 我方推定制方案 → "merci je vais réfléchir"（谢谢我考虑考虑）→ 4/22发五一群发。20天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段3：客户说"我考虑考虑"后已过20天。'));
+
+children.push(h3('第三层：卡点诊断'));
+children.push(pb('卡点：需求错配 + 决策困难。客户明确说不要流行款、要独特的东西、看重品质。但我方推的是现有畅销款 + 笼统的"我们可以定制"。核心问题是：他想要看到具体独特的东西，而不是被告诉"可以定制"。'));
+children.push(p('他在科特迪瓦销售，法语母语，可能有特定的本地审美偏好。2件$6是样品测试——不是最终订单规模。'));
+
+children.push(h3('第四层：话术（B级）'));
+children.push(pb('判断：客户要独特不要流行，推畅销款方向错了。用专属面料切入科特迪瓦市场审美。'));
+children.push(pi('"Bonjour Martin, j\'ai repensé à ce que vous avez dit — quelque chose d\'unique, pas les modèles populaires. J\'ai des tissus exclusifs de notre bibliothèque de 300+ motifs qui ne sont pas en ligne. Style wax coloré ou plutôt motifs sobres pour le marché ivoirien ? Je peux vous envoyer 3 photos de tissus que personne d\'autre n\'a."'));
+children.push(p('钩子：hook_fabric_library（⚠️待整理但可用——发花型PDF）'));
+
+children.push(h3('S/A/B 分流：B级'));
+children.push(p('订单金额$6 < $200 → B级。但对话有深度，可升A级关注。'));
+
+children.push(hr());
+
+// ============================================================
+// 三、P0 批次 2 — 5人
+// ============================================================
+children.push(h1('三、P0 客户分析 — 批次 2（5人）'));
+
+// --- 3.1 Eulalia Julio Chiau ---
+children.push(h2('3.1 Eulalia Julio Chiau — 莫桑比克 → A级'));
+
+children.push(h3('对话概要（7条消息）'));
+children.push(p('2026-04-16: 客户发产品卡（Korean Style 2-Piece Set, $1.30-2, MOQ 2）→ 我方回"100%棉，适合3-8岁，MOQ 2" → 客户"i want this for three years old" → 我方问尺码（73cm/80cm）和数量 → "整理信息后给报价" → 4/21发五一促销"3岁100cm/110cm有现货，要10-20套价格表吗？" → 9天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段2：询价中。客户给了年龄需求（3岁），我方问了尺码和数量但从未给过具体价格。客户在等了14天还没收到报价。'));
+
+children.push(h3('第二层：意图判断'));
+children.push(pb('→ 选品中/准备试单。发了具体产品卡、指定了年龄。莫桑比克小零售商，先拿几套测试。'));
+
+children.push(h3('第四层：下一步话术'));
+children.push(pb('目标：阶段2 → 阶段3（给报价）'));
+children.push(p('策略：不要再问问题了。客户已经说了"3岁"。直接给具体报价 + 产品实拍。'));
+children.push(pi('"Hi Eulalia, sorry for the delay — here is the exact quote for the 3-year-old (100cm) Korean 2-piece set:\n• 10 sets: $2.50/set + shipping\n• 20 sets: $2.20/set + shipping\n100% cotton, breathable, in stock. I can take actual photos of the 100cm set today. How many would you like to start with?"'));
+children.push(p('注意：$2.20-2.50高于产品卡标价$1.30-2.00，因现货精准尺码推荐有溢价空间。最终报价须老板确认。'));
+
+children.push(h3('S/A/B 分流：A级'));
+children.push(p('有明确采购需求（指定年龄/品类），莫桑比克市场有增长潜力 → A级。'));
+children.push(pb('一句话：等了14天没收到报价，赶紧给具体数字+实拍图，不然客户就跑了。'));
+
+children.push(hr());
+
+// --- 3.2 Lisa Ketelsen ---
+children.push(h2('3.2 Lisa Ketelsen — 德国 → B级（⚠️数据异常：与Euzito Carlos完全一致）'));
+
+children.push(h3('数据异常说明'));
+children.push(p('Lisa Ketelsen（德国）和 Euzito Carlos（莫桑比克）的对话内容完全一致——相同产品卡、相同时间戳、相同回复。极可能是数据合并错误。以下分析以 Lisa Ketelsen 为代表。Euzito Carlos 不再重复分析（见#3.3标注）。'));
+
+children.push(h3('对话概要（5条消息）'));
+children.push(p('2026-04-17: 客户发两张产品卡（Unisex Baby Onesie Bamboo $1.40-1.50 MOQ 2 + OEM Baby Romper Cotton $2.70-3.20 MOQ 500）→ 我方英文回bamboo款 → 我方英文回cotton款 → 我方葡语发3字母问题。客户零回复。13天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段1：初次接触，客户发卡后零互动。'));
+
+children.push(h3('第二层：意图判断'));
+children.push(pb('→ 随便看看。一次性发两张完全不同品类的产品卡（onesie + romper），广撒网比价。德国市场决策链长。'));
+
+children.push(h3('第四层：话术（B级）'));
+children.push(pb('判断：德国客户广撒网，用德语+ISO9001破冰，看他是不是认真要bamboo。'));
+children.push(pi('"Hallo Lisa, Sie haben zwei verschiedene Produkte angefragt — den Bambus-Strampler (MOQ 2) und den Baumwoll-Romper (MOQ 500). Welcher ist für Sie interessanter? Für den deutschen Markt: Wir sind ISO9001-zertifiziert und haben aktuelle Prüfberichte. Soll ich Ihnen die Zertifikate schicken?"'));
+children.push(p('钩子：hook_iso_cert（✅可用）'));
+
+children.push(h3('S/A/B 分流：B级'));
+children.push(p('零互动，仅发卡，需求完全模糊 → B级。'));
+
+children.push(hr());
+
+// --- 3.3 Euzito Carlos ---
+children.push(h2('3.3 Euzito Carlos — 莫桑比克（数据异常）→ 待确认'));
+children.push(pb('与 Lisa Ketelsen（#3.2）对话完全一致。'));
+children.push(p('建议用户确认：两人是否为同一买家使用两个账号？或是数据系统合并错误？确认前不展开独立分析。如确认是独立客户，按 Lisa Ketelsen 同等处理（阶段1，B级，德语改为葡语）。'));
+
+children.push(hr());
+
+// --- 3.4 Vanilla Balite ---
+children.push(h2('3.4 Vanilla Balite — 美国 → B级'));
+
+children.push(h3('对话概要（3条消息）'));
+children.push(p('2026-04-15: 客户发产品卡（BABY Rompers Hooded Coral Fleece, $1.90-3.50, MOQ 5）→ 我方回"谢谢，请分享数量规格" → 我方发3字母问题。客户零回复。15天未回。'));
+
+children.push(h3('第一层：阶段判断'));
+children.push(pb('→ 阶段1：初次接触，客户发卡后零互动。'));
+
+children.push(h3('第二层：意图判断'));
+children.push(pb('→ 随便看看。美国注册，发冬季珊瑚绒连体衣卡，MOQ仅5件——小型在线店主选品/比价。'));
+
+children.push(h3('第四层：话术（B级）'));
+children.push(pb('判断：美国小店主选品，用预洗精梳棉面料对比图激活比3字母问题有力。'));
+children.push(pi('"That hooded coral fleece romper — we do this style with pre-washed combed cotton lining instead of regular fleece, same price range. Much softer after washing and doesn\'t pill. I have a side-by-side fabric comparison photo — want to see the difference?"'));
+children.push(p('钩子：hook_fabric_compare（✅可用，静态对比图）——客户不理你，抛钩子。'));
+
+children.push(h3('S/A/B 分流：B级'));
+children.push(p('零互动，仅发卡 → B级。'));
+
+children.push(hr());
+
+// --- 3.5 Nanthini Rss ---
+children.push(h2('3.5 Nanthini Rss — 阿联酋（数据相似异常）→ B级'));
+
+children.push(pb('与 Vanilla Balite（#3.4）收到的系统回复完全相同。同一产品卡、相同时间戳、相同3字母问题。如为独立客户，策略不同：'));
+children.push(pb('判断：阿联酋客户发冬季连体衣卡，用帮宝适奥运实拍图破冰（中东吃这套），而非面料对比图。'));
+children.push(pi('"Salam! That hooded romper you checked — we produced the baby towels for the Pampers 2024 Olympic gift box. Same factory, same quality. Want to see a photo of what we shipped for them? It will give you a clear idea of our production standard."'));
+children.push(p('钩子：hook_pampers_olympic（✅可用）'));
+children.push(p('分流：B级。'));
+
+children.push(hr());
+
+// ============================================================
+// 四、P0 无对话数据标注
+// ============================================================
+children.push(h1('四、P0 无对话数据标注（2人）'));
+children.push(pb('1. ShudeshB Thapa — 无对话数据。JSON中查无此人。建议检查小满CRM中是否有其他沟通渠道记录。'));
+children.push(pb('2. Vanessa Arroyomejias — 无对话数据。JSON中查无此人。建议同上。'));
+children.push(p('⚠️ 这两位客户的P0优先级原因未知（数据中无记录），需用户补充信息后方可分析。'));
+children.push(p('另外：JSON中还有两个P0客户（Josh Martinez 和 yoselyn Rodriguez）不在用户指定名单中，如需补充分析请告知。'));
+
+children.push(hr());
+
+// ============================================================
+// 五、P1 客户分群策略
+// ============================================================
+children.push(h1('五、P1 客户分群策略（24人，全部B级）'));
+children.push(p('本次快照提取到 24 个 P1 客户（用户原说27人，差额3人可能不在DOM可见范围）。全部B级。按地域分群，每群给通用策略+推荐钩子。不展开单人分析。'));
+
+children.push(h2('群A：非洲 — 12人'));
+children.push(p('客户：arshavin amoah(GH), maimouna cisse(ML), Ruth mutambo(ZM), Patience Mensah Agyeman Prempeh(GH), Vie Merveilleux(CI), Nelly Lupity(CD), Cryn Nyabadza(ZW), Sonia Monjane(MZ), Umm Aysha(KE), Lois Anokye(GH), rayan shafi(KE), JeanRomain Ouffouet(CI)'));
+children.push(pb('通用策略：'));
+children.push(p('• 价格敏感+整柜倾向+中国货代清关 → 给试单方案（混款小额）降低决策门槛'));
+children.push(p('• 主动提"可发中国货代地址"'));
+children.push(p('• 法语区（CI/ML/CD）用翻译工具辅助'));
+children.push(p('• 推荐钩子：hook_fabric_compare（✅静态对比图）+ 小批量试单方案'));
+children.push(p('• 标准触达频率：1-2个月一次'));
+
+children.push(h2('群B：中东 — 6人'));
+children.push(p('客户：Emad Jumah(LY), Mezna Alawfi(OM), nshwan altayy(IQ), adm hsyn(EG), Loza Bondok(EG), slwyahmd bas(LY)'));
+children.push(pb('通用策略：'));
+children.push(p('• 大牌背书破冰（帮宝适奥运实拍图✅），中东客户吃这套'));
+children.push(p('• 留议价空间，推DAP/DDP'));
+children.push(p('• 利比亚客户注意物流限制'));
+children.push(p('• 推荐钩子：hook_pampers_olympic（✅可用）'));
+children.push(p('• 标准触达频率：1-2个月一次'));
+
+children.push(h2('群C：亚洲 — 3人'));
+children.push(p('客户：Tanaya Mallick(IN), d zm(CN), Afiq Amrullah(ID)'));
+children.push(pb('通用策略：'));
+children.push(p('• 印度（Tanaya）：不投入过多精力，直报直走，不追'));
+children.push(p('• 中国（d zm）：可能是货代/中间商，直接问采购用途'));
+children.push(p('• 印尼（Afiq 17条消息）：推现货畅销款+CIF到门价'));
+children.push(p('• 推荐钩子：印度不用钩子；中国推产线实拍（⚠️部分可用）；印尼推产品实拍+面料对比'));
+
+children.push(h2('群D：欧美/澳洲 — 3人'));
+children.push(p('客户：irfan khan(AU), Kings Sikaz(US), YULIA GOLUBTSOVA(RU)'));
+children.push(pb('通用策略：'));
+children.push(p('• 澳洲/美国：ISO9001+质检报告（✅可用），推样品单'));
+children.push(p('• 俄罗斯（YULIA 12条消息，P1中较高）：优先铁路运输+推防寒品类'));
+children.push(p('• 推荐钩子：hook_iso_cert（✅可用）对欧美；产品实拍+产线视频（⚠️部分可用）对俄罗斯'));
+
+children.push(h2('P1 行动优先级排序'));
+children.push(p('1. YULIA GOLUBTSOVA（12条消息，俄罗斯）'));
+children.push(p('2. irfan khan（19条消息，澳洲）'));
+children.push(p('3. Kings Sikaz（19条消息，美国）'));
+children.push(p('4. Emad Jumah（17条消息，利比亚）'));
+children.push(p('5. Tanaya Mallick（17条消息，印度）'));
+children.push(p('6. Afiq Amrullah（17条消息，印尼）'));
+children.push(p('其余18人（消息量≤9）→ 标准触达频率'));
+
+children.push(hr());
+
+// ============================================================
+// 六、P2/P3 标注
+// ============================================================
+children.push(h1('六、P2/P3 标注'));
+children.push(pb('本次快照仅覆盖 DOM 可见的 39 个客户（P0: 12人 + P1: 24人 + 其他: 3人）。'));
+children.push(pb('完整 415 客户需全量提取。P2/P3 客户未在本次 deep_scrape 数据中提取，无法进行任何分析。'));
+children.push(p('建议：'));
+children.push(p('1. 执行全量 DOM 提取获取完整 415 客户列表'));
+children.push(p('2. 按优先级分批加载对话数据'));
+children.push(p('3. P2 客户可按 P1 分群策略模板快速批量处理（每群1套通用话术+1个钩子）'));
+
+children.push(hr());
+
+// ============================================================
+// 七、汇总与行动建议
+// ============================================================
+children.push(h1('七、汇总与行动建议'));
+
+children.push(h2('7.1 P0 客户速查表'));
+children.push(makeTable(
+  ['客户', '国家/市场', '阶段', '等级', '核心卡点', '建议动作'],
+  [
+    ['syf khdr', '叙利亚', '阶段3\n已报价13天', 'A', '运费$445=货值2.25倍', '加量至200件/换运输方式/问中国货代'],
+    ['BuyLi Now', '利比亚→肯尼亚', '阶段3\n已报价10天', 'A', '报价太快未确认需求\n$1,350总价可能过高', '退一步重新确认数量\n给20-50件试单方案'],
+    ['fatmt mtr', '伊拉克', '阶段3\n要样品未给', 'B', '客户要样品图\n我方跳去报价', '直接发棕/白现货实拍图'],
+    ['Peggy Hamungala', '赞比亚→加纳', '阶段3\n已报价8天', 'B', '运费$66=货值2.5倍\n人民币报价后消失', '给20件混合装方案\n或问中国货代地址'],
+    ['martin wamundila', '赞比亚→科特迪瓦', '阶段3\n已沉默20天', 'B', '需求错配：要独特\n我方推畅销款', '发3款目录外专属面料\n先问科特迪瓦审美偏好'],
+    ['Eulalia Julio Chiau', '莫桑比克', '阶段2\n等了14天没报价', 'A', '我方一直在问问题\n从未给具体价格', '直接给10/20套报价\n+100cm实拍图'],
+    ['Lisa Ketelsen', '德国', '阶段1\n零互动13天', 'B', '广撒网无互动\n3字母问题无回复', '德语+ISO9001证书\n先确认要bamboo还是cotton'],
+    ['Euzito Carlos', '莫桑比克', '⚠️数据异常\n与Lisa一致', '待确认', '重复数据', '先确认是否为同一人'],
+    ['Vanilla Balite', '美国', '阶段1\n零互动15天', 'B', '发卡后无回复', '面料对比图激活'],
+    ['Nanthini Rss', '阿联酋', '阶段1\n零互动15天', 'B', '发卡后无回复', '帮宝适奥运实拍图激活'],
+  ]
+));
+
+children.push(h2('7.2 钩子使用状态核查'));
+children.push(p('以下推荐钩子已通过 hooks-library.md 状态字段核查：'));
+children.push(p('✅ hook_fabric_compare（静态对比图）— 可用于 BuyLi Now, Vanilla Balite, 非洲P1群'));
+children.push(p('✅ hook_pampers_olympic（实拍图+PPT截图）— 可用于 Nanthini Rss, 中东P1群'));
+children.push(p('✅ hook_iso_cert（ISO9001证书）— 可用于 Lisa Ketelsen, 欧美P1群'));
+children.push(p('⚠️ hook_fabric_library（花型PDF, 待整理可视化）— 可用于 martin wamundila'));
+children.push(p('❌ hook_sample_fabric（迷你样布, M10待制备）— 本次分析中不推荐'));
+children.push(p('❌ hook_packing_shipping（打包发货视频, M07待拍摄）— 本次分析中不推荐'));
+
+children.push(h2('7.3 报价安全核查'));
+children.push(p('本文档中所有报价均为价格区间+标注"须老板确认"。'));
+children.push(p('唯一引用的历史报价：syf khdr ($3.95/pc) 和 BuyLi Now ($3.95/pc) 和 fatmt mtr ($4.50/pc) 和 Peggy Hamungala ($4.20/pc, ¥28.5/pc)——这些是对话中已发出的数字，引用时标注了来源。'));
+
+children.push(h2('7.4 待用户确认事项'));
+children.push(p('1. Lisa Ketelsen 与 Euzito Carlos 是否为同一人？（影响2个P0的分析）'));
+children.push(p('2. Vanilla Balite 与 Nanthini Rss 的数据重复是否为系统问题？'));
+children.push(p('3. P0 名单中 Josh Martinez 和 yoselyn Rodriguez 是否需要补充分析？'));
+children.push(p('4. ShudeshB Thapa 和 Vanessa Arroyomejias 的P0优先级原因是什么？'));
+children.push(p('5. 叙利亚物流线路确认（syf khdr）'));
+children.push(p('6. 缺少的3个P1客户姓名确认'));
+
+children.push(h2('7.5 总体优先级矩阵'));
+children.push(makeTable(
+  ['优先级', '客户', '紧急原因'],
+  [
+    ['🔴 立即', 'Eulalia Julio Chiau', '等了14天没收到报价，可能已经去别家买了'],
+    ['🔴 立即', 'fatmt mtr', '客户明确要样品图，发了就能推进到报价'],
+    ['🟡 本周', 'syf khdr', '13天没回但已报价完整，用物流方案再激活一次'],
+    ['🟡 本周', 'BuyLi Now', '10天没回，退一步重新确认需求'],
+    ['🟡 本周', 'Peggy Hamungala', '8天没回，给加量方案试试'],
+    ['🟢 两周内', 'martin wamundila', '客户在"考虑"，用专属面料切入'],
+    ['🟢 两周内', 'Vanilla Balite / Nanthini Rss', '阶段1零互动，标准激活'],
+    ['🟢 两周内', 'Lisa Ketelsen', '阶段1零互动，德语+证书激活'],
+    ['⚪ 待确认', 'Euzito Carlos', '先确认数据异常'],
+    ['⚪ 信息缺失', 'ShudeshB Thapa, Vanessa Arroyomejias', '无对话数据，需补充'],
+  ]
+));
+
+children.push(hr());
+children.push(pb('—— 报告完 ——'));
+children.push(p('生成时间：2026-04-30 | 分析引擎：V3四层模型 | 数据源：deep_scrape_merged_v2_2026-04-29'));
+children.push(p('BSCI表述合规：✓ | 报价规则合规：✓ | 钩子状态核查：✓ | 禁用词扫描：✓'));
+
+// ===== Build & Export =====
+const doc = new Document({
+  styles: {
+    default: {
+      document: { run: { size: 21, font: 'Microsoft YaHei' } }
+    }
+  },
+  sections: [{ children }]
+});
+
+Packer.toBuffer(doc).then(buffer => {
+  const outPath = 'C:/Users/Administrator/Desktop/外贸跟进方案_完整版_2026-04-30.docx';
+  fs.writeFileSync(outPath, buffer);
+  console.log('✅ Document generated: ' + outPath);
+  console.log('File size: ' + (buffer.length / 1024).toFixed(0) + ' KB');
+}).catch(err => {
+  console.error('❌ Error:', err.message);
+});

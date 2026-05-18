@@ -1,0 +1,462 @@
+/**
+ * 阶段5：Word 战报生成
+ * 输入：分析结果 JSON（包含 P0-P4 分类+深度分析+生命周期监控）
+ * 输出：reports/今日跟进战报_YYYY-MM-DD.docx
+ *
+ * 依赖：npm docx 包
+ */
+
+const fs = require('fs');
+const path = require('path');
+const {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  HeadingLevel, AlignmentType, BorderStyle, ShadingType, WidthType,
+  PageBreak, Header, Footer, PageNumber,
+} = require('docx');
+
+const REPORTS_DIR = path.join(__dirname, '..', 'reports');
+
+// ====== 颜色/样式常量 ======
+const COLORS = {
+  p0Red: 'CC0000',
+  p0RedBg: 'FFE0E0',
+  p1Orange: 'E67300',
+  p1OrangeBg: 'FFF0E0',
+  p2Blue: '3366CC',
+  p3Gray: '888888',
+  p4LightGray: 'AAAAAA',
+  warningYellow: 'FFE066',
+  white: 'FFFFFF',
+  black: '1A1A1A',
+  darkGray: '333333',
+  borderGray: 'CCCCCC',
+  zebraEven: 'F8F8F8',
+  zebraOdd: 'FFFFFF',
+};
+
+const FONT_SIZES = {
+  title: 44,
+  subtitle: 28,
+  heading: 22,
+  subheading: 18,
+  body: 20,
+  small: 16,
+  tiny: 14,
+};
+
+// ====== 工具函数 ======
+
+function makeHeaderCell(text, color, colSpan = 1, fontSize = FONT_SIZES.body) {
+  return new TableCell({
+    children: [
+      new Paragraph({
+        children: [new TextRun({ text, bold: true, color: COLORS.white, size: fontSize })],
+        alignment: AlignmentType.CENTER,
+      }),
+    ],
+    shading: { type: ShadingType.SOLID, color },
+    width: { size: 100 / colSpan, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+      left: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+      right: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+    },
+  });
+}
+
+function makeCell(text, opts = {}) {
+  const { bold = false, color = COLORS.black, fontSize = FONT_SIZES.small, bgColor = null, alignment = AlignmentType.LEFT } = opts;
+  const children = [new TextRun({ text: String(text || ''), bold, color, size: fontSize })];
+  const shading = bgColor ? { type: ShadingType.SOLID, color: bgColor } : undefined;
+
+  return new TableCell({
+    children: [new Paragraph({ children, alignment })],
+    shading,
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+      left: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+      right: { style: BorderStyle.SINGLE, size: 1, color: COLORS.borderGray },
+    },
+  });
+}
+
+function makeRow(cells, rowIdx = 0) {
+  const bgColor = rowIdx % 2 === 0 ? COLORS.zebraOdd : COLORS.zebraEven;
+  return new TableRow({
+    children: cells.map((c, i) => {
+      if (typeof c === 'string') return makeCell(c, { bgColor });
+      return c;
+    }),
+  });
+}
+
+function heading(text, level = HeadingLevel.HEADING_1) {
+  return new Paragraph({
+    text,
+    heading: level,
+    spacing: { before: 400, after: 200 },
+  });
+}
+
+function para(text, opts = {}) {
+  const { bold = false, fontSize = FONT_SIZES.body, color = COLORS.black, spacing = {} } = opts;
+  return new Paragraph({
+    children: [new TextRun({ text, bold, color, size: fontSize })],
+    spacing: { before: 80, after: 80, ...spacing },
+  });
+}
+
+function emptyPara() {
+  return new Paragraph({ children: [], spacing: { before: 100, after: 100 } });
+}
+
+function pageBreak() {
+  return new Paragraph({ children: [new PageBreak()] });
+}
+
+// ====== 总览统计表 ======
+
+function buildOverviewSection(stats) {
+  const rows = [
+    new TableRow({
+      children: [
+        makeHeaderCell('优先级', COLORS.p0Red),
+        makeHeaderCell('人数', COLORS.p0Red),
+        makeHeaderCell('说明', COLORS.p0Red),
+      ],
+    }),
+    makeRow(['P0-付款/售后', String(stats.p0Payment || 0), 'PI已发等付款、售后投诉、质量异常'], 0),
+    makeRow(['P0-高意向', String(stats.p0Intent || 0), '选款+地址确认、下单信号明确'], 1),
+    makeRow(['P1', String(stats.p1 || 0), '未读消息、谈判活跃、样品/报价等待'], 2),
+    makeRow(['P2', String(stats.p2 || 0), '初询有效、30天内互动'], 3),
+    makeRow(['P3', String(stats.p3 || 0), '沉默/模板后/低意向'], 4),
+    makeRow(['P4', String(stats.p4 || 0), '30天+无互动、仅系统消息'], 5),
+  ];
+
+  return [
+    heading('一、总览', HeadingLevel.HEADING_1),
+    new Table({
+      rows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    }),
+    emptyPara(),
+    para(`客户总数：${stats.total || 0} | 未读消息：${stats.unread || 0} | 生成时间：${stats.generatedAt || ''}`, { fontSize: FONT_SIZES.small, color: COLORS.darkGray }),
+  ];
+}
+
+// ====== 自检清单 ======
+
+function buildChecklistSection(checklist) {
+  const items = checklist || [
+    '无 latestMessageContent 为系统消息的条目',
+    '无 P1 但有下单/选款+地址信号的客户',
+    '无 P0 但只有系统消息+≤3条的客户',
+    '无最后消息为表情/单字导致误判的客户',
+    '所有 latestMessageContent 来自真实对话',
+  ];
+
+  const rows = [
+    new TableRow({
+      children: [
+        makeHeaderCell('检查项', COLORS.p2Blue),
+        makeHeaderCell('状态', COLORS.p2Blue),
+      ],
+    }),
+    ...items.map((item, i) =>
+      makeRow([item, '✅'], i)
+    ),
+  ];
+
+  return [
+    heading('二、分类自检清单', HeadingLevel.HEADING_1),
+    new Table({
+      rows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    }),
+  ];
+}
+
+// ====== 客户分析表格（P0/P1） ======
+
+function buildCustomerAnalysisSection(title, color, customers) {
+  if (!customers || customers.length === 0) {
+    return [
+      heading(title, HeadingLevel.HEADING_1),
+      para('(无客户)', { color: COLORS.p3Gray }),
+    ];
+  }
+
+  const sections = [heading(title, HeadingLevel.HEADING_1)];
+
+  for (const c of customers) {
+    sections.push(para(`${c.name || '(未知)'} | ${c.country || ''} | ${c.stage || ''}`, {
+      bold: true,
+      fontSize: FONT_SIZES.heading,
+      color,
+    }));
+
+    const detailRows = [
+      ['画像', c.profile || '待分析'],
+      ['沟通阶段', c.stage || '待分类'],
+      ['卡点', c.blocker || '待识别'],
+      ['下一步行动', c.nextAction || '待制定'],
+    ];
+
+    for (const [label, value] of detailRows) {
+      sections.push(para(`${label}：${value}`, { fontSize: FONT_SIZES.small, spacing: { before: 40, after: 40 } }));
+    }
+
+    if (c.script) {
+      sections.push(para('推荐话术：', { bold: true, fontSize: FONT_SIZES.small }));
+      sections.push(para(`> ${c.script}`, {
+        fontSize: FONT_SIZES.small,
+        color: COLORS.darkGray,
+        spacing: { before: 40, after: 120 },
+      }));
+    }
+
+    if (c.evidence) {
+      sections.push(para(`证据链：${c.evidence}`, { fontSize: FONT_SIZES.tiny, color: COLORS.p3Gray }));
+    }
+
+    sections.push(emptyPara());
+  }
+
+  return sections;
+}
+
+// ====== 生命周期异常提醒 ======
+
+function buildLifecycleSection(alerts) {
+  if (!alerts || alerts.length === 0) {
+    return [
+      heading('六、生命周期异常提醒', HeadingLevel.HEADING_1),
+      para('(无异常)', { color: COLORS.p3Gray }),
+    ];
+  }
+
+  const rows = [
+    new TableRow({
+      children: [
+        makeHeaderCell('客户', COLORS.warningYellow, 1, FONT_SIZES.small),
+        makeHeaderCell('状态', COLORS.warningYellow, 1, FONT_SIZES.small),
+        makeHeaderCell('风险', COLORS.warningYellow, 1, FONT_SIZES.small),
+        makeHeaderCell('建议', COLORS.warningYellow, 2, FONT_SIZES.small),
+      ],
+    }),
+    ...alerts.map((a, i) =>
+      new TableRow({
+        children: [
+          makeCell(a.name || '', { bgColor: i % 2 === 0 ? COLORS.zebraOdd : COLORS.zebraEven, fontSize: FONT_SIZES.tiny }),
+          makeCell(a.status || '', { bgColor: i % 2 === 0 ? COLORS.zebraOdd : COLORS.zebraEven, fontSize: FONT_SIZES.tiny }),
+          makeCell(a.risk || '', { bgColor: i % 2 === 0 ? COLORS.zebraOdd : COLORS.zebraEven, fontSize: FONT_SIZES.tiny, bold: a.risk?.includes('高') }),
+          makeCell(a.suggestion || '', { bgColor: i % 2 === 0 ? COLORS.zebraOdd : COLORS.zebraEven, fontSize: FONT_SIZES.tiny }),
+        ],
+      })
+    ),
+  ];
+
+  return [
+    pageBreak(),
+    heading('六、生命周期异常提醒', HeadingLevel.HEADING_1),
+    new Table({
+      rows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    }),
+  ];
+}
+
+// ====== 分类变化差异报告 ======
+
+function buildDiffSection(diffs) {
+  if (!diffs || diffs.length === 0) {
+    return [
+      heading('七、分类变化差异报告', HeadingLevel.HEADING_1),
+      para('(无差异 — 规则引擎与AI分类一致)', { color: COLORS.p3Gray }),
+    ];
+  }
+
+  const rows = [
+    new TableRow({
+      children: [
+        makeHeaderCell('客户', COLORS.p2Blue, 1, FONT_SIZES.small),
+        makeHeaderCell('规则引擎', COLORS.p2Blue, 1, FONT_SIZES.small),
+        makeHeaderCell('AI修正', COLORS.p2Blue, 1, FONT_SIZES.small),
+        makeHeaderCell('差异原因', COLORS.p2Blue, 2, FONT_SIZES.small),
+      ],
+    }),
+    ...diffs.map((d, i) =>
+      makeRow([d.name || '', d.rulePriority || '', d.aiPriority || '', d.reason || ''], i)
+    ),
+  ];
+
+  return [
+    heading('七、分类变化差异报告', HeadingLevel.HEADING_1),
+    new Table({
+      rows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    }),
+  ];
+}
+
+// ====== 附录 ======
+
+function buildAppendix(dataPaths) {
+  return [
+    pageBreak(),
+    heading('八、附录', HeadingLevel.HEADING_1),
+    ...(dataPaths || []).map((d) => para(`数据文件：${d}`, { fontSize: FONT_SIZES.small, color: COLORS.p3Gray })),
+    para('生成脚本：scripts/generate_report.js', { fontSize: FONT_SIZES.small, color: COLORS.p3Gray }),
+  ];
+}
+
+// ====== 主文档生成 ======
+
+function buildReport(inputData) {
+  const {
+    stats = {},
+    checklist = null,
+    p0Payment = [],
+    p0Intent = [],
+    p1 = [],
+    lifecycleAlerts = [],
+    diffs = [],
+    dataPaths = [],
+    reportDate,
+  } = inputData;
+
+  const date = reportDate || new Date().toISOString().slice(0, 10);
+
+  const sections = [
+    // 标题页
+    new Paragraph({
+      children: [new TextRun({ text: '今日跟进战报', bold: true, size: FONT_SIZES.title, color: COLORS.p0Red })],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 600, after: 100 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: date, size: FONT_SIZES.subtitle, color: COLORS.darkGray })],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 100 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: '小星星服饰工厂 · OKKI CRM 客户分析系统', size: FONT_SIZES.small, color: COLORS.p3Gray })],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100, after: 600 },
+    }),
+    pageBreak(),
+
+    // 一、总览
+    ...buildOverviewSection({ ...stats, generatedAt: new Date().toLocaleString('zh-CN') }),
+
+    // 二、自检清单
+    ...buildChecklistSection(checklist),
+
+    // 三、P0-付款/售后
+    pageBreak(),
+    ...buildCustomerAnalysisSection('三、P0-付款/售后 完整分析', COLORS.p0Red, p0Payment),
+
+    // 四、P0-高意向
+    pageBreak(),
+    ...buildCustomerAnalysisSection('四、P0-高意向 完整分析', COLORS.p0Red, p0Intent),
+
+    // 五、P1
+    pageBreak(),
+    ...buildCustomerAnalysisSection('五、P1 完整分析', COLORS.p1Orange, p1),
+
+    // 六、生命周期异常提醒
+    ...buildLifecycleSection(lifecycleAlerts),
+
+    // 七、分类变化差异报告
+    ...buildDiffSection(diffs),
+
+    // 八、附录
+    ...buildAppendix(dataPaths),
+  ];
+
+  return new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: { top: 1000, bottom: 1000, left: 1200, right: 1200 },
+          },
+        },
+        headers: {
+          default: new Header({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({ text: '小星星服饰工厂 · OKKI 客户跟进战报', size: FONT_SIZES.tiny, color: COLORS.p3Gray }),
+                  new TextRun({ text: `    ${date}`, size: FONT_SIZES.tiny, color: COLORS.p3Gray }),
+                ],
+                alignment: AlignmentType.RIGHT,
+              }),
+            ],
+          }),
+        },
+        footers: {
+          default: new Footer({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({ children: ['第 ', PageNumber.CURRENT, ' 页'], size: FONT_SIZES.tiny, color: COLORS.p3Gray }),
+                ],
+                alignment: AlignmentType.CENTER,
+              }),
+            ],
+          }),
+        },
+        children: sections,
+      },
+    ],
+  });
+}
+
+// ====== CLI ======
+
+function main() {
+  const inputArg = process.argv[2];
+  if (!inputArg) {
+    console.error('用法: node generate_report.js <analysis-result.json>');
+    console.error('输入文件应为包含完整分析结果的JSON文件');
+    process.exit(1);
+  }
+
+  const inputFile = path.resolve(inputArg);
+  if (!fs.existsSync(inputFile)) {
+    console.error(`文件不存在: ${inputFile}`);
+    process.exit(1);
+  }
+
+  console.log(`读取分析数据: ${path.basename(inputFile)}`);
+  const inputData = JSON.parse(fs.readFileSync(inputFile, 'utf-8'));
+
+  const reportDate = new Date().toISOString().slice(0, 10);
+  const outDir = REPORTS_DIR;
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+  }
+
+  // Ensure data paths include input file
+  if (!inputData.dataPaths) {
+    inputData.dataPaths = [path.basename(inputFile)];
+  }
+
+  const doc = buildReport(inputData);
+
+  const outFile = path.join(outDir, `今日跟进战报_${reportDate}.docx`);
+  Packer.toBuffer(doc).then((buffer) => {
+    fs.writeFileSync(outFile, buffer);
+    console.log(`战报已生成: ${outFile}`);
+    console.log(`大小: ${(buffer.length / 1024).toFixed(1)} KB`);
+  }).catch((err) => {
+    console.error('生成失败:', err.message);
+    process.exit(1);
+  });
+}
+
+main();

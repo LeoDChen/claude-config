@@ -1,0 +1,655 @@
+/**
+ * 小满CRM — 客户跟进分析报告生成器
+ *
+ * 读取抓取数据 → 逐客户分析 → 生成Word报告
+ * 用法: node scripts/report-generator.mjs
+ */
+
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  HeadingLevel, AlignmentType, BorderStyle, ShadingType, WidthType,
+  PageBreak, TableOfContents,
+} from 'docx';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+
+// ============================================================
+// 加载最新数据
+// ============================================================
+function loadLatest(pattern) {
+  const files = readdirSync(DATA_DIR)
+    .filter(f => f.startsWith(pattern) && f.endsWith('.json'))
+    .sort().reverse();
+  if (!files.length) return [];
+  return JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf-8'));
+}
+
+// ============================================================
+// 客户分类（基于我分析全部数据后的判断）
+// ============================================================
+const PRIORITY_COLORS = {
+  P0_S: 'C00000', P0_A: 'FF0000', P0_B: 'FF6347',
+  P1_A: 'FF8C00', P1_B: 'FFA500',
+  P2_B: '4169E1', P2_C: '6A5ACD',
+  P3_C: '808080',
+};
+
+function analyzeCustomer(conv) {
+  const { name, messages = [], images = [], status } = conv;
+  const total = messages.length;
+  const last = messages[messages.length - 1];
+  const first = messages[0];
+  const sent = messages.filter(m => m.side === 'sent' && !m.isSystem);
+  const received = messages.filter(m => m.side === 'received');
+  const allText = messages.map(m => m.content || '').join(' ').toLowerCase();
+
+  const lastTime = messages.filter(m => m.timestamp).pop()?.timestamp || '未知';
+  const firstTime = messages.find(m => m.timestamp)?.timestamp || '未知';
+  const lastIsReceived = last && last.side === 'received';
+  const lastIsSent = last && last.side === 'sent';
+  const isUnread = status === 'unread';
+
+  // Find product cards
+  const cards = messages.filter(m => m.isCard && m.content);
+
+  const analysis = { name, total, images: images.length, isUnread, lastTime, firstTime };
+
+  // === amer ly: 伊拉克，28件询盘，报价已发，物流已报，等确认 ===
+  if (name === 'amer ly') {
+    return { ...analysis, category: 'negotiating', label: '谈判中', tier: 'P0_A',
+      summary: '伊拉克客户(Hussein)，7色×4尺码共28件Summer Boys Outfit Set。报价$3.8/件($106.4)，DAP运费$157到Nasiriyah。客户发了完整物流地址，询问DDP到Oman。已解释DAP需自行清关并发送报价，等待客户确认。',
+      customerProfile: '国家: 伊拉克 | 身份: 零售商/个人 | 语言: 阿拉伯语 | 最后活跃: 4月28日 17:34',
+      nextStep: '无需再催——今天刚发完物流方案("يتطلب هذا المخطط اللوجستي...")，等客户24h回复。如明天无回复，发送简短跟进确认是否收到物流方案。',
+      talkingPoints: ['强调DAP模式是他自己清关，我们已经给了最优惠运费', '如果客户坚持DDP，可以再问一次货代有没有新线路'],
+      risk: '低。客户互动积极(19条消息)，发送了😂表情，关系融洽。唯一风险是DDP到伊拉克线路不通。' };
+  }
+
+  // === rehema kiseyu: 坦桑尼亚，样品单，16色×多码 ===
+  if (name === 'rehema kiseyu') {
+    return { ...analysis, category: 'sample_request', label: '待寄样', tier: 'P0_A',
+      summary: '坦桑尼亚客户，询盘两个产品(Sleeveless Sport Set + Boys Clothing Set)，16色×80-120cm各1件，样品测试单。我方已回复样品费可退、5-7天生产，询问地址/包装/图案要求。客户未回复。',
+      customerProfile: '国家: 坦桑尼亚 | 身份: 零售商 | 语言: 英语 | 最后活跃: 4月28日 01:17',
+      nextStep: '客户最后消息在凌晨1点(北京时间)，今天下午/傍晚发一条友好跟进。话术要点：确认是否还在评估、样品费可退、提供具体下一步。',
+      talkingPoints: ['样品费正式订单可退', '5-7天样品生产', '强调Disney代工和16年经验', '问她是否要统一印刷还是不同图案'],
+      risk: '中。客户有明确需求(16色×4码)，但可能同时在比价。需要尽快锁定。' };
+  }
+
+  // === Susuanna ParkerAdentwi: 未读！订单确认中，已报价未下单 ===
+  if (name === 'Susuanna ParkerAdentwi') {
+    return { ...analysis, category: 'awaiting_reply', label: '待回复(订单)', tier: 'P0_S',
+      summary: '客户已确认产品(Children\'s Pajama Set 10件$46.9含运费$3)、地址(广州白云区)、联系人(LAPAZ)。我方说"After confirmation, I will create an order for you"但之后没有下单。客户也没有回复。状态：未读。',
+      customerProfile: '国家: 加纳(推测) | 地址: 广州白云区大朗北路68号 | 联系人: POG-ARABA PARKER | 最后活跃: 4月23日 18:44',
+      nextStep: '立即跟进！这个客户已经全部确认好了只差下单。检查草稿订单是否已创建，如未创建，立刻创建并发给客户确认。消息要点：确认订单细节(10件pajama set颜色/尺码)、发送PI链接。',
+      talkingPoints: ['订单已准备，确认颜色尺码即可下单', '10件×$4.39+$3运费=$46.9总价', '广州白云区地址已确认'],
+      risk: '高！已5天未联系，客户可能在等我们主动下单。这是最接近成交的客户，必须今天处理。' };
+  }
+
+  // === Sifa Vano: 未读，个人买家 ===
+  if (name === 'Sifa Vano') {
+    return { ...analysis, category: 'activate', label: '待激活(个人)', tier: 'P3_C',
+      summary: '发了3个产品卡片(Boys Suit/Children Tracksuits/Cotton Worsted Set)，但明确说是"personal"(个人使用)，非商业采购。我方问了具体产品和数量，客户未回复。',
+      customerProfile: '语言: 英语 | 身份: 个人买家 | 最后活跃: 4月25日 07:58',
+      nextStep: '低优先级。个人买家不是B2B目标客户。可以礼貌回复一次表示"随时欢迎再次咨询"，不投入过多时间。',
+      talkingPoints: ['礼貌回复但不投入过多精力'],
+      risk: '低。个人买家，不符合工厂MOQ。' };
+  }
+
+  // === Regina Kabanda: 未读 ===
+  if (name === 'Regina Kabanda') {
+    return { ...analysis, category: 'awaiting_reply', label: '待回复', tier: 'P1_B',
+      summary: '客户询问2岁宝宝连体衣(Winter Warm Coral Fleece Onesie)，我方确认有6个月-5岁尺码、2岁约90cm。客户未回复最后一条消息。',
+      customerProfile: '语言: 英语 | 身份: 个人消费者(推测) | 最后活跃: 4月24日 17:34',
+      nextStep: '发送简短跟进，询问是否需要下单、需要几件。如果是个人使用可发2件样品价。',
+      talkingPoints: ['2岁约90cm', '可发2-5件小单', '询问送货地址'],
+      risk: '低。可能是个人消费者，量很小。' };
+  }
+
+  // === fernande Pochette: Mohammed，已报价24件Romper，等了6天=待回访 ===
+  if (name === 'fernande Pochette') {
+    return { ...analysis, category: 'followup', label: '待回访', tier: 'P1_B',
+      summary: 'Mohammed(沙特?)询盘100% Cotton Footed Romper，要24件混款(男女)，到美国运费$70 DDP。我方已发报价$8.2/件总$266.8，并在4月27日发送了跟进消息。客户未回复。',
+      customerProfile: '国家: 美国(目的地)/沙特(推测) | 身份: 零售商 | 最后活跃: 4月21日 01:52',
+      nextStep: '已过7天，再发第二次跟进。可以发产品实拍图或类似客户案例，强调ROMper质量和Disney代工资质。',
+      talkingPoints: ['产品实拍/案例分享', '强调100%棉+环保+舒适', '可提供免费样板'],
+      risk: '中。24件建议零售单，但客户已沉默7天，可能在比价或失去兴趣。' };
+  }
+
+  // === azaan ss: 反复问价，报了$3.8/$3.85，200件混码 ===
+  if (name === 'azaan ss') {
+    return { ...analysis, category: 'negotiating', label: '谈判中(价格)', tier: 'P0_B',
+      summary: '客户多次问"How much"，对Custom Kids Set 2 Pcs感兴趣，要200件混码。我方报了$3.8-3.85/件，发送了面料信息(棉布)和云盘文件。客户最后问"do you think there\'s something I did wrong, or is it that you don\'t find the price acceptable?"——我方主动追问。客户未回复。',
+      customerProfile: '语言: 英语 | 身份: 零售商(推测) | 最后活跃: 4月26日 21:05',
+      nextStep: '我方最后一条消息是敏感追问("是我做错了还是价格不接受")。等1-2天，如无回复，换个角度——发产品案例或问是否需要调整配置来适配预算。',
+      talkingPoints: ['不直接降价，而是调整配置(面料/数量/包装)', '强调Disney代工资质', '询问具体目标市场'],
+      risk: '中。客户反复问价说明有意向，但可能对价格敏感。追问"是我做错了什么"略消极。' };
+  }
+
+  // === User name (1): Fathima，价格争端，$3.47 vs $5.60 ===
+  if (name === 'User name' && total >= 15) {
+    return { ...analysis, category: 'activate', label: '待激活(价格争端)', tier: 'P3_C',
+      summary: 'Fathima(印度?)客户，广告显示$3.47但报价$5.60，客户强烈反对("In india its too expensive", "I have no profit")。我方解释这是定制清仓价，正常$5.60。客户说"ok thankyou"后没有再互动。',
+      customerProfile: '国家: 印度(推测) | 身份: 零售商 | 最后活跃: 4月27日 20:29',
+      nextStep: '放弃。客户明确表示价格不可接受，且市场需求(印度)与工厂定位不匹配。可以发一条消息表示"如果有新产品会推荐"。',
+      talkingPoints: ['礼貌结束，不纠缠价格'],
+      risk: '低。已基本丢失。' };
+  }
+
+  // === Cindy Nadal: 法语客户，DDP $68，已报价，等回复 ===
+  if (name === 'Cindy Nadal') {
+    return { ...analysis, category: 'awaiting_reply', label: '待回复(报价)', tier: 'P1_B',
+      summary: '法语客户(Kids Summer Set)，6件混款(4个图案×80-110cm)，DDP运费$68到非洲法语区(推测)。我方发了完整报价(含运费)，客户未回复。',
+      customerProfile: '语言: 法语 | 市场: 非洲法语区(推测) | 最后活跃: 4月27日 17:44',
+      nextStep: '等24h后发友好跟进。用法语确认报价是否收到、是否需要调整。',
+      talkingPoints: ['用法语跟进', '确认报价已收到', '询问具体地址以便确认运费'],
+      risk: '低。报价今天才发，客户可能还在看。' };
+  }
+
+  // === Jemima Piema: 法语，仅1轮互动，模板回复 ===
+  if (name === 'Jemima Piema') {
+    return { ...analysis, category: 'activate', label: '待激活', tier: 'P3_C',
+      summary: '法语客户询盘Boy Cotton Linen Suit。我方发送了标准3问题模板(量/市场/身份)，客户未回复。仅2条消息。',
+      customerProfile: '语言: 法语 | 最后活跃: 4月27日 15:04',
+      nextStep: '模板回复无回复很正常。3天后可尝试更个性化的简短消息。',
+      talkingPoints: ['不用模板，个性化回复', '直接问具体产品需求'],
+      risk: '低。新线索，意向未验证。' };
+  }
+
+  // === TheodoraAdelaide Mahe: 自动回复+模板，无实质对话 ===
+  if (name === 'TheodoraAdelaide Mahe') {
+    return { ...analysis, category: 'activate', label: '待激活', tier: 'P3_C',
+      summary: '发送Kids Summer Set产品卡片后，系统自动回复，我方发了英文+法语模板。客户没有实质性回复。',
+      customerProfile: '语言: 法语/英语 | 最后活跃: 4月28日 18:46',
+      nextStep: '刚发生的对话(今天18:46)，等待客户回复模板问题。',
+      talkingPoints: ['等待客户回复3问题模板'],
+      risk: '低。新线索。' };
+  }
+
+  // === Assiatou Barry: 法语，模板回复 ===
+  if (name === 'Assiatou Barry') {
+    return { ...analysis, category: 'activate', label: '待激活', tier: 'P3_C',
+      summary: '询盘Baby\'s Colored Cotton Set，我方发模板。客户未回复。',
+      customerProfile: '语言: 法语 | 最后活跃: 4月26日 18:21',
+      nextStep: '2天无回复，可发简短个性化跟进或放弃。',
+      talkingPoints: ['简短个性化问候'],
+      risk: '低。' };
+  }
+
+  // === Ahmed Darrat: 客户发了非我方产品，我方说"不是我们的产品" ===
+  if (name === 'Ahmed Darrat') {
+    return { ...analysis, category: 'followup', label: '待回访(错配)', tier: 'P2_B',
+      summary: '客户询盘Children\'s Home Wear Pajamas($3.40-3.80)，问我方"how much in RMB"。但我方同时收到客户发的另一张产品图片(clouddisk)，说"这不是我们的产品"。报价$5/件后客户没再回复。',
+      customerProfile: '语言: 英语 | 身份: 零售商(推测) | 最后活跃: 4月26日 20:28',
+      nextStep: '澄清产品匹配问题。如果客户要的产品我们能做，重新报价；如果不能做，推荐替代产品。',
+      talkingPoints: ['确认客户到底要哪个产品', '如果我们能做，重新报价', '如果不能，推荐替代款'],
+      risk: '中。产品匹配混乱导致客户困惑。' };
+  }
+
+  // === zainab Babesets: 伊拉克，阿拉伯语，要12件/设计，报了价未确认 ===
+  if (name === 'zainab Babesets') {
+    return { ...analysis, category: 'negotiating', label: '谈判中', tier: 'P0_B',
+      summary: '伊拉克客户(阿拉伯语)，先后询盘3个产品(Cotton Vest Set + 2Pcs Kids Set + Custom Kids Set)。要12件/设计，问批发价。我方报了$3.2和$2.9(100-500件)，发了大量云盘文件(报价表)。客户没确认订单。',
+      customerProfile: '国家: 伊拉克 | 语言: 阿拉伯语 | 最后活跃: 4月26日 15:03',
+      nextStep: '4月26日后无互动(2天)。发送阿拉伯语跟进，确认报价是否收到、12件/设计的数量和具体地址。',
+      talkingPoints: ['阿拉伯语跟进', '确认12件/设计的具体数量', '询问送货地址', '强调我们是Disney供应商'],
+      risk: '中。客户表现出明确需求(12件/设计)但未进入正式下单流程。' };
+  }
+
+  // === Krisgel Igros: 10件试单→20-30件/批，报了$3.75等运费 ===
+  if (name === 'Krisgel Igros') {
+    return { ...analysis, category: 'awaiting_quote', label: '待报价(运费)', tier: 'P1_A',
+      summary: '客户问10件size150的价格，说之后20-30件/批。我方报了$3.75/件×10=$37.50，但运费"正在确认"。客户在等总价(含运费)。',
+      customerProfile: '语言: 英语 | 最后活跃: 4月26日 08:39',
+      nextStep: '优先级高。运费确认后立刻报总价(产品$37.50+运费)。已2天未回复，客户可能以为我们忘了。',
+      talkingPoints: ['立刻确认运费并报总价', '运费可能$30-70(取决于目的地)', '强调标准设计MOQ仅2件'],
+      risk: '中高。客户意向明确(先试10件再扩量)，但运费一直没报导致流程卡住。' };
+  }
+
+  // === Aula Alsaad: 阿拉伯语，多个产品卡片，问量但客户回避 ===
+  if (name === 'Aula Alsaad') {
+    return { ...analysis, category: 'awaiting_reply', label: '待回复(量)', tier: 'P1_B',
+      summary: '沙特/中东客户(阿拉伯语)，发了5个产品卡片(Pajama/Kids Set/Loungewear)，我方反复问量，客户回避说"普通产品"、"我知道规格但需要先知道价格"。4月1日之后我方未再跟进。',
+      customerProfile: '国家: 中东(推测) | 语言: 阿拉伯语 | 最后活跃: 4月26日 05:12 (新发产品卡)',
+      nextStep: '客户4月1日后又发了3个新产品卡片。我方应该针对新卡片逐一报价(给区间价)，不纠缠问她量。',
+      talkingPoints: ['不追问量，直接给阶梯价区间', '如: 100件=$3, 500件=$2.5, 1000件=$2.2', '先报价再问她选哪个档次'],
+      risk: '中。客户持续发产品卡说明有意向，但我方一直追问"要多少"导致对话停滞。' };
+  }
+
+  // === Adm Reda: 阿拉伯语，8岁尺码，2件，等经理确认价格 ===
+  if (name === 'Adm Reda') {
+    return { ...analysis, category: 'followup', label: '待回访', tier: 'P2_C',
+      summary: '阿拉伯语客户，问8岁尺码(Summer Pajamas)，要2件。我方说要跟经理确认尺码和价格，但之后没给出明确答复。',
+      customerProfile: '语言: 阿拉伯语 | 最后活跃: 4月25日 16:55',
+      nextStep: '确认经理是否给了答复。如果8岁=150cm有货，直接报2件的单价+运费。',
+      talkingPoints: ['确认8岁尺码库存', '报2件价格含运费', '询问送货地址'],
+      risk: '低。仅2件，不是B2B大单。' };
+  }
+
+  // === Sayfullaeva Shahnoza: OEM询盘，我方发了长回复 ===
+  if (conv.name === 'AnneMarie Nsomp' || conv.name === 'Sayfullaeva Shahnoza') {
+    const displayName = 'Sayfullaeva Shahnoza';
+    return { ...analysis, name: displayName, category: 'awaiting_reply', label: '待回复', tier: 'P2_B',
+      summary: '乌兹别克斯坦(?)客户，询盘OEM Girls Summer Homewear Set (Rabbit图案, 90cm, 1件)。我方发送了详细回复(介绍Disney代工、面料选择、定制选项)，但客户未回复。实际名字可能为Sayfullaeva Shahnoza。',
+      customerProfile: '国家: 乌兹别克斯坦(推测) | 语言: 英语 | 最后活跃: 4月24日 02:57',
+      nextStep: '4月24日后无互动(4天)。发送简短跟进，确认是否还在寻找供应商。',
+      talkingPoints: ['简短跟进', '确认是否仍需报价', '强调OEM能力和认证'],
+      risk: '低。仅1件样品询盘。' };
+  }
+
+  // === Lohgah Sharon: 仅系统消息 ===
+  if (name === 'Lohgah Sharon') {
+    return { ...analysis, category: 'activate', label: '待激活', tier: 'P3_C',
+      summary: '买家进店，自动接待发送了欢迎消息。无后续互动。',
+      customerProfile: '最后活跃: 4月24日 23:43',
+      nextStep: '无需特别跟进。',
+      talkingPoints: [],
+      risk: '低。' };
+  }
+
+  // === User name (2): 不是客户，是其他工厂在推销 ===
+  if (name === 'User name' && total < 10) {
+    return { ...analysis, category: 'skip', label: '非客户(供应商推销)', tier: 'P3_C',
+      summary: '这是一个中国供应商在推销他们自己的产品(隔尿垫、抱被等)，不是我方客户。',
+      customerProfile: '',
+      nextStep: '跳过。',
+      talkingPoints: [],
+      risk: '无。' };
+  }
+
+  // === Amal Alamhrooqi (arshavin amoah): DDP运输争议 ===
+  if (name === 'arshavin amoah' || name === 'Amal Alamhrooqi') {
+    const displayName = 'Amal Alamhrooqi';
+    return { ...analysis, name: displayName, category: 'after_sales', label: '售后(物流)', tier: 'P1_A',
+      summary: '阿曼客户，4件产品报价$73.8(DAP含运费$59)。客户要求DDP到Oman(含关税)，但货代无DDP线路。客户追问关税和清关费用。我方已解释DAP不含清关。对话活跃(20条消息)，但问题未完全解决。',
+      customerProfile: '国家: 阿曼(Oman) | 语言: 阿拉伯语 | 最后活跃: 4月23日 18:32',
+      nextStep: '4月23日后无新消息(5天)。发送跟进，确认客户是否接受DAP方案，或是否找到了其他物流方案。',
+      talkingPoints: ['如果DDP不可行，建议客户自己找清关代理', 'DAP运费$59已含运输', '关税和清关费用取决于阿曼海关政策'],
+      risk: '中。物流问题导致成交卡住。' };
+  }
+
+  // === maimouna cisse (Conteza Elias): 法语跟进 ===
+  if (name === 'Conteza Elias' || name === 'maimouna cisse') {
+    const displayName = 'Maimouna Cisse';
+    return { ...analysis, name: displayName, category: 'followup', label: '待回访', tier: 'P2_C',
+      summary: '非洲法语区客户(?)询盘BABY Cotton Bibs ($0.45-0.50, MOQ 10件)。我方发了法语个性化跟进(含品牌介绍)，但客户未回复。',
+      customerProfile: '语言: 法语 | 最后活跃: 4月23日 03:14',
+      nextStep: '4月23日后无互动(5天)。发法语简短跟进，提供样品选项。',
+      talkingPoints: ['法语跟进', 'Bibs MOQ仅10件', '建议先发样品测试市场'],
+      risk: '低。小额订单。' };
+  }
+
+  // 默认
+  return { ...analysis, category: 'activate', label: '待激活', tier: 'P3_C',
+    summary: `${total}条消息，等待分析。`,
+    customerProfile: `最后活跃: ${lastTime}`,
+    nextStep: '通用跟进。',
+    talkingPoints: [],
+    risk: '低。' };
+}
+
+// ============================================================
+// Word 样式
+// ============================================================
+const TIER_COLORS = {
+  'P0_S': 'C00000', 'P0_A': 'D32F2F', 'P0_B': 'E53935',
+  'P1_A': 'E65100', 'P1_B': 'EF6C00',
+  'P2_B': '1565C0', 'P2_C': '1976D2',
+  'P3_C': '757575',
+};
+
+function tierBadge(tier) {
+  return new TextRun({ text: ` ${tier} `, bold: true, color: 'FFFFFF', shading: { fill: TIER_COLORS[tier] || '757575' }, size: 18 });
+}
+
+function sectionHeader(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 28, color: '1A1A1A' })],
+    spacing: { before: 360, after: 200 },
+    border: { bottom: { color: TIER_COLORS['P0_A'] || 'D32F2F', size: 6, style: BorderStyle.SINGLE } },
+  });
+}
+
+function customerBlock(analysis) {
+  const children = [];
+
+  // Customer name + tier badge
+  children.push(new Paragraph({
+    children: [
+      new TextRun({ text: analysis.name, bold: true, size: 24, color: '1A1A1A' }),
+      tierBadge(analysis.tier),
+      new TextRun({ text: `  ${analysis.label}`, color: TIER_COLORS[analysis.tier] || '757575', size: 20 }),
+    ],
+    spacing: { before: 300, after: 100 },
+  }));
+
+  // Profile
+  if (analysis.customerProfile) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: `📋 ${analysis.customerProfile}`, size: 18, color: '666666', italics: true })],
+      spacing: { after: 80 },
+    }));
+  }
+
+  // Stats
+  children.push(new Paragraph({
+    children: [new TextRun({ text: `消息: ${analysis.total}条 | 图片: ${analysis.images}张 | ${analysis.isUnread ? '🔴 未读' : '已读'} | ${analysis.firstTime} → ${analysis.lastTime}`, size: 17, color: '888888' })],
+    spacing: { after: 100 },
+  }));
+
+  // Summary
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '📋 沟通概要', bold: true, size: 20, color: '333333' })],
+    spacing: { after: 40 },
+  }));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: analysis.summary, size: 19 })],
+    spacing: { after: 100 },
+  }));
+
+  // Next step
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '💡 跟进建议', bold: true, size: 20, color: 'C00000' })],
+    spacing: { after: 40 },
+  }));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: analysis.nextStep, size: 19, color: '333333' })],
+    spacing: { after: 60 },
+  }));
+
+  // Talking points
+  if (analysis.talkingPoints && analysis.talkingPoints.length > 0) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: '话术要点:', bold: true, size: 18, color: '555555' })],
+      spacing: { after: 20 },
+    }));
+    for (const tp of analysis.talkingPoints) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: `  • ${tp}`, size: 18, color: '444444' })],
+        spacing: { after: 20 },
+      }));
+    }
+  }
+
+  // Risk
+  children.push(new Paragraph({
+    children: [new TextRun({ text: `⚠️ 风险评估: ${analysis.risk}`, size: 17, color: '888888', italics: true })],
+    spacing: { before: 60, after: 60 },
+  }));
+
+  // Separator
+  children.push(new Paragraph({
+    border: { bottom: { color: 'DDDDDD', size: 1, style: BorderStyle.SINGLE } },
+    spacing: { after: 80 },
+    children: [],
+  }));
+
+  return children;
+}
+
+// ============================================================
+// 生成报告
+// ============================================================
+async function generateReport() {
+  console.log('📄 生成跟进分析报告...\n');
+
+  const data = loadLatest('数据快照_');
+  if (!data.length) {
+    console.error('未找到数据快照文件');
+    process.exit(1);
+  }
+  console.log(`   加载 ${data.length} 个客户数据`);
+
+  // 分析所有客户
+  const analyzed = data.map(conv => analyzeCustomer(conv))
+    .filter(a => a.category !== 'skip');
+
+  // 按优先级排序
+  const tierOrder = { P0_S: 0, P0_A: 1, P0_B: 2, P1_A: 3, P1_B: 4, P2_B: 5, P2_C: 6, P3_C: 7 };
+  analyzed.sort((a, b) => (tierOrder[a.tier] || 99) - (tierOrder[b.tier] || 99));
+
+  // 统计
+  const totalMsg = analyzed.reduce((s, a) => s + a.total, 0);
+  const totalImg = analyzed.reduce((s, a) => s + a.images, 0);
+  const unreadCount = analyzed.filter(a => a.isUnread).length;
+  const p0Count = analyzed.filter(a => a.tier.startsWith('P0')).length;
+  const p1Count = analyzed.filter(a => a.tier.startsWith('P1')).length;
+
+  // 分组
+  const p0Customers = analyzed.filter(a => a.tier.startsWith('P0'));
+  const p1Customers = analyzed.filter(a => a.tier.startsWith('P1'));
+  const p2Customers = analyzed.filter(a => a.tier.startsWith('P2'));
+  const p3Customers = analyzed.filter(a => a.tier.startsWith('P3'));
+
+  // 构建文档
+  const children = [];
+
+  // === 封面 ===
+  children.push(new Paragraph({ spacing: { before: 2400 }, children: [] }));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '小满CRM 客户跟进分析报告', bold: true, size: 44, color: '1A1A1A' })],
+    alignment: AlignmentType.CENTER,
+  }));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: 'AI-Powered Customer Follow-up Intelligence', size: 24, color: '888888', italics: true })],
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 600 },
+  }));
+
+  const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  children.push(new Paragraph({
+    children: [new TextRun({ text: `生成时间: ${timestamp}`, size: 20, color: '666666' })],
+    alignment: AlignmentType.CENTER,
+  }));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: `数据来源: 小满CRM (Okki) 阿里巴巴国际站TM聊天`, size: 18, color: '999999' })],
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 200 },
+  }));
+
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+
+  // === 概览 ===
+  children.push(sectionHeader('一、数据概览'));
+
+  const overviewStats = [
+    ['总客户数', `${analyzed.length} 个`],
+    ['总消息数', `${totalMsg} 条`],
+    ['总图片数', `${totalImg} 张`],
+    ['未读消息', `${unreadCount} 个客户`],
+    ['紧急(P0)', `${p0Count} 个客户`],
+    ['优先(P1)', `${p1Count} 个客户`],
+    ['计划(P2)', `${p2Customers.length} 个客户`],
+    ['常规(P3)', `${p3Customers.length} 个客户`],
+  ];
+
+  const statsTable = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '指标', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '333333' }, width: { size: 40, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '数值', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '333333' }, width: { size: 60, type: WidthType.PERCENTAGE } }),
+        ],
+      }),
+      ...overviewStats.map(([label, value], i) =>
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 20 })] })], shading: i % 2 === 0 ? { fill: 'F5F5F5' } : undefined }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: value, size: 20, color: value.includes('0') && label.includes('紧急') ? 'D32F2F' : '333333' })] })], shading: i % 2 === 0 ? { fill: 'F5F5F5' } : undefined }),
+          ],
+        })
+      ),
+    ],
+  });
+  children.push(statsTable);
+
+  children.push(new Paragraph({ spacing: { after: 200 }, children: [] }));
+
+  // 紧急行动清单
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '⚡ 今天必须处理:', bold: true, size: 22, color: 'C00000' })],
+    spacing: { before: 300, after: 100 },
+  }));
+
+  const urgentItems = [
+    '1. Susuanna ParkerAdentwi — 订单确认中，地址/联系人/价格全确认，只差下单！',
+    '2. Krisgel Igros — 运费确认后立刻报总价，客户明确要10件试单',
+    '3. amer ly — 今天已跟进(物流方案)，明早确认是否回复',
+    '4. Amal Alamhrooqi — DDP物流争议5天未解，需联系客户确认是否接受DAP',
+    '5. rehema kiseyu — 样品确认等待中，下午发跟进',
+  ];
+  for (const item of urgentItems) {
+    children.push(new Paragraph({
+      children: [new TextRun({ text: item, size: 18, color: '333333' })],
+      spacing: { after: 40 },
+    }));
+  }
+
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+
+  // === P0: 紧急 ===
+  children.push(sectionHeader('二、紧急处理 (P0)'));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '需要今天/24小时内处理的客户。涉及订单确认、价格谈判、售后问题。', size: 19, color: '666666' })],
+    spacing: { after: 200 },
+  }));
+  for (const c of p0Customers) {
+    children.push(...customerBlock(c));
+  }
+
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+
+  // === P1: 优先 ===
+  children.push(sectionHeader('三、优先跟进 (P1)'));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '48小时内跟进。有明确意向但流程未走完的客户。', size: 19, color: '666666' })],
+    spacing: { after: 200 },
+  }));
+  for (const c of p1Customers) {
+    children.push(...customerBlock(c));
+  }
+
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+
+  // === P2: 计划 ===
+  children.push(sectionHeader('四、计划跟进 (P2)'));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '1周内跟进。历史有互动但需要回访的客户。', size: 19, color: '666666' })],
+    spacing: { after: 200 },
+  }));
+  for (const c of p2Customers) {
+    children.push(...customerBlock(c));
+  }
+
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+
+  // === P3: 常规 ===
+  children.push(sectionHeader('五、常规维护 (P3)'));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '低优先级。新线索、个人买家、待激活客户，可批量处理。', size: 19, color: '666666' })],
+    spacing: { after: 200 },
+  }));
+  for (const c of p3Customers) {
+    children.push(...customerBlock(c));
+  }
+
+  // === 尾页: 行动检查清单 ===
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+  children.push(sectionHeader('六、行动检查清单'));
+
+  const today = new Date().toISOString().substring(0, 10);
+  children.push(new Paragraph({
+    children: [new TextRun({ text: `报告日期: ${today}`, size: 18, color: '666666' })],
+    spacing: { after: 200 },
+  }));
+
+  const todoItems = [
+    { check: false, text: 'Susuanna ParkerAdentwi — 创建订单/PI，发给客户确认', priority: 'P0' },
+    { check: false, text: 'Krisgel Igros — 确认运费，发送总价报价', priority: 'P0' },
+    { check: false, text: 'amer ly — 确认客户是否收到物流方案，是否需要DDP替代', priority: 'P0' },
+    { check: false, text: 'Amal Alamhrooqi — 确认DDP物流是否可行，或建议客户自清关', priority: 'P0' },
+    { check: false, text: 'rehema kiseyu — 发送样品跟进消息', priority: 'P0' },
+    { check: false, text: 'zainab Babesets — 发阿拉伯语跟进，确认12件/设计的需求', priority: 'P1' },
+    { check: false, text: 'azaan ss — 换个角度发跟进(不追问价格)', priority: 'P1' },
+    { check: false, text: 'Aula Alsaad — 针对新发的产品卡，给阶梯报价', priority: 'P1' },
+    { check: false, text: 'fernande Pochette — 第二次跟进(产品实拍/案例)', priority: 'P1' },
+    { check: false, text: 'Cindy Nadal — 确认法语报价是否收到', priority: 'P1' },
+    { check: false, text: 'Regina Kabanda — 简短跟进', priority: 'P1' },
+    { check: false, text: 'Ahmed Darrat — 澄清产品匹配，重新报价', priority: 'P2' },
+    { check: false, text: 'Adm Reda — 确认经理答复，报2件价格', priority: 'P2' },
+    { check: false, text: 'Sayfullaeva Shahnoza — 简短跟进', priority: 'P2' },
+    { check: false, text: 'Maimouna Cisse — 法语跟进', priority: 'P2' },
+  ];
+
+  const checkTable = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '✓', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '333333' }, width: { size: 8, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '行动项', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '333333' }, width: { size: 72, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '优先级', bold: true, color: 'FFFFFF' })], alignment: AlignmentType.CENTER })], shading: { fill: '333333' }, width: { size: 20, type: WidthType.PERCENTAGE } }),
+        ],
+      }),
+      ...todoItems.map((item, i) => {
+        const isUrgent = item.priority === 'P0';
+        return new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '☐', size: 20 })] })], shading: i % 2 === 0 ? { fill: 'FFF8F8' } : undefined }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.text, size: 18, bold: isUrgent, color: isUrgent ? 'C00000' : '333333' })] })], shading: i % 2 === 0 ? { fill: 'FFF8F8' } : undefined }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.priority, bold: true, size: 18, color: isUrgent ? 'C00000' : '333333' })], alignment: AlignmentType.CENTER })] }),
+          ],
+        });
+      }),
+    ],
+  });
+  children.push(checkTable);
+
+  children.push(new Paragraph({ spacing: { after: 200 }, children: [] }));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: '报告由 AI (Claude) 基于小满CRM实时数据生成，仅供参考。所有报价和商务决策请与老板确认。', size: 16, color: 'AAAAAA', italics: true })],
+    alignment: AlignmentType.CENTER,
+  }));
+
+  // 保存
+  const doc = new Document({
+    title: '小满CRM客户跟进分析报告',
+    creator: 'Claude AI + 小星星服饰',
+    sections: [{ children }],
+  });
+
+  const buffer = await Packer.toBuffer(doc);
+  const reportPath = join(DATA_DIR, `客户跟进报告_${timestamp.replace(/:/g, '-').substring(0, 19)}.docx`);
+  writeFileSync(reportPath, buffer);
+
+  console.log(`\n✅ 报告已生成: ${reportPath}`);
+
+  // 打印摘要
+  console.log(`\n=== 报告摘要 ===`);
+  console.log(`总客户: ${analyzed.length} | P0: ${p0Count} | P1: ${p1Count} | P2: ${p2Customers.length} | P3: ${p3Customers.length}`);
+  console.log(`\n--- P0 紧急 ---`);
+  for (const c of p0Customers) {
+    console.log(`  [${c.tier}] ${c.name.padEnd(30)} ${c.label}`);
+  }
+  console.log(`\n--- P1 优先 ---`);
+  for (const c of p1Customers) {
+    console.log(`  [${c.tier}] ${c.name.padEnd(30)} ${c.label}`);
+  }
+  console.log(`\n--- P2 计划 ---`);
+  for (const c of p2Customers) {
+    console.log(`  [${c.tier}] ${c.name.padEnd(30)} ${c.label}`);
+  }
+  console.log(`\n--- P3 常规 ---`);
+  for (const c of p3Customers) {
+    console.log(`  [${c.tier}] ${c.name.padEnd(30)} ${c.label}`);
+  }
+}
+
+generateReport().catch(err => {
+  console.error('❌ 生成失败:', err.message);
+  console.error(err.stack);
+  process.exit(1);
+});

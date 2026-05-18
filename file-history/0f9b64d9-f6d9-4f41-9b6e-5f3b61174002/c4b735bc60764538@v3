@@ -1,0 +1,59 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 18:10
+
+## 当前阶段
+
+**数据抓取基本完成。** 可直接开始客户分析。
+
+## 已就绪数据
+
+| 文件 | 内容 | 数量 |
+|------|------|------|
+| `data/customers/*.json` | 每客户邮件跟进+详情 | 346 人 |
+| `data/tm_conversations_full.json` | 会话 latestMessage | 453 会话，355 有内容 |
+| `data/okki_full_2026-05-05T05-17-48.json` | 原始客户列表 | 346 人 |
+
+## TM 独立连接规则
+
+- 同一子账号 IM 连接只能有一个：浏览器 / 手机阿里卖家 / 桌面客户端 三选一
+- 主账号、其他子账号互不影响
+- **抓聊天历史前**：退出手机端阿里卖家 → 刷新浏览器 TM → 跑脚本
+- 平时正常用不需要退出
+
+## SDK 已知信息
+
+- `window._imsdk` / `window._imBaaSSDK` — IM SDK
+- `window.__conversationListFullData__` — 453 会话内存数据
+- SDK `listMessageWithConversationCodeForHistory()` 在 isLogin 状态不对时返回空
+- **真实消息协议已发现**：WebSocket LWP `MessageManager/listUserMessages`
+  - 请求：`{"lwp":"/r/MessageManager/listUserMessages","headers":{"mid":"..."},"body":["<cid>",false,9007199254740991,<count>,false]}`
+  - 响应：`{"code":200,"body":{"nextCursor":...,"userMessageModels":[...]}}`
+- HTTP 端点：`POST /message/getChatMessageListExtra.htm`（参数待确定）
+
+## 下次启动指令
+
+> 继续 OKKI CRM 数据分析。先读 STATE.md 和 `knowledge/` 下文件。
+>
+> **可直接开始：**
+> 1. 加载 `data/customers/` 346 客户 + `data/tm_conversations_full.json` 453 会话
+> 2. 按关联匹配（loginId/aliId/公司名）
+> 3. 五梯队分类（P0-P4），分批分析
+>
+> **如需完整聊天历史：**
+> 4. 确保子账号只在 CDP Chrome 登录（退出手机端和其他浏览器）
+> 5. 刷新 TM 页面，点联系人
+> 6. 通过 WebSocket LWP 协议拉取消息（脚本待完善）
+
+## 项目文件
+
+| 文件 | 说明 |
+|------|------|
+| `data/customers/*.json` | 346 客户邮件+详情 |
+| `data/tm_conversations_full.json` | 453 会话+latestMessage |
+| `scripts/scrape_api_batch.js` | API 批量抓取 |
+| `scripts/check_login.js` | SDK 状态检查 |
+| `scripts/save_all_convs.js` | 保存会话数据 |
+| `scripts/final_sniff.js` | WS/HTTP 网络抓包 |
+| `knowledge/` | 分析规则和安全策略 |
+| `RUNBOOK.md` | 完整操作手册 |

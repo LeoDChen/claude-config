@@ -1,0 +1,267 @@
+/**
+ * 从小满TM页面window变量提取全部422客户 + P0/P1分类
+ * 用法: node extract-all-customers.mjs
+ * 前置: Chrome 9222已开，小满TM页面已登录
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SNAPSHOT_DIR = join(DATA_DIR, 'snapshots');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(SNAPSHOT_DIR)) mkdirSync(SNAPSHOT_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+/**
+ * P0/P1/P2/P3 分类规则
+ */
+function classifyCustomer(c) {
+  const unreadCount = c.unreadCount || 0;
+  const lastMsg = c.latestMessage || {};
+  const isMsgFromCustomer = lastMsg.messageType === 'receive';
+  const isMsgFromUs = lastMsg.messageType === 'send';
+  const content = (lastMsg.content || '').toLowerCase();
+  const now = Date.now();
+  const lastContactTime = c.lastContactTime || c.modifyTime || 0;
+  const daysSinceContact = (now - lastContactTime) / (1000 * 60 * 60 * 24);
+
+  // 关键词检测
+  const hasPrice = /price|quote|cost|how much|报价|价格|cuánto|combien|كم|сколько/i.test(content);
+  const hasSample = /sample|muestra|échantillon|样品|试用/i.test(content);
+  const hasPayment = /payment|pay|deposit|付款|pago|paiement|دفع/i.test(content);
+  const hasShipping = /ship|delivery|envío|livraison|快递|海运|dhl|fedex/i.test(content);
+  const hasComplaint = /complaint|return|refund|damage|defect|wrong|quality|reembolso|reemboursement|投诉|退换/i.test(content);
+  const hasNegotiation = /discount|better price|cheaper|moq|minimum|negotiate/i.test(content);
+  const hasGreeting = /^(hi|hello|hola|bonjour|hey|ok|okay|yes|no|thanks|gracias|merci|شكرا|مرحبا)[\s!.?,]*$/i.test(content.trim());
+
+  const reasons = [];
+
+  // P0 规则
+  if (unreadCount > 0 && isMsgFromCustomer) {
+    reasons.push(`未读${unreadCount}条+客户消息`);
+    return { priority: 'P0', tier: 'S', reasons };
+  }
+
+  if (isMsgFromCustomer && hasComplaint) {
+    reasons.push('售后/投诉内容');
+    return { priority: 'P0', tier: 'S', reasons };
+  }
+
+  if (isMsgFromCustomer && hasPayment) {
+    reasons.push('付款相关');
+    return { priority: 'P0', tier: 'A', reasons };
+  }
+
+  if (isMsgFromCustomer && hasPrice && daysSinceContact <= 3) {
+    reasons.push('近期询价');
+    return { priority: 'P0', tier: 'A', reasons };
+  }
+
+  if (isMsgFromCustomer && daysSinceContact <= 1) {
+    reasons.push('今天/昨天新消息');
+    return { priority: 'P0', tier: 'B', reasons };
+  }
+
+  if (isMsgFromCustomer && hasNegotiation) {
+    reasons.push('谈判相关');
+    return { priority: 'P0', tier: 'A', reasons };
+  }
+
+  // P1 规则
+  if (isMsgFromCustomer && hasSample) {
+    reasons.push('样品相关');
+    return { priority: 'P1', tier: 'A', reasons };
+  }
+
+  if (isMsgFromCustomer && hasShipping) {
+    reasons.push('物流相关');
+    return { priority: 'P1', tier: 'A', reasons };
+  }
+
+  if (isMsgFromCustomer && daysSinceContact <= 7) {
+    reasons.push('7天内客户消息');
+    return { priority: 'P1', tier: 'B', reasons };
+  }
+
+  if (isMsgFromCustomer && hasPrice) {
+    reasons.push('询价(较旧)');
+    return { priority: 'P1', tier: 'B', reasons };
+  }
+
+  if (isMsgFromCustomer) {
+    reasons.push('客户最后发言');
+    return { priority: 'P1', tier: 'C', reasons };
+  }
+
+  // P2 规则
+  if (isMsgFromUs && daysSinceContact <= 14) {
+    reasons.push('我方最后发言(<14天)');
+    return { priority: 'P2', tier: 'B', reasons };
+  }
+
+  if (daysSinceContact <= 30 && !isMsgFromUs) {
+    reasons.push('30天内有过联系');
+    return { priority: 'P2', tier: 'C', reasons };
+  }
+
+  // P3 规则
+  if (daysSinceContact > 30) {
+    reasons.push(`超过30天未联系(${Math.round(daysSinceContact)}天)`);
+    return { priority: 'P3', tier: 'C', reasons };
+  }
+
+  return { priority: 'P3', tier: 'C', reasons: ['默认休眠'] };
+}
+
+async function main() {
+  console.log('[extract-all] 连接小满...');
+  const { talkFrame } = await connect();
+
+  // 从window变量提取全部数据
+  const rawCustomers = await talkFrame.evaluate(() => {
+    const data = window.__conversationListFullData__;
+    if (!data || !Array.isArray(data)) return null;
+
+    return data
+      .filter(item => {
+        // 过滤系统账号
+        const name = item.contact?.name || '';
+        return name !== 'Assistant Eva官方' && item.available !== false;
+      })
+      .map(item => {
+        const contact = item.contact || {};
+        const latestMsg = item.latestMessage || {};
+        return {
+          // 基本信息
+          name: contact.name || contact.companyName || 'Unknown',
+          companyName: contact.companyName || '',
+          countryCode: contact.complianceCountryCode || '',
+          buyerLevel: contact.userNewLevel || '',
+          loginId: contact.loginId || '',
+
+          // 会话状态
+          unreadCount: item.unreadCount || 0,
+          muted: item.mute || false,
+          pinned: item.stayTop || false,
+          blocked: item.block || false,
+
+          // 时间戳
+          lastContactTime: item.lastContactTime || item.modifyTime || 0,
+          joinTime: item.joinTime || 0,
+          createAt: item.createAt || 0,
+          modifyTime: item.modifyTime || 0,
+
+          // 最新消息
+          latestMessageContent: latestMsg.content || '',
+          latestMessageType: latestMsg.messageType || '', // 'send'=我方, 'receive'=客户
+          latestMessageTime: latestMsg.gmtChat || 0,
+          contactRead: latestMsg.contactRead !== undefined ? latestMsg.contactRead : (item.contactRead || false),
+
+          // 标签
+          tagInfo: item.tagInfo || null,
+
+          // 原始CID(用于后续深抓)
+          cid: item.cid || '',
+          accountId: contact.accountId || item.accountId || '',
+        };
+      });
+  });
+
+  if (!rawCustomers || rawCustomers.length === 0) {
+    console.log('❌ 未能提取客户数据');
+    return;
+  }
+
+  console.log(`✅ 提取 ${rawCustomers.length} 个客户\n`);
+
+  // 分类
+  const classified = rawCustomers.map(c => {
+    const classification = classifyCustomer(c);
+    return { ...c, ...classification };
+  });
+
+  // 统计
+  const stats = { P0: [], P1: [], P2: [], P3: [] };
+  classified.forEach(c => {
+    if (stats[c.priority]) stats[c.priority].push(c);
+  });
+
+  console.log('=== 分类统计 ===');
+  for (const [p, customers] of Object.entries(stats)) {
+    const emoji = { P0: '🔴', P1: '🟡', P2: '🔵', P3: '⚪' }[p];
+    const unreadTotal = customers.reduce((s, c) => s + c.unreadCount, 0);
+    console.log(`${emoji} ${p}: ${customers.length}人 (未读${unreadTotal}条)`);
+  }
+
+  // 打印P0/P1详情
+  console.log('\n=== 🔴 P0 紧急客户 ===');
+  stats.P0.sort((a, b) => b.unreadCount - a.unreadCount).slice(0, 20).forEach(c => {
+    const days = Math.round((Date.now() - c.lastContactTime) / (1000 * 60 * 60 * 24));
+    const msg = (c.latestMessageContent || '').substring(0, 60);
+    console.log(`  ${c.name} | ${c.countryCode} | L:${c.buyerLevel} | 未读:${c.unreadCount} | ${days}天前 | ${c.reasons.join(',')} | "${msg}"`);
+  });
+  if (stats.P0.length > 20) console.log(`  ... 共${stats.P0.length}人`);
+
+  console.log('\n=== 🟡 P1 高优客户(前20) ===');
+  stats.P1.sort((a, b) => b.lastContactTime - a.lastContactTime).slice(0, 20).forEach(c => {
+    const days = Math.round((Date.now() - c.lastContactTime) / (1000 * 60 * 60 * 24));
+    const msg = (c.latestMessageContent || '').substring(0, 60);
+    console.log(`  ${c.name} | ${c.countryCode} | ${days}天前 | ${c.reasons.join(',')} | "${msg}"`);
+  });
+  if (stats.P1.length > 20) console.log(`  ... 共${stats.P1.length}人`);
+
+  // 保存
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+
+  const output = {
+    capturedAt: now.toISOString(),
+    stats: {
+      total: classified.length,
+      P0: stats.P0.length,
+      P1: stats.P1.length,
+      P2: stats.P2.length,
+      P3: stats.P3.length,
+      totalUnread: classified.reduce((s, c) => s + c.unreadCount, 0),
+    },
+    customers: classified,
+  };
+
+  const filename = `classified_customers_${dateStr}.json`;
+  writeFileSync(join(DATA_DIR, filename), JSON.stringify(output, null, 2));
+  console.log(`\n✅ 已保存: ${filename}`);
+
+  // 单独保存P0/P1列表(用于深抓)
+  const p0p1List = [...stats.P0, ...stats.P1].map(c => ({
+    name: c.name,
+    priority: c.priority,
+    tier: c.tier,
+    countryCode: c.countryCode,
+    cid: c.cid,
+    accountId: c.accountId,
+    reasons: c.reasons,
+  }));
+
+  const p0p1Filename = `p0p1_deep_scrape_list_${dateStr}.json`;
+  writeFileSync(join(DATA_DIR, p0p1Filename), JSON.stringify(p0p1List, null, 2));
+  console.log(`✅ P0/P1深抓清单: ${p0p1Filename} (${p0p1List.length}人)`);
+}
+
+main().catch(err => {
+  console.error('[extract-all] 错误:', err.message);
+  process.exit(1);
+});

@@ -1,0 +1,22 @@
+---
+name: OKKI平台消息区分
+description: OKKI（小满）CRM 中系统提示 vs 客户消息的区分规则
+type: feedback
+originSessionId: 273f9059-74b0-427a-a9d4-bd0e22ba606a
+---
+**核心规则：OKKI 最新一条消息是系统提示，不等于客户发的。**
+
+以下都是 OKKI 平台的**系统自动推送**，不是客户聊天内容：
+
+- "Since you have read the conversation, the automatic reception will no longer intervene in this session."（你介入了会话，自动接待停止）
+- "You have a visitor. Follow up with them as soon as possible."（有访客）
+- "This buyer has been pre-screened and has a clear request. Please respond..."（买家预筛选提示）
+- "买家有流失风险，AI给您生成了一条回复建议，去看看"（流失预警）
+- "当前买家首次给您发消息，建议查看买家特征，了解买家更多采购偏好和身份信息。查看买家特征"（新买家提示）
+- "阿里国际Marco大模型翻译"（AI翻译标签，非聊天内容）
+- "反馈"（平台反馈标签，非聊天内容）
+- "一旦离开平台发生纠纷或遭遇欺诈，您的权益将无法得到平台保障..."（阿里国际站站外交易合规警告，非客户消息）
+
+**Why:** 用户之前看到我把系统提示当客户消息分析，导致错误分类。这些消息是平台级别的通知，不能用来判断客户意向、回复质量或卡点。
+
+**How to apply:** 分析客户时，latestMessageContent 如果是上述系统提示 → 需要往前看真正的客户消息。分类时不能以系统提示作为判断依据。需要看更早的真实对话来判断客户状态。

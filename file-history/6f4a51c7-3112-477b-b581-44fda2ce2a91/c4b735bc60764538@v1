@@ -1,0 +1,79 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 (抓取完成)
+
+## 已完成
+
+| 事项 | 状态 |
+|------|:---:|
+| `scrape_api_batch.js` — 346 人邮件+详情 | ✅ `data/customers/` 6.3MB |
+| `tm_conversations_full.json` — 453 会话 latestMessage | ✅ 355 条有内容 |
+| SDK 完整映射（_imsdk + _imBaaSSDK） | ✅ |
+| 真实消息协议发现 | ✅ LWP over WebSocket |
+| WebSocket 实例捕获 | ✅ hijack `send` → `wss://wss-icbu.dingtalk.com/` |
+| LWP 收发器安装 | ✅ 劫持方案已验证 |
+| SDK 重连方法 | ✅ `authSvc.reConnect()` |
+
+## 待完成
+
+| # | 任务 | 阻断 | 方案 |
+|---|------|------|------|
+| 1 | ~~全量聊天历史抓取~~ | ✅ 已完成 2026-05-05 | 453会话 / 14961条消息 / 0错误 |
+| 2 | 客户五梯队分析 | 需独立对话执行 | 在新对话中读取 chat_history/ + tm_conversations_full.json |
+
+## LWP 协议（已确认）
+
+**WebSocket URL**: `wss://wss-icbu.dingtalk.com/`
+**SDK 方法全部返回空**。唯一路径：通过 WebSocket 发 LWP。
+
+**请求格式：**
+```json
+{"lwp":"/r/MessageManager/listUserMessages","headers":{"mid":"<ts> <seq>"},"body":["<cid>",false,9007199254740991,20,false]}
+```
+
+**响应格式：**
+```json
+{"code":200,"headers":{"mid":"<ts> <seq>","server-timestamp":"..."},"body":{"nextCursor":<timestamp>,"userMessageModels":[...]}}
+```
+
+## 抓取方案（lwp_scrape_all.js）
+
+1. CDP 连接 → 找到 onetalk iframe → 检查 SDK 状态 → 必要时 `reConnect()`
+2. 劫持 `WebSocket.prototype.send` → 第一次心跳时捕获 WS 实例
+3. 对捕获的 WS 用原始 `addEventListener` 注册 message handler
+4. 按 mid 匹配 LWP 响应 → Promise resolve
+5. 遍历 453 会话 → `listUserMessages` → 翻页 → 存 `data/chat_history/{cid}.json`
+6. 支持断点续传（跳过已存在 json 文件）
+
+## IM 连接规则
+
+- 同一子账号只能一处登录（浏览器/手机/桌面端互斥）
+- 抓取前：退出手机阿里卖家 + 关闭其他 Chrome → 刷新浏览器 TM
+- CDP Chrome: `--remote-debugging-port=9222`，连 `localhost:9222`
+
+## 下次启动指令
+
+> 继续 OKKI CRM。读 STATE.md 和 `knowledge/` 全部文件。
+>
+> **任务：客户五梯队分析**
+> 1. 读取 `data/chat_history/` 下的聊天历史文件（453会话，14961条消息）
+> 2. 读取 `data/tm_conversations_full.json`（会话元数据+latestMessage）
+> 3. 读取 `data/customers/*.json`（346客户邮件+详情）
+> 4. 按 `knowledge/system-prompt.md` 框架执行两遍法分类
+> 5. 输出五梯队分析报告到 `reports/`
+>
+> **注意：分析必须在新对话中进行！不要在当前对话做。**
+
+## 数据文件
+
+| 文件 | 内容 |
+|------|------|
+| `data/customers/*.json` | 346 客户邮件+详情 |
+| `data/tm_conversations_full.json` | 453 会话+latestMessage |
+| `data/chat_history/*.json` | **453个会话的完整聊天历史（14961条消息）** |
+| `scripts/lwp_scrape_all.js` | **LWP 全量抓取脚本（本次交付）** |
+| `scripts/scrape_api_batch.js` | 批量抓取（已跑完） |
+| `scripts/check_login.js` | SDK login 检查 |
+| `scripts/final_sniff.js` | WS/HTTP 抓包 |
+| `scripts/hijack_ws.js` | WS 劫持验证 |
+| `knowledge/` | 分析规则 |

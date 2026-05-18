@@ -1,0 +1,62 @@
+# 常用路径速查
+
+## Claude Code
+
+| 用途                 | 路径                                                                   |
+| ------------------ | -------------------------------------------------------------------- |
+| 用户全局配置             | `C:\Users\Administrator\.claude\`                                    |
+| 用户全局 settings.json | `C:\Users\Administrator\.claude\settings.json`                       |
+| 用户全局 CLAUDE.md     | `C:\Users\Administrator\.claude\CLAUDE.md`                           |
+| 用户全局规则             | `C:\Users\Administrator\.claude\rules\`                              |
+| 工作区项目目录            | `D:\ClaudeWorkspace\`                                                |
+| 项目 .claude 目录      | `D:\ClaudeWorkspace\.claude\`                                        |
+| 项目 settings.json   | `D:\ClaudeWorkspace\.claude\settings.json`                           |
+| 项目 CLAUDE.md       | `D:\ClaudeWorkspace\.claude\CLAUDE.md`                               |
+| 项目规则               | `D:\ClaudeWorkspace\.claude\rules\`                                  |
+| 项目技能               | `D:\ClaudeWorkspace\.claude\skills\`                                 |
+| 自动记忆               | `C:\Users\Administrator\.claude\projects\d--ClaudeWorkspace\memory\` |
+
+## cc-Switch（模型切换工具）
+
+| 用途 | 路径 |
+|------|------|
+| 程序目录 | `C:\Users\Administrator\AppData\Local\Programs\CC Switch\` |
+| 配置文件 | `C:\Users\Administrator\.cc-switch\settings.json` |
+| 数据库 | `C:\Users\Administrator\.cc-switch\cc-switch.db` |
+| 日志 | `C:\Users\Administrator\.cc-switch\logs\cc-switch.log` |
+| 本地代理地址 | `http://127.0.0.1:15721` |
+
+## Obsidian
+
+| 用途 | 路径 |
+|------|------|
+| Vault 根目录 | `E:\道友的宝贝\道友的宝贝\` |
+| 对话归档 | `E:\道友的宝贝\道友的宝贝\对话归档\CC\` |
+| 自定义技能 | `E:\道友的宝贝\道友的宝贝\自定义SKILL\` |
+| 公司资料库 | `E:\道友的宝贝\道友的宝贝\公司资料库\` |
+
+## 工厂资料
+
+| 用途 | 路径 |
+|------|------|
+| 工厂全息档案 V10 | `D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt` |
+| 工厂全息档案（OB副本） | `E:\道友的宝贝\道友的宝贝\小星星工厂全息背景档案_V10.txt` |
+
+## 工作产出目录（D:\ClaudeWorkspace\ 子目录）
+
+| 目录 | 用途 |
+|------|------|
+| `01_P4P\` | P4P优化方案 |
+| `01_运营分析\` | 运营数据分析 |
+| `02_客户资料\` | 客户信息 |
+| `03_产品资料\` | 产品相关 |
+| `04_方案输出\` | 方案文档 |
+| `05_办公文档\` | 办公文件 |
+| `06_知识库\` | 知识库资料 |
+| `07_归档\` | 归档文件 |
+
+## 关键注意
+
+- Obsidian vault 根是 `E:\道友的宝贝\道友的宝贝\`（嵌套两层，不是一层）
+- cc-Switch 模型名加 `[1m]` 后缀不生效，上下文窗口用 `CLAUDE_CODE_MAX_CONTEXT_TOKENS=1000000` 环境变量
+- `~/.claude/` 对应用户目录 `C:\Users\Administrator\.claude\`

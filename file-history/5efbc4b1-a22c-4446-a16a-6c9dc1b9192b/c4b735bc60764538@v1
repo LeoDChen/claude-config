@@ -1,0 +1,69 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 18:15
+
+## 已完成
+
+| 事项 | 状态 |
+|------|:---:|
+| `scrape_api_batch.js` — 346 人邮件+详情 | ✅ `data/customers/` 6.3MB |
+| `tm_conversations_full.json` — 453 会话 latestMessage | ✅ 355 条有内容 |
+| SDK 完整映射（_imsdk + _imBaaSSDK） | ✅ |
+| 真实消息协议发现 | ✅ 见下方 |
+
+## 待完成
+
+| # | 任务 | 阻断 | 方案 |
+|---|------|------|------|
+| 1 | 全量聊天历史抓取 | LWP 脚本待写 | 见下方 LWP 协议 |
+| 2 | 客户五梯队分析 | 等聊天数据 | 匹配 TM 会话 + 邮件记录 |
+
+## LWP 协议（本次核心发现）
+
+**SDK `listMessageWithConversationCodeForHistory()` 始终返回空。** 但通过网络抓包发现了真实协议：页面通过 WebSocket 用 LWP（Lightweight Web Protocol）加载消息。
+
+**请求格式：**
+```json
+{"lwp":"/r/MessageManager/listUserMessages","headers":{"mid":"<unique_id> 0"},"body":["<cid>",false,9007199254740991,20,false]}
+```
+
+**响应格式：**
+```json
+{"code":200,"body":{"nextCursor":<timestamp>,"userMessageModels":[{"message":{...},"readStatus":2,...}]}}
+```
+
+**body 数组含义**：`[conversationCode, false, maxMessageId, count, false]`
+
+**关键**：需要通过页面内 JS 找到 SDK 的 WebSocket 实例，或直接调用 SDK 内部的 LWP 发送方法。消息数据在 `userMessageModels[]` 中，`nextCursor` 用于分页。
+
+**已知有用脚本**：`scripts/final_sniff.js` — 抓包 WS + HTTP 验证协议
+
+## IM 连接规则
+
+- 同一子账号只能一处登录（浏览器/手机/桌面端互斥）
+- 抓取前：退出手机阿里卖家 + 关闭其他 Chrome → 刷新浏览器 TM
+- CDP Chrome: `--remote-debugging-port=9222`，连 `localhost:9222`
+
+## 下次启动指令
+
+> 继续 OKKI CRM。读 STATE.md 和 `knowledge/` 全部文件。
+>
+> **任务：全量聊天历史抓取**
+> 1. `curl -s http://localhost:9222/json/version` 确认 CDP 在线
+> 2. `node scripts/check_login.js` 检查 SDK 状态
+> 3. 如果用户刚操作过 TM 页面 → 通过 CDP 注入 JS，找到 SDK WebSocket 实例
+> 4. 按 LWP 协议格式发 `MessageManager/listUserMessages`
+> 5. 遍历 453 会话，逐条拉取完整历史 → `data/chat_history/`
+> 6. 全部就绪后跑五梯队分析
+
+## 数据文件
+
+| 文件 | 内容 |
+|------|------|
+| `data/customers/*.json` | 346 客户邮件+详情 |
+| `data/tm_conversations_full.json` | 453 会话+latestMessage |
+| `scripts/scrape_api_batch.js` | 批量抓取（已跑完） |
+| `scripts/check_login.js` | SDK login 检查 |
+| `scripts/final_sniff.js` | WS/HTTP 抓包 |
+| `scripts/save_all_convs.js` | 保存 latestMessage |
+| `knowledge/` | 分析规则 |

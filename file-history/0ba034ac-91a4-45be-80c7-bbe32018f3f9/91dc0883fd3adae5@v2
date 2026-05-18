@@ -1,0 +1,60 @@
+/**
+ * AI外贸顾问系统 — 每日一键巡检
+ * 用法: node daily-pipeline.mjs
+ * 前置: Chrome 9222已开，小满TM页面已登录
+ *
+ * 流程: 全量提取 → 分类 → P0/P1深抓 → 战报输出
+ */
+
+import { execSync } from 'child_process';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+function run(scriptName, label) {
+  console.log(`\n${'='.repeat(50)}`);
+  console.log(`  ${label}`);
+  console.log(`${'='.repeat(50)}`);
+  try {
+    execSync(`node "${join(__dirname, scriptName)}"`, {
+      stdio: 'inherit',
+      timeout: 600000, // 10 min max
+    });
+    console.log(`✅ ${label} 完成`);
+    return true;
+  } catch (e) {
+    console.error(`❌ ${label} 失败: ${e.message}`);
+    return false;
+  }
+}
+
+async function main() {
+  console.log('╔══════════════════════════════════════╗');
+  console.log('║  AI外贸顾问 — 每日巡检管线            ║');
+  console.log('║  ' + new Date().toISOString() + '        ║');
+  console.log('╚══════════════════════════════════════╝');
+
+  const startTime = Date.now();
+
+  // Phase 1: 全量提取+分类
+  const p1 = run('extract-all-v2.mjs', 'Phase 1: 全量客户提取+分类');
+
+  // Phase 2: P0/P1深抓
+  let p2 = false;
+  if (p1) {
+    p2 = run('deep-scrape-p0p1.mjs', 'Phase 2: P0/P1深抓对话');
+  }
+
+  // Phase 3: 生成战报（由CC执行分析）
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+  console.log(`\n🏁 管线完成 (${elapsed}s)`);
+  console.log(`   Phase 1 (提取分类): ${p1 ? '✅' : '❌'}`);
+  console.log(`   Phase 2 (P0/P1深抓): ${p2 ? '✅' : '❌'}`);
+  console.log(`\n📋 下一步: 将data目录最新JSON + reports模板 → 发给CC做五步分析`);
+}
+
+main().catch(err => {
+  console.error('管线错误:', err.message);
+  process.exit(1);
+});

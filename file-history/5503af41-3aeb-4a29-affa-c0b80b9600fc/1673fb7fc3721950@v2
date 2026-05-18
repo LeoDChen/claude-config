@@ -1,0 +1,106 @@
+# OKKI 客户分析
+
+小星星服饰工厂 OKKI CRM 客户分析。同步数据 → AI 分类 → 看板 → 行动清单，四步固定流程。
+
+## 硬约束
+
+- **分批**：每批 50-80 人，绝不超 80。上下文消耗接近 70% 时主动暂停，提示用户"打 /okki 继续下一批"
+- **不跳过同步**：每次启动必须跑同步脚本，不假设数据是新的
+- **不主动跑 gen_mobile_report.js**：用户明确说需要手机长图才生成
+- **结论锚点**：每个阶段/卡点判断必须引用对话原文具体句子
+- **禁止替用户做商业决策**：定价/费用/门槛只给框架，不填具体数字
+
+## 工作流
+
+### Step 1 — 同步数据
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js
+```
+
+- sync_okki.js：CDP 抓取 TM 会话元数据 + LWP 增量拉取聊天历史
+- sync_orders.js：CDP 抓取销售订单
+- enhanced_classify.js：质量等级初判（S/A/B/C/D）+ 文本提取 → s1_enhanced.json + s2_ai_input.json
+- 任一步失败即停止，报告错误。LWP 拉取失败必须报错退出
+
+### Step 2 — AI 分类判定
+
+**数据源**：读 `data/s2_ai_input.json`，读 Skill 自带的 `knowledge/classification-rules.md`
+
+**脚本已完成**：质量等级初判（`determineQuality()`, S/A/B/C/D）、对话片段提取。AI 可以修正质量等级。
+
+**AI 完成**：
+- 生命周期阶段（9阶段+2终态，见 classification-rules.md）
+- 优先级（now/soon/idle）
+- 质量等级修正（如脚本判错）
+- 行动方向提示
+
+**分批执行**：
+- 每批 50-80 人
+- 每批判定完立即增量写入 `data/s3_ai_judgments.json`
+- 每人字段：`name, cid, country, stage, priority, grade, gradeOverride, confidence, reason, actionHint`
+- 上下文消耗接近 70% 时暂停，提示用户继续
+
+**完成后自检（硬性）**：
+- 阶段分布 ≥ 6 种不同值？少于 → 判定太粗糙，删除 s3 重新判定
+- 搁置占比 > 60%？超过 → 很多活跃客户被误判为搁置，重判
+- 任一不通过 → 删除 s3 重新判定
+
+**新客户检测**：
+- 对比本次 `tm_conversations_latest.json` 与上次 `tm_conversations_full.json`
+- 标记首次出现的会话 ID
+
+### Step 3 — 生成看板
+
+```bash
+node scripts/enhanced_classify.js --dashboard-only
+```
+
+输出 `output/dashboard_YYYY-MM-DD.html`
+
+### Step 4 — 输出行动清单
+
+从 s3 提取 urgent + soon 客户，按沉默天数排序，写 `output/actions_YYYY-MM-DD.md`：
+
+```
+## 🚨 今天必须行动（X人）
+| 客户 | 国家 | 等级 | 阶段 | 沉默 | 行动方向 |
+## ⏳ 48h内跟进（X人）
+| 客户 | 国家 | 等级 | 阶段 | 沉默 | 行动方向 |
+## 📅 本周关注（X人）
+| 客户 | 国家 | 等级 | 阶段 | 沉默 | 行动方向 |
+## 🆕 新客户（首次出现）（X人）
+```
+
+更新 `STATE.md` 的同步指标。
+
+### 完成后报告
+
+```
+/okki 执行完成
+├── 同步：XXX 会话 | +X 新增 | +XXX 消息
+├── 分类：S:X A:X B:X C:X D:X | 阶段分布 X 种 | 紧急 X 人
+├── 看板：output/dashboard_YYYY-MM-DD.html
+└── 行动清单：output/actions_YYYY-MM-DD.md
+```
+
+## 知识文件（按需加载）
+
+Skill 自带 knowledge/ 目录，分析时按需加载：
+
+| 阶段 | 加载 |
+|------|------|
+| Step 2 AI 分类 | `knowledge/classification-rules.md` |
+| 深度分析单个客户 | `knowledge/system-prompt.md` + `knowledge/factory.md` |
+| 业务判断辅助 | `knowledge/business-rules.md` |
+
+## 沉默客户处理原则
+
+**不放弃任何一个客户。** 客户没拉黑就继续发。沉默分层策略见 classification-rules.md 第五章。
+
+## 报价安全
+
+- 永远不直接报具体价格（须老板审批）
+- 可给价格区间（如 $2.70-3.20/pc at 500 pcs）
+- 报价时同步标注有效期 3-7 天
+- 绝不通过降低品质来降价（降克重/换面料/减工艺均不可）

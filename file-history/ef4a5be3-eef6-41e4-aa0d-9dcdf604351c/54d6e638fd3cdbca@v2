@@ -1,0 +1,19 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+    "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000"
+  },
+  "effortLevel": "xhigh",
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kemikeai.1688.com)",
+      "WebSearch",
+      "Bash(python3 -c \"import pandas as pd; print\\('pandas available'\\)\")",
+      "Bash(python3 -c \"import openpyxl; print\\('openpyxl available'\\)\")",
+      "Bash(python3 -c \"import xlrd; print\\('xlrd available'\\)\")",
+      "Bash(npm install *)"
+    ]
+  }
+}

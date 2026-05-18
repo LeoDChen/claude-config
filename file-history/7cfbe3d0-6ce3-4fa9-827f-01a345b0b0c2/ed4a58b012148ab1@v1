@@ -1,0 +1,63 @@
+---
+name: okki-redesign-may15
+description: 2026-05-15 OKKI 项目第五轮重构——从分类系统改为跟进清单的讨论
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 9eeec93d-e384-4f98-aa25-d731bf2b92cf
+---
+
+# OKKI 重设计方案讨论（2026-05-15）
+
+## 背景
+
+项目已改 5 轮，每次都失败。用户要求稳定可靠的结果。
+
+## 已确认的根因
+
+1. **目标错了**：试图对 465 人做精确分类（9阶段×5等级），但用户只需要知道"该跟进谁、什么情况、做什么"
+2. **脚本做语义判定必然误判**：正则分不清"讨论物流"和"实际发货"，读不懂"在等合伙人"
+3. **AI 批量判定必然偷懒**：20-30 人同时分析会产生模板输出
+4. **Snippet（12条消息）不够分析客户情况**：Mona 480 条对话被缩成日常闲聊
+5. **元数据污染**：产品 ID 被当作数量、OEM 产品标题被当作客户意图
+
+## 讨论中发现的具体问题
+
+### 数据质量问题
+- Direction（球在谁那边）462/465 判为 to_them，实际应为 ~40 to_us
+- Christine Muwela：客户要粉色短裙照片，我方说"明天拍"没兑现 → 判为 to_them（错）
+- 8 个交易成功订单只匹配到 2 个已签收
+
+### Grade 系统问题
+- Assia Assia：1条客户消息+全未读 → S 级（产品 ID 被误当数量）
+- Gabriela Torrealba：5条客户消息基础询盘 → A 级
+- Leon Scott Kennedy、Anne Shen：幽灵账号被判 B 级
+
+### AI 执行问题
+- Skill Step 2 被跳过，直接复用昨天的 s3
+- 行动建议千篇一律："了解需求，推进报价" 重复 13 次
+
+## 当前方案方向
+
+从"465 人全量分类系统"改为"跟进清单"：
+- 脚本只提取客观事实（不判阶段/等级）
+- 硬规则筛选该跟进的 20-40 人
+- AI 对筛出的人写"什么情况 + 做什么"
+
+## 用户最新反馈（2026-05-15）
+
+1. **Snippet 不够分析客户情况** — 12 条消息看不出来龙去脉
+2. **不需要标注等级（S/A/B/C/D）** — 简化
+3. 需要新开对话继续
+
+## 待解决的核心矛盾
+
+- 要分析"什么情况"需要读完整聊天记录 → 但 40 人 × 每人几百条消息 = 上下文爆炸
+- 用 snippet 分析 → 不够准确
+- 用户实际未回的新客户很少，主要是需要主动跟进的沉默客户
+
+## 相关文件
+- `08_客户跟进/Okki/scripts/enhanced_classify.js` — determineQuality() 有元数据污染
+- `08_客户跟进/Okki/scripts/ai_classify.js` — 规则引擎 v3
+- `.claude/skills/okki/SKILL.md` — 当前 Skill 定义
+- `C:\Users\Administrator\.claude\plans\branstorming-gentle-candy.md` — 方案草稿

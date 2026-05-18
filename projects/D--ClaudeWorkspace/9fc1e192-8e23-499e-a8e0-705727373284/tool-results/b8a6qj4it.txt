@@ -1,0 +1,689 @@
+Frame 1 title: 阿里卖家
+=== Layout containers (67) ===
+(0,60) 60x546 [DIV] menu-placeholder
+(0,0) 1202x606 [DIV] pwa-app
+(0,0) 1202x606 [DIV] buyer-messenger-container seller spa-visible
+(0,0) 60x606 [DIV] im-seller-nav-menu-container
+(0,138) 60x51 [DIV] select-wrapper selected
+(0,199) 60x51 [DIV] select-wrapper
+(60,0) 280x606 [DIV] messenger-left-container 
+(60,0) 280x57 [DIV] search-container show-cloud-disk
+(60,57) 280x549 [DIV] im-conversation-list-container   
+(60,99) 279x507 [DIV] all-list-container
+(60,99) 279x507 [DIV] normal-list-container
+(60,139) 275x60 [DIV] contact-item-container
+(60,199) 275x60 [DIV] contact-item-container selected
+(60,259) 275x60 [DIV] contact-item-container
+(60,319) 275x60 [DIV] contact-item-container
+(60,379) 275x60 [DIV] contact-item-container
+(60,439) 275x60 [DIV] contact-item-container
+(60,499) 275x60 [DIV] contact-item-container
+(60,559) 275x60 [DIV] contact-item-container
+(60,619) 275x60 [DIV] contact-item-container
+(60,679) 275x60 [DIV] contact-item-container
+(60,739) 275x60 [DIV] contact-item-container
+(60,799) 275x60 [DIV] contact-item-container
+(60,859) 275x60 [DIV] contact-item-container
+(60,919) 275x60 [DIV] contact-item-container
+(60,979) 275x60 [DIV] contact-item-container
+(60,1039) 275x60 [DIV] contact-item-container
+(60,1099) 275x60 [DIV] contact-item-container
+(60,1159) 275x60 [DIV] contact-item-container
+(60,1219) 275x60 [DIV] contact-item-container
+(60,1279) 275x60 [DIV] contact-item-container
+(60,1339) 275x60 [DIV] contact-item-container
+(60,1399) 275x60 [DIV] contact-item-container
+(60,1459) 275x60 [DIV] contact-item-container
+(60,641) 275x165 [DIV] im-next-collapse collapse-list-container
+(60,686) 275x60 [DIV] contact-item-container
+(60,746) 275x60 [DIV] contact-item-container
+(340,0) 862x606 [DIV] messenger-content-container
+(340,0) 402x606 [DIV] message-container
+(340,56) 402x261 [DIV] message-flow-container messenger
+(340,2195) 391x98 [DIV] message-item-wrapper messenger
+(340,1482) 391x714 [DIV] message-item-wrapper item-right wider messenger
+(352,1514) 319x664 [DIV] fail-wrapper
+(340,1269) 391x213 [DIV] message-item-wrapper item-right wider messenger
+(352,1301) 319x163 [DIV] fail-wrapper
+(340,924) 391x345 [DIV] message-item-wrapper item-left no-flex-grow messenger
+(400,956) 200x301 [DIV]  dx-card-wrapper
+(400,956) 200x301 [DIV] tpl-wrapper
+(340,691) 391x233 [DIV] message-item-wrapper item-right wider messenger
+(352,723) 319x183 [DIV] fail-wrapper
+(340,-244) 391x935 [DIV] message-item-wrapper item-left wider messenger
+(400,-212) 375x576 [DIV]  dx-card-wrapper
+(400,-212) 375x576 [DIV] tpl-wrapper
+(424,-72) 327x340 [DIV] description-container
+(340,-457) 391x213 [DIV] message-item-wrapper item-right wider messenger
+(352,-425) 319x163 [DIV] fail-wrapper
+(340,-802) 391x345 [DIV] message-item-wrapper item-left no-flex-grow messenger
+(400,-770) 200x301 [DIV]  dx-card-wrapper
+(400,-770) 200x301 [DIV] tpl-wrapper
+(340,-857) 391x55 [DIV] message-item-wrapper
+(340,317) 402x288 [DIV] send-box-container 
+(340,325) 402x280 [DIV] send-box-wrapper  
+(340,544) 402x62 [DIV] translate-container old-translate-container
+(742,0) 460x606 [DIV] slide-tab-wrapper
+(742,60) 460x546 [DIV] assets-group-alicrm-im-container
+(817,87) 359x52 [DIV] alicrm-customer-detail-card-header-name-container
+(761,694) 418x309 [DIV] alicrm-customer-behavioral-card-last-behavior-secondary-container
+
+=== Conversation list items (113) ===
+[0] (11,20) 34x34 kids=0 "L"
+  class=session-avatar head-portrait 
+[1] (60,57) 280x549 kids=2 "网络连接已经断开全部未读待回复待跟进已折叠20+个置顶会话aamer ly15:41[未读] شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بن"
+  class=icbu-im-im-conversation-list seller
+[2] (60,57) 280x549 kids=2 "全部未读待回复待跟进已折叠20+个置顶会话aamer ly15:41[未读] شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بناءً على "
+  class=im-conversation-list-container   
+[3] (60,57) 279x549 kids=1 "全部未读待回复待跟进已折叠20+个置顶会话aamer ly15:41[未读] شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بناءً على "
+  class=seller-conversation-list
+[4] (60,57) 279x549 kids=1 "全部未读待回复待跟进已折叠20+个置顶会话aamer ly15:41[未读] شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بناءً على "
+  class=conversation-list-content
+[5] (60,57) 56x42 kids=1 "全部"
+  class=im-next-tabs-tab active list-tab-item
+[6] (116,57) 56x42 kids=1 "未读"
+  class=im-next-tabs-tab list-tab-item
+[7] (172,57) 56x42 kids=1 "待回复"
+  class=im-next-tabs-tab list-tab-item
+[8] (228,57) 56x42 kids=1 "待跟进"
+  class=im-next-tabs-tab list-tab-item
+[9] (60,139) 275x60 kids=2 "aamer ly15:41[未读] شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بناءً على الكمية التي قدمتها، 
+"
+  class=contact-item-container
+[10] (60,139) 60x60 kids=1 "a"
+  class=contact-left
+[11] (120,139) 205x60 kids=2 "amer ly15:41[未读] شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بناءً على الكمية التي قدمتها، 
+ "
+  class=contact-right
+[15] (60,199) 275x60 kids=2 "rrehema kiseyu14:02由于您介入该会话，自动接待将不再触发。"
+  class=contact-item-container selected
+[16] (60,199) 60x60 kids=1 "r"
+  class=contact-left
+[17] (120,199) 205x60 kids=2 "rehema kiseyu14:02由于您介入该会话，自动接待将不再触发。"
+  class=contact-right
+[21] (60,259) 275x60 kids=2 "Assistant Eva官方09:23【每日重要买家跟进提醒】"
+  class=contact-item-container
+[23] (120,259) 205x60 kids=2 "Assistant Eva官方09:23【每日重要买家跟进提醒】"
+  class=contact-right
+[27] (60,319) 275x60 kids=2 "UUser name2026-4-27[已读] [图片]"
+  class=contact-item-container
+[28] (60,319) 60x60 kids=1 "U"
+  class=contact-left
+[29] (120,319) 205x60 kids=2 "User name2026-4-27[已读] [图片]"
+  class=contact-right
+[33] (60,379) 275x60 kids=2 "CCindy Nadal2026-4-27[未读] Voici les détails des frais de port : 
+ 
+ Montant : 68 dollars américains "
+  class=contact-item-container
+[34] (60,379) 60x60 kids=1 "C"
+  class=contact-left
+[35] (120,379) 205x60 kids=2 "Cindy Nadal2026-4-27[未读] Voici les détails des frais de port : 
+ 
+ Montant : 68 dollars américains 
+"
+  class=contact-right
+[39] (60,439) 275x60 kids=2 "ffernande Pochette2026-4-27[已读] Hi, hope everything is going well for you! Just checking in to see i"
+  class=contact-item-container
+[40] (60,439) 60x60 kids=1 "f"
+  class=contact-left
+[41] (120,439) 205x60 kids=2 "fernande Pochette2026-4-27[已读] Hi, hope everything is going well for you! Just checking in to see if"
+  class=contact-right
+[45] (60,499) 275x60 kids=2 "SSusuanna ParkerAdentwi2026-4-27[未读] After confirmation, I will create an order for you"
+  class=contact-item-container
+[46] (60,499) 60x60 kids=1 "S"
+  class=contact-left
+[47] (120,499) 205x60 kids=2 "Susuanna ParkerAdentwi2026-4-27[未读] After confirmation, I will create an order for you"
+  class=contact-right
+[51] (60,559) 275x60 kids=2 "JJemima Piema2026-4-27[已读] Merci de l'intérêt que vous portez à nos ensembles pour enfants. Pour vou"
+  class=contact-item-container
+[52] (60,559) 60x60 kids=1 "J"
+  class=contact-left
+[53] (120,559) 205x60 kids=2 "Jemima Piema2026-4-27[已读] Merci de l'intérêt que vous portez à nos ensembles pour enfants. Pour vous"
+  class=contact-right
+[57] (60,619) 275x60 kids=2 "aazaan ss2026-4-26[已读] Hello, do you think there's something I did wrong, or is it that you don't fi"
+  class=contact-item-container
+[58] (60,619) 60x60 kids=1 "a"
+  class=contact-left
+[59] (120,619) 205x60 kids=2 "azaan ss2026-4-26[已读] Hello, do you think there's something I did wrong, or is it that you don't fin"
+  class=contact-right
+[63] (60,679) 275x60 kids=2 "Ahmed Darrat2026-4-26[已读] Thank you for your interest in our children's sets. In order to provide yo"
+  class=contact-item-container
+[65] (120,679) 205x60 kids=2 "Ahmed Darrat2026-4-26[已读] Thank you for your interest in our children's sets. In order to provide yo"
+  class=contact-right
+[69] (60,739) 275x60 kids=2 "Assiatou Barry2026-4-26由于您介入该会话，自动接待将不再触发。"
+  class=contact-item-container
+[71] (120,739) 205x60 kids=2 "Assiatou Barry2026-4-26由于您介入该会话，自动接待将不再触发。"
+  class=contact-right
+[75] (60,799) 275x60 kids=2 "zainab Babesets2026-4-26[已读] 100-500 قطعة: المنتج 1: 3.2 دولار أمريكي 
+ 100-500 قطعة: المنتج 2: 2.9 "
+  class=contact-item-container
+[77] (120,799) 205x60 kids=2 "zainab Babesets2026-4-26[已读] 100-500 قطعة: المنتج 1: 3.2 دولار أمريكي 
+ 100-500 قطعة: المنتج 2: 2.9 "
+  class=contact-right
+[81] (60,859) 275x60 kids=2 "KKrisgel Igros2026-4-26由于您介入该会话，自动接待将不再触发。"
+  class=contact-item-container
+[82] (60,859) 60x60 kids=1 "K"
+  class=contact-left
+[83] (120,859) 205x60 kids=2 "Krisgel Igros2026-4-26由于您介入该会话，自动接待将不再触发。"
+  class=contact-right
+[87] (60,919) 275x60 kids=2 "AAula Alsaad2026-4-26[已读] مرحباً، كم الكمية التي تحتاجها؟ بعد معرفة الكمية وعنوان التسليم، يمكنني أن"
+  class=contact-item-container
+[88] (60,919) 60x60 kids=1 "A"
+  class=contact-left
+[89] (120,919) 205x60 kids=2 "Aula Alsaad2026-4-26[已读] مرحباً، كم الكمية التي تحتاجها؟ بعد معرفة الكمية وعنوان التسليم، يمكنني أن "
+  class=contact-right
+[93] (60,979) 275x60 kids=2 "AAdm Reda2026-4-25[已读] أقدم لك اقتراحات مُخصَّصة."
+  class=contact-item-container
+[94] (60,979) 60x60 kids=1 "A"
+  class=contact-left
+[95] (120,979) 205x60 kids=2 "Adm Reda2026-4-25[已读] أقدم لك اقتراحات مُخصَّصة."
+  class=contact-right
+[99] (60,1039) 275x60 kids=2 "UUser name2026-4-25[已读] Hello"
+  class=contact-item-container
+[100] (60,1039) 60x60 kids=1 "U"
+  class=contact-left
+[101] (120,1039) 205x60 kids=2 "User name2026-4-25[已读] Hello"
+  class=contact-right
+[105] (60,1099) 275x60 kids=2 "SSifa Vano2026-4-25[未读] Thank you for confirming! Could you please share the specific product types "
+  class=contact-item-container
+[106] (60,1099) 60x60 kids=1 "S"
+  class=contact-left
+[107] (120,1099) 205x60 kids=2 "Sifa Vano2026-4-25[未读] Thank you for confirming! Could you please share the specific product types a"
+  class=contact-right
+[111] (60,1159) 275x60 kids=2 "RRegina Kabanda2026-4-25[未读] Yes, this product is available in sizes from 6 months to about 5 years "
+  class=contact-item-container
+[112] (60,1159) 60x60 kids=1 "R"
+  class=contact-left
+[113] (120,1159) 205x60 kids=2 "Regina Kabanda2026-4-25[未读] Yes, this product is available in sizes from 6 months to about 5 years o"
+  class=contact-right
+[117] (60,1219) 275x60 kids=2 "LLohgah Sharon2026-4-24买家进店，请尽快跟进与服务该买家。上条商家消息由访客接待发出。"
+  class=contact-item-container
+[118] (60,1219) 60x60 kids=1 "L"
+  class=contact-left
+[119] (120,1219) 205x60 kids=2 "Lohgah Sharon2026-4-24买家进店，请尽快跟进与服务该买家。上条商家消息由访客接待发出。"
+  class=contact-right
+[123] (60,1279) 275x60 kids=2 "SSayfullaeva Shahnoza2026-4-24由于您介入该会话，自动接待将不再触发。"
+  class=contact-item-container
+[124] (60,1279) 60x60 kids=1 "S"
+  class=contact-left
+[125] (120,1279) 205x60 kids=2 "Sayfullaeva Shahnoza2026-4-24由于您介入该会话，自动接待将不再触发。"
+  class=contact-right
+[129] (60,1339) 275x60 kids=2 "AnneMarie Nsomp2026-4-24由于您介入该会话，自动接待将不再触发。"
+  class=contact-item-container
+[131] (120,1339) 205x60 kids=2 "AnneMarie Nsomp2026-4-24由于您介入该会话，自动接待将不再触发。"
+  class=contact-right
+[135] (60,1399) 275x60 kids=2 "AAmal Alamhrooqi2026-4-23[已读] لقد استفسرت بالفعل من وكيل الشحن، ولا توجد خطوط شحن بنظام DDP."
+  class=contact-item-container
+[136] (60,1399) 60x60 kids=1 "A"
+  class=contact-left
+[137] (120,1399) 205x60 kids=2 "Amal Alamhrooqi2026-4-23[已读] لقد استفسرت بالفعل من وكيل الشحن، ولا توجد خطوط شحن بنظام DDP."
+  class=contact-right
+[141] (60,1459) 275x60 kids=2 "MMelisapierina Apenaadvincula2026-4-23[已读] Somos fabricantes autorizados por Disney y nuestros produ"
+  class=contact-item-container
+[142] (60,1459) 60x60 kids=1 "M"
+  class=contact-left
+[143] (120,1459) 205x60 kids=2 "Melisapierina Apenaadvincula2026-4-23[已读] Somos fabricantes autorizados por Disney y nuestros produc"
+  class=contact-right
+[147] (60,686) 275x60 kids=2 "aazaan ss2026-4-26[已读] Hello, do you think there's something I did wrong, or is it that you don't fi"
+  class=contact-item-container
+[148] (60,686) 60x60 kids=1 "a"
+  class=contact-left
+[149] (120,686) 205x60 kids=2 "azaan ss2026-4-26[已读] Hello, do you think there's something I did wrong, or is it that you don't fin"
+  class=contact-right
+[153] (60,746) 275x60 kids=2 "KKrisgel Igros2026-4-26由于您介入该会话，自动接待将不再触发。"
+  class=contact-item-container
+[154] (60,746) 60x60 kids=1 "K"
+  class=contact-left
+[155] (120,746) 205x60 kids=2 "Krisgel Igros2026-4-26由于您介入该会话，自动接待将不再触发。"
+  class=contact-right
+[159] (60,56) 60x42 kids=1 "好友"
+  class=im-next-tabs-tab active list-tab-item
+[160] (120,56) 74x42 kids=1 "陌生人"
+  class=im-next-tabs-tab list-tab-item
+[161] (194,56) 74x42 kids=1 "黑名单"
+  class=im-next-tabs-tab list-tab-item
+[165] (352,9) 186x37 kids=1 "rehema kiseyu本地时间: 10:59 AM"
+  class=contact-info
+[166] (352,9) 186x37 kids=1 "rehema kiseyu本地时间: 10:59 AM"
+  class=contact-name-wrapper
+[167] (352,9) 186x37 kids=2 "rehema kiseyu本地时间: 10:59 AM"
+  class=contact-name-inner
+[169] (352,1514) 319x664 kids=18 "Hello Rehema,   Thank you for your detailed inquiry! We can fully meet your request for 1 piece of e"
+  class=session-rich-content text
+[171] (679,1514) 40x40 kids=0 "L"
+  class=session-avatar head-portrait messenger
+[172] (352,1301) 319x124 kids=0 "This sleeveless sport set is breathable, quick-dry, and made from 100% polyester—just right for summ"
+  class=session-rich-content text
+[174] (679,1301) 40x40 kids=0 "L"
+  class=session-avatar head-portrait messenger
+[175] (352,956) 40x40 kids=0 "r"
+  class=session-avatar head-portrait messenger
+[176] (400,956) 200x301 kids=1 "Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days"
+  class=session-rich-content card  
+[177] (352,723) 319x144 kids=0 "This kids' sleeveless sport set is made from 100% polyester soft shell fabric—breathable, quick-dryi"
+  class=session-rich-content text
+[179] (679,723) 40x40 kids=0 "L"
+  class=session-avatar head-portrait messenger
+[180] (352,-212) 40x40 kids=0 "r"
+  class=session-avatar head-portrait messenger
+[181] (400,-212) 375x576 kids=1 "询盘Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Da"
+  class=session-rich-content card  
+[182] (412,-160) 351x44 kids=1 "Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days"
+  class=list-item
+[183] (400,364) 375x315 kids=1 "你好，我正在采购这款产品，想了解更多信息。颜色：14；长度：110厘米；数量：1.0；  颜色:11;年龄:120厘米;数量:1.0;  颜色:15;年龄:110厘米;数量:1.0;  颜色:7;年龄"
+  class=session-translate util-clearfix
+[184] (352,-425) 319x124 kids=0 "Hi! Our new kids' sleeveless sport set is breathable, quick-dry, and super comfy—just right for summ"
+  class=session-rich-content text
+[186] (679,-425) 40x40 kids=0 "L"
+  class=session-avatar head-portrait messenger
+[187] (352,-770) 40x40 kids=0 "r"
+  class=session-avatar head-portrait messenger
+[188] (400,-770) 200x301 kids=1 "Children Tracksuits Sleeveless Soft Shell Polyester Cartoon Print Breathable Comfortable Outfit$1.40"
+  class=session-rich-content card  
+[189] (365,-845) 340x31 kids=1 "在Alibaba.com平台聊天和交易，享受安全保障。"
+  class=session-security
+[190] (761,0) 124x56 kids=0 "OKKI销售助手"
+  class=tab-item
+[191] (885,0) 66x56 kids=0 "客户"
+  class=tab-item selected
+[192] (951,0) 116x56 kids=0 "Eva接待助手"
+  class=tab-item
+[193] (1067,0) 66x56 kids=0 "订单"
+  class=tab-item
+[194] (1133,0) 94x56 kids=0 "物流报价"
+  class=tab-item
+[195] (861,304) 72x28 kids=0 "工厂偏好"
+  class=ai-tag-content-list-item
+[196] (945,304) 84x28 kids=0 "轻定制偏好"
+  class=ai-tag-content-list-item
+[197] (1041,304) 95x28 kids=0 "logo定制偏好"
+  class=ai-tag-content-list-item
+[198] (861,339) 96x28 kids=0 "免费样品偏好"
+  class=ai-tag-content-list-item
+[199] (969,339) 96x28 kids=0 "货代服务偏好"
+  class=ai-tag-content-list-item
+[200] (1077,339) 84x28 kids=0 "高质量偏好"
+  class=ai-tag-content-list-item
+
+=== Inputs (2) ===
+{"placeholder":"输入‘/’唤起AI助手","id":"","class":"send-textarea","w":330,"h":52,"x":356,"y":427}
+{"placeholder":"输入需要翻译的文字……","id":"","class":"","w":310,"h":32,"x":340,"y":559}
+
+=== Buttons/Clickables (42) ===
+(60,57) 56x42 "全部" class=im-next-tabs-tab active list-tab-item id=
+(116,57) 56x42 "未读" class=im-next-tabs-tab list-tab-item id=
+(172,57) 56x42 "待回复" class=im-next-tabs-tab list-tab-item id=
+(228,57) 56x42 "待跟进" class=im-next-tabs-tab list-tab-item id=
+(60,99) 275x40 "已折叠20+个置顶会话" class=fold-bar id=
+(60,139) 275x60 "aamer ly15:41[未读] شكراً لك على هذه القائ" class=contact-item-container id=
+(60,199) 275x60 "rrehema kiseyu14:02由于您介入该会话，自动接待将不再触发。" class=contact-item-container selected id=
+(60,259) 275x60 "Assistant Eva官方09:23【每日重要买家跟进提醒】" class=contact-item-container id=
+(60,319) 275x60 "UUser name2026-4-27[已读] [图片]" class=contact-item-container id=
+(60,379) 275x60 "CCindy Nadal2026-4-27[未读] Voici les déta" class=contact-item-container id=
+(60,439) 275x60 "ffernande Pochette2026-4-27[已读] Hi, hope" class=contact-item-container id=
+(60,499) 275x60 "SSusuanna ParkerAdentwi2026-4-27[未读] Aft" class=contact-item-container id=
+(60,559) 275x60 "JJemima Piema2026-4-27[已读] Merci de l'in" class=contact-item-container id=
+(60,619) 275x60 "aazaan ss2026-4-26[已读] Hello, do you thi" class=contact-item-container id=
+(60,679) 275x60 "Ahmed Darrat2026-4-26[已读] Thank you for " class=contact-item-container id=
+(60,739) 275x60 "Assiatou Barry2026-4-26由于您介入该会话，自动接待将不再触" class=contact-item-container id=
+(60,799) 275x60 "zainab Babesets2026-4-26[已读] 100-500 قطع" class=contact-item-container id=
+(60,859) 275x60 "KKrisgel Igros2026-4-26由于您介入该会话，自动接待将不再触" class=contact-item-container id=
+(60,919) 275x60 "AAula Alsaad2026-4-26[已读] مرحباً، كم الك" class=contact-item-container id=
+(60,979) 275x60 "AAdm Reda2026-4-25[已读] أقدم لك اقتراحات " class=contact-item-container id=
+(60,1039) 275x60 "UUser name2026-4-25[已读] Hello" class=contact-item-container id=
+(60,1099) 275x60 "SSifa Vano2026-4-25[未读] Thank you for co" class=contact-item-container id=
+(60,1159) 275x60 "RRegina Kabanda2026-4-25[未读] Yes, this p" class=contact-item-container id=
+(60,1219) 275x60 "LLohgah Sharon2026-4-24买家进店，请尽快跟进与服务该买家。" class=contact-item-container id=
+(60,1279) 275x60 "SSayfullaeva Shahnoza2026-4-24由于您介入该会话，自" class=contact-item-container id=
+(60,1339) 275x60 "AnneMarie Nsomp2026-4-24由于您介入该会话，自动接待将不再" class=contact-item-container id=
+(60,1399) 275x60 "AAmal Alamhrooqi2026-4-23[已读] لقد استفسر" class=contact-item-container id=
+(60,1459) 275x60 "MMelisapierina Apenaadvincula2026-4-23[已" class=contact-item-container id=
+(60,641) 275x45 "跟进沟通价格 (2)" class=im-next-collapse-panel-title id=
+(60,686) 275x60 "aazaan ss2026-4-26[已读] Hello, do you thi" class=contact-item-container id=
+(60,746) 275x60 "KKrisgel Igros2026-4-26由于您介入该会话，自动接待将不再触" class=contact-item-container id=
+(60,56) 60x42 "好友" class=im-next-tabs-tab active list-tab-item id=
+(120,56) 74x42 "陌生人" class=im-next-tabs-tab list-tab-item id=
+(194,56) 74x42 "黑名单" class=im-next-tabs-tab list-tab-item id=
+(356,325) 80x32 "AI润色" class=im-next-btn im-next-small im-next-btn-normal opera id=
+(444,325) 94x32 "回复建议" class=im-next-btn im-next-small im-next-btn-normal opera id=
+(546,325) 94x32 "消息总结" class=im-next-btn im-next-small im-next-btn-normal opera id=
+(647,325) 28x32 "..." class=im-next-btn im-next-small im-next-btn-normal opera id=
+(644,484) 70x28 "发送" class=im-next-btn im-next-medium im-next-btn-primary sen id=
+(650,559) 80x32 "auto" class=im-next-btn im-next-medium im-next-btn-ghost im-ne id=
+(765,93) 40x40 "r" class= id=
+(1103,88) 72x17 "客户详情" class= id=
+
+=== Full body text ===
+Alibaba is loading
+
+L
+
+自动接待
+
+消息
+通讯录
+设置
+搜索
+网络连接已经断开
+全部
+未读
+待回复
+待跟进
+已折叠20+个置顶会话
+a
+amer ly
+15:41
+[未读] 
+
+شكراً لك على هذه القائمة المفصلة، إنها واضحة جداً. بناءً على الكمية التي قدمتها، لقد قمت بحصرها: 7 ألوان، من كل لون قطعة واحدة بمقاسات 80-90-100-110 سم، بإجمالي 28 قطعة. معلومات عرض الأسعار: سعر الوحدة: 3.8 دولار أمريكي/للقطعة السعر الإجمالي: 106.4 دولار أمريكي 3. وقت الشحن: من 1 إلى 7 أيام بعد الدفع. لتحديد تكلفة الشحن، أرجو تزويدي بمدينة الاستلام والرمز البريدي بالتحديد، وسأقوم بحساب تكلفة الشحن البحري أو البريدي بدقة. فيما يتعلق بالتعاون طويل الأمد: نتطلع أيضًا إلى بناء علاقات توريد مستقرة وطويلة الأمد. نحن متخصصون في ملابس الأطفال والرضع منذ 16 عامًا، ومصنعون لمنتجات ديزني، بإنتاج شهري يبلغ 300,000 قطعة. بالإضافة إلى ذلك، هل يمكنك إخباري، هل أنت تعمل في متجر تقليدي أم متجر إلكتروني؟ بهذه الطريقة يمكنني تقديم بعض الاقتراحات بشأن التعبئة والتغليف واختيار المنتجات، بناءً على قنوات البيع الخاصة بك. هل يمكنك إرسال العنوان لي؟ سأقوم بإعداد فاتورة أولية (PI) لك بعد حساب تكلفة الشحن.
+
+r
+rehema kiseyu
+14:02
+
+由于您介入该会话，自动接待将不再触发。
+
+Assistant Eva
+官方
+09:23
+
+【每日重要买家跟进提醒】
+
+U
+User name
+2026-4-27
+[已读] 
+[图片]
+C
+Cindy Nadal
+2026-4-27
+[未读] 
+
+Voici les détails des frais de port : Montant : 68 dollars américains Termes de commerce : DDP (Livraison avec droits de douane payés) Mode de transport : Transport aérien Délai de livraison : environ 15 jours.
+
+f
+fernande Pochette
+2026-4-27
+[已读] 
+
+Hi, hope everything is going well for you! Just checking in to see if you have any thoughts on the quote I shared. If you have any questions or need adjustments, please let me know. We are here to support your needs!
+
+S
+Susuanna ParkerAdentwi
+2026-4-27
+[未读] 
+
+After confirmation, I will create an order for you
+
+J
+Jemima Piema
+2026-4-27
+[已读] 
+
+Merci de l'intérêt que vous portez à nos ensembles pour enfants. Pour vous fournir une offre plus précise, pourriez-vous répondre aux 3 questions suivantes ? Je vous demande simplement de répondre avec 3 lettres : Premièrement, quelle est la quantité approximative ? A) 100-500 unités B) 500-2000 unités C) Plus de 2000 unités. Deuxièmement, le marché cible ? A) États-Unis B) Europe C) Moyen-Orient D) Autres. Troisièmement, quelle est votre identité ? Vendeur de magasin physique B) Boutique en ligne/Vendeur Amazon C) Distributeurs/Grossistes D) Fabricant de la marque. Veuillez me répondre avec 3 lettres (par exemple, A A B), et je vous ferai une offre immédiatement.
+
+a
+azaan ss
+2026-4-26
+[已读] 
+
+Hello, do you think there's something I did wrong, or is it that you don't find the price acceptable?
+
+Ahmed Darrat
+2026-4-26
+[已读] 
+
+Thank you for your interest in our children's sets. In order to provide you with a more accurate quote, could you please answer the following 3 questions? I only need you to answer with 3 letters: First, what is the approximate quantity? A) 100-500 units B) 500-2000 units C) More than 2,000 units. Second, the target market? A) United States B) Europe C) Middle East D) Other. Third, what is your identity? A) Brick-and-mortar sellers B) Online Store/Amazon Seller C) Distributor/Wholesaler D) Brand manufacturer. Please reply with 3 letters (e.g., A A B), and I will give you a quote immediately.
+
+Assiatou Barry
+2026-4-26
+
+由于您介入该会话，自动接待将不再触发。
+
+zainab Babesets
+2026-4-26
+[已读] 
+
+100-500 قطعة: المنتج 1: 3.2 دولار أمريكي 100-500 قطعة: المنتج 2: 2.9 دولار أمريكي
+
+K
+Krisgel Igros
+2026-4-26
+
+由于您介入该会话，自动接待将不再触发。
+
+A
+Aula Alsaad
+2026-4-26
+[已读] 
+
+مرحباً، كم الكمية التي تحتاجها؟ بعد معرفة الكمية وعنوان التسليم، يمكنني أن أرسل لك عرض أسعار تفصيلي، بما في ذلك تكلفة الشحن.
+
+A
+Adm Reda
+2026-4-25
+[已读] 
+
+أقدم لك اقتراحات مُخصَّصة.
+
+U
+User name
+2026-4-25
+[已读] 
+
+Hello
+
+S
+Sifa Vano
+2026-4-25
+[未读] 
+
+Thank you for confirming! Could you please share the specific product types and quantities you need? This will help us provide tailored options for you. 😊
+
+R
+Regina Kabanda
+2026-4-25
+[未读] 
+
+Yes, this product is available in sizes from 6 months to about 5 years old
+
+L
+Lohgah Sharon
+2026-4-24
+
+买家进店，请尽快跟进与服务该买家。上条商家消息由访客接待发出。
+
+S
+Sayfullaeva Shahnoza
+2026-4-24
+
+由于您介入该会话，自动接待将不再触发。
+
+AnneMarie Nsomp
+2026-4-24
+
+由于您介入该会话，自动接待将不再触发。
+
+A
+Amal Alamhrooqi
+2026-4-23
+[已读] 
+
+لقد استفسرت بالفعل من وكيل الشحن، ولا توجد خطوط شحن بنظام DDP.
+
+M
+Melisapierina Apenaadvincula
+2026-4-23
+[已读] 
+
+Somos fabricantes autorizados por Disney y nuestros productos se fabrican según los estándares internacionales de producción. ¿Necesitas algo personalizado?
+
+好友
+陌生人
+黑名单
+新建组
+(0)
+Ungroup
+(7)
+rehema kiseyu
+本地时间: 10:59 AM
+由于您介入该会话，自动接待将不再触发。
+
+2026-04-28 14:02
+
+Hello Rehema,
+
+Thank you for your detailed inquiry! We can fully meet your request for 1 piece of each of the 16 colors and 80-120cm sizes you listed.
+
+This is a sample test order, right? Here is our proposal:
+
+1. All 16 colors and samples of each size that you need can be arranged for production.
+2. Sample production time: 5-7 days
+3. Sample fee: This time it is calculated based on the sample price, and the sample fee can be refunded when placing a large order later.
+4. Fabric technology: 100% polyester wool blend fabric + printing, ODM customization, consistent with the style you selected.
+
+Please confirm the following information, and I will provide you with a detailed quote immediately:
+Delivery address (including specific city in Tanzania)
+Does it require special packaging or labels?
+Does each color require a different pattern to be printed, or is it a unified print?
+
+Once confirmed, I will send you the PI and the shipping cost as soon as possible.
+
+Looking forward to cooperation!
+L
+
+未读
+
+2026-04-28 01:20
+
+This sleeveless sport set is breathable, quick-dry, and made from 100% polyester—just right for summer. Could you let me know your order quantity, delivery address, and any customization requests?
+自动接待发送，
+去优化
+L
+
+已读
+
+rehema kiseyu
+2026-04-28 01:20
+
+r
+Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days
+$1.75-3.40
+最小订购量: 
+10.0
+Pieces
+
+2026-04-28 01:18
+
+This kids' sleeveless sport set is made from 100% polyester soft shell fabric—breathable, quick-drying, and super comfy for summer. Could you let me know your order quantity, delivery address, or any customization requests? That way, I can give you the best info.
+自动接待发送，
+去优化
+L
+
+已读
+
+rehema kiseyu
+2026-04-28 01:17
+
+r
+询盘
+Custom Boys Clothing Set Worsted Polyester Fabric Printing ODM Service in Stock Fast Sample 5 7 Days
+详细需求
+Hi,I’m sourcing this product and would like to know more.Color:14;Age:110cm;Quantity:1.0;
+Color:11;Age:120cm;Quantity:1.0;
+Color:15;Age:110cm;Quantity:1.0;
+Color:7;Age:100cm;Quantity:1.0;
+Color:3;Age:100cm;Quantity:1.0;
+Color:1;Age:80cm;Quantity:1.0;
+Color:13;Age:90cm;Quantity:1.0;
+Color:9;Age:110cm;Quantity:1.0;
+Color:4;Age:110cm;Quantity:1.0;
+Color:12;Age:100cm;Quantity:1.0;
+Color:8;Age:100cm;Quantity:1.0;
+Color:2;Age:90cm;Quantity:1.0;
+Color:5;Age:120cm;Quantity:1.0;
+Color:10;Age:100cm;Quantity:1.0;
+Color:16;Age:110cm;Quantity:1.0;
+Color:6;Age:80cm;Quantity:1.0;
+
+ID:
+100000024206296
+查看详情
+立即报价
+
+你好，我正在采购这款产品，想了解更多信息。颜色：14；长度：110厘米；数量：1.0；
+颜色:11;年龄:120厘米;数量:1.0;
+颜色:15;年龄:110厘米;数量:1.0;
+颜色:7;年龄:100厘米;数量:1.0;
+颜色:3;年龄:100厘米;数量:1.0;
+颜色:1;年龄:80厘米;数量:1.0;
+颜色:13;年龄:90厘米;数量:1.0;
+颜色:9;年龄:110厘米;数量:1.0;
+颜色:4;年龄:110厘米;数量:1.0;
+颜色:12;年龄:100厘米;数量:1.0;
+颜色:8;年龄:100厘米;数量:1.0;
+颜色:2;年龄:90厘米;数量:1.0;
+颜色:5;年龄:120厘米;数量:1.0;
+颜色:10;年龄:100厘米;数量:1.0;
+颜色:16;年龄:110厘米;数量:1.0;
+颜色:6;年龄:80厘米;数量:1.0;
+
+由阿里翻译提供
+反馈
+
+2026-04-28 01:16
+
+Hi! Our new kids' sleeveless sport set is breathable, quick-dry, and super comfy—just right for summer. Could you let me know your order quantity, delivery address, and how you plan to use it?
+自动接待发送，
+去优化
+L
+
+已读
+
+rehema kiseyu
+2026-04-28 01:15
+
+r
+Children Tracksuits Sleeveless Soft Shell Polyester Cartoon Print Breathable Comfortable Outfit
+$1.40-2.10
+最小订购量: 
+2.0
+Pieces
+
+在Alibaba.com平台聊天和交易，享受安全保障。
+AI润色
+回复建议
+消息总结
+...
+
+按键“Enter”快捷发送 / “shift+enter"快捷换行
+
+发送
+auto
+OKKI销售助手
+客户
+Eva接待助手
+订单
+物流报价
+r
+rehema kiseyu
+客户详情
+坦桑尼亚
+ID:tz1440962534tesh
+加为客户
+公司名称
+SUREY company
+邮箱
+-
+注册时间
+2021-06-27
+买家标签
+-
+买家特征
+工厂偏好
+轻定制偏好
+logo定制偏好
+免费样品偏好
+货代服务偏好
+高质量偏好
+发送名片至聊天框，买

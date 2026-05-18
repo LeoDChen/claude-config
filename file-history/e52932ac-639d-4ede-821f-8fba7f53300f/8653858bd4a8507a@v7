@@ -1,0 +1,857 @@
+#!/usr/bin/env node
+/**
+ * gen_dashboard.js — OKKI 矩阵看板 + 弹窗详情（v2 品质）
+ *
+ * 数据源:
+ *   - output/factor_baselines.json   (全员阶段+基线+等级)
+ *   - output/soon_layer_cards.json   (SOON 因子命中清单)
+ *   - output/cold_layer_stratification.json (冷层/冷冻分层)
+ *   - data/briefs/*.md              (状态卡，聊天/关键数字/下一步)
+ *
+ * 用法:
+ *   node scripts/gen_dashboard.js                  → 矩阵 HTML → output/dashboard.html
+ *   node scripts/gen_dashboard.js --md              → Markdown 表格 → stdout
+ *   node scripts/gen_dashboard.js --html            → 旧版 HTML 表格 → stdout
+ *   node scripts/gen_dashboard.js -o board.html     → 指定输出路径
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = path.resolve(__dirname, "..");
+const OUTPUT_DIR = path.join(ROOT, "output");
+const BRIEFS_DIR = path.join(ROOT, "data", "briefs");
+const TODAY = new Date().toISOString().slice(0, 10);
+
+const args = process.argv.slice(2);
+const mdMode = args.includes("--md");
+const htmlTableMode = args.includes("--html");
+const outFile = (() => {
+  const idx = args.indexOf("-o");
+  return idx >= 0 ? args[idx + 1] : null;
+})();
+
+// ═══════════════════════════════════════════════
+// 国家代码 → 中文
+// ═══════════════════════════════════════════════
+const COUNTRY_CN = {
+  US:"美国",GB:"英国",DE:"德国",FR:"法国",IT:"意大利",ES:"西班牙",NL:"荷兰",BE:"比利时",PT:"葡萄牙",RU:"俄罗斯",TR:"土耳其",
+  IN:"印度",PK:"巴基斯坦",BD:"孟加拉",JP:"日本",KR:"韩国",HK:"香港",ID:"印尼",MY:"马来西亚",PH:"菲律宾",VN:"越南",TH:"泰国",
+  SD:"苏丹",EG:"埃及",CD:"刚果民主",ZM:"赞比亚",CI:"科特迪瓦",SA:"沙特",AE:"阿联酋",GH:"加纳",NG:"尼日利亚",KE:"肯尼亚",TZ:"坦桑尼亚",
+  ZA:"南非",MA:"摩洛哥",DZ:"阿尔及利亚",TN:"突尼斯",LY:"利比亚",ET:"埃塞俄比亚",UG:"乌干达",RW:"卢旺达",CM:"喀麦隆",SN:"塞内加尔",
+  ML:"马里",TG:"多哥",BJ:"贝宁",BF:"布基纳法索",CG:"刚果",GA:"加蓬",ZR:"刚果(金)",LR:"利比里亚",SL:"塞拉利昂",GN:"几内亚",
+  IQ:"伊拉克",LB:"黎巴嫩",JO:"约旦",KW:"科威特",QA:"卡塔尔",OM:"阿曼",BH:"巴林",IL:"以色列",SY:"叙利亚",YE:"也门",
+  BR:"巴西",AR:"阿根廷",CL:"智利",CO:"哥伦比亚",PE:"秘鲁",MX:"墨西哥",BO:"玻利维亚",VE:"委内瑞拉",EC:"厄瓜多尔",PY:"巴拉圭",
+  AU:"澳大利亚",NZ:"新西兰",CA:"加拿大",PL:"波兰",UA:"乌克兰",RO:"罗马尼亚",HU:"匈牙利",CZ:"捷克",SE:"瑞典",DK:"丹麦",
+  MD:"摩尔多瓦",PA:"巴拿马",ZW:"津巴布韦",DJ:"吉布提",NP:"尼泊尔",MZ:"莫桑比克",
+};
+function countryCN(code) { return COUNTRY_CN[code] || code; }
+
+// ═══════════════════════════════════════════════
+// 矩阵列定义
+// ═══════════════════════════════════════════════
+const COLUMNS = [
+  { key: "需求探索", label: "需求探索", icon: "🔍" },
+  { key: "报价已发", label: "报价已发", icon: "💰" },
+  { key: "谈判中",   label: "谈判中",   icon: "🤝" },
+  { key: "待付款",   label: "待付款",   icon: "💳" },
+  { key: "待发货",   label: "待发货",   icon: "📦" },
+  { key: "已发货/在途", label: "在途",  icon: "🚢" },
+  { key: "已签收",   label: "已签收",   icon: "✅" },
+  { key: "其他",     label: "售后/返单", icon: "🔄" },
+];
+const COL_KEY_SET = new Set(COLUMNS.map(c => c.key));
+function stageColKey(stage) {
+  if (COL_KEY_SET.has(stage)) return stage;
+  if (stage === "售后" || stage === "待返单") return "其他";
+  return "其他";
+}
+
+const URGENCY = {
+  RED:    { key: "red",    label: "需立即处理", dot: "red",    icon: "🔴", desc: "我不动它就死" },
+  YELLOW: { key: "yellow", label: "需定时关注", dot: "yellow", icon: "🟡", desc: "业务推进但需提醒" },
+  GREY:   { key: "grey",   label: "正常流转",   dot: "grey",   icon: "⚪", desc: "暂无行动信号" },
+  FROZEN: { key: "frozen", label: "冷冻",       dot: "grey",   icon: "❄️", desc: ">90天无互动" },
+};
+
+function classifyUrgency(factors, briefHeat) {
+  if (!factors || factors.length === 0) {
+    // 无因子时用 brief heat 做基准，但不直接进 RED（避免 stale brief 过度告警）
+    if (briefHeat === "NOW") return "yellow";
+    if (briefHeat === "SOON") return "yellow";
+    return "grey";
+  }
+  for (const f of factors) {
+    const code = (f.factor || "").split("(")[0].trim();
+    if (code === "S3 该推进了") return "red";
+    if (code === "S4 该催款了" && !f.observeMode) return "red";
+  }
+  for (const f of factors) {
+    if (/^S\d/.test((f.factor || "").split("(")[0].trim())) return "yellow";
+  }
+  // 有因子但非 S1-S9：用 brief heat
+  if (briefHeat === "NOW" || briefHeat === "SOON") return "yellow";
+  return "grey";
+}
+
+// ═══════════════════════════════════════════════
+// 驱动因子 → 人类可读描述（v2 品质）
+// ═══════════════════════════════════════════════
+
+function buildRichDrivers(factors, stage, daysSince, paymentConfirmed, briefContent) {
+  return factors.map(f => {
+    const code = (f.factor || "").split("(")[0].trim();
+    const days = f.days || daysSince || 0;
+    const isObserve = !!f.observeMode;
+    const isHigh = f.priority === "high";
+    const isDoudi = (f.factor || "").includes("兜底");
+
+    let title = "", detail = "", level = "yellow";
+
+    switch (code) {
+      case "S3 该推进了":
+        level = "red";
+        if (days <= 3) title = `未回复——客户${days}天前发消息等你跟进`;
+        else if (days <= 7) title = `该推进——谈判中${days}天客户未回应`;
+        else title = `该推进——谈判沉默${days}天，需主动破局`;
+        detail = `谈判阶段，客户${days}天前最后回应。节奏第${f.rhythmDay || days}天，该推动下一步决策。`;
+        break;
+
+      case "S4 该催款了":
+        level = isObserve ? "yellow" : "red";
+        if (isObserve) {
+          title = `该催款(观察)——PI已发${days}天，长期未付`;
+          detail = `待付款${days}天，进入观察模式。如客户有动静再跟进，暂不主动催。`;
+        } else if (f.overdue) {
+          title = `该催款——第1/3/5天均未提醒付款，已过${days}天`;
+          detail = `按节奏应在第1/3/5天各提醒一次，均已错过。现在第${days}天，该补上催款了。`;
+        } else {
+          title = `该催款——PI已发${days}天等付款`;
+          detail = `谈判已完成，PI已发${days}天。客户未付款，该提醒确认付款方式和时间。`;
+        }
+        break;
+
+      case "S1 该深挖需求了":
+        level = "yellow";
+        if (isDoudi) title = `该深挖——需求探索超${days}天无实质进展`;
+        else if (days <= 7) title = `该深挖需求——${days}天前开始沟通，需了解采购背景`;
+        else if (days <= 18) title = `该深挖——沟通${days}天仍停在需求探索`;
+        else title = `该深挖——${days}天未推进，需重新激活`;
+        detail = `客户在需求探索阶段已停留${days}天。`;
+        if (isDoudi) detail += `兜底节奏触发，该主动了解采购规模/目标市场/是否有品牌渠道。`;
+        else detail += `节奏第${f.rhythmDay || days}天，该推进到报价或样品阶段。`;
+        break;
+
+      case "S2 该追问了":
+        level = "yellow";
+        title = `该追问——报价后沉默${days}天`;
+        detail = `报价已发${days}天，客户未回复也未还价。可能不在采购周期或在比价。温和追问是否收到报价、是否有其他需求。`;
+        break;
+
+      case "S5a 该更新进度了":
+        level = "yellow";
+        if (isHigh) {
+          title = `⚠ 该更新进度——超承诺发货日${days}天`;
+          detail = `承诺发货日期已过${days}天，必须立即更新客户并给出新时间线。`;
+        } else if (paymentConfirmed) {
+          title = `该更新进度——付款后${days}天没给客户更新`;
+          detail = `客户已付款。每${f.interval || 7}天应同步备货/生产进度。该拍照或视频发给客户，给安心感。`;
+        } else {
+          title = `该确认状态——标记为待发货${days}天`;
+          detail = `阶段标签来自聊天关键词，订单数据未确认付款。请核实是否已付款，再决定是催款还是更新进度。`;
+        }
+        break;
+
+      case "S6 该更新物流了":
+        level = "yellow";
+        title = `物流跟踪——在途${days}天，该同步状态`;
+        detail = `货物在途${days}天，每${f.interval || 5}天应跟踪物流并主动通知客户运输进展。到港前3天提醒清关。`;
+        break;
+
+      case "S7a 该回访了":
+        level = "yellow";
+        title = `该回访——签收${days}天未问反馈`;
+        detail = `客户已签收${days}天，该回访产品质量满意度和销售情况，同时试探复购意向。`;
+        break;
+
+      case "S7b 该推返单了":
+        level = "yellow";
+        title = `该推返单——签收后进入复购窗口`;
+        detail = `签收后${days}天，进入复购窗口。该同步新品、推热卖款，争取返单。`;
+        break;
+
+      case "S8 该收尾了":
+        level = "yellow";
+        title = `该收尾——售后问题${days}天未关闭`;
+        detail = `售后问题已开启${days}天，需确认是否已解决。投诉类≤1h响应，常规24h内跟进。`;
+        break;
+
+      case "S9 该接触了":
+        level = "yellow";
+        title = `该接触——待返单客户定期触达`;
+        detail = `待返单${days}天，按节奏定期触达。同步新品/行业信息/工厂动态维持存在感。`;
+        break;
+
+      default:
+        title = f.factor;
+        detail = `${days}天前基线(${f.baseline || "?"})`;
+    }
+
+    return { level, title, detail, factor: f.factor };
+  });
+}
+
+// ═══════════════════════════════════════════════
+// 芯片徽章（语义化）
+// ═══════════════════════════════════════════════
+
+function makeBadge(f, daysSince, paymentConfirmed) {
+  const code = (f.factor || "").split("(")[0].trim();
+  const days = f.days || daysSince || 0;
+  const isObserve = !!f.observeMode;
+  const isHigh = f.priority === "high";
+  const isDoudi = (f.factor || "").includes("兜底");
+
+  switch (code) {
+    case "S3 该推进了":
+      if (days <= 3) return `未回${days}d`;
+      if (days <= 7) return `沉默${days}d`;
+      return `推进${days}d`;
+    case "S4 该催款了":
+      if (isObserve) return "催款观察";
+      return `催款${days}d`;
+    case "S1 该深挖需求了":
+      if (isDoudi) return `兜底${days}d`;
+      return `深挖${days}d`;
+    case "S2 该追问了":
+      return `追问${days}d`;
+    case "S5a 该更新进度了":
+      if (isHigh) return "超期!";
+      if (!paymentConfirmed) return "待核实";
+      return `进度${days}d`;
+    case "S6 该更新物流了":
+      return "物流";
+    case "S7a 该回访了":
+      return "回访";
+    case "S7b 该推返单了":
+      return "返单";
+    case "S8 该收尾了":
+      return "收尾";
+    case "S9 该接触了":
+      return "接触";
+    default:
+      return "待办";
+  }
+}
+
+// ═══════════════════════════════════════════════
+// 数据加载
+// ═══════════════════════════════════════════════
+
+function loadJSON(filename) {
+  const p = path.join(OUTPUT_DIR, filename);
+  if (!fs.existsSync(p)) return null;
+  return JSON.parse(fs.readFileSync(p, "utf-8"));
+}
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const fm = {};
+  for (const line of match[1].split("\n")) {
+    const kv = line.match(/^(\w+):\s*(.+)$/);
+    if (kv) fm[kv[1]] = kv[2].trim();
+  }
+  return fm;
+}
+
+function extractSection(content, heading) {
+  const re = new RegExp(`## ${heading}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`, "i");
+  const m = content.match(re);
+  return m ? m[1].trim() : "";
+}
+
+/** 从"最近动态"区块提取结构化聊天行 */
+function extractChatLines(content) {
+  const section = extractSection(content, "最近动态");
+  if (!section) return [];
+  const lines = [];
+  // 格式1: - 2026-05-09 我: hello world（MsgID:xxx）
+  // 格式2: - 2026-05-09 我催单：hello world
+  // 格式3: [初稿] 最近5条消息摘要：...
+  const chatRe = /^-\s*(\d{4}-\d{2}-\d{2})\s+(我|客)(?:催单|告知|跟进|回复|追问|)?[：:]\s*(.+?)(?:（MsgID:[\w.]+）)?$/;
+  for (const raw of section.split("\n")) {
+    const line = raw.trim();
+    if (!line.startsWith("- ")) continue;
+    if (line.includes("[初稿]") || line.includes("最近5条消息摘要")) continue;
+    const m = line.match(chatRe);
+    if (m) {
+      lines.push({
+        who: m[2] === "我" ? "me" : "cust",
+        time: m[1].slice(5), // MM-DD
+        text: m[3].trim().substring(0, 150),
+      });
+    } else {
+      // 宽松匹配
+      const loose = line.match(/^-\s*(\d{4}-\d{2}-\d{2})\s+(.+)$/);
+      if (loose) {
+        const rest = loose[2];
+        const whoStr = rest.startsWith("我") ? "me" : rest.startsWith("客") ? "cust" : null;
+        if (whoStr) {
+          const text = rest.replace(/^[我客](?:催单|告知|跟进|回复|追问|)?[：:]?\s*/, "").replace(/（MsgID:[\w.]+）$/, "").trim();
+          lines.push({ who: whoStr, time: loose[1].slice(5), text: text.substring(0, 150) });
+        }
+      }
+    }
+  }
+  return lines.slice(-6); // 最近6条
+}
+
+/** 将英文聊天行转为中文叙事摘要 */
+function chatToChinese(chatLines) {
+  if (!chatLines || chatLines.length === 0) return [];
+  return chatLines.map(cl => {
+    const who = cl.who === 'me' ? '我方' : '客户';
+    const text = (cl.text || '').trim();
+    // 识别关键动作
+    let action = text;
+    const lower = text.toLowerCase();
+    if (/sent.*(pic|photo|image|picture)/i.test(lower)) action = '发来图片';
+    else if (/^ok(ay)?$/i.test(lower) || /^(yes|yeah|sure|good|great|thanks|thank|👍)/i.test(lower)) action = '确认';
+    else if (/create.*order|send.*(order|payment|link|PI|invoice)/i.test(lower)) action = '发送订单/付款链接';
+    else if (/arrange.*ship|will.*ship|shipping/i.test(lower)) action = '说明物流安排';
+    else if (/ready|prepared|备好/i.test(lower)) action = '告知备货完成';
+    else if (/quote|报价|price.*USD|USD.*price|\$\d/i.test(lower)) action = '报价：' + text.substring(0, 60);
+    else if (/\?$/.test(text.trim())) action = '询问：' + text.substring(0, 50);
+    else if (text.length > 80) action = text.substring(0, 70) + '…';
+    return { who, time: cl.time, action };
+  });
+}
+
+function extractKeyNums(content) {
+  const section = extractSection(content, "关键数字");
+  if (!section) return [];
+  return section.split("\n")
+    .filter(l => l.trim().startsWith("-") && !l.includes("[初稿]"))
+    .map(l => l.replace(/^-\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function extractNextStep(content) {
+  const section = extractSection(content, "下一步");
+  const lines = section.split("\n").filter(l => l.trim().startsWith("→"));
+  if (lines.length > 0) {
+    return lines.map(l => l.replace(/^→\s*(?:\[初稿\]\s*)?/, "").trim()).join("\n");
+  }
+  return section.replace(/^→\s*(?:\[初稿\]\s*)?/, "").trim().substring(0, 120);
+}
+
+function loadBriefs() {
+  const map = {};
+  if (!fs.existsSync(BRIEFS_DIR)) return map;
+  for (const file of fs.readdirSync(BRIEFS_DIR)) {
+    if (!file.endsWith(".md")) continue;
+    const content = fs.readFileSync(path.join(BRIEFS_DIR, file), "utf-8");
+    const fm = parseFrontmatter(content);
+    if (fm.cid) map[fm.cid] = { frontmatter: fm, content, file };
+  }
+  return map;
+}
+
+// ═══════════════════════════════════════════════
+// 构建客户卡片
+// ═══════════════════════════════════════════════
+
+function buildCustomerCards() {
+  const baselines = loadJSON("factor_baselines.json");
+  const soon = loadJSON("soon_layer_cards.json");
+  const cold = loadJSON("cold_layer_stratification.json");
+  const briefs = loadBriefs();
+
+  if (!baselines) {
+    console.error("factor_baselines.json 不存在，请先运行 init_factor_baselines.js");
+    return null;
+  }
+
+  const factorMap = new Map();
+  if (soon) for (const c of soon.customers || []) factorMap.set(c.cid, c);
+
+  const coldCids = new Set();
+  if (cold) {
+    for (const layer of Object.values(cold.frozen || {})) {
+      for (const c of layer) coldCids.add(c.cid);
+    }
+  }
+
+  const cards = [];
+
+  for (const [cid, data] of Object.entries(baselines)) {
+    const stage = data.stage || "未知";
+    const soonData = factorMap.get(cid);
+    const factors = soonData ? soonData.factors : [];
+    const brief = briefs[cid];
+    const briefHeat = (brief && brief.frontmatter && brief.frontmatter.heat) || null;
+    const urgencyKey = coldCids.has(cid) ? "frozen" : classifyUrgency(factors, briefHeat);
+    const tier = (data.meta && data.meta.customer_tier) || "C";
+    const paymentConfirmed = (data.meta && data.meta._payment_confirmed) || false;
+    const orderStatus = (data.meta && data.meta._order_status) || null;
+
+    let daysSince = null, lastContactDate = null, firstContact = null;
+    if (data.baselines) {
+      let latest = null, earliest = null;
+      for (const v of Object.values(data.baselines)) {
+        if (v) {
+          if (!latest || v > latest) latest = v;
+          if (!earliest || v < earliest) earliest = v;
+        }
+      }
+      if (latest) { lastContactDate = latest; daysSince = Math.floor((new Date(TODAY) - new Date(latest)) / 86400000); }
+      firstContact = earliest;
+    }
+
+    let chatLines = [], chatLinesCN = [], keyNums = [], nextStep = "";
+
+    // 服务端生成富驱动因子描述
+    const richDrivers = factors.length > 0
+      ? buildRichDrivers(factors, stage, daysSince, paymentConfirmed, brief ? brief.content : null)
+      : [];
+
+    if (brief) {
+      chatLines = extractChatLines(brief.content);
+      chatLinesCN = chatToChinese(chatLines);
+      keyNums = extractKeyNums(brief.content);
+      nextStep = extractNextStep(brief.content);
+    }
+
+    cards.push({
+      cid,
+      name: data.name || "?",
+      country: data.country || "?",
+      countryCN: countryCN(data.country),
+      stage,
+      colKey: stageColKey(stage),
+      tier,
+      urgencyKey,
+      factors,
+      richDrivers,       // 服务端预生成的驱动因子描述
+      daysSince,
+      lastContactDate,
+      firstContact,
+      chatLines,         // 结构化聊天行（原文）
+      chatLinesCN,       // 中文叙事摘要
+      keyNums,
+      nextStep,
+      hasBrief: !!brief,
+      briefFile: brief ? brief.file : null,
+      paymentConfirmed,  // 订单交叉验证：是否确认已付款
+      orderStatus,       // 订单实际状态
+    });
+  }
+
+  return cards;
+}
+
+// ═══════════════════════════════════════════════
+// HTML 矩阵渲染（v2 品质）
+// ═══════════════════════════════════════════════
+
+function renderMatrixHTML(cards) {
+  // 按 (urgencyKey, colKey) 分组
+  const matrix = {};
+  for (const u of Object.values(URGENCY)) {
+    matrix[u.key] = {};
+    for (const col of COLUMNS) matrix[u.key][col.key] = [];
+  }
+  for (const c of cards) {
+    const bucket = matrix[c.urgencyKey];
+    if (bucket && bucket[c.colKey]) bucket[c.colKey].push(c);
+  }
+
+  const counts = {};
+  for (const c of cards) counts[c.urgencyKey] = (counts[c.urgencyKey] || 0) + 1;
+  const frozenList = cards.filter(c => c.urgencyKey === "frozen");
+
+  const now = TODAY;
+
+  let html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户状态看板 — ${now}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif; background: #f5f5f5; padding: 20px; color: #333; }
+  h1 { font-size: 1.2em; margin-bottom: 2px; }
+  .subtitle { color: #999; font-size: 0.78em; margin-bottom: 16px; }
+  .summary-bar { display: flex; gap: 16px; margin-bottom: 14px; font-size: 0.82em; align-items: center; }
+  .summary-bar span { padding: 4px 12px; border-radius: 14px; background: #fff; border: 1px solid #eee; }
+  .summary-bar strong { font-size: 1.2em; }
+
+  .matrix-wrap { overflow-x: auto; }
+  .matrix { display: grid; gap: 1px; background: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); min-width: 960px; }
+
+  .cell { background: #fff; padding: 8px 10px; min-height: 52px; display: flex; flex-wrap: wrap; gap: 4px; align-content: start; align-items: start; }
+  .cell-header { background: #fafafa; padding: 8px 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75em; color: #666; text-align: center; }
+  .row-label { background: #fafafa; padding: 8px 10px; display: flex; align-items: center; gap: 6px; font-size: 0.76em; font-weight: 600; white-space: nowrap; }
+
+  .customer-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 13px; font-size: 0.73em; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: all .12s; }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .chip-red { background: #ffebee; border-color: #ffcdd2; color: #b71c1c; }
+  .chip-yellow { background: #fff8e1; border-color: #ffecb3; color: #e65100; }
+  .chip-grey { background: #f5f5f5; border-color: #eee; color: #888; }
+  .chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: #d32f2f; }
+  .chip-dot-yellow { background: #f57c00; }
+  .chip-dot-grey { background: #bbb; }
+  .chip-badge { font-size: 0.68em; padding: 1px 4px; border-radius: 6px; background: rgba(0,0,0,.06); }
+  .chip-tier-s { background: #ffd700; color: #5d4037; font-size: 0.6em; padding: 0px 3px; border-radius: 4px; margin-left: 1px; }
+  .chip-tier-a { background: #c8e6c9; color: #2e7d32; font-size: 0.6em; padding: 0px 3px; border-radius: 4px; margin-left: 1px; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1000; justify-content: center; align-items: center; }
+  .overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 14px; box-shadow: 0 8px 48px rgba(0,0,0,.2); width: 700px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; animation: modalIn .18s ease; }
+  @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-header h2 { font-size: 1.15em; }
+  .modal-close { background: none; border: none; font-size: 1.4em; cursor: pointer; color: #999; padding: 6px 10px; border-radius: 6px; line-height: 1; }
+  .modal-close:hover { background: #f0f0f0; }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; font-size: 0.88em; line-height: 1.6; }
+  .modal-footer { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; flex-shrink: 0; }
+
+  .btn { padding: 7px 18px; border-radius: 6px; border: 1px solid #ddd; font-size: 0.84em; cursor: pointer; background: #fff; transition: .12s; }
+  .btn:hover { background: #f5f5f5; }
+  .btn-primary { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .btn-primary:hover { background: #1565c0; }
+
+  .fm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .fm-item { background: #fafafa; border-radius: 8px; padding: 10px 14px; }
+  .fm-label { color: #999; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.5px; }
+  .fm-value { font-weight: 600; font-size: 0.95em; margin-top: 3px; }
+
+  .section { margin-bottom: 16px; }
+  .section-title { font-weight: 600; font-size: 0.8em; color: #888; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .driver-list { display: flex; flex-direction: column; gap: 6px; }
+  .driver-item { display: flex; gap: 10px; padding: 10px 14px; border-radius: 8px; font-size: 0.9em; align-items: flex-start; }
+  .driver-item-red { background: #fff5f5; border: 1px solid #ffcdd2; }
+  .driver-item-yellow { background: #fffdf5; border: 1px solid #ffecb3; }
+  .driver-icon { font-size: 1.15em; flex-shrink: 0; margin-top: 1px; }
+
+  .chat-snippet { background: #fafafa; border-radius: 8px; padding: 10px 14px; font-size: 0.86em; }
+  .chat-line { padding: 4px 0; display: flex; gap: 10px; align-items: baseline; }
+  .chat-who { font-weight: 600; flex-shrink: 0; min-width: 20px; }
+  .chat-who-me { color: #1976d2; }
+  .chat-who-cust { color: #d32f2f; }
+  .chat-time { color: #bbb; font-size: 0.78em; flex-shrink: 0; min-width: 45px; }
+
+  .key-num { background: #f5f5f5; border-radius: 6px; padding: 7px 12px; margin-bottom: 4px; font-size: 0.85em; }
+  .info-note { background: #fff9c4; border-radius: 6px; padding: 8px 12px; font-size: 0.82em; color: #666; }
+
+  .frozen-row { background: #fafafa; padding: 8px 14px; font-size: 0.74em; color: #999; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .frozen-chip { cursor: default; opacity: 0.5; }
+  .frozen-chip:hover { transform: none; box-shadow: none; }
+
+  .legend { font-size: 0.75em; color: #999; margin-top: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<h1>OKKI 客户状态看板</h1>
+<p class="subtitle">横轴：生命周期阶段 → ｜ 纵轴：紧急度 ｜ 点击客户卡片查看详情 ｜ ${now}</p>
+
+<div class="summary-bar">
+  <span>🔴 需立即处理 <strong>${counts.red || 0}</strong></span>
+  <span>🟡 需定时关注 <strong>${counts.yellow || 0}</strong></span>
+  <span>⚪ 正常流转 <strong>${counts.grey || 0}</strong></span>
+  <span>❄️ 冷冻 <strong>${counts.frozen || 0}</strong></span>
+</div>
+
+<div class="matrix-wrap">
+<div class="matrix" style="grid-template-columns: 80px repeat(${COLUMNS.length}, 1fr);">
+  <div class="cell-header"></div>
+${COLUMNS.map(col => `  <div class="cell-header">${col.icon} ${col.label}</div>`).join("\n")}
+`;
+
+  for (const u of [URGENCY.RED, URGENCY.YELLOW, URGENCY.GREY, URGENCY.FROZEN]) {
+    const dotClass = `chip-dot-${u.dot}`;
+    const opacity = u.key === "frozen" ? ' style="opacity:0.45"' : "";
+
+    if (u.key === "frozen") {
+      const show = frozenList.slice(0, 10);
+      const rest = frozenList.length - 10;
+      const chips = show.map(c => `<span class="customer-chip chip-grey frozen-chip">${esc(c.name)}</span>`).join("\n    ");
+      const more = rest > 0 ? `<span class="customer-chip chip-grey frozen-chip">+${rest}人</span>` : "";
+      html += `  <div class="row-label"${opacity}><span class="chip-dot ${dotClass}"></span>${u.icon} ${u.label}</div>\n`;
+      html += `  <div class="frozen-row" style="grid-column: span ${COLUMNS.length};">${chips}${more}</div>\n`;
+      continue;
+    }
+
+    html += `  <div class="row-label"${opacity}><span class="chip-dot ${dotClass}"></span>${u.icon} ${u.label}</div>\n`;
+
+    for (const col of COLUMNS) {
+      const bucket = matrix[u.key][col.key] || [];
+      if (bucket.length === 0) {
+        html += `  <div class="cell"></div>\n`;
+        continue;
+      }
+
+      if (u.key === "grey") {
+        // 正常流转：展示更多芯片，超过20个才折叠
+        const maxShow = 20;
+        const show = bucket.slice(0, maxShow);
+        const rest = bucket.length - maxShow;
+        const chips = show.map(c =>
+          `<span class="customer-chip chip-grey" onclick="openModal('${esc(c.cid)}')">${esc(c.name)}</span>`
+        ).join("");
+        const more = rest > 0 ? `<span class="customer-chip chip-grey">+${rest}</span>` : "";
+        html += `  <div class="cell">${chips}${more}</div>\n`;
+      } else {
+        const chipClass = u.key === "red" ? "chip-red" : "chip-yellow";
+        const chips = bucket.map(c => {
+          const badge = c.factors.length > 0 ? makeBadge(c.factors[0], c.daysSince, c.paymentConfirmed) : "";
+          const tierMark = (c.tier === "S" || c.tier === "A")
+            ? `<span class="chip-tier-${c.tier.toLowerCase()}">${c.tier}</span>` : "";
+          return `<span class="customer-chip ${chipClass}" onclick="openModal('${esc(c.cid)}')"><span class="chip-dot ${dotClass}"></span>${esc(c.name)}${tierMark}<span class="chip-badge">${badge}</span></span>`;
+        }).join("\n    ");
+        html += `  <div class="cell">${chips}</div>\n`;
+      }
+    }
+  }
+
+  html += `</div>
+</div>
+
+<div class="legend">
+  <span>🔴 需立即处理 = ${URGENCY.RED.desc}</span>
+  <span>🟡 需定时关注 = ${URGENCY.YELLOW.desc}</span>
+  <span>⚪ 正常流转 = ${URGENCY.GREY.desc}</span>
+  <span>❄️ 冷冻 = ${URGENCY.FROZEN.desc}</span>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modal"></div>
+</div>
+
+<script>
+var CARDS = ${JSON.stringify(cards)};
+
+function openModal(cid) {
+  var c = CARDS.find(function(x){ return x.cid === cid; });
+  if (!c) return;
+  var h = '';
+  h += '<div class="modal-header"><h2>' + esc(c.name) + '</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  h += '<div class="modal-body">';
+
+  // Frontmatter
+  h += '<div class="fm-grid">';
+  var fields = [
+    ['国家', c.countryCN || c.country],
+    ['阶段', c.stage],
+    ['等级', c.tier + '级'],
+    ['最后联系', c.daysSince !== null ? c.daysSince + '天前' : '?']
+  ];
+  for (var i = 0; i < fields.length; i++) {
+    h += '<div class="fm-item"><div class="fm-label">' + fields[i][0] + '</div><div class="fm-value">' + esc(String(fields[i][1])) + '</div></div>';
+  }
+  if (c.firstContact) {
+    h += '<div class="fm-item"><div class="fm-label">首次联系</div><div class="fm-value">' + c.firstContact + '</div></div>';
+  }
+  h += '</div>';
+
+  // Driver factors (服务端预生成)
+  if (c.richDrivers && c.richDrivers.length) {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="driver-list">';
+    for (var j = 0; j < c.richDrivers.length; j++) {
+      var dr = c.richDrivers[j];
+      var cls = dr.level === 'red' ? 'driver-item-red' : 'driver-item-yellow';
+      var icon = dr.level === 'red' ? '🔴' : '🟡';
+      h += '<div class="driver-item ' + cls + '"><span class="driver-icon">' + icon + '</span><div><strong>' + esc(dr.title) + '</strong><div style="color:#999;font-size:0.85em;margin-top:2px;">' + esc(dr.detail) + '</div></div></div>';
+    }
+    h += '</div></div>';
+  } else if (c.urgencyKey === 'red') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">⚠️ 该客户标记为需立即处理（状态卡热度=NOW），但未命中因子节奏天。请检查状态卡确认紧急原因。</div></div>';
+  } else if (c.urgencyKey === 'yellow') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">📌 该客户标记为需关注（状态卡热度=NOW/SOON），但未命中因子节奏天。可能是刚联系过或等待客户行动中。</div></div>';
+  } else if (c.urgencyKey !== 'frozen') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">无活跃因子。该客户在正常流转中，暂无行动信号。</div></div>';
+  }
+
+  // Chat lines (中文摘要)
+  if (c.chatLinesCN && c.chatLinesCN.length) {
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var k = 0; k < c.chatLinesCN.length; k++) {
+      var cl = c.chatLinesCN[k];
+      var whoClass = cl.who === '我方' ? 'chat-who-me' : 'chat-who-cust';
+      h += '<div class="chat-line"><span class="chat-who ' + whoClass + '">' + esc(cl.who) + '</span><span class="chat-time">' + esc(cl.time) + '</span>' + esc(cl.action) + '</div>';
+    }
+    h += '</div></div>';
+  } else if (c.chatLines && c.chatLines.length) {
+    // 降级：无中文摘要时显示原文
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var k = 0; k < c.chatLines.length; k++) {
+      var cl2 = c.chatLines[k];
+      var whoClass2 = cl2.who === 'me' ? 'chat-who-me' : 'chat-who-cust';
+      h += '<div class="chat-line"><span class="chat-who ' + whoClass2 + '">' + (cl2.who === 'me' ? '我' : '客') + '</span><span class="chat-time">' + cl2.time + '</span>' + esc(cl2.text) + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  // Key numbers
+  if (c.keyNums && c.keyNums.length) {
+    h += '<div class="section"><div class="section-title">🔢 关键数字</div>';
+    for (var m = 0; m < c.keyNums.length; m++) {
+      h += '<div class="key-num">' + esc(c.keyNums[m]) + '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Next step
+  if (c.nextStep) {
+    h += '<div class="section"><div class="section-title">→ 下一步</div><div style="font-size:0.9em;line-height:1.7;white-space:pre-line">' + esc(c.nextStep) + '</div></div>';
+  }
+
+  if (!c.hasBrief && c.urgencyKey !== 'frozen') {
+    h += '<div class="info-note">📝 暂无状态卡。运行 /okki 深度分析创建详细档案。</div>';
+  }
+
+  h += '</div>';
+  h += '<div class="modal-footer"><button class="btn btn-primary">✏️ 起草回复</button><button class="btn">🔍 深度分析</button><button class="btn">✅ 标记已处理</button></div>';
+
+  document.getElementById('modal').innerHTML = h;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function esc(s) {
+  if (typeof s !== 'string') return String(s);
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+</script>
+
+</body>
+</html>`;
+
+  return html;
+}
+
+// ═══════════════════════════════════════════════
+// Markdown 表格（兼容旧模式）
+// ═══════════════════════════════════════════════
+
+function renderMarkdown(cards) {
+  const active = cards.filter(c => c.urgencyKey !== "frozen");
+  const counts = {};
+  for (const c of cards) counts[c.urgencyKey] = (counts[c.urgencyKey] || 0) + 1;
+
+  let md = `# OKKI 客户看板\n\n`;
+  md += `> ${TODAY} | 🔴需立即处理:${counts.red||0} 🟡需定时关注:${counts.yellow||0} ⚪正常:${counts.grey||0} ❄️冷冻:${counts.frozen||0}\n\n`;
+  md += `| 客户 | 国家 | 等级 | 阶段 | 最后联系 | 驱动因子 | 下一步 |\n`;
+  md += `|------|------|:---:|------|----------|----------|--------|\n`;
+
+  let lastU = "";
+  for (const u of ["red", "yellow", "grey"]) {
+    for (const c of active) {
+      if (c.urgencyKey !== u) continue;
+      if (c.urgencyKey !== lastU) {
+        lastU = c.urgencyKey;
+        const label = URGENCY[u.toUpperCase()] ? URGENCY[u.toUpperCase()].label : u;
+        md += `| **── ${label} ──** | | | | | | |\n`;
+      }
+      const factorNames = c.richDrivers.map(d => d.title.replace(/——.*$/, "")).join(" · ") || "—";
+      const daysStr = c.daysSince !== null ? `${c.daysSince}天前` : "?";
+      md += `| ${c.name} | ${c.countryCN} | ${c.tier} | ${c.stage} | ${daysStr} | ${factorNames} | ${(c.nextStep || "—").replace(/\n/g, " ")} |\n`;
+    }
+  }
+  return md;
+}
+
+// ═══════════════════════════════════════════════
+// 旧版 HTML 表格（--html 兼容）
+// ═══════════════════════════════════════════════
+
+function renderHTMLTable(cards) {
+  const active = cards.filter(c => c.urgencyKey !== "frozen");
+
+  let html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>OKKI 客户看板 — ${TODAY}</title>
+<style>
+  body { font-family: -apple-system, sans-serif; margin: 20px; color: #333; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+  th { background: #f5f5f5; padding: 10px 8px; text-align: left; border-bottom: 2px solid #ddd; }
+  td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .heat-red { color: #d32f2f; font-weight: bold; }
+  .heat-yellow { color: #f57c00; }
+  .heat-grey { color: #999; }
+  .section-row td { background: #f0f0f0; font-weight: bold; padding: 6px 8px; font-size: 0.85em; }
+</style></head><body>
+<h1>OKKI 客户看板</h1><p>${TODAY}</p>
+<table><thead><tr><th>客户</th><th>国家</th><th>等级</th><th>阶段</th><th>最后联系</th><th>驱动因子</th><th>下一步</th></tr></thead><tbody>`;
+
+  let lastU = "";
+  for (const c of active) {
+    if (c.urgencyKey !== lastU) {
+      lastU = c.urgencyKey;
+      html += `<tr class="section-row"><td colspan="7">── ${URGENCY[c.urgencyKey.toUpperCase()]?.label || c.urgencyKey} ──</td></tr>\n`;
+    }
+    const cls = `heat-${c.urgencyKey}`;
+    const factors = c.richDrivers.map(d => d.title).join(" · ") || "—";
+    html += `<tr>
+  <td>${esc(c.name)}</td><td>${c.countryCN}</td><td>${c.tier}</td><td>${c.stage}</td>
+  <td>${c.daysSince !== null ? c.daysSince + "天前" : "?"}</td>
+  <td>${esc(factors)}</td><td>${esc((c.nextStep || "—").replace(/\n/g, " "))}</td></tr>\n`;
+  }
+
+  html += `</tbody></table></body></html>`;
+  return html;
+}
+
+function esc(s) {
+  if (typeof s !== "string") return String(s);
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+// ═══════════════════════════════════════════════
+// main
+// ═══════════════════════════════════════════════
+
+function main() {
+  const cards = buildCustomerCards();
+  if (!cards) process.exit(1);
+
+  const counts = {};
+  for (const c of cards) counts[c.urgencyKey] = (counts[c.urgencyKey] || 0) + 1;
+
+  let output;
+  if (mdMode) {
+    output = renderMarkdown(cards);
+  } else if (htmlTableMode) {
+    output = renderHTMLTable(cards);
+  } else {
+    output = renderMatrixHTML(cards);
+  }
+
+  const dest = outFile || (mdMode || htmlTableMode ? null : path.join(OUTPUT_DIR, "dashboard.html"));
+
+  if (dest) {
+    fs.writeFileSync(dest, output, "utf-8");
+    console.log(`✅ 看板已生成: ${dest}`);
+  } else {
+    console.log(output);
+  }
+
+  console.error(`\n── OKKI 看板 ${TODAY} ──`);
+  console.error(`🔴 需立即处理: ${counts.red || 0}人`);
+  console.error(`🟡 需定时关注: ${counts.yellow || 0}人`);
+  console.error(`⚪ 正常流转:   ${counts.grey || 0}人`);
+  console.error(`❄️ 冷冻:       ${counts.frozen || 0}人`);
+  console.error(`📊 总计:       ${cards.length}人`);
+}
+
+main();

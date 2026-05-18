@@ -1,0 +1,31 @@
+{
+  "model": "claude-sonnet-4-6[1m]",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+    "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000"
+  },
+  "effortLevel": "xhigh",
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kemikeai.1688.com)",
+      "WebSearch",
+      "Bash(python3 *)",
+      "Bash(npm *)",
+      "Bash(node *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(curl *)",
+      "Bash(cd *)",
+      "Bash(taskkill *)",
+      "Bash(tasklist *)",
+      "Bash(sleep *)",
+      "Bash(cmd.exe *)",
+      "Bash(mkdir *)",
+      "Bash(rm *)",
+      "Bash(echo *)",
+      "Bash(find *)"
+    ]
+  }
+}

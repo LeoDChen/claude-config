@@ -1,0 +1,275 @@
+// Phase 1 v6: 深入探测联系人列表 HTML
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+    const events = [];
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+        if (msg.method) events.push(msg);
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Network.enable');
+    await cmd('Runtime.enable');
+    await cmd('Page.enable');
+    await cmd('DOM.enable');
+
+    // 等页面渲染
+    await new Promise(r => setTimeout(r, 2000));
+
+    // === 找 messenger-left-container 的 HTML ===
+    const leftContainer = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var el = document.querySelector('.messenger-left-container');
+                if (!el) return 'NOT FOUND';
+                return el.innerHTML.substring(0, 5000);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('=== messenger-left-container HTML ===');
+    console.log(leftContainer.result?.value || '(无)');
+
+    // === 找 ul.im-next-tabs-nav 的内容 ===
+    const tabsContent = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var tabs = document.querySelectorAll('.im-next-tabs-nav li');
+                var r = [];
+                for (var i = 0; i < tabs.length; i++) {
+                    r.push({
+                        text: tabs[i].textContent?.trim(),
+                        cls: tabs[i].className,
+                        offsetHeight: tabs[i].offsetHeight
+                    });
+                }
+                return JSON.stringify(r);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('\n=== Tab 导航 ===');
+    console.log(tabsContent.result?.value || '(无)');
+
+    // === 找所有 ul > li 的完整列表 ===
+    const allLists = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var uls = document.querySelectorAll('ul');
+                var r = [];
+                for (var i = 0; i < uls.length; i++) {
+                    var ul = uls[i];
+                    var lis = ul.querySelectorAll(':scope > li');
+                    var items = [];
+                    for (var j = 0; j < lis.length; j++) {
+                        var li = lis[j];
+                        items.push({
+                            text: li.textContent?.trim().substring(0, 60),
+                            cls: (li.className || '').substring(0, 60),
+                            h: li.offsetHeight,
+                            kids: li.children.length
+                        });
+                    }
+                    r.push({
+                        ulCls: (ul.className || '').substring(0, 60),
+                        lis: items
+                    });
+                }
+                return JSON.stringify(r);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('\n=== 所有 UL 列表 ===');
+    console.log(allLists.result?.value || '(无)');
+
+    // === 尝试点击 "全部" tab 中的第一个子项 ===
+    const clickTab = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 先点 "全部" tab
+                var tabs = document.querySelectorAll('.im-next-tabs-nav li');
+                for (var i = 0; i < tabs.length; i++) {
+                    var t = tabs[i].textContent?.trim() || '';
+                    if (t === '全部' || t.includes('全部')) {
+                        tabs[i].click();
+                        return 'clicked tab: ' + t;
+                    }
+                }
+                return 'tab not found';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('\n点击 Tab:', clickTab.result?.value);
+
+    await new Promise(r => setTimeout(r, 2000));
+
+    // === 再找一遍联系人列表（tab 点击后可能渲染了） ===
+    const contactList = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 找任何可能有联系人名字的元素
+                var result = {};
+
+                // 策略1: 找所有有文本内容的 div（leaf elements）
+                var allDivs = document.querySelectorAll('div');
+                var leaves = [];
+                for (var i = 0; i < allDivs.length; i++) {
+                    var d = allDivs[i];
+                    if (d.children.length === 0 && d.offsetHeight > 15 && d.offsetHeight < 100) {
+                        var t = d.textContent?.trim() || '';
+                        if (t.length > 2 && t.length < 80) {
+                            leaves.push({ text: t, cls: (d.className || '').substring(0, 60), h: d.offsetHeight });
+                        }
+                    }
+                }
+                result.leaves = leaves.slice(0, 30);
+
+                // 策略2: 找 span 带文本的
+                var spans = document.querySelectorAll('span');
+                var spanTexts = [];
+                for (var j = 0; j < spans.length; j++) {
+                    var s = spans[j];
+                    var st = s.textContent?.trim() || '';
+                    if (st.length > 2 && st.length < 50 && s.children.length === 0) {
+                        spanTexts.push(st);
+                    }
+                }
+                result.spanTexts = spanTexts.slice(0, 30);
+
+                return JSON.stringify(result);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('\n=== 联系人候选 ===');
+    console.log(contactList.result?.value || '(无)');
+
+    // === 尝试点击第一个 leaf div ===
+    const clickContact = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var leaves = [];
+                var allDivs = document.querySelectorAll('div');
+                for (var i = 0; i < allDivs.length; i++) {
+                    var d = allDivs[i];
+                    if (d.children.length === 0 && d.offsetHeight > 15 && d.offsetHeight < 100) {
+                        var t = d.textContent?.trim() || '';
+                        if (t.length > 2 && t.length < 80) {
+                            leaves.push(d);
+                        }
+                    }
+                }
+
+                for (var j = 0; j < leaves.length; j++) {
+                    var parent = leaves[j].parentElement;
+                    // 找可点击的父元素
+                    while (parent && parent.tagName !== 'BODY') {
+                        if (parent.offsetHeight > 20 && parent.offsetHeight < 150) {
+                            parent.click();
+                            return 'clicked parent of "' + leaves[j].textContent.trim().substring(0, 30) + '" (' + parent.tagName + '.' + (parent.className || '').substring(0, 40) + ')';
+                        }
+                        parent = parent.parentElement;
+                    }
+                    leaves[j].click();
+                    return 'clicked leaf: ' + leaves[j].textContent.trim().substring(0, 30);
+                }
+                return 'nothing found';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('点击联系人:', clickContact.result?.value);
+
+    // 等网络请求
+    console.log('\n等待 10 秒...');
+    await new Promise(r => setTimeout(r, 10000));
+
+    // === 网络分析 ===
+    console.log('\n' + '='.repeat(70));
+    console.log('网络请求');
+    console.log('='.repeat(70));
+
+    const reqs = {};
+    for (const evt of events) {
+        if (evt.method === 'Network.requestWillBeSent') {
+            const url = evt.params.request.url;
+            if (url.match(/\.(js|css|png|jpg|gif|svg|woff2?|ico|ttf|jsonp)/i)) continue;
+            if (url.includes('aplus.alibaba.com')) continue;
+
+            let cat = 'other';
+            if (url.includes('mtop')) cat = 'MTOP';
+            else if (url.includes('acs.h.alibaba')) cat = 'ACS';
+            else if (url.includes('im.')) cat = 'IM';
+            else if (url.match(/\/(message|chat|contact|history|conversation)/i)) cat = 'CHAT';
+
+            if (!reqs[cat]) reqs[cat] = [];
+            reqs[cat].push({
+                url,
+                method: evt.params.request.method,
+                postData: evt.params.request.postData
+            });
+        }
+    }
+
+    for (const [cat, items] of Object.entries(reqs)) {
+        console.log(`\n--- ${cat} (${items.length}) ---`);
+        for (const r of items) {
+            console.log(`  ${r.method} ${r.url.substring(0, 250)}`);
+            if (r.postData) console.log(`    Payload: ${r.postData.substring(0, 400)}`);
+        }
+    }
+
+    const total = Object.values(reqs).reduce((s, a) => s + a.length, 0);
+    console.log(`\n总计: ${total}`);
+
+    fs.writeFileSync(
+        'd:/ClaudeWorkspace/08_客户跟进/Okki/data/phase1_events.json',
+        JSON.stringify(reqs, null, 2)
+    );
+
+    ws.close();
+    console.log('\n完成');
+})();

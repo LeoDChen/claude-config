@@ -1,0 +1,329 @@
+/**
+ * 小满CRM — 深抓 V3（搜索框方案）
+ *
+ * 绕过侧边栏虚拟滚动限制，用搜索框定位每个目标客户。
+ * 前置: Chrome 9222 + 小满 TM 页面已登录
+ * 用法: node deep-scrape-v3.mjs
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+// ============================================================
+// 搜索客户
+// ============================================================
+async function searchCustomer(frame, name) {
+  // Find search input
+  const searchSel = '.search-input input, .im-search input, .conversation-search input, [class*="search"] input, [placeholder*="搜索"]';
+  const found = await frame.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (el) {
+      el.value = '';
+      el.focus();
+      return true;
+    }
+    return false;
+  }, searchSel);
+
+  if (!found) {
+    console.log('   [搜索框未找到，尝试 fallback]');
+    // Try to find any input
+    const anyInput = await frame.evaluate(() => {
+      const inputs = document.querySelectorAll('input');
+      for (const inp of inputs) {
+        if (inp.offsetParent !== null && (inp.placeholder || '').includes('')) {
+          inp.value = '';
+          inp.focus();
+          return true;
+        }
+      }
+      return false;
+    });
+    if (!anyInput) return false;
+  }
+
+  // Type name character by character to trigger search
+  await frame.evaluate((n) => {
+    const inputs = document.querySelectorAll('input');
+    for (const inp of inputs) {
+      if (inp === document.activeElement) {
+        inp.value = n;
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+        inp.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  }, name);
+
+  await new Promise(r => setTimeout(r, 800));
+
+  // Check if search results appeared
+  const resultsVisible = await frame.evaluate(() => {
+    const items = document.querySelectorAll('.contact-item-container, .search-item, [class*="search-result"]');
+    return items.length > 0;
+  });
+
+  return resultsVisible;
+}
+
+// ============================================================
+// 点击搜索结果中第一个匹配项
+// ============================================================
+async function clickSearchResult(frame, targetName) {
+  // After search, the sidebar shows filtered results.
+  // Click the first (and usually only) matching item.
+  return frame.evaluate((name) => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    for (const el of containers) {
+      const text = el.textContent || '';
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : text;
+
+      // Fuzzy match
+      const t = name.toLowerCase().trim();
+      const d = nameText.toLowerCase().trim();
+      if (d.includes(t) || t.includes(d) || d.startsWith(t.substring(0, 5))) {
+        el.click();
+        return true;
+      }
+    }
+    // Fallback: click first item
+    if (containers.length > 0) {
+      containers[0].click();
+      return true;
+    }
+    return false;
+  }, targetName);
+}
+
+// ============================================================
+// 确认聊天窗口身份
+// ============================================================
+async function verifyIdentity(frame, expectedName) {
+  for (let i = 0; i < 15; i++) {
+    const actual = await frame.evaluate(() => {
+      const h = document.querySelector('.im-header-title, .session-header-title, .chat-header-title');
+      return h ? (h.textContent || '').trim() : '';
+    });
+
+    if (actual && actual.length > 0) {
+      // Fuzzy check
+      const a = actual.toLowerCase();
+      const e = expectedName.toLowerCase();
+      if (a.includes(e) || e.includes(a) || a === e) return true;
+
+      // Partial name match
+      const eParts = e.split(/\s+/).filter(x => x.length > 1);
+      for (const p of eParts) {
+        if (a.includes(p)) return true;
+      }
+    }
+
+    await new Promise(r => setTimeout(r, 500));
+  }
+  return false;
+}
+
+// ============================================================
+// 滚动聊天内容到底部，加载全部消息
+// ============================================================
+async function scrollChatToLoadAll(frame) {
+  for (let i = 0; i < 30; i++) {
+    const { scrolled, count } = await frame.evaluate(() => {
+      const containers = [
+        '.message-list-container', '.chat-list', '.im-chat-list',
+        '.message-list', '[class*="message-list"]', '[class*="chat-content"]',
+        '.session-message-list-wrapper',
+      ];
+      for (const sel of containers) {
+        const el = document.querySelector(sel);
+        if (el && el.scrollHeight > el.clientHeight) {
+          const old = el.scrollTop;
+          el.scrollTop = 0;
+          return {
+            scrolled: old > 0,
+            count: document.querySelectorAll('.message-item-wrapper.messenger').length
+          };
+        }
+      }
+      return { scrolled: false, count: 0 };
+    });
+
+    if (!scrolled) break;
+    await new Promise(r => setTimeout(r, 400));
+  }
+}
+
+// ============================================================
+// 获取消息
+// ============================================================
+async function getMessages(frame) {
+  return frame.evaluate(() => {
+    const msgs = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(w => {
+      const securityEl = w.querySelector('.session-security');
+      if (securityEl) return;
+
+      const isLeft = w.classList.contains('item-left');
+      const isRight = w.classList.contains('item-right');
+
+      const textEl = w.querySelector('.session-rich-content.text');
+      const cardEl = w.querySelector('.session-rich-content.card');
+
+      let content = '';
+      let isCard = false;
+      if (textEl) {
+        content = textEl.textContent.trim()
+          .replace(/翻译中…反馈$/, '').replace(/由阿里翻译提供反馈$/, '')
+          .replace(/阿里国际Marco大模型翻译反馈$/, '').replace(/由阿里翻译提供$/, '')
+          .trim();
+      } else if (cardEl) {
+        content = cardEl.textContent.trim();
+        isCard = true;
+      } else return;
+
+      const timeEl = w.querySelector('p.item-base-info span:last-child');
+      msgs.push({
+        side: isLeft ? 'received' : isRight ? 'sent' : 'system',
+        content: content.substring(0, 2000),
+        timestamp: timeEl ? timeEl.textContent.trim() : null,
+        isCard,
+      });
+    });
+    return msgs;
+  });
+}
+
+// ============================================================
+// 清除搜索
+// ============================================================
+async function clearSearch(frame) {
+  await frame.evaluate(() => {
+    const inputs = document.querySelectorAll('input');
+    for (const inp of inputs) {
+      if (inp.offsetParent !== null) {
+        inp.value = '';
+        inp.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+    // Click "x" clear button if exists
+    const clears = document.querySelectorAll('[class*="clear"], [class*="close"], .search-clear');
+    clears.forEach(el => el.click());
+  });
+  await new Promise(r => setTimeout(r, 400));
+}
+
+// ============================================================
+// Main
+// ============================================================
+async function main() {
+  // Load P0 list
+  const files = readdirSync(DATA_DIR).filter(f => f.includes('P0P1深抓清单'));
+  if (files.length === 0) {
+    console.log('未找到P0/P1清单，先运行 extract-all-v2.mjs');
+    return;
+  }
+  const listFile = files.sort().reverse()[0];
+  const p0p1List = JSON.parse(readFileSync(join(DATA_DIR, listFile), 'utf8'));
+  const p0Only = p0p1List.filter(c => c.priority === 'P0');
+
+  console.log(`[deep-scrape-v3] 搜索方案深抓 ${p0Only.length} 个 P0 客户\n`);
+
+  const { talkFrame } = await connect();
+  console.log('✅ 已连接\n');
+
+  const results = [];
+  const skipped = [];
+
+  for (let i = 0; i < p0Only.length; i++) {
+    const target = p0Only[i];
+    process.stdout.write(`[${i + 1}/${p0Only.length}] P0 ${target.name}... `);
+
+    try {
+      // Step 1: Clear previous search
+      await clearSearch(talkFrame);
+      await new Promise(r => setTimeout(r, 300));
+
+      // Step 2: Search for customer
+      const searched = await searchCustomer(talkFrame, target.name);
+      if (!searched) {
+        console.log('搜索失败');
+        skipped.push(target.name);
+        continue;
+      }
+
+      // Step 3: Click first result
+      const clicked = await clickSearchResult(talkFrame, target.name);
+      if (!clicked) {
+        console.log('未找到结果');
+        skipped.push(target.name);
+        continue;
+      }
+
+      // Step 4: Wait + verify
+      await new Promise(r => setTimeout(r, 1500));
+      const verified = await verifyIdentity(talkFrame, target.name);
+      if (!verified) {
+        console.log('身份验证失败');
+        skipped.push(target.name);
+        continue;
+      }
+
+      // Step 5: Scroll and read
+      await scrollChatToLoadAll(talkFrame);
+      const messages = await getMessages(talkFrame);
+
+      results.push({
+        name: target.name,
+        priority: target.priority,
+        messageCount: messages.length,
+        messages,
+        scrapedAt: new Date().toISOString(),
+      });
+
+      console.log(`✅ ${messages.length}条`);
+    } catch (e) {
+      console.log(`❌ ${e.message.substring(0, 50)}`);
+      skipped.push(target.name);
+    }
+  }
+
+  // Save
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const outputPath = join(DATA_DIR, `deep_scrape_v3_${dateStr}.json`);
+
+  writeFileSync(outputPath, JSON.stringify({
+    scrapedAt: now.toISOString(),
+    method: 'search-box',
+    totalTargeted: p0Only.length,
+    successCount: results.length,
+    skippedCount: skipped.length,
+    skipped,
+    results,
+  }, null, 2));
+
+  console.log(`\n✅ 深抓完成: ${results.length}/${p0Only.length} P0, ${skipped.length} 跳过 → ${outputPath}`);
+}
+
+main().catch(err => {
+  console.error('[deep-scrape-v3]', err.message);
+  process.exit(1);
+});

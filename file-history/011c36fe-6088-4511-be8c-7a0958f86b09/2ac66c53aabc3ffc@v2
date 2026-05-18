@@ -1,0 +1,106 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Agent",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(python *)",
+      "Bash(pip *)",
+      "Bash(npm *)",
+      "Bash(ls *)",
+      "Bash(cd *)",
+      "Bash(dir *)",
+      "Bash(echo *)",
+      "Bash(cat *)",
+      "Bash(wc *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(sort *)",
+      "Bash(which *)",
+      "Bash(whoami *)",
+      "Bash(date *)",
+      "Bash(uname *)",
+      "Bash(pwd *)",
+      "Bash(powershell *)",
+      "Bash(cmd *)",
+      "Bash(sleep *)",
+      "Bash(npx *)",
+      "Bash(pnpx *)",
+      "Bash(pnpm *)",
+      "Bash(yarn *)",
+      "Bash(find *)",
+      "Bash(where *)",
+      "Bash(whereis *)",
+      "Bash(netstat *)",
+      "Bash(tasklist *)",
+      "Bash(taskkill *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(openssl *)",
+      "Bash(ssh *)",
+      "Bash(scp *)",
+      "Bash(play_sound *)",
+      "Bash(mkdir *)",
+      "Bash(chmod *)",
+      "Bash(chown *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(rm *)",
+      "Bash(tar *)",
+      "Bash(gzip *)",
+      "Bash(unzip *)",
+      "Bash(zip *)"
+    ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound.ps1\" -sound \"Windows Ding\""
+          }
+        ]
+      },
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound.ps1\" -sound \"Windows Notify System Generic\""
+          }
+        ]
+      },
+      {
+        "matcher": "elicitation_dialog",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound.ps1\" -sound \"Windows Ding\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound.ps1\" -sound \"tada\""
+          }
+        ]
+      }
+    ]
+  }
+}

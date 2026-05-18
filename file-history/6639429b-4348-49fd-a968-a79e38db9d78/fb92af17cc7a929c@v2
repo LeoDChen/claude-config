@@ -1,0 +1,85 @@
+/**
+ * OKKI 全量客户数据抓取 — CDP 连接 + 自动翻页
+ *
+ * 使用：Chrome 已通过 --remote-debugging-port=9222 启动并登录 OKKI
+ * node scripts/scrape_cdp_full.js
+ */
+
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+
+const CDP_URL = 'http://localhost:9222';
+const OUTPUT_DIR = path.join(__dirname, '..', 'data');
+const PAGE_SIZE = 100;
+const REQUEST_DELAY = 500;
+
+if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+async function main() {
+  console.log('[OKKI Full] 连接 Chrome ...');
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const page = browser.contexts()[0].pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到 OKKI 页面');
+
+  console.log(`[OKKI Full] 页面: ${page.url()}`);
+  if (page.url().includes('login')) throw new Error('未登录');
+
+  const allCustomers = [];
+  let curPage = 1;
+  let totalItem = Infinity;
+
+  while ((curPage - 1) * PAGE_SIZE < totalItem) {
+    const result = await page.evaluate(async ({ curPage, pageSize }) => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://crm.xiaoman.cn/api/customerV3Read/companyList', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.withCredentials = true;
+        xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+        xhr.onerror = () => reject(new Error('XHR failed'));
+        const params = new URLSearchParams();
+        params.append('curPage', curPage);
+        params.append('pageSize', pageSize);
+        params.append('show_field_key', 'company.private.list.field');
+        params.append('user_num[0]', '1');
+        params.append('user_num[1]', '2');
+        params.append('sort_scene', 'setting');
+        params.append('show_all', '1');
+        params.append('swarm_id', '1');
+        params.append('layout_flag', '1');
+        xhr.send(params.toString());
+      });
+    }, { curPage, pageSize: PAGE_SIZE });
+
+    const list = result.data?.list || [];
+    totalItem = result.data?.totalItem || 0;
+
+    if (list.length === 0) {
+      console.log(`[OKKI Full] 第 ${curPage} 页为空，停止`);
+      break;
+    }
+
+    allCustomers.push(...list);
+    console.log(`[OKKI Full] 第 ${curPage} 页 → ${list.length} 人 (累计 ${allCustomers.length}/${totalItem})`);
+
+    if (curPage % 5 === 0) saveSnapshot(allCustomers, totalItem);
+
+    curPage++;
+    await new Promise(r => setTimeout(r, REQUEST_DELAY));
+  }
+
+  const ts = saveSnapshot(allCustomers, totalItem);
+  console.log(`\n[OKKI Full] ✅ ${allCustomers.length}/${totalItem} 人 → ${ts}`);
+  process.exit(0);
+}
+
+function saveSnapshot(customers, total) {
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const fp = path.join(OUTPUT_DIR, `okki_full_${ts}.json`);
+  fs.writeFileSync(fp, JSON.stringify({ capturedAt: ts, totalItem: total, totalCaptured: customers.length, customers }, null, 2));
+  console.log(`  [Save] ${fp}`);
+  return ts;
+}
+
+main().catch(err => { console.error('[OKKI Full]', err.message); process.exit(1); });

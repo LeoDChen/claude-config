@@ -1,0 +1,111 @@
+Write-Host "============================================"
+Write-Host "THIS PC HANG - COMPLETE DIAGNOSTIC"
+Write-Host "============================================"
+
+# 1. Check all namespace extensions under This PC
+Write-Host "`n[1] Namespace extensions under MyComputer"
+$nsPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace'
+if (Test-Path $nsPath) {
+    Get-ChildItem $nsPath | ForEach-Object {
+        $clsid = $_.PSChildName
+        $default = (Get-ItemProperty $_.PSPath -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        Write-Host "  CLSID: $clsid = $default"
+    }
+}
+
+$nsPath2 = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace'
+if (Test-Path $nsPath2) {
+    Write-Host "  --- WOW6432Node ---"
+    Get-ChildItem $nsPath2 | ForEach-Object {
+        $clsid = $_.PSChildName
+        $default = (Get-ItemProperty $_.PSPath -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        Write-Host "  CLSID: $clsid = $default"
+    }
+}
+
+# 2. Check Known Folder definitions for Desktop, Downloads, Documents
+Write-Host "`n[2] Known Folder definitions"
+$knownFolderPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions'
+$checkGuids = @(
+    '{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}',  # Desktop
+    '{374DE290-123F-4565-9164-39C4925E467B}',  # Downloads
+    '{FDD39AD0-238F-46AF-ADB4-6C85480369C7}',  # Documents
+    '{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'   # The weird one
+)
+foreach ($guid in $checkGuids) {
+    $fPath = Join-Path $knownFolderPath $guid
+    if (Test-Path $fPath) {
+        $name = (Get-ItemProperty $fPath -Name 'Name' -ErrorAction SilentlyContinue).Name
+        $parsingName = (Get-ItemProperty $fPath -Name 'ParsingName' -ErrorAction SilentlyContinue).ParsingName
+        $relativePath = (Get-ItemProperty $fPath -Name 'RelativePath' -ErrorAction SilentlyContinue).RelativePath
+        Write-Host "  $name ($guid)"
+        Write-Host "    ParsingName: $parsingName"
+        Write-Host "    RelativePath: $relativePath"
+    }
+}
+
+# 3. Check all values in Shell Folders (legacy) for anything suspicious
+Write-Host "`n[3] Legacy Shell Folders (full)"
+$legacyKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+$legacy = Get-ItemProperty $legacyKey
+foreach ($prop in $legacy.PSObject.Properties) {
+    if ($prop.Name -match '^PS') { continue }
+    $val = $prop.Value
+    if ($val -and $val -notmatch '^C:\\') {
+        Write-Host "  NON-STANDARD PATH: $($prop.Name) = $val"
+    }
+}
+
+# 4. Check if there's corruption in User Shell Folders
+Write-Host "`n[4] User Shell Folders - check for non-existent paths"
+$userKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+$user = Get-ItemProperty $userKey
+foreach ($prop in $user.PSObject.Properties) {
+    if ($prop.Name -match '^PS') { continue }
+    $val = $prop.Value
+    if ($val -and (-not (Test-Path $val))) {
+        Write-Host "  BROKEN PATH: $($prop.Name) -> $val (does not exist)"
+    }
+}
+
+# 5. Check for problematic CLSID registrations
+Write-Host "`n[5] Check Desktop CLSID (CLSID_ShellDesktop)"
+$desktopCLSID = 'HKCR:\CLSID\{00021400-0000-0000-C000-000000000046}'
+if (Test-Path $desktopCLSID) {
+    Write-Host "  Desktop IShellFolder CLSID: OK"
+} else {
+    Write-Host "  Desktop IShellFolder CLSID: MISSING!"
+}
+
+# 6. Check if Shell registry entries are intact
+Write-Host "`n[6] Critical shell registry checks"
+$criticalPaths = @(
+    'HKCR:\Folder\shell',
+    'HKCR:\Folder\shellex',
+    'HKCR:\Directory\shell',
+    'HKCR:\Drive\shell'
+)
+foreach ($p in $criticalPaths) {
+    if (Test-Path $p) {
+        Write-Host "  $p : OK"
+    } else {
+        Write-Host "  $p : MISSING!"
+    }
+}
+
+# 7. Check sfc /scannow results (quick check)
+Write-Host "`n[7] System file integrity (quick check)"
+$sfcLog = "$env:windir\Logs\CBS\CBS.log"
+if (Test-Path $sfcLog) {
+    $recentErrors = Select-String -Path $sfcLog -Pattern 'Cannot repair' -SimpleMatch | Select-Object -Last 3
+    if ($recentErrors) {
+        Write-Host "  Recent SFC cannot-repair entries found:"
+        $recentErrors | ForEach-Object { Write-Host "    $($_.Line.Substring(0, [Math]::Min(200, $_.Line.Length)))" }
+    } else {
+        Write-Host "  No recent 'Cannot repair' entries"
+    }
+}
+
+Write-Host "`n============================================"
+Write-Host "DIAGNOSTIC COMPLETE"
+Write-Host "============================================"

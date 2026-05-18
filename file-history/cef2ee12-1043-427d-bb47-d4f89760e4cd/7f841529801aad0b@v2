@@ -1,0 +1,201 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const USER_DATA = path.join(process.env.LOCALAPPDATA, 'Google', 'Chrome', 'User Data');
+const CHROME_EXE = path.join(process.env.LOCALAPPDATA, 'Google', 'Chrome', 'Application', 'chrome.exe');
+const PROFILE = 'Profile 4'; // 云超数码
+
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+(async () => {
+  // Step 1: Kill all Chrome processes
+  console.log('关闭现有Chrome进程...');
+  try { execSync('taskkill /F /IM chrome.exe 2>nul', { timeout: 5000 }); } catch (e) {}
+  await new Promise(r => setTimeout(r, 3000));
+  console.log('Chrome已关闭');
+
+  // Step 2: Launch Chrome via Playwright with user profile
+  console.log(`\n启动Chrome (资料: ${PROFILE})...`);
+  const context = await chromium.launchPersistentContext(USER_DATA, {
+    executablePath: CHROME_EXE,
+    args: [
+      `--profile-directory=${PROFILE}`,
+      '--disable-blink-features=AutomationControlled',
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-background-networking',
+    ],
+    headless: false,
+    viewport: null, // use natural window size
+  });
+
+  console.log('Chrome已启动');
+  const page = context.pages()[0] || await context.newPage();
+
+  // Step 3: Collect all XHR/fetch responses from xiaoman.cn
+  const captured = [];
+  const seenUrls = new Set();
+
+  page.on('response', async (response) => {
+    try {
+      const url = response.url();
+      const ct = response.headers()['content-type'] || '';
+      if (!ct.includes('json') && !url.includes('/api/')) return;
+      if (!url.includes('xiaoman.cn')) return;
+      if (seenUrls.has(url)) return;
+      seenUrls.add(url);
+
+      let body;
+      try {
+        body = await response.json();
+      } catch (e) {
+        body = await response.text();
+      }
+
+      const entry = {
+        url: url.substring(0, 300),
+        status: response.status(),
+        bodyType: typeof body,
+        isArray: Array.isArray(body),
+        bodyKeys: typeof body === 'object' && !Array.isArray(body) ? Object.keys(body).slice(0, 30) : null,
+        sample: JSON.stringify(body).substring(0, 500),
+        totalRecords: Array.isArray(body) ? body.length : (body?.data && Array.isArray(body.data) ? body.data.length : null),
+      };
+      captured.push(entry);
+      console.log(`  [${response.status()}] ${url.substring(0, 120)} ${entry.totalRecords ? 'records=' + entry.totalRecords : ''}`);
+    } catch (e) { /* skip */ }
+  });
+
+  // Step 4: Navigate to OKKI CRM
+  console.log('\n导航到OKKI CRM...');
+  try {
+    await page.goto('https://crm.xiaoman.cn/', { waitUntil: 'networkidle', timeout: 30000 });
+  } catch (e) {
+    console.log('  首页加载超时，检查当前URL...');
+  }
+  console.log(`  当前URL: ${page.url()}`);
+  await page.waitForTimeout(3000);
+
+  // Step 5: Try to navigate to customer list
+  console.log('\n查找客户列表入口...');
+  const navSnapshot = await page.evaluate(() => {
+    const result = { title: document.title, url: location.href, hasLogin: false, navTexts: [] };
+    result.hasLogin = !document.body.innerText.includes('登录') && !document.body.innerText.includes('Login');
+    const allText = [];
+    document.querySelectorAll('a, [class*="nav"], [class*="menu"], [class*="tab"], [class*="sidebar"] span, li span').forEach(el => {
+      const text = (el.textContent || '').trim();
+      if (text && text.length >= 1 && text.length <= 15) allText.push(text);
+    });
+    result.navTexts = [...new Set(allText)].slice(0, 30);
+    return result;
+  });
+  console.log('  标题:', navSnapshot.title);
+  console.log('  已登录:', navSnapshot.hasLogin);
+  console.log('  导航:', navSnapshot.navTexts);
+
+  // If not logged in, wait for user
+  if (!navSnapshot.hasLogin) {
+    console.log('\n⚠️  检测到未登录状态！请在浏览器中手动登录OKKI CRM');
+    console.log('   登录完成后按Enter继续...');
+    await new Promise(r => process.stdin.once('data', r));
+    await page.waitForTimeout(2000);
+  }
+
+  // Step 6: Navigate customer pages to trigger API calls
+  console.log('\n浏览客户管理页面以触发API...');
+  const customerUrls = [
+    'https://crm.xiaoman.cn/client',
+    'https://crm.xiaoman.cn/client/list',
+    'https://crm.xiaoman.cn/clue/list',
+    'https://crm.xiaoman.cn/im/inbox',
+  ];
+  for (const url of customerUrls) {
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+      console.log(`  ${url} → ${page.url().substring(0, 80)}`);
+      await page.waitForTimeout(2000);
+    } catch (e) {
+      console.log(`  ${url} → 超时/失败`);
+    }
+  }
+
+  // Step 7: Try clicking on customer-related elements
+  console.log('\n尝试点击客户相关元素...');
+  const clickResult = await page.evaluate(() => {
+    const clicked = [];
+    const targets = ['客户', 'Client', '全部客户', '客户管理', '线索', 'Leads', 'Inbox', '询盘'];
+    for (const t of targets) {
+      const els = [...document.querySelectorAll('div, span, a, li, button')];
+      for (const el of els) {
+        if ((el.textContent || '').trim() === t) {
+          try { el.click(); clicked.push(t); break; } catch(e) {}
+        }
+      }
+    }
+    return clicked;
+  });
+  console.log('  已点击:', clickResult);
+  await page.waitForTimeout(3000);
+
+  // Step 8: Check page content and try to extract data
+  const contentCheck = await page.evaluate(() => {
+    const body = document.body.innerText.substring(0, 500);
+    const hasTable = !!document.querySelector('table');
+    const hasList = !!document.querySelector('[class*="list"], [class*="table"]');
+    const rowCount = document.querySelectorAll('tr, [class*="row"]').length;
+    return { bodyPreview: body, hasTable, hasList, rowCount };
+  });
+  console.log('\n页面内容:', contentCheck.bodyPreview.substring(0, 200));
+  console.log('  表格:', contentCheck.hasTable, '列表:', contentCheck.hasList, '行数:', contentCheck.rowCount);
+
+  // Step 9: Wait for more API calls
+  console.log('\n等待API响应...');
+  await page.waitForTimeout(5000);
+
+  // Step 10: Save results
+  const customerApis = captured.filter(c => {
+    const url = c.url.toLowerCase();
+    return url.includes('client') || url.includes('customer') || url.includes('clue') ||
+           url.includes('list') || url.includes('search') || url.includes('query') ||
+           url.includes('inbox') || url.includes('im/');
+  });
+
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const output = {
+    capturedAt: new Date().toISOString(),
+    crmUrl: page.url(),
+    totalCaptured: captured.length,
+    customerApis: customerApis,
+    allApis: captured,
+    navSnapshot,
+  };
+  const filepath = path.join(DATA_DIR, `pw_extract_${ts}.json`);
+  fs.writeFileSync(filepath, JSON.stringify(output, null, 2));
+
+  console.log(`\n=== 结果 ===`);
+  console.log(`总API捕获: ${captured.length} 个`);
+  console.log(`客户相关API: ${customerApis.length} 个`);
+  console.log(`\n客户相关API详情:`);
+  for (const cap of customerApis) {
+    console.log(`  [${cap.status}] ${cap.url}`);
+    console.log(`    Keys: ${cap.bodyKeys}`);
+    console.log(`    Records: ${cap.totalRecords}`);
+    console.log(`    Sample: ${cap.sample.substring(0, 150)}`);
+    console.log('');
+  }
+  console.log(`完整结果: ${filepath}`);
+
+  // Close page but keep browser open for user review
+  await page.close().catch(() => {});
+  console.log('\n脚本完成。浏览器保持打开以供检查。');
+  console.log('按Enter关闭浏览器并退出...');
+  await new Promise(r => process.stdin.once('data', r));
+  await context.close();
+  console.log('已关闭。');
+})().catch(err => {
+  console.error('脚本错误:', err);
+  process.exit(1);
+});

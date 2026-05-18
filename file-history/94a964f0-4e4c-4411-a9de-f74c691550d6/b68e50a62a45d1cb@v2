@@ -1,0 +1,25 @@
+$guids = @(
+    '{374DE290-123F-4565-9164-39C4925E467B}',
+    '{7D83EE9B-2244-4E70-B1F5-5393042AF1E4}',
+    '{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}',
+    '{F42EE2D3-909F-4907-8871-4C22FC0BF756}'
+)
+
+$basePath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions'
+foreach ($guid in $guids) {
+    $path = Join-Path $basePath $guid
+    if (Test-Path $path) {
+        $name = (Get-ItemProperty -Path $path -Name 'Name' -ErrorAction SilentlyContinue).Name
+        Write-Host "$guid = $name"
+    } else {
+        Write-Host "$guid = NOT FOUND in FolderDescriptions"
+    }
+}
+
+# Also check what's in user shell folders pointing to Desktop
+Write-Host "`n--- Current User Shell Folders pointing to D:\桌面 ---"
+$userShell = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+$props = $userShell.PSObject.Properties | Where-Object { $_.Value -eq 'D:\桌面' }
+foreach ($p in $props) {
+    Write-Host "$($p.Name) -> $($p.Value)"
+}

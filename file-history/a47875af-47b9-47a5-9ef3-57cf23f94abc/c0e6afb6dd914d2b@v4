@@ -1,0 +1,110 @@
+# KPI 卡片可点击弹窗 — 实施计划
+
+> 规格：[2026-05-14-kpi-clickable-modal-design.md](../docs/superpowers/specs/2026-05-14-kpi-clickable-modal-design.md)
+
+## 改动范围
+
+改 `d:\ClaudeWorkspace\08_客户跟进\Okki\scripts\enhanced_classify.js` 的 `generateDashboard` 函数（L461-L715）。
+
+## 实施步骤
+
+### Step 1: 修改"需行动"计算（L497）
+
+```js
+// 旧：
+const needsAction = data.filter(e => e.stageLabel === '待回复' || e.questionUnanswered || e.stageLabel === 'PI已发' || (e.stageLabel === '报价已发' && e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays <= 7)).length;
+
+// 新：
+const needsAction = data.filter(e => e.actionPriority === 'urgent' || e.actionPriority === 'soon' || e.actionPriority === 'watch').length;
+```
+
+### Step 2: 构建 KPI_DATA JSON（L604 之后）
+
+筛选条件与 Step 1 变量计算完全一致，每个数组按 priority → silence 升序排列：
+
+```js
+// 辅助函数
+function kpiSort(arr) {
+  const order = { urgent: 0, soon: 1, watch: 2, idle: 3 };
+  return arr.sort((a, b) => {
+    const pd = (order[a.actionPriority] || 3) - (order[b.actionPriority] || 3);
+    if (pd !== 0) return pd;
+    return (a.lastCustomerMsgDays === '-' ? 999 : a.lastCustomerMsgDays) - (b.lastCustomerMsgDays === '-' ? 999 : b.lastCustomerMsgDays);
+  });
+}
+
+function toEntry(e) { return {
+  n: e.name, c: e.countryCN || e.country || '??',
+  d: e.lastCustomerMsgDays === '-' ? 999 : e.lastCustomerMsgDays,
+  g: e.grade, as: e.afterSalesFlag || false,
+  st: e.actionStatus || '', ac: e.actionText || '',
+  pr: e.actionPriority || 'idle'
+}; }
+
+const kpiJson = {
+  "总客户": kpiSort(data.map(toEntry)),
+  "3天活跃": kpiSort(data.filter(e => e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays < 3).map(toEntry)),
+  "超90天无互动": kpiSort(data.filter(e => e.lastCustomerMsgDays !== '-' && e.lastCustomerMsgDays >= 90).map(toEntry)),
+  "未读消息": kpiSort(data.filter(e => e.questionUnanswered).map(toEntry)),
+  "本期变动": kpiSort(data.filter(e => e.daysAgo <= 3).map(toEntry)),
+  "需行动": kpiSort(data.filter(e => e.actionPriority === 'urgent' || e.actionPriority === 'soon' || e.actionPriority === 'watch').map(toEntry))
+};
+```
+
+### Step 3: KPI 卡片加 onclick + CSS（L623 L658）
+
+CSS 加 `.kpi { cursor: pointer; transition: transform 0.15s; }` + `.kpi:hover { transform: scale(1.03); }`
+
+L658 ~ `kpiCards.map(...)` 改为：
+```js
+kpiCards.map(c => '<div class="kpi" style="background:' + c.color + ';cursor:pointer;" onclick="openKpiModal(\'' + c.label + '\')"><div class="num">' + c.num + '</div><div class="lbl">' + c.label + '</div></div>').join('\n')
+```
+
+### Step 4: 注入 window.KPI_DATA（L678 之后）
+
+```js
+'window.KPI_DATA = ' + JSON.stringify(kpiJson) + ';\n' +
+```
+
+### Step 5: 新增 openKpiModal 函数
+
+在 `openModal` 函数（L689）之前插入：
+```js
+function openKpiModal(key) {
+  var data = window.KPI_DATA[key] || [];
+  document.getElementById("modal-title").innerHTML = esc(key) + " — " + data.length + "人";
+  var rows = "";
+  for (var i = 0; i < data.length; i++) {
+    var c = data[i];
+    rows += "<tr><td>" + gradeTag(c.g) + "<strong>" + esc(c.n) + "</strong></td><td style=\"text-align:center;white-space:nowrap;font-size:11px;\">" + esc(c.c) + " · " + (c.d === 999 ? "?" : c.d + "d") + "</td><td style=\"font-size:12px;\">" + (c.as ? '⚠️ 售后待确认 — ' : '') + esc(c.st) + "</td><td style=\"color:var(--text-primary);font-weight:600;font-size:12px;\">" + prioIcon(c.pr) + " " + esc(c.ac) + "</td></tr>";
+  }
+  document.getElementById("modal-body").innerHTML =
+    '<div style="max-height:55vh;overflow-y:auto;"><table><tr><th style="width:140px;">客户</th><th style="text-align:center;width:100px;">国家 · 静默</th><th>当前状态</th><th>行动方向</th></tr>' + rows + '</table></div>' +
+    '<div style="margin-top:8px;font-size:10px;color:var(--text-tertiary);">💡 🔴今天必须 🟡今明可做 🟢正常等待 ⚪暂不行动 | ESC/点击遮罩关闭</div>';
+  document.getElementById("modal-overlay").classList.add("show");
+}
+```
+
+注：KPI 弹窗无"标准动作参考"行（跨阶段无单一标准动作）。
+
+### Step 6: 矩阵弹窗也按紧急度排序
+
+问题：`matrixJson` 构建（L593-602）只 `.map()` 没排序，弹窗客户列表无序。
+
+修复：每个 matrixJson 格子的 `.map()` 外包一层 `kpiSort()`，复用已有排序函数。
+
+```js
+// 旧：
+matrixJson[s][g] = (matrixData[s][g] || []).map(e => ({...}));
+
+// 新：
+matrixJson[s][g] = kpiSort((matrixData[s][g] || []).map(e => ({...})));
+```
+
+### Step 7: 运行验证
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/enhanced_classify.js
+```
+
+打开 `output/dashboard_2026-05-14.html` 确认 6 个 KPI 都可点击，数字与弹窗人数一致。

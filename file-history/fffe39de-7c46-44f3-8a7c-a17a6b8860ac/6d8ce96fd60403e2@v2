@@ -1,0 +1,370 @@
+<style>
+  /* 全部用框架 CSS 变量，自动适配浅色/深色 */
+  .db-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin: 0 0 16px 0;
+  }
+  .kpi {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 10px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .kpi.red { background: #c0392b; }
+  .kpi.orange { background: #e67e22; }
+  .kpi.green { background: #27ae60; }
+  .kpi.purple { background: #8e44ad; }
+  .kpi-num { font-size: 28px; font-weight: bold; color: #fff; }
+  .kpi-label { font-size: 12px; opacity: 0.9; color: #fff; }
+
+  .panel-header {
+    background: var(--bg-tertiary);
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .panel-header span { font-weight: normal; font-size: 11px; color: var(--text-secondary); }
+
+  .mx-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+  .mx-table th {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .mx-table td {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-primary);
+  }
+  .mx-table td.row-label { text-align: left; font-weight: 600; }
+  .mx-cell-hot {
+    background: rgba(255, 159, 10, 0.25);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .mx-cell-good {
+    background: rgba(52, 199, 89, 0.2);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .mx-change-up { color: var(--success); font-weight: 600; }
+  .mx-change-down { color: var(--error); font-weight: 600; }
+  .mx-legend {
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+  }
+
+  .silence-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    color: var(--text-primary);
+  }
+  .silence-detail {
+    display: none;
+    padding: 8px 14px;
+    font-size: 11px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .silence-detail .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    color: var(--text-primary);
+  }
+
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  .action-detail {
+    display: none;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+  }
+  .badge { color: #fff; padding: 3px 10px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+  .badge.urgent { background: #c0392b; }
+  .badge.today { background: #e67e22; }
+  .badge.h48 { background: #3498db; }
+  .badge.week { background: #27ae60; }
+
+  .script-box {
+    background: var(--bg-secondary);
+    padding: 10px;
+    border-left: 3px solid #f39c12;
+    border-radius: 0 4px 4px 0;
+    color: var(--text-primary);
+  }
+  .script-box.blue-border { border-left-color: #3498db; }
+
+  .sub-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+  .sub-table th {
+    padding: 8px;
+    border: 1px solid var(--border);
+    text-align: left;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .sub-table td {
+    padding: 8px;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .sub-table td.num { text-align: center; }
+
+  .trend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .trend-row .detail { font-size: 11px; color: var(--text-secondary); }
+
+  .flex-row { display: flex; gap: 16px; margin: 16px 0; }
+  .flex-1 { flex: 1; }
+  .flex-320 { flex: 0 0 320px; }
+  .mb-16 { margin: 16px 0; }
+</style>
+
+<h2>OKKI 客户运营看板 — 主题自适应版</h2>
+<p class="subtitle">深浅主题自动切换，文字对比度确保可读。点击可折叠展开</p>
+
+<!-- 顶部指标卡 -->
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-num">477</div><div class="kpi-label">总会话</div></div>
+  <div class="kpi"><div class="kpi-num">23</div><div class="kpi-label">3天活跃</div></div>
+  <div class="kpi red"><div class="kpi-num">267</div><div class="kpi-label">超90天无互动</div></div>
+  <div class="kpi orange"><div class="kpi-num">47</div><div class="kpi-label">未读</div></div>
+  <div class="kpi green"><div class="kpi-num">17</div><div class="kpi-label">本期变动</div></div>
+  <div class="kpi purple"><div class="kpi-num">12</div><div class="kpi-label">今天行动</div></div>
+</div>
+
+<!-- 矩阵 + 静默 -->
+<div class="flex-row">
+  <div class="flex-1 db-card" style="overflow:hidden;">
+    <div class="panel-header">客户双轴矩阵 <span>（生命周期 × 质量）</span></div>
+    <table class="mx-table">
+      <tr><th></th><th>S 级</th><th>A 级</th><th>B 级</th><th>C 级</th><th>D 级</th><th>变动</th></tr>
+      <tr><td class="row-label">待回复</td><td class="mx-cell-hot" onclick="alert('S级×待回复:\n\nMaimouna Cisse (CI) - 报价已发5天未回\n判断: 品牌采购经理, 明确询价接受MOQ')">1</td><td>2</td><td>3</td><td>5</td><td>3</td><td class="mx-change-up">+1</td></tr>
+      <tr><td class="row-label">初询沟通</td><td>0</td><td>2</td><td>4</td><td>6</td><td>2</td><td class="mx-change-down">-2</td></tr>
+      <tr><td class="row-label">报价已发</td><td class="mx-cell-hot" onclick="alert('S×报价已发:\n1.Maimouna Cisse (CI) 静默5天\n2.Ahmed (SD) 静默2天')">2</td><td class="mx-cell-hot" onclick="alert('A×报价已发:\n1.John (EG) 静默3天\n2.Fatima (SA) 静默1天\n3.Kwame (GH) 静默4天')">3</td><td>5</td><td>4</td><td>1</td><td>0</td></tr>
+      <tr><td class="row-label">谈判/样品</td><td class="mx-cell-good" onclick="alert('S×谈判:\nKeinjol Tata (CD) 样板确认中')">1</td><td class="mx-cell-good" onclick="alert('A×谈判:\n1.Musa (NG) 样板寄送中\n2.Amina (TZ) 价格谈判')">2</td><td>1</td><td>0</td><td>0</td><td class="mx-change-up">+3</td></tr>
+      <tr><td class="row-label">PI已发</td><td class="mx-cell-good" onclick="alert('S×PI已发:\nSamia Guenad (SD) 待付款4天')">1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td class="row-label">订单执行</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td class="row-label">已签收</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td class="row-label">售后</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    </table>
+  </div>
+
+  <div class="flex-320 db-card" style="overflow:hidden;">
+    <div class="panel-header">静默风险分级</div>
+    <div>
+      <div class="silence-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="border-bottom: 1px solid var(--border);">
+        <span>● <strong style="color:#c0392b;">深度静默 90天+</strong></span>
+        <strong style="font-size:16px;color:#c0392b;">267</strong>
+      </div>
+      <div class="silence-detail" style="background: rgba(255,59,48,0.08);">
+        <div class="row"><span>Sara Ali (SD)</span><span>352天</span></div>
+        <div class="row"><span>Mohamed B. (EG)</span><span>298天</span></div>
+        <div class="row"><span>Grace K. (GH)</span><span>275天</span></div>
+        <div class="row"><span>Ibrahim D. (CI)</span><span>240天</span></div>
+        <div style="color: var(--text-secondary); padding-top: 4px;">... 263 人更多</div>
+      </div>
+    </div>
+    <div>
+      <div class="silence-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'">
+        <span>● <strong style="color:#e67e22;">长期静默 30-90天</strong></span>
+        <strong style="font-size:16px;color:#e67e22;">45</strong>
+      </div>
+      <div class="silence-detail" style="background: rgba(230,126,34,0.08);">
+        <div class="row"><span>Kofi Mensah (GH)</span><span>78天</span></div>
+        <div class="row"><span>Amal Hassan (SD)</span><span>65天</span></div>
+        <div class="row"><span>Peter O. (NG)</span><span>52天</span></div>
+        <div style="color: var(--text-secondary); padding-top: 4px;">... 42 人更多</div>
+      </div>
+    </div>
+    <div>
+      <div class="silence-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'">
+        <span>● <strong style="color:#f39c12;">中期静默 14-30天</strong></span>
+        <strong style="font-size:16px;color:#f39c12;">23</strong>
+      </div>
+      <div class="silence-detail" style="background: rgba(243,156,18,0.08);">
+        <div class="row"><span>David L. (US)</span><span>28天</span></div>
+        <div class="row"><span>Marie F. (FR)</span><span>22天</span></div>
+        <div class="row"><span>Youssef B. (MA)</span><span>18天</span></div>
+        <div style="color: var(--text-secondary); padding-top: 4px;">... 20 人更多</div>
+      </div>
+    </div>
+    <div>
+      <div class="silence-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'">
+        <span>● <strong style="color:#3498db;">短期静默 7-14天</strong></span>
+        <strong style="font-size:16px;color:#3498db;">18</strong>
+      </div>
+      <div class="silence-detail" style="background: rgba(52,152,219,0.08);">
+        <div class="row"><span>Kwame A. (GH)</span><span>12天</span></div>
+        <div class="row"><span>Zainab M. (NG)</span><span>9天</span></div>
+        <div style="color: var(--text-secondary); padding-top: 4px;">... 16 人更多</div>
+      </div>
+    </div>
+    <div>
+      <div class="silence-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="border-bottom: none;">
+        <span>● <strong style="color:#27ae60;">近期活跃 3-7天</strong></span>
+        <strong style="font-size:16px;color:#27ae60;">12</strong>
+      </div>
+      <div class="silence-detail" style="background: rgba(39,174,96,0.08);">
+        <div class="row"><span>Keinjol Tata (CD)</span><span>5天前活跃</span></div>
+        <div class="row"><span>Maimouna Cisse (CI)</span><span>6天前活跃</span></div>
+        <div style="color: var(--text-secondary); padding-top: 4px;">... 10 人更多</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 行动清单 -->
+<div class="db-card mb-16" style="overflow:hidden;">
+  <div class="panel-header">今日行动清单（12人） <span>点击展开卡点 + 时间窗口理由 + 话术</span></div>
+
+  <div style="border-bottom: 1px solid var(--border);">
+    <div class="action-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="border-bottom: none;">
+      <span class="badge urgent">紧急</span>
+      <strong style="font-size:14px;">Maimouna Cisse</strong>
+      <span style="color: var(--text-secondary); font-size:12px;">🇨🇮 科特迪瓦 · 报价已发 · S级</span>
+      <span style="color: #c0392b; font-size:12px; font-weight:bold;">静默5天</span>
+      <span style="color: var(--text-secondary); font-size:11px; margin-left:auto;">▶ 展开</span>
+    </div>
+    <div class="action-detail" style="border-top: 1px solid var(--border);">
+      <div style="margin-bottom:8px;"><strong>卡点：</strong>客户已收到报价但未确认，可能在与竞品比价。上次沟通停留在价格确认环节。</div>
+      <div style="margin-bottom:8px;"><strong>时间窗口：</strong>报价后第5天是关键跟进节点——再等2天竞品可能抢先。</div>
+      <div class="script-box">
+        <strong>话术：</strong><br>
+        Hi Maimouna, hope you've had time to review the quotation. I wanted to check if you have any questions about the pricing or specs — happy to adjust based on your target budget. Looking forward to your feedback.
+      </div>
+    </div>
+  </div>
+
+  <div style="border-bottom: 1px solid var(--border);">
+    <div class="action-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'">
+      <span class="badge today">今日</span>
+      <strong style="font-size:14px;">Keinjol Tata</strong>
+      <span style="color: var(--text-secondary); font-size:12px;">🇨🇩 刚果民主 · 初询沟通 · S级</span>
+      <span style="color: #c0392b; font-size:12px; font-weight:bold;">待回复2天</span>
+      <span style="color: var(--text-secondary); font-size:11px; margin-left:auto;">▶ 展开</span>
+    </div>
+    <div class="action-detail" style="border-top: 1px solid var(--border);">
+      <div style="margin-bottom:8px;"><strong>卡点：</strong>新客户首次询盘后我方已回复报价+工厂资料，对方未读。可能障碍：被竞品吸引/对MOQ有顾虑/仅比价。</div>
+      <div style="margin-bottom:8px;"><strong>时间窗口：</strong>首次回复后48小时是黄金二次触达期。再延迟可能被遗忘。</div>
+      <div class="script-box">
+        <strong>话术：</strong><br>
+        Hi Keinjol, just following up on the quotation I sent. We also have some new baby blanket designs I think you'd like — would you be interested in seeing them? Let me know if MOQ is a concern, we can discuss flexible options.
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="action-row" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'">
+      <span class="badge h48">48h内</span>
+      <strong style="font-size:14px;">Samia Guenad</strong>
+      <span style="color: var(--text-secondary); font-size:12px;">🇸🇩 苏丹 · PI已发 · A级</span>
+      <span style="color: #e67e22; font-size:12px; font-weight:bold;">待付款4天</span>
+      <span style="color: var(--text-secondary); font-size:11px; margin-left:auto;">▶ 展开</span>
+    </div>
+    <div class="action-detail" style="border-top: 1px solid var(--border);">
+      <div style="margin-bottom:8px;"><strong>卡点：</strong>PI已发但付款未到。可能卡在银行流程/外汇审批/决策人变动。</div>
+      <div style="margin-bottom:8px;"><strong>时间窗口：</strong>PI有效期通常7天，已过4天。建议在第6天前确认银行流程状态。</div>
+      <div class="script-box blue-border">
+        <strong>话术：</strong><br>
+        Hi Samia, hope you're well. Just checking if the payment is proceeding smoothly or if you need any documents from our side to help with the bank process. The PI is valid until [date], please let us know if any adjustments are needed.
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 10px 14px; font-size: 12px; color: var(--text-secondary); text-align: center; border-top: 1px solid var(--border);">
+    ... 剩余 9 项折叠（48h内 × 4, 本周 × 5）
+  </div>
+</div>
+
+<!-- 市场 + 变动 -->
+<div class="flex-row">
+  <div class="flex-1 db-card" style="overflow:hidden;">
+    <div class="panel-header">核心市场管道密度</div>
+    <table class="sub-table">
+      <tr><th>市场</th><th>客户数</th><th>S/A级</th><th>待行动</th></tr>
+      <tr><td style="font-weight:600;">🇸🇩 苏丹</td><td class="num">58</td><td class="num">4</td><td class="num" style="color:#c0392b;font-weight:bold;">3</td></tr>
+      <tr><td style="font-weight:600;">🇪🇬 埃及</td><td class="num">42</td><td class="num">3</td><td class="num">2</td></tr>
+      <tr><td style="font-weight:600;">🇨🇩 刚果民主</td><td class="num">31</td><td class="num">5</td><td class="num" style="color:#c0392b;font-weight:bold;">4</td></tr>
+      <tr><td style="font-weight:600;">🇸🇦 沙特</td><td class="num">27</td><td class="num">2</td><td class="num">1</td></tr>
+      <tr><td style="font-weight:600;">🇦🇪 阿联酋</td><td class="num">22</td><td class="num">1</td><td class="num">0</td></tr>
+    </table>
+  </div>
+
+  <div class="flex-1 db-card" style="overflow:hidden;">
+    <div class="panel-header">本期变动（相较上次运行）</div>
+    <div style="padding: 10px 14px; font-size:13px;">
+      <div class="trend-row">
+        <span>📈 升级</span>
+        <strong style="color:#27ae60;">8人</strong>
+        <span class="detail">C→B ×3, B→A ×3, A→S ×2</span>
+      </div>
+      <div class="trend-row">
+        <span>📉 降级</span>
+        <strong style="color:#e74c3c;">5人</strong>
+        <span class="detail">A→B ×2, B→C ×2, S→A ×1</span>
+      </div>
+      <div class="trend-row">
+        <span>🆕 新进入</span>
+        <strong style="color:#3498db;">4人</strong>
+        <span class="detail">本期新询盘</span>
+      </div>
+      <div class="trend-row" style="border-bottom:none;">
+        <span>⏸️ 流失</span>
+        <strong style="color: var(--text-secondary);">3人</strong>
+        <span class="detail">超90天转沉淀</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>这次文本对比度应该没问题了</h3>
+  <p>所有文字颜色用了框架的 CSS 变量（<code>var(--text-primary)</code> 等），跟随系统深浅主题自动切换。你的系统是深色模式的话，背景会自动变深、文字变浅。</p>
+  <p style="color: var(--text-secondary);">确认 OK 的话，我们继续细化：<strong>筛选器</strong>（顶部加国家/级别/阶段过滤）、<strong>完整名单</strong>的展示方式、还是其他你关心的点？</p>
+</div>

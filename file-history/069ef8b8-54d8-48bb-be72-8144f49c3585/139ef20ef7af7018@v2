@@ -1,0 +1,32 @@
+# 下一批分析启动指令
+
+> 复制下面内容，在新对话中发送即可开始。
+
+---
+
+继续OKKI分析。第3批P0收尾——深度分析以下6人：
+
+1. **Aloh Voma** | 美国 | 107条 | 已付款已发货，25件童装→喀麦隆，3天内到仓库。需要确认收货+索要质量反馈
+2. **WELE Mounia** | 多哥 | 110条 | 老客户回头，2月首单30件完成，5/5主动问"还有别的吗"。需发产品目录+催新单
+3. **Keinjol Tata** | 印度 | 55条 | 品牌"Kinjolluxe"，500件MOQ，全定制包装+条形码(Amazon)。需出正式报价+设计mockup
+4. **Christine Muwela** | 赞比亚★ | 54条 | 选款确认中，需跟进款式+地址
+5. **ali Amjid** | 南非 | 234条 | 个人买家，16件~¥510，选款马拉松，需确认付款
+6. **yoselyn Rodriguez** | 美国 | 230条 | 西班牙语，大量对话，需判断是否有实质需求
+
+## 执行要求
+
+1. 先读 `STATE.md` + `knowledge/` 下3个文件了解上下文
+2. 读 `data/s1_enhanced.json` 获取增强分类数据
+3. 逐个读 `data/chat_history/` 对应文件原文（messag消息在 `message.content.text.content`，我方UID=`2500000853693@icbu`）
+4. 每人输出：阶段、卡点、下一步行动（今天/48h/本周）、推荐话术（中文可复制版）
+5. 全部6人完成后跑 `node scripts/gen_tracker_v2.js` 更新Excel
+6. 更新 `STATE.md` 中对应P0的状态
+
+## 系统消息过滤列表
+`自动接待将不再触发` `Since you have read` `Marco大模型翻译` `买家有流失风险` `由于您介入该会话` `AI给您生成了一条回复建议` `You have a visitor` `This buyer has been pre-screened` `当前买家首次给您发消息`
+
+## 分批规则
+本批6人，消息总量~790条（过滤系统消息后~500条），不需要再拆子批。每人分析完直接输出结果，6人全部出完后统一跑tracker+更新STATE。
+
+## 完成后
+告知用户本批完成情况+剩余任务（对话B:12人P1+P2, 独立对话C:Mona 1000条）。

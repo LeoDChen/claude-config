@@ -1,0 +1,379 @@
+// Generate CRM Tracker Excel — 客户管理看板
+// Usage: node scripts/generate-crm-tracker.js
+// Output: reports/客户管理看板_{date}.xlsx
+// Auto-classifies all customers into P0-P4 tiers + basic stage detection
+
+const fs = require('fs');
+const path = require('path');
+const ExcelJS = require('exceljs');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const REPORTS_DIR = path.join(__dirname, '..', 'reports');
+const TM_FILE = path.join(DATA_DIR, 'tm_conversations_latest.json');
+const CHAT_DIR = path.join(DATA_DIR, 'chat_history');
+const CUSTOMERS_DIR = path.join(DATA_DIR, 'customers');
+const STATE_FILE = path.join(__dirname, '..', 'STATE.md');
+
+const NOW = new Date();
+const DATE_STR = NOW.toISOString().slice(0, 10);
+const NOW_TS = NOW.getTime();
+const D = 86400000;
+
+// === COUNTRY MAP ===
+const COUNTRY_CN = {
+  AF:'阿富汗', AL:'阿尔巴尼亚', DZ:'阿尔及利亚', AO:'安哥拉', AR:'阿根廷', AM:'亚美尼亚', AU:'澳大利亚', AT:'奥地利',
+  AZ:'阿塞拜疆', BH:'巴林', BD:'孟加拉', BY:'白俄罗斯', BE:'比利时', BJ:'贝宁', BO:'玻利维亚', BA:'波黑',
+  BW:'博茨瓦纳', BR:'巴西', BG:'保加利亚', BF:'布基纳法索', BI:'布隆迪', KH:'柬埔寨', CM:'喀麦隆', CA:'加拿大',
+  CL:'智利', CN:'中国', CO:'哥伦比亚', CG:'刚果布', CD:'刚果金', CR:'哥斯达黎加', CI:'科特迪瓦', HR:'克罗地亚',
+  CU:'古巴', CY:'塞浦路斯', CZ:'捷克', DK:'丹麦', DJ:'吉布提', DO:'多米尼加', EC:'厄瓜多尔', EG:'埃及',
+  SV:'萨尔瓦多', EE:'爱沙尼亚', ET:'埃塞俄比亚', FI:'芬兰', FR:'法国', GA:'加蓬', GM:'冈比亚', GE:'格鲁吉亚',
+  DE:'德国', GH:'加纳', GR:'希腊', GT:'危地马拉', GN:'几内亚', GY:'圭亚那', HT:'海地', HN:'洪都拉斯',
+  HK:'香港', HU:'匈牙利', IS:'冰岛', IN:'印度', ID:'印尼', IR:'伊朗', IQ:'伊拉克', IE:'爱尔兰',
+  IL:'以色列', IT:'意大利', JM:'牙买加', JP:'日本', JO:'约旦', KZ:'哈萨克斯坦', KE:'肯尼亚', KW:'科威特',
+  KG:'吉尔吉斯斯坦', LA:'老挝', LV:'拉脱维亚', LB:'黎巴嫩', LY:'利比亚', LT:'立陶宛', LU:'卢森堡', MG:'马达加斯加',
+  MW:'马拉维', MY:'马来西亚', ML:'马里', MR:'毛里塔尼亚', MU:'毛里求斯', MX:'墨西哥', MD:'摩尔多瓦', MN:'蒙古',
+  MA:'摩洛哥', MZ:'莫桑比克', MM:'缅甸', NA:'纳米比亚', NP:'尼泊尔', NL:'荷兰', NZ:'新西兰', NE:'尼日尔',
+  NG:'尼日利亚', KP:'朝鲜', NO:'挪威', OM:'阿曼', PK:'巴基斯坦', PS:'巴勒斯坦', PA:'巴拿马', PY:'巴拉圭',
+  PE:'秘鲁', PH:'菲律宾', PL:'波兰', PT:'葡萄牙', QA:'卡塔尔', RO:'罗马尼亚', RU:'俄罗斯', RW:'卢旺达',
+  SA:'沙特阿拉伯', SN:'塞内加尔', RS:'塞尔维亚', SC:'塞舌尔', SL:'塞拉利昂', SG:'新加坡', SK:'斯洛伐克',
+  SI:'斯洛文尼亚', SO:'索马里', ZA:'南非', KR:'韩国', SS:'南苏丹', ES:'西班牙', LK:'斯里兰卡', SD:'苏丹',
+  SR:'苏里南', SE:'瑞典', CH:'瑞士', SY:'叙利亚', TW:'台湾', TJ:'塔吉克斯坦', TZ:'坦桑尼亚', TH:'泰国',
+  TG:'多哥', TT:'特立尼达和多巴哥', TN:'突尼斯', TR:'土耳其', TM:'土库曼斯坦', UG:'乌干达', UA:'乌克兰',
+  AE:'阿联酋', GB:'英国', US:'美国', UY:'乌拉圭', UZ:'乌兹别克斯坦', VE:'委内瑞拉', VN:'越南', YE:'也门',
+  ZM:'赞比亚', ZW:'津巴布韦',
+};
+
+function cn(country) {
+  if (!country) return '';
+  const c = country.toUpperCase();
+  return COUNTRY_CN[c] || c;
+}
+
+// === SYSTEM MESSAGE FILTER ===
+const SYS_PATTERNS = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+  '当前买家首次给您发消息',
+];
+
+function isSystemMsg(content) {
+  if (!content) return false;
+  for (const p of SYS_PATTERNS) {
+    if (content.includes(p)) return true;
+  }
+  return false;
+}
+
+// === TIER CLASSIFICATION (from business-rules.md + system-prompt.md) ===
+function classifyTier(conv, msgCount) {
+  const daysAgo = conv.lastContactTime ? Math.floor((NOW_TS - conv.lastContactTime) / D) : 9999;
+  const isUnread = conv.unreadCount > 0;
+  const latestContent = conv.latestMessage?.content || '';
+  const latestType = conv.latestMessage?.messageType || '';
+  const isSys = isSystemMsg(latestContent);
+  // Core markets (higher priority)
+  const coreMarkets = ['SD','EG','CD','ZM','CI','SA','AE'];
+  const isCore = coreMarkets.includes((conv.complianceCountryCode || '').toUpperCase());
+
+  // P0: Immediate action needed
+  if (isUnread) return 'P0';
+  if (latestType === 'received' && !isSys && daysAgo < 2) return 'P0';
+  // PI/payment related signals in latest message
+  const piKeywords = ['PI','Proforma','Invoice','payment','付款','deposit','定金','Wire Transfer','TT','bank transfer'];
+  if (piKeywords.some(k => latestContent.toLowerCase().includes(k.toLowerCase())) && daysAgo < 7) return 'P0';
+  if (msgCount > 50 && daysAgo < 2 && latestType === 'received') return 'P0';
+
+  // P1: Active this week
+  if (daysAgo < 7 && msgCount >= 5) return 'P1';
+  if (daysAgo < 3 && msgCount >= 3 && latestType === 'received' && !isSys) return 'P1';
+  if (isCore && daysAgo < 14 && msgCount >= 10) return 'P1';
+
+  // P2: Recent contact but not deep
+  if (daysAgo < 7) return 'P2';
+  if (msgCount > 20 && daysAgo < 14) return 'P2';
+
+  // P3: Low activity, within 30 days
+  if (daysAgo < 30) return 'P3';
+
+  // P4: Silent
+  return 'P4';
+}
+
+// === STAGE DETECTION ===
+function detectStage(conv, msgCount) {
+  const latestContent = conv.latestMessage?.content || '';
+  const latestType = conv.latestMessage?.messageType || '';
+  const daysAgo = conv.lastContactTime ? Math.floor((NOW_TS - conv.lastContactTime) / D) : 9999;
+  const content = latestContent.toLowerCase();
+
+  if (daysAgo > 30 && msgCount <= 3) return '沉默-无有效对话';
+
+  const piKw = ['pi','proforma','invoice','payment','付款','deposit','定金','tt ','wire transfer','bank transfer','sent you the','quote sent'];
+  if (piKw.some(k => content.includes(k))) {
+    if (latestType === 'send') return 'PI已发-等付款';
+    if (latestType === 'received') return '付款确认中';
+  }
+
+  const negotiateKw = ['price','quote','quotation','cost','sample','样品','ship','freight','运费','moq','数量','order','discount','offer'];
+  if (negotiateKw.some(k => content.includes(k)) && daysAgo < 7) return '谈判中';
+
+  if (msgCount <= 5 && daysAgo < 14) return '初询阶段';
+  if (daysAgo >= 30) return '沉默->30d';
+  if (daysAgo >= 7 && daysAgo < 30) return '待激活';
+
+  return '';
+}
+
+// === HELPERS ===
+function daysAgoFn(ts) { if (!ts) return 9999; return Math.floor((NOW_TS - ts) / D); }
+function fmtDate(ts) { if (!ts) return ''; return new Date(ts).toISOString().slice(0, 10); }
+function cidToFile(cid) { return cid ? cid.replace(/#/g, '_').replace(/@/g, '_') + '.json' : ''; }
+
+// === MAIN ===
+async function main() {
+  console.log('[CRM Tracker] Reading data...');
+
+  // 1. Conversations
+  if (!fs.existsSync(TM_FILE)) { console.error('tm_conversations_latest.json not found'); process.exit(1); }
+  const tmData = JSON.parse(fs.readFileSync(TM_FILE, 'utf8'));
+  const convs = tmData.conversations || [];
+  console.log(`  ${convs.length} conversations`);
+
+  // 2. Customers (name-based lookup)
+  const customerFiles = fs.readdirSync(CUSTOMERS_DIR).filter(f => f.endsWith('.json'));
+  const custByName = {};
+  for (const f of customerFiles) {
+    try {
+      const raw = fs.readFileSync(path.join(CUSTOMERS_DIR, f), 'utf8');
+      const cust = JSON.parse(raw);
+      const name = (cust.name || cust.detail?.name_info || '').toLowerCase().trim();
+      if (name) {
+        custByName[name] = {
+          okkiLevel: cust.listData?.level || cust.detail?.cus_tag_info?.[0]?.info_label || '',
+          okkiStatus: cust.listData?.status || cust.detail?.trail_status_info || '',
+          country: cust.listData?.country || cust.detail?.country || '',
+          intent: cust.detail?.intention_level_info || '',
+        };
+      }
+    } catch (e) { /* skip */ }
+  }
+  console.log(`  ${Object.keys(custByName).length} customer profiles matched`);
+
+  // 3. Chat message counts (fast scan)
+  const chatDirFiles = fs.readdirSync(CHAT_DIR).filter(f => f.endsWith('.json'));
+  const chatMsgCount = {};
+  for (const cf of chatDirFiles) {
+    try {
+      const raw = fs.readFileSync(path.join(CHAT_DIR, cf), 'utf8');
+      const match = raw.match(/"totalMessages":\s*(\d+)/);
+      if (match) chatMsgCount[cf] = parseInt(match[1]);
+    } catch (e) { /* skip */ }
+  }
+
+  // 4. Existing P0/P1 names from STATE.md for override
+  const knownP0P1 = new Map();
+  if (fs.existsSync(STATE_FILE)) {
+    const sc = fs.readFileSync(STATE_FILE, 'utf8');
+    const tierSec = sc.match(/\|\s*\*\*(P\d)\*\*[^\n]*\n/g);
+    if (tierSec) {
+      for (const line of tierSec) {
+        const m = line.match(/\*\*(P\d)\*\*\s+\S+\s+\|\s+\*?\*?(\d+)\*?\*?\s*\|?\s*(.+)/);
+        if (m) {
+          const tier = m[1];
+          const names = m[3].split(/[,，、]/);
+          for (const n of names) {
+            const trimmed = n.trim().replace(/\(.*\)/g, '').trim();
+            if (trimmed && !trimmed.startsWith('等') && !/^\d+$/.test(trimmed)) {
+              knownP0P1.set(trimmed.toLowerCase(), tier);
+            }
+          }
+        }
+      }
+    }
+  }
+  console.log(`  ${knownP0P1.size} known P0/P1 from STATE.md`);
+
+  // 5. Build rows
+  const rows = [];
+  for (const conv of convs) {
+    const filename = cidToFile(conv.cid);
+    const msgCount = filename ? (chatMsgCount[filename] || 0) : 0;
+    const nameLow = (conv.name || '').toLowerCase().trim();
+
+    // Match customer profile
+    let cust = custByName[nameLow] || null;
+    if (!cust) {
+      for (const [cn, ci] of Object.entries(custByName)) {
+        if (nameLow.includes(cn) || cn.includes(nameLow)) { cust = ci; break; }
+      }
+    }
+
+    // Tier: STATE.md overrides auto-classification
+    let tier = '';
+    for (const [kn, kv] of knownP0P1) {
+      if (nameLow.includes(kn) || kn.includes(nameLow)) { tier = kv; break; }
+    }
+    if (!tier) tier = classifyTier(conv, msgCount);
+
+    // Stage
+    const stage = detectStage(conv, msgCount);
+
+    // Direction
+    let lastMsgDir = '';
+    if (conv.latestMessage) {
+      lastMsgDir = conv.latestMessage.messageType === 'send' ? '我方' : '客户';
+    }
+
+    const d = daysAgoFn(conv.lastContactTime);
+
+    rows.push({
+      name: conv.name || '',
+      countryCode: conv.complianceCountryCode || '',
+      countryCN: cn(conv.complianceCountryCode),
+      tier,
+      okkiLevel: cust ? cust.okkiLevel : '',
+      okkiStatus: cust ? cust.okkiStatus : '',
+      lastContactDays: d,
+      lastContactDate: fmtDate(conv.lastContactTime),
+      msgCount,
+      lastMsgDir,
+      unreadCount: conv.unreadCount || 0,
+      stage,
+      bottleneck: '',
+      nextAction: '',
+      followupPriority: tier === 'P0' ? '今天' : tier === 'P1' ? '48h' : tier === 'P2' ? '本周' : '',
+      notes: cust && cust.intent && cust.intent !== '未知' ? `意向:${cust.intent}` : '',
+      cid: conv.cid,
+      filename,
+    });
+  }
+
+  // Sort: P0 → P1 → P2 → P3 → P4, then by lastContactDays asc within each
+  const tierOrder = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
+  rows.sort((a, b) => {
+    const ta = tierOrder[a.tier] ?? 5;
+    const tb = tierOrder[b.tier] ?? 5;
+    if (ta !== tb) return ta - tb;
+    return a.lastContactDays - b.lastContactDays;
+  });
+
+  // === GEN EXCEL ===
+  console.log(`[CRM Tracker] Generating ${rows.length} rows...`);
+
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'OKKI CRM Tracker';
+  wb.created = NOW;
+
+  const ws = wb.addWorksheet('客户管理看板', { views: [{ state: 'frozen', ySplit: 1 }] });
+
+  const cols = [
+    { header: '客户名', key: 'name', width: 24 },
+    { header: '国家', key: 'countryCN', width: 12 },
+    { header: '梯队', key: 'tier', width: 7 },
+    { header: '小满等级', key: 'okkiLevel', width: 14 },
+    { header: '小满状态', key: 'okkiStatus', width: 12 },
+    { header: '最后联系\n(天前)', key: 'lastContactDays', width: 9 },
+    { header: '最后联系日期', key: 'lastContactDate', width: 13 },
+    { header: '总消息', key: 'msgCount', width: 8 },
+    { header: '最新', key: 'lastMsgDir', width: 7 },
+    { header: '未读', key: 'unreadCount', width: 6 },
+    { header: '沟通阶段', key: 'stage', width: 18 },
+    { header: '卡点', key: 'bottleneck', width: 28 },
+    { header: '下一步行动', key: 'nextAction', width: 34 },
+    { header: '跟紧', key: 'followupPriority', width: 8 },
+    { header: '备注', key: 'notes', width: 22 },
+  ];
+  ws.columns = cols;
+
+  // Header style
+  const hr = ws.getRow(1);
+  hr.font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+  hr.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2F5496' } };
+  hr.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+  hr.height = 34;
+
+  const tierFills = {
+    P0: 'FFC00000', P1: 'FFED7D31', P2: 'FFFFC000', P3: 'FF4472C4', P4: 'FFA5A5A5',
+  };
+
+  for (const row of rows) {
+    const r = ws.addRow(row);
+    r.height = 21;
+
+    // Tier color
+    if (row.tier && tierFills[row.tier]) {
+      const tc = r.getCell('tier');
+      tc.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+      tc.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: tierFills[row.tier] } };
+      tc.alignment = { horizontal: 'center' };
+    }
+
+    // Faded for >30d
+    if (row.lastContactDays > 30) r.font = { color: { argb: 'FFA0A0A0' } };
+    // Unread highlight
+    if (row.unreadCount > 0) r.getCell('unreadCount').font = { bold: true, color: { argb: 'FFC00000' } };
+    // Stage bold
+    if (row.stage) r.getCell('stage').font = { bold: true };
+    // P0 name bold
+    if (row.tier === 'P0') r.getCell('name').font = { bold: true };
+  }
+
+  ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: rows.length + 1, column: cols.length } };
+
+  // === SUMMARY SHEET ===
+  const sws = wb.addWorksheet('统计');
+  sws.columns = [
+    { header: '指标', key: 'metric', width: 22 },
+    { header: '数值', key: 'value', width: 26 },
+  ];
+
+  const tc = { P0: 0, P1: 0, P2: 0, P3: 0, P4: 0, '未分类': 0 };
+  for (const r of rows) {
+    if (r.tier && tc[r.tier] !== undefined) tc[r.tier]++;
+    else tc['未分类']++;
+  }
+
+  const a24 = rows.filter(r => r.lastContactDays < 1).length;
+  const a7d = rows.filter(r => r.lastContactDays < 7).length;
+  const a30d = rows.filter(r => r.lastContactDays < 30).length;
+  const s30d = rows.filter(r => r.lastContactDays >= 30).length;
+  const withStage = rows.filter(r => r.stage).length;
+  const withBN = rows.filter(r => r.bottleneck).length;
+
+  sws.addRows([
+    { metric: '生成时间', value: NOW.toISOString().slice(0, 16).replace('T', ' ') },
+    { metric: '数据导出时间', value: tmData.exportedAt ? new Date(tmData.exportedAt).toISOString().slice(0, 16).replace('T', ' ') : '' },
+    { metric: '客户总数', value: rows.length },
+    { metric: '24h活跃', value: a24 },
+    { metric: '7d活跃', value: a7d },
+    { metric: '30d内活跃', value: a30d },
+    { metric: '>30d沉默', value: s30d },
+    { metric: '', value: '' },
+    ...Object.entries(tc).map(([k, v]) => ({ metric: `梯队 ${k}`, value: v })),
+    { metric: '', value: '' },
+    { metric: '已推断阶段', value: withStage },
+    { metric: '已标注卡点', value: withBN },
+    { metric: '待AI深度分析', value: rows.length - withBN },
+    { metric: '', value: '' },
+    { metric: '分类规则', value: 'P0=未读/客户最新消息/PI关键词 | P1=7d活跃+≥5条 | P2=7d活跃 | P3=<30d | P4=>30d静默' },
+  ]);
+
+  const sh = sws.getRow(1);
+  sh.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  sh.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2F5496' } };
+
+  const outFile = path.join(REPORTS_DIR, `客户管理看板_${DATE_STR}.xlsx`);
+  if (!fs.existsSync(REPORTS_DIR)) fs.mkdirSync(REPORTS_DIR, { recursive: true });
+  await wb.xlsx.writeFile(outFile);
+
+  console.log(`\n[Done] ${outFile}`);
+  console.log(`  ${rows.length} customers | P0:${tc.P0} P1:${tc.P1} P2:${tc.P2} P3:${tc.P3} P4:${tc.P4}`);
+  console.log(`  24h:${a24} | 7d:${a7d} | 30d:${a30d} | >30d:${s30d}`);
+  console.log(`  Stage detected: ${withStage} | Need AI: ${rows.length - withBN}`);
+}
+
+main().catch(err => { console.error(err); process.exit(1); });

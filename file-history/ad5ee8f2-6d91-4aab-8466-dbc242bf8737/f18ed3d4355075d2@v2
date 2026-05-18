@@ -1,0 +1,11 @@
+---
+name: 不要信任项目陈旧分析，必须先重新搜索验证
+description: 项目记忆中标记为"不可行"的技术方案，涉及外部工具时应重新搜索验证，不直接接受
+type: feedback
+originSessionId: ad5ee8f2-6d91-4aab-8466-dbc242bf8737
+---
+被项目记忆告知"此路不通"时，不要直接接受。先做一次外部搜索确认生态是否有新工具/新方案。
+
+**Why:** OKKI CRM CDP数据抓取项目中，STATE.md记录了"CDP两条路径均不可行"，我就此接受并只在Console/Network cURL/Chrome扩展的框框里想。但 `chrome-devtools-mcp` 的 `autoConnect` 功能2025年12月就已存在，如果我当时搜一下五分钟就能找到。浪费了时间在造轮子上。
+
+**How to apply:** 涉及外部工具/协议/库的方案被标记为"不可行"时，重新WebSearch确认生态是否有更新。不要假设几个月前的分析结论仍然有效——技术生态变化快。

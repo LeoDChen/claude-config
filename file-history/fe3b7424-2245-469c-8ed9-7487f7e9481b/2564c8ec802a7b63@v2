@@ -1,0 +1,113 @@
+# CC+OB 协作系统：配置瘦身与科学管理方案
+
+## 背景
+
+全局+项目 181 个 rules 文件（~12,000 行）、327 个 skills 目录、100 个 agents、173 个 commands，其中 95%+ 是 ECC 全量安装带来的编程语言专用内容，与用户的母婴纺织品 B2B 外贸运营**完全无关**。声量比极高，关键规则在注意力竞争中持续失败。
+
+## 目标
+
+- 每轮固定上下文开销从 ~20,000-30,000 tokens 降到 ~2,000-4,000 tokens
+- 只留下用户实际使用的内容，消除全局/项目重复
+- 建立未来修改的决策框架和同步机制
+
+---
+
+## Phase 1：全局瘦身 `C:/Users/Administrator/.claude/`
+
+### 1a. Rules（当前 91 文件 / 6,020 行 → 目标 0 文件）
+
+**全删**。所有 rules 移到项目级管理。全局 rules 的内容全是编程语言规则，用户只有一个项目，没必要在全局维护 rules。
+
+操作：
+- 删除 `C:/Users/Administrator/.claude/rules/` 下所有内容
+- 如果担心将来需要，先备份到 `C:/Users/Administrator/.claude/backups/rules-YYYYMMDD/`
+
+### 1b. Skills（当前 160 目录 → 目标 ~10-12 目录）
+
+**只保留用户实际使用的**：
+- 9 个 ECC 业务技能：`p4p-optimization`、`inquiry-analysis`、`customer-pitch`、`b2b-visual-design`、`copywriting`、`product-listing`、`order-followup`、`logistics`、`office-tools`
+- 手动层工具（如 `brainstorming`、`grill-me`、`writing-plans`、`writing-skills`、`systematic-debugging`、`using-superpowers` 等）— 具体保留哪些需确认
+- 其余 ~140+ 编程语言技能全部删除
+
+### 1c. Commands（当前 ~86 文件 → 目标 ~15-18 文件）
+
+与 skills 同步：保留 9 个业务命令 + 用户常用的手动层命令，其余删除。
+
+### 1d. Agents（当前 ~50 文件 → 目标 ~5-8 文件）
+
+只保留通用型 agent（如 `code-reviewer`、`security-reviewer`、`code-explorer`），删除所有语言专用 agent（`cpp-reviewer`、`rust-reviewer`、`kotlin-reviewer` 等）。
+
+### 1e. 全局 CLAUDE.md
+
+精简为只包含跨项目的通用交互原则，不含项目特定内容。
+
+---
+
+## Phase 2：项目瘦身 `D:/ClaudeWorkspace/.claude/`
+
+### 2a. Rules（当前 90 文件 / 5,997 行 → 目标 1-3 文件 / ~200 行）
+
+**只保留**：
+- `operations-rules.md`（已改好）
+- 可选：一个极简的通用行为规则文件（如果需要）
+
+删除所有 `common/`、`zh/`、`typescript/`、`python/`、`golang/`、`swift/`、`php/`、`web/` 等目录。
+
+### 2b. Skills、Commands、Agents
+
+与全局同步清理（如果全局已清理，项目侧同样处理）。
+
+---
+
+## Phase 3：改造 CLAUDE.md 为指针模式
+
+当前 CLAUDE.md 内嵌了技能索引表、知识文件路径等。改为指针：
+- 内嵌知识 → 替换为 OB 路径引用
+- 技能索引保留（这个有实际作用，不能让 Claude Code 去 OB 查）
+- 目标：CLAUDE.md 控制在 ~30 行以内
+
+---
+
+## Phase 4：建立修改决策框架
+
+### 操作分级
+
+| 级别 | 定义 | 示例 |
+|------|------|------|
+| 安全 | 改完立刻生效，无意外影响 | 修改单个 command 的说明文字 |
+| 需告知 | 改动影响面大，改完告诉用户 | 修改 settings.json |
+| 需确认 | 不可逆或有风险 | 删除规则目录、修改 CLAUDE.md |
+
+### 改前三问
+1. 管什么范围？（全局/项目/仅本对话）
+2. 被谁依赖？（哪些 skills/commands/rules 引用它？）
+3. 可逆吗？（删了能恢复吗？改了能回退吗？）
+
+---
+
+## Phase 5：同步机制
+
+后续每次修改配置后，自动更新 OB 笔记 `对话归档/CC/项目-ClaudeCode工作环境/CC+OB协作系统建设.md` 的状态部分。形式：
+```
+### YYYY-MM-DD 修改记录
+- 改了 X → 原因 → 影响范围
+```
+
+---
+
+## 执行顺序
+
+1. **先备份**：全局 rules/skills/commands/agents 整体备份
+2. **全局瘦身**：rules → skills → commands → agents
+3. **项目瘦身**：同步清理
+4. **CLAUDE.md 精简**：指针模式改造
+5. **写决策框架到 OB**：修改决策框架 + 同步机制
+6. **验证**：新对话测试，确认固定开销下降、关键规则被遵守
+
+---
+
+## 风险控制
+
+- 所有删除前先备份到 `backups/` 目录
+- 每个 Phase 完成后暂停，等用户验证再继续
+- 不在同一对话执行所有 Phase——分对话执行，避免上下文污染

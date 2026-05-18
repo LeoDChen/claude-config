@@ -1,0 +1,246 @@
+// 模拟真实 DOM 点击触发 WebSocket 重连
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+    await cmd('Network.enable');
+
+    // === 1. 先用 Input.dispatchMouseEvent 模拟真实点击 ===
+    console.log('=== 模拟点击 Ungroup 下第一个联系人 ===\n');
+
+    // 找到第一个 contact-node 的位置
+    const findContact = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 找一个 Ungroup 下的 contact-node (不是 group-node)
+                var nodes = document.querySelectorAll('.im-next-tree-node.contact-node');
+                if (nodes.length > 0) {
+                    var first = nodes[0];
+                    var rect = first.getBoundingClientRect();
+                    return JSON.stringify({
+                        text: first.textContent.trim(),
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2,
+                        width: rect.width,
+                        height: rect.height
+                    });
+                }
+
+                // 如果没有 contact-node，找 contact-item-container
+                var items = document.querySelectorAll('.contact-item-container');
+                if (items.length > 0) {
+                    // 找第一个不是 selected 的
+                    for (var i = 0; i < items.length; i++) {
+                        if (!items[i].className.includes('selected')) {
+                            var r = items[i].getBoundingClientRect();
+                            return JSON.stringify({
+                                text: items[i].textContent.trim().substring(0, 50),
+                                x: r.left + r.width / 2,
+                                y: r.top + r.height / 2,
+                                width: r.width,
+                                height: r.height
+                            });
+                        }
+                    }
+                }
+
+                return 'no contact found';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('目标位置:', findContact.result?.value);
+
+    const posInfo = JSON.parse(findContact.result?.value || '{}');
+
+    if (posInfo.x && posInfo.y) {
+        // 使用 Input.dispatchMouseEvent 模拟真实点击
+        console.log(`点击坐标: (${posInfo.x}, ${posInfo.y})`);
+
+        await cmd('Input.dispatchMouseEvent', {
+            type: 'mousePressed',
+            x: posInfo.x,
+            y: posInfo.y,
+            button: 'left',
+            clickCount: 1
+        });
+        await cmd('Input.dispatchMouseEvent', {
+            type: 'mouseReleased',
+            x: posInfo.x,
+            y: posInfo.y,
+            button: 'left',
+            clickCount: 1
+        });
+
+        console.log('已点击');
+    }
+
+    // === 2. 等 WebSocket 重连 ===
+    console.log('\n等待 8 秒观察连接恢复...');
+    await new Promise(r => setTimeout(r, 8000));
+
+    // === 3. 检查连接状态 ===
+    console.log('\n=== 连接状态 ===\n');
+
+    const connStatus = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var auth = window._imsdk.getAuthService();
+
+                // 也检查页面上是否有"网络连接已经断开"的文字
+                var body = document.body.textContent;
+                var disconnected = body.includes('网络连接已经断开');
+
+                return {
+                    isLogin: auth.isLogin(),
+                    nick: auth.getLoginNick(),
+                    uid: auth.getLoginUid(),
+                    pageShowsDisconnected: disconnected
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(connStatus.result?.value);
+
+    // === 4. 尝试拉消息 ===
+    console.log('\n=== 重连后拉消息 ===\n');
+
+    const msgsFinal = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var fullData = window.__conversationListFullData__;
+                    if (!fullData || !fullData[0]) { resolve('no data'); return; }
+
+                    // 用当前选中的会话
+                    var targetCid = fullData[0].cid;
+                    // 找 selected 的 contact
+                    var selected = document.querySelector('.contact-item-container.selected');
+                    if (selected) {
+                        // 从 DOM 推断 cid 不太现实，直接用第一个
+                    }
+
+                    var msgSvc = window._imsdk.getMessageService();
+                    msgSvc.listMessageWithConversationCodeForHistory({
+                        conversationCode: targetCid,
+                        count: 10,
+                        dataCallback: function(result) {
+                            var data = result.data || [];
+                            resolve(JSON.stringify({
+                                count: data.length,
+                                hasMore: result.hasMore,
+                                msgs: data.slice(0, 5).map(function(m) {
+                                    return {
+                                        content: (m.content||'').substring(0, 150),
+                                        time: m.sendTime,
+                                        sender: m.from ? m.from.name||m.from.accountId : '?'
+                                    };
+                                })
+                            }));
+                        },
+                        errorCallBack: function(err) {
+                            resolve(JSON.stringify({ error: String(err&&(err.message||err.err)||'unknown') }));
+                        }
+                    });
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msgsFinal.result?.value || '(无)');
+
+    // === 5. 也试试直接点击已选中的联系人（Keinjol Tata） ===
+    console.log('\n=== 点击 Keinjol Tata（已选中）===\n');
+
+    const clickSelected = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var selected = document.querySelector('.contact-item-container.selected');
+                if (selected) {
+                    // 触发一个真实的 mousedown/mouseup
+                    var evt1 = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+                    var evt2 = new MouseEvent('mouseup', { bubbles: true, cancelable: true });
+                    var evt3 = new MouseEvent('click', { bubbles: true, cancelable: true });
+                    selected.dispatchEvent(evt1);
+                    selected.dispatchEvent(evt2);
+                    selected.dispatchEvent(evt3);
+
+                    return 'clicked: ' + selected.textContent.trim().substring(0, 50);
+                }
+                return 'no selected contact';
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(clickSelected.result?.value);
+
+    await new Promise(r => setTimeout(r, 6000));
+
+    // === 6. 最终检查 ===
+    const finalCheck = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var auth = window._imsdk.getAuthService();
+                var body = document.body.textContent;
+                return {
+                    isLogin: auth.isLogin(),
+                    nick: auth.getLoginNick(),
+                    disconnectedText: body.includes('网络连接已经断开'),
+                    reconnectText: body.includes('重新连接') || body.includes('重连')
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log('\n最终状态:', finalCheck.result?.value);
+
+    ws.close();
+    console.log('\n完成');
+})();

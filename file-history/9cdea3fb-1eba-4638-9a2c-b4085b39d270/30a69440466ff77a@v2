@@ -1,0 +1,842 @@
+#!/usr/bin/env node
+
+/**
+ * 小满CRM — 客户执行方案生成器 v3
+ * 输出专业排版的 Word 文档到桌面
+ * 特点：中文话术 / 深度策略推演 / 多方案对比 / 风险预判
+ */
+
+import { writeFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  AlignmentType, WidthType, BorderStyle, ShadingType, TableLayoutType,
+} from 'docx';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DESKTOP = 'C:/Users/Administrator/Desktop';
+
+// ============================================================
+// 调色板 — 专业商务风格
+// ============================================================
+const C = {
+  ink:      '1E1E1E',   // 正文黑
+  soft:     '5C5C5C',   // 辅助灰
+  light:    '8C8C8C',   // 轻灰
+  line:     'D0D0D0',   // 分隔线
+  accent:   '1A3A8A',   // 深蓝主强调
+  accentBg: 'EDF1FA',   // 浅蓝底
+  red:      'B71C1C',   // 警示红
+  redBg:    'FFF0F0',   // 红底
+  orange:   'C05A00',   // 高优橙
+  orangeBg: 'FFF6ED',   // 橙底
+  yellow:   '7A6300',   // 关注黄
+  yellowBg: 'FFFCE8',   // 黄底
+  green:    '1E6E2E',   // 行动绿
+  greenBg:  'EDF7EF',   // 绿底
+  purple:   '5C2D91',   // 紫色
+  teal:     '0D6B6B',   // 青色
+  white:    'FFFFFF',
+  bg:       'FAFBFD',
+  tableBg:  'F5F6FA',   // 表格底色
+};
+
+// ============================================================
+// 排版工具
+// ============================================================
+const FONT = 'Microsoft YaHei';
+const FONT_MONO = 'Consolas';
+
+function T(text, opts = {}) {
+  return new TextRun({
+    text,
+    size: opts.size || 21,
+    color: opts.color || C.ink,
+    bold: opts.bold || false,
+    italics: opts.italics || false,
+    font: opts.font || FONT,
+  });
+}
+
+function P(runs, opts = {}) {
+  return new Paragraph({
+    children: Array.isArray(runs) ? runs : [runs],
+    spacing: {
+      before: opts.before || 0,
+      after: opts.after ?? 80,
+      line: opts.line || 360,
+    },
+    indent: opts.indent,
+    alignment: opts.alignment || AlignmentType.LEFT,
+    border: opts.border,
+    shading: opts.shading,
+  });
+}
+
+function Spacer(h = 8) {
+  return new Paragraph({ spacing: { before: h, after: h } });
+}
+
+function Divider() {
+  return new Paragraph({
+    children: [],
+    spacing: { before: 140, after: 140 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: C.line } },
+  });
+}
+
+function Section(title, color) {
+  return new Paragraph({
+    children: [
+      T(title, { size: 32, bold: true, color: color || C.accent }),
+    ],
+    spacing: { before: 400, after: 200 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: color || C.accent } },
+  });
+}
+
+// 深度分析卡片 - 用于P0客户
+function DeepCard(title, blocks, { color = C.accent, bgColor = C.accentBg } = {}) {
+  const items = [];
+
+  // 标题
+  items.push(new Paragraph({
+    children: [T(title, { size: 26, bold: true, color })],
+    spacing: { before: 240, after: 100 },
+    shading: { fill: bgColor, type: ShadingType.CLEAR },
+    indent: { left: 200, right: 200 },
+    border: {
+      left: { style: BorderStyle.SINGLE, size: 10, color },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: C.line },
+    },
+  }));
+
+  for (const block of blocks) {
+    if (block.type === 'section') {
+      items.push(new Paragraph({
+        children: [T('▌' + block.label, { size: 22, bold: true, color: C.ink })],
+        spacing: { before: 120, after: 80 },
+        indent: { left: 400 },
+      }));
+    } else if (block.type === 'text') {
+      items.push(new Paragraph({
+        children: [T(block.value, { size: 20, color: C.ink })],
+        spacing: { after: 50 },
+        indent: { left: 600 },
+      }));
+    } else if (block.type === 'compare') {
+      // 方案对比表
+      const rows = [
+        new TableRow({
+          tableHeader: true,
+          children: ['方案', '做法', '风险', '判断'].map((h, i) =>
+            new TableCell({
+              children: [new Paragraph({
+                children: [T(h, { size: 18, bold: true, color: C.white })],
+                alignment: AlignmentType.CENTER,
+              })],
+              shading: { fill: color, type: ShadingType.CLEAR },
+              width: { size: i === 0 ? 1200 : i === 3 ? 1000 : 2000, type: WidthType.DXA },
+              margins: { top: 60, bottom: 60, left: 60, right: 60 },
+            })
+          ),
+        }),
+        ...block.options.map((opt, i) => {
+          const bg = i % 2 === 0 ? C.white : C.tableBg;
+          return new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ children: [T(opt.name, { size: 18, bold: true, color: C.ink })], alignment: AlignmentType.CENTER })],
+                shading: { fill: bg, type: ShadingType.CLEAR },
+                margins: { top: 60, bottom: 60, left: 60, right: 60 },
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [T(opt.actions, { size: 17, color: C.soft })] })],
+                shading: { fill: bg, type: ShadingType.CLEAR },
+                margins: { top: 60, bottom: 60, left: 60, right: 60 },
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [T(opt.risks, { size: 17, color: C.red })] })],
+                shading: { fill: bg, type: ShadingType.CLEAR },
+                margins: { top: 60, bottom: 60, left: 60, right: 60 },
+              }),
+              new TableCell({
+                children: [new Paragraph({ children: [T(opt.verdict, { size: 17, bold: true, color: opt.verdictColor || C.green })] })],
+                shading: { fill: bg, type: ShadingType.CLEAR },
+                margins: { top: 60, bottom: 60, left: 60, right: 60 },
+              }),
+            ],
+          });
+        }),
+      ];
+
+      items.push(
+        new Table({
+          rows,
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          layout: TableLayoutType.FIXED,
+        }),
+      );
+    } else if (block.type === 'strategy') {
+      items.push(new Paragraph({
+        children: [T('► 推荐策略：' + block.value, { size: 20, bold: true, color: C.green })],
+        spacing: { before: 80, after: 60 },
+        indent: { left: 600 },
+      }));
+    } else if (block.type === 'reply') {
+      items.push(new Paragraph({
+        children: [
+          T('回复话术（中文）：', { size: 19, bold: true, color: C.green }),
+        ],
+        spacing: { before: 80, after: 40 },
+        indent: { left: 400 },
+      }));
+      items.push(new Paragraph({
+        children: [T(block.text, { size: 19, color: C.ink })],
+        spacing: { after: 60 },
+        indent: { left: 600, right: 200 },
+        shading: { fill: C.greenBg, type: ShadingType.CLEAR },
+        border: {
+          left: { style: BorderStyle.SINGLE, size: 5, color: C.green },
+          top: { style: BorderStyle.SINGLE, size: 1, color: C.line },
+          bottom: { style: BorderStyle.SINGLE, size: 1, color: C.line },
+          right: { style: BorderStyle.SINGLE, size: 1, color: C.line },
+        },
+      }));
+    } else if (block.type === 'logic') {
+      items.push(new Paragraph({
+        children: [T(block.label, { size: 19, bold: true, color: C.purple })],
+        spacing: { before: 60, after: 30 },
+        indent: { left: 400 },
+      }));
+      items.push(new Paragraph({
+        children: [T(block.text, { size: 18, color: C.soft })],
+        spacing: { after: 40 },
+        indent: { left: 600 },
+      }));
+    } else if (block.type === 'pricing') {
+      items.push(new Paragraph({
+        children: [T('定价推算：' + block.text, { size: 19, color: C.orange, italics: true })],
+        spacing: { before: 40, after: 40 },
+        indent: { left: 600 },
+        shading: { fill: C.orangeBg, type: ShadingType.CLEAR },
+      }));
+    } else if (block.type === 'trigger') {
+      items.push(new Paragraph({
+        children: [T('⏎ 后续动作：' + block.text, { size: 19, bold: true, color: C.red })],
+        spacing: { before: 80, after: 40 },
+        indent: { left: 400 },
+        border: { left: { style: BorderStyle.SINGLE, size: 4, color: C.red } },
+      }));
+    }
+  }
+
+  return items;
+}
+
+// 标准卡片 - 用于P1客户
+function StdCard(title, contents, { color = C.accent, bgColor = C.accentBg } = {}) {
+  const items = [];
+  items.push(new Paragraph({
+    children: [T(title, { size: 24, bold: true, color })],
+    spacing: { before: 200, after: 80 },
+    shading: { fill: bgColor, type: ShadingType.CLEAR },
+    indent: { left: 200 },
+    border: { left: { style: BorderStyle.SINGLE, size: 6, color } },
+  }));
+
+  for (const item of contents) {
+    if (item.type === 'diag') {
+      items.push(new Paragraph({
+        children: [T('现状：' + item.text, { size: 19, color: C.ink })],
+        spacing: { after: 40 },
+        indent: { left: 500 },
+      }));
+    } else if (item.type === 'strat') {
+      items.push(new Paragraph({
+        children: [T('策略：' + item.text, { size: 19, bold: true, color: C.ink })],
+        spacing: { before: 40, after: 40 },
+        indent: { left: 500 },
+      }));
+    } else if (item.type === 'reply') {
+      items.push(new Paragraph({
+        children: [T('话术：', { size: 18, bold: true, color: C.green }), T(item.text, { size: 18, color: C.ink })],
+        spacing: { after: 40 },
+        indent: { left: 560 },
+        shading: { fill: C.greenBg, type: ShadingType.CLEAR },
+        border: { left: { style: BorderStyle.SINGLE, size: 3, color: C.green } },
+      }));
+    } else if (item.type === 'trigger') {
+      items.push(new Paragraph({
+        children: [T('触发：' + item.text, { size: 18, color: C.orange })],
+        spacing: { after: 30 },
+        indent: { left: 500 },
+      }));
+    } else if (item.type === 'warn') {
+      items.push(new Paragraph({
+        children: [T('注意：' + item.text, { size: 18, color: C.red, bold: true })],
+        spacing: { before: 20, after: 20 },
+        indent: { left: 500 },
+      }));
+    }
+  }
+  return items;
+}
+
+
+// ============================================================
+// 构建文档
+// ============================================================
+async function build() {
+  const children = [];
+  const now = new Date();
+
+  // ==================== 封面 ====================
+  children.push(new Paragraph({ spacing: { before: 1400 } }));
+  children.push(
+    new Paragraph({
+      children: [
+        T('小满CRM', { size: 30, color: C.light }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+    }),
+    new Paragraph({
+      children: [
+        T('客户执行方案', { size: 52, bold: true, color: C.accent }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 160 },
+    }),
+    new Paragraph({
+      children: [T('专业跟进策略 · 博弈推演 · 回复话术', { size: 24, color: C.soft })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 360 },
+    }),
+    new Paragraph({
+      children: [T('小星星服饰  ·  阿里巴巴国际站 B2B', { size: 19, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 40 },
+    }),
+    new Paragraph({
+      children: [T(`${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日  生成  |  数据快照 2026-04-28`, { size: 18, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 800 },
+    }),
+  );
+
+  // ==================== 一、看板概览 ====================
+  children.push(Section('一、看板概览', C.accent));
+
+  const statItems = [
+    { val: '22', label: '总会话', sub: '待处理客户', color: C.accent, bg: C.accentBg },
+    { val: '5', label: 'P0 紧急', sub: '今日处理', color: C.red, bg: C.redBg },
+    { val: '5', label: 'P1 重要', sub: '48h内处理', color: C.orange, bg: C.orangeBg },
+    { val: '12', label: 'P2/P3', sub: '本周处理', color: C.yellow, bg: C.yellowBg },
+  ];
+
+  children.push(
+    new Table({
+      rows: [
+        new TableRow({
+          children: statItems.map(s =>
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [T(s.val, { size: 40, bold: true, color: s.color, font: FONT_MONO })],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 20 },
+                }),
+                new Paragraph({
+                  children: [T(s.label, { size: 20, bold: true, color: C.ink })],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 8 },
+                }),
+                new Paragraph({
+                  children: [T(s.sub, { size: 16, color: C.light })],
+                  alignment: AlignmentType.CENTER,
+                }),
+              ],
+              shading: { fill: s.bg, type: ShadingType.CLEAR },
+              width: { size: 2200, type: WidthType.DXA },
+              margins: { top: 240, bottom: 240 },
+              borders: {
+                top: { style: BorderStyle.NONE },
+                bottom: { style: BorderStyle.NONE },
+                left: { style: BorderStyle.NONE },
+                right: { style: BorderStyle.NONE },
+              },
+            })
+          ),
+        }),
+      ],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  children.push(Spacer(100));
+
+  // 分类明细表
+  children.push(new Paragraph({
+    children: [T('客户分类明细', { size: 24, bold: true, color: C.ink })],
+    spacing: { before: 160, after: 120 },
+  }));
+
+  const catHeaderRow = new TableRow({
+    tableHeader: true,
+    children: [
+      { w: 1700, t: '分类' },
+      { w: 600, t: '人数' },
+      { w: 6500, t: '客户' },
+    ].map(h =>
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [T(h.t, { size: 18, bold: true, color: C.white })],
+            alignment: h.w === 600 ? AlignmentType.CENTER : AlignmentType.LEFT,
+          }),
+        ],
+        shading: { fill: C.accent, type: ShadingType.CLEAR },
+        width: { size: h.w, type: WidthType.DXA },
+        margins: { top: 80, bottom: 80, left: 80, right: 80 },
+      })
+    ),
+  });
+
+  const catData = [
+    ['P0 · 今日紧急', '5', 'amer ly (伊拉克), azaan ss, zainab Babesets (伊拉克), Amal Alamhrooqi (阿曼), Ahmed Darrat', C.red],
+    ['P1 · 48h内', '5', 'Krisgel Igros (菲律宾), fernande Pochette (美国/Mohammed), Aula Alsaad, Susuanna ParkerAdentwi (加纳), rehema kiseyu (坦桑尼亚)', C.orange],
+    ['P2 · 本周内', '6', 'Cindy Nadal (法语区), Sifa Vano, Regina Kabanda, Adm Reda, Sayfullaeva Shahnoza, maimouna cisse (法语区)', C.yellow],
+    ['P3 · 低活跃', '6', 'TheodoraAdelaide Mahe, Fathima (印度), Jemima Piema, Assiatou Barry, Lohgah Sharon, 同行推销', C.light],
+  ];
+
+  children.push(
+    new Table({
+      rows: [catHeaderRow, ...catData.map((r, i) =>
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ children: [T(r[0], { size: 18, bold: true, color: r[3] })] })],
+              margins: { top: 70, bottom: 70, left: 80, right: 80 },
+              width: { size: 1700, type: WidthType.DXA },
+              shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [T(r[1], { size: 20, bold: true, color: C.soft, font: FONT_MONO })], alignment: AlignmentType.CENTER })],
+              width: { size: 600, type: WidthType.DXA },
+              shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [T(r[2], { size: 17, color: C.soft })] })],
+              width: { size: 6500, type: WidthType.DXA },
+              shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+            }),
+          ],
+        })
+      )],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  // ================================================================
+  // 二、P0 深度分析
+  // ================================================================
+  children.push(Divider());
+  children.push(Section('二、P0 今日紧急 · 深度策略推演', C.red));
+
+  // ==================== 1. amer ly ====================
+  children.push(...DeepCard('1. amer ly — 伊拉克 — S级 — 已报价待付款', [
+    { type: 'section', label: '一、当前卡点诊断' },
+    { type: 'text', value: '已发完整报价：$3.80/pc × 28件（7色×4码）= $106.40，DHL运费 $157 DAP到伊拉克Nasiriyah，总价 $263.40。客户Apr 28主动催过"هل أكملت؟"（弄好了吗？），说明有紧迫感。我方已发PI文件。' },
+    { type: 'text', value: '核心判断：客户要的是现货，不是定制生产。28件=7色×4码各1件的组合说明：这是小批量试单/样品单，不是常规批发订单。$157运费占了总价的60%，这很可能是客户犹豫的核心原因。' },
+    { type: 'text', value: '客户画像：伊拉克Nasiriyah，阿拉伯语，很可能是个体店主/小批发商。小批量试单说明他在测试市场，如果不满意运费/总价，可能找其他供应商。' },
+
+    { type: 'section', label: '二、跟进策略博弈分析' },
+    { type: 'compare', options: [
+      { name: '方案A：追问「收到了吗"', actions: '发一条"هل استلمت الفاتورة؟"（收到发票了吗？）', risks: '被动、显得急、没有给客户新信息，回复率低', verdict: '❌ 不推荐', verdictColor: C.red },
+      { name: '方案B：直接催付款', actions: '发付款链接，问TT还是TA', risks: '如果客户在犹豫运费，催付款会让他直接放弃', verdict: '⚠️ 风险大', verdictColor: C.orange },
+      { name: '方案C：给选择权', actions: '确认现货库存，提供两种物流方案对比（DHL快但贵 vs 海运慢但便宜），让客户自己选', risks: '客户可能选更便宜的海运，你的运费收入降低', verdict: '✅ 推荐', verdictColor: C.green },
+    ]},
+    { type: 'strategy', value: '用方案C。核心逻辑：不替客户做决定，给他两个选项，让他感觉自己在控制决策。同时「现货库存随时可发」的表述创造稀缺感。' },
+
+    { type: 'section', label: '三、定价与成本分析' },
+    { type: 'pricing', text: '产品$3.80/pc（1688成本约¥15.2 ÷ 0.6 ÷ 6.8 = $3.72 → 报价$3.80 ✓）。28件利润=$3.80×28-$3.72×28≈$2.24，利润极薄。这单的核心价值不在利润，在打开伊拉克市场+获得一个长期客户。' },
+
+    { type: 'section', label: '四、回复话术（中文，发时翻译成阿拉伯语）' },
+    { type: 'reply', text: '【核心信息】\n1. 确认库存：28件（7色×4码）全部有现货，付款后1-3天即可发出\n2. 给物流选项：DHL快递$157（7-9天到）vs 海运约$60-80（25-35天到），让客户自己选\n3. 付款方式：TT银行转账 或 阿里巴巴Trade Assurance，问他哪个方便\n4. 留钩子：如果这次试单满意，后续大单可以给更优惠的价格\n\n【参考全文】\n"关于你的订单（28件，7色×4码），所有款式和尺码都有现货，付款后1-3天即可发出。\n\n物流有两个选择：\n• DHL快递：$157，7-9天到你手里\n• 海运到伊拉克：约$60-80，但需要25-35天\n\n你看哪个更适合？\n\n付款方式：你可以选TT转账或者阿里巴巴信保（Trade Assurance），哪个方便？\n\n确认后我马上发最终发票，当天安排发货。这批试单满意的话，后续大单价格可以更优惠。"' },
+
+    { type: 'section', label: '五、风险预判 & 后续分支' },
+    { type: 'trigger', text: '客户选DHL+确认付款 → 发PI，当天安排发货 | 客户选海运 → 确认海运具体费用，发PI | 客户说「太贵了" → 问他的预算，推荐减少颜色到3-4色（总价降到$150左右） | 1天不回复 → 发PI截图+付款链接直接引导 | 3天不回复 → 轻量跟进「还需要调整订单吗？"' },
+  ], { color: C.red, bgColor: C.redBg }));
+
+  // ==================== 2. azaan ss ====================
+  children.push(...DeepCard('2. azaan ss — 国家未知 — S级 — 报价后客户沉默3天', [
+    { type: 'section', label: '一、当前卡点诊断' },
+    { type: 'text', value: '时间线复盘：Apr 25客户发产品卡问"How much" → 客户说"200 mix size" → 我方先回「问经理" → Apr 26报$3.80-3.85（0-100pcs）→ 客户又问"How much"和"What fabric" → 我方发面料说明 + 追问"Where to ship?" → 我方又发"Do you think I did something wrong?" → 客户至今未回复。' },
+    { type: 'text', value: '三个核心问题：①客户要的是200pcs，我方报的是0-100pcs价格，数量不匹配让客户觉得我们不认真；②最后一条「我哪里做错了「极其被动，把谈判地位拱手让出，像是在求客户回复；③客户问了两次"How much"，说明他最在意价格，但我方没有针对200pcs给一个明确的总价。' },
+    { type: 'text', value: '客户可能的状态：A)在和其他供应商比价（最可能） B)被我方「做错了什么「的消息搞得很尴尬 C)根本不是真实买家。' },
+
+    { type: 'section', label: '二、跟进策略博弈分析' },
+    { type: 'compare', options: [
+      { name: '方案A：道歉+给价', actions: '说sorry for the delay，报200pcs价格', risks: '道歉就是承认之前不专业，减分；而且他可能已经拿到别家报价了', verdict: '⚠️ 可尝试', verdictColor: C.orange },
+      { name: '方案B：用价值重启', actions: '不发价格，发产品实拍图/视频+面料细节+工厂资质，用品质吸引他回来', risks: '如果他只关心价格，发品质内容可能被无视', verdict: '⚠️ 依赖客户类型', verdictColor: C.orange },
+      { name: '方案C：价格+价值组合', actions: '先报200pcs明确价格（$3.80×200=$760 FOB），附一条品质背书（Disney/帮宝适工厂），然后留一个开放问题（"要发实拍图给你看吗？"）', risks: '几乎没有——既有价格也有价值，还给客户一个容易回复的问题', verdict: '✅ 推荐', verdictColor: C.green },
+    ]},
+    { type: 'strategy', value: '用方案C。关键：第一句话就报200pcs的总价，让客户看到我们这次认真了；不提之前「做错了什么「的事；用「要发实拍图吗「作为低门槛回复钩子。' },
+
+    { type: 'section', label: '三、回复话术（中文，发时翻译成英文）' },
+    { type: 'reply', text: '【核心信息】\n1. 第一句就给200pcs明确价格：$3.80/pc × 200 = $760 FOB\n2. 附品质背书（BSCI认证/Disney代工/100%精梳棉预洗处理）\n3. 低门槛钩子：问要不要看实拍图（不是问「要不要下单"）\n4. 不提发货地址（上次问过了没回复，不重复）\n\n【参考全文】\n"针对你问的这款Kids Cotton Canvas Set，200件混码的价格是：$3.80/件 FOB，总价$760。\n\n这个价格对应的是100%精梳棉面料，预洗处理不缩水——和市面上普通棉布的手感差别很大。我们是BSCI认证工厂，也是帮宝适奥运款和迪士尼婴儿线的生产商。\n\n要不要我发几张这款的工厂实拍图给你看看？你可以对比一下面料质感。"' },
+
+    { type: 'section', label: '四、风险预判 & 后续分支' },
+    { type: 'trigger', text: '客户回复「发图" → 发3-5张实拍图+面料细节，然后问发货城市 | 客户回复「太贵了" → 问他的目标价，确认后看能否调整（最低$3.50，再低亏本） | 客户问「有现货吗" → 如实回答：这款需要生产15-20天，现货有类似款可推荐 | 3天不回复 → 发实拍图（不发文字，降低阅读门槛） | 7天不回复 → 最后一条：推荐另一款价格更低的产品线' },
+  ], { color: C.red, bgColor: C.redBg }));
+
+  // ==================== 3. zainab Babesets ====================
+  children.push(...DeepCard('3. zainab Babesets — 伊拉克 — A级 — 已多次报价待客户选品', [
+    { type: 'section', label: '一、当前卡点诊断' },
+    { type: 'text', value: '时间跨度Apr 9-26，跨度大。我方先后报了4个产品价格：$3.0（Custom Kids Set 2 Pcs）、$3.3（另一款）、$3.2（产品1批量价100-500pcs）、$2.9（产品2批量价100-500pcs）。客户用阿拉伯语沟通，明确说了「我要批发价"+"不要单件"+"12件每种设计「。最后我方消息是Apr 26的价格更新，客户未回复。' },
+    { type: 'text', value: '问题诊断：不是价格问题——客户从来没说过「贵"。真正的问题是她面对4个产品+多个价格，不知道下一步该做什么。我们给了太多信息，但没有帮她做决策。」' },
+
+    { type: 'section', label: '二、跟进策略博弈分析' },
+    { type: 'compare', options: [
+      { name: '方案A：继续降价', actions: '发更低的价格吸引回复', risks: '利润本来就薄，降价后客户可能还要继续压，陷入无底洞；而且她没有说贵，降价是自伤', verdict: '❌ 不推荐', verdictColor: C.red },
+      { name: '方案B：问她「选好了吗"', actions: '追问客户决定', risks: '等于把决策压力全部推给客户，她可能直接不回了', verdict: '❌ 不推荐', verdictColor: C.red },
+      { name: '方案C：帮客户选', actions: '从4个产品中推荐1个最畅销的，给完整报价（含运费），让她只做一个「是/否「的决定', risks: '推荐的产品可能不是她最想要的', verdict: '✅ 推荐', verdictColor: C.green },
+    ]},
+    { type: 'strategy', value: '用方案C。帮客户选最畅销的1款→给她12件×1设计的完整报价→问「要这个还是换一款「。把"4选1"的复杂决策变成「是/否「的简单决策。」' },
+
+    { type: 'section', label: '三、回复话术（中文，发时翻译成阿拉伯语）' },
+    { type: 'reply', text: '【核心信息】\n1. 帮客户选：从她看过的产品里推荐Custom Kids Set 2 Pcs（最畅销、性价比最高）\n2. 按她的要求（批发、12件）给出一个完整的报价方案\n3. 给一个替代选项（Cotton Vest Set），但只需要她回复「第一个「或"第二个"\n4. 顺便问发货城市，为后续PI做准备\n\n【参考全文】\n"看了你之前关注的产品，如果要选一款最适合批发走量的，我推荐第一款Custom Kids Set 2 Pcs（纯棉帆布卡通印花套装）：\n\n• 12件（混码混色）：$3.0/件 = $36\n• 100-500件批量价：$3.2/件\n• 尺码：80/90/100/110/120cm都有\n\n这是我们最畅销的款，伊拉克客户反馈很好。\n\n第二个选择是Cotton Vest Set，$3.3/件，适合夏天。\n\n你看选第一个还是第二个？确认后我马上算运费给你。另外，你的发货城市是？"' },
+
+    { type: 'section', label: '四、风险预判 & 后续分支' },
+    { type: 'trigger', text: '客户选产品 → 发详细报价+运费+PI | 客户说「都要" → 分别报价，推荐先试一款再追加 | 客户问「为什么推荐这个" → 发该产品的实拍图+面料细节+销量数据 | 3天不回复 → 发产品实拍图+客户反馈截图 | 7天不回复 → 最后一条激活消息' },
+  ], { color: C.red, bgColor: C.redBg }));
+
+  // ==================== 4. Amal Alamhrooqi ====================
+  children.push(...DeepCard('4. Amal Alamhrooqi — 阿曼 — S级 ⚠️ — 最接近成交·卡在物流', [
+    { type: 'section', label: '⚠️ 重要：这个客户上一轮完全遗漏。数据中名为arshavin amoah（Scraper Bug），实际发送者为Amal Alamhrooqi，来自阿曼(Oman)，阿拉伯语，20条消息，状态UNREAD。' },
+
+    { type: 'section', label: '一、当前卡点诊断' },
+    { type: 'text', value: '时间线复盘：Apr 23我方报价$3.70×4件+$59 DAP=$73.80 → 客户确认「是的，4件" → 客户问"DDP到Oman可用吗？关税大概多少？你们有Oman客户吗？" → 我方查了货代说"No DDP available" → 发了货运参考图 → 客户说"حسنا"（好吧）→ 我方最后说了一句解释 → UNREAD至今。' },
+    { type: 'text', value: '核心判断：价格$3.70/pc已经接受了。客户问的三个问题（DDP、关税、Oman客户）本质上不是在问物流——而是在确认「和你交易安全吗？"。他是第一次和中国供应商交易，对清关流程不熟悉，对未知成本恐惧。我方的"No DDP"回答技术上正确，但给客户的感受是「你要自己搞定「。' },
+    { type: 'text', value: '当前卡点不是价格，不是产品，是信任——客户不确定DAP清关会不会有隐藏麻烦。UNREAD状态意味着客户可能已经读了消息但在犹豫，或者有了新的回复。' },
+
+    { type: 'section', label: '二、跟进策略博弈分析' },
+    { type: 'compare', options: [
+      { name: '方案A：继续解释DAP', actions: '再次说明DAP的流程，重复之前的解释', risks: '如果他已经读了但没回复，重复=骚扰', verdict: '❌ 不推荐', verdictColor: C.red },
+      { name: '方案B：主动降为DDP', actions: '自己承担清关风险，给DDP报价', risks: '你不会做阿曼清关，万一出了问题你要负责', verdict: '❌ 不推荐', verdictColor: C.red },
+      { name: '方案C：给出清关「傻瓜指南"', actions: '把DAP清关包装成「很简单，三步搞定"，附具体指引和文件清单，降低客户对未知的恐惧。同时用「有其他海湾国家客户「建立社交证明', risks: '如果客户就是想要全包服务，可能还不够', verdict: '✅ 推荐', verdictColor: C.green },
+    ]},
+    { type: 'strategy', value: '用方案C。核心逻辑：把「你需要自己清关「重新包装成「清关很简单，三步搞定，所有文件我都给你准备好了「。加上「我们有其他阿曼/海湾客户，他们都这么做「的社交证明，消除孤立感。最后直接推动创建订单。」' },
+
+    { type: 'section', label: '三、回复话术（中文，发时翻译成阿拉伯语）' },
+    { type: 'reply', text: '【核心信息】\n1. 不道歉，不重复"No DDP"\n2. 把清关流程简化成3步，让客户觉得很简单\n3. 用「其他海湾客户也这样做「建立信任\n4. 直接推动创建订单\n\n【参考全文】\n"关于DAP清关，其实很简单，其他阿曼和海湾国家的客户都是这样做的：\n\n第1步：我们发货，同时给你3份文件（商业发票+装箱单+提单）\n第2步：快递到了阿曼，当地清关代理联系你（我们可以推荐代理）\n第3步：你付关税（大约发票金额的5-10%）后，包裹送到你门口\n\n整个过程一般1-2天就清完，不需要你亲自去海关。\n\n要不要我现在就帮你创建订单？4件，$73.80，发阿曼。你确认后我今天就把所有文件给你准备好。"' },
+
+    { type: 'section', label: '四、风险预判 & 后续分支' },
+    { type: 'trigger', text: '客户确认下单 → 立即创建阿里巴巴信保订单，当天发PI | 客户坚持DDP → 联系货代确认DDP到Oman价格（哪怕贵一些，转嫁给客户也行） | 客户问「关税到底多少钱" → 给一个范围$4-8（发票额$73.80×5-10%），说以海关实际为准 | 3天不回复 → 电话/WhatsApp跟进（这个客户值得打电话） | 7天不回复 → 发新产品推荐保持联系' },
+  ], { color: C.red, bgColor: C.redBg }));
+
+  // ==================== 5. Ahmed Darrat ====================
+  children.push(...DeepCard('5. Ahmed Darrat — 阿拉伯国家 — A级 — 沟通混乱需重置', [
+    { type: 'section', label: '一、当前卡点诊断' },
+    { type: 'text', value: '时间线复盘：客户发产品卡（$3.40-3.80）+ "hello frend" → 我方发欢迎模板 → 客户问"how much it will cost in rmb?" → 我方反问「定制还是现货" → 客户又发了一张图片 → 我方报价$5 → 客户说"i want this one" → 我方说"This is not our product" → 然后居然发了3-question英文模板。' },
+    { type: 'text', value: '三个严重失误：①客户用RMB问价（可能是中国贸易商/代理/在中国有办事处的阿拉伯人），我方始终没回答RMB价格——这是他唯一明确的问题；②先报价$5又否认产品是自己的，自相矛盾，客户会觉得你不可靠；③最后发模板完全无视客户的具体问题，显得机器人。' },
+    { type: 'text', value: '客户状态：大概率已经走了。如果还没走，他愿意回复的唯一可能是你承认错误并给出他真正要的信息。' },
+
+    { type: 'section', label: '二、跟进策略博弈分析' },
+    { type: 'compare', options: [
+      { name: '方案A：当没事继续报价', actions: '假装之前的混乱没发生过，报一个新价格', risks: '客户不傻，你不承认错误他会觉得你不可靠', verdict: '❌ 不推荐', verdictColor: C.red },
+      { name: '方案B：诚实道歉+重置', actions: '承认之前搞混了产品，问他到底要哪个（产品卡还是发的图片），直接回答RMB价格问题', risks: '道歉可能进一步降低信任，但不道歉更糟', verdict: '✅ 推荐（唯一可行）', verdictColor: C.green },
+    ]},
+    { type: 'strategy', value: '用方案B。简短、诚实、直接。不说「我们做错了"，而是"I mixed up the products"。问他到底要哪个。如果他回复了，用中文沟通（他问了RMB，大概率懂中文）。' },
+
+    { type: 'section', label: '三、回复话术（中文，发时翻译成英文+中文双语）' },
+    { type: 'reply', text: '【核心信息】\n1. 承认混淆（轻描淡写，不过度道歉）\n2. 确认他到底要哪个产品\n3. 给RMB价格（他终于能得到这个问题的答案了）\n4. 留一条简单选择\n\n【参考全文（中英双语发送）】\n"Hi friend, I mixed up the products earlier — sorry about that. Let me be clear now:\n\n你发了两款产品：\nA) 产品卡那个儿童睡衣套装（$3.40-3.80）\nB) 后来发的那张图片\n\n你要的是A还是B？\n\n如果A（睡衣套装）：$3.60/pc，约¥25.9/pc。\n如果你方便用中文沟通，我也可以用中文和你聊。\n\nWhich one do you want? A or B?"' },
+
+    { type: 'section', label: '四、风险预判 & 后续分支' },
+    { type: 'trigger', text: '客户回复A或B → 直接给那个产品的完整报价 | 客户不回复 → 3天后发一条消息推荐我们确实有的类似产品（儿童睡衣套装） | 客户说中文 → 切到中文沟通，确认是否中国贸易商，如果是→后续沟通效率和信任会大幅提升 | 7天不回复 → 归档，这个客户大概率已经流失' },
+  ], { color: C.red, bgColor: C.redBg }));
+
+  // ================================================================
+  // 三、P1 48h内优先处理
+  // ================================================================
+  children.push(Divider());
+  children.push(Section('三、P1 48h内优先处理', C.orange));
+
+  children.push(...StdCard('6. Krisgel Igros — 菲律宾 — A级 — 已报价等运费', [
+    { type: 'diag', text: '客户是在线卖家，需要先有estimate才能上架。已报价$3.75×10=$37.50（Apr 26），但运费还在查。客户明确说"once I have an estimate cost already" → "then I\'ll post the items on my page"。当前唯一卡点：没给运费。' },
+    { type: 'strat', text: '立即补全运费。DHL到菲律宾约$35-45（5-7天）。给两个选项：10pcs试单 / 30pcs常规（她说的typical order）。让她可以直接复制价格到店铺页面。' },
+    { type: 'reply', text: '【中文话术，发时翻译成英文】\n"你上架需要的价格来了：\n• 10件试单：$37.50 + 运费$35 = 总共约$72.50\n• 30件（你常规的量）：约$112.50 + 运费$45 = 总共约$157.50\n\n可以混5款不同的设计。我们是Disney认证工厂，品质有保障。\n\n确认款式后1小时内发正式PI给你。要不要我先发几款在菲律宾卖得最好的设计给你看？"' },
+    { type: 'trigger', text: '客户确认款式 → 1h内发PI | 3天不回复 → 发畅销款实拍图刺激兴趣' },
+  ], { color: C.orange, bgColor: C.orangeBg }));
+
+  children.push(...StdCard('7. fernande Pochette (Mohammed) — 美国/沙特 — A级 — 报价7天未回复', [
+    { type: 'diag', text: 'Apr 21已报$8.20×24+$70 DDP=$266.80。客户没回复。注意：Scraper名"fernande Pochette"错了，实际客户叫Mohammed（沙特名）。$8.20/pc已经报了不能降。7天不回复=要么觉得贵，要么在比价。' },
+    { type: 'strat', text: '不催单，给价值：100%棉预洗不缩水的品质对比+DDP到门无隐藏费用的便利性+Disney/帮宝适工厂背书。同时给12pcs试单方案降低门槛。' },
+    { type: 'reply', text: '【中文话术，发时翻译成英文】\n"Mohammed你好，关于之前报价的婴儿连体衣，顺便补充一下：我们用的是预洗精梳棉，洗完不会缩水——这个和市面上很多产品差别很大。\n\n另外$70 DDP是包税到门的，美国海关不会有任何额外费用。\n\n如果你是第一次试这款，可以先拿12件试单：$8.20×12 + $45 DDP = $143.40。卖得好再加量。你看怎么样？"' },
+    { type: 'trigger', text: '5天不复 → 确认价格敏感，提供混纺降级方案（$5.50-6.50/pc） | 10天不复 → 归档待激活' },
+  ], { color: C.orange, bgColor: C.orangeBg }));
+
+  children.push(...StdCard('8. Aula Alsaad — 阿拉伯国家 — B级 — 产品切换中需重新引导', [
+    { type: 'diag', text: 'Apr 1对话因"500件起订「卡住。Apr 26客户重新发了3个新产品卡片。我方简单回了「需要多少数量？"。没有重复之前「不能报价「的错误。' },
+    { type: 'strat', text: '这次针对3个新产品逐个回应：有货/价格范围/MOQ。推荐Custom Kids Set为切入点（最畅销）。不给太多选择，一次推一款。' },
+    { type: 'reply', text: '【中文话术，发时翻译成阿拉伯语】\n"关于你发的三款产品：\n1. 保暖睡衣套装：有货，$3.0-3.5/件\n2. 儿童纯棉套装（Custom Kids Set）：有货，$2.8-3.2/件 — 这个是我们本季最畅销的\n3. 女孩花睡衣：有货，$2.5-3.0/件\n\n都支持80-120cm尺码。我先把最畅销的儿童纯棉套装的实拍图发给你看看？"' },
+    { type: 'trigger', text: '客户选品 → 发详细报价+运费 | 3天不回复 → 发实拍图激活' },
+  ], { color: C.orange, bgColor: C.orangeBg }));
+
+  children.push(...StdCard('9. Susuanna ParkerAdentwi — 加纳(广州仓) — B级 — 已报价待付款', [
+    { type: 'diag', text: '广州白云区地址是非洲贸易公司的中国集货仓。已报价$4.39×10=$46.90+$3运费。Apr 27我方说「确认后创建订单「。UNREAD。订单已到最后环节，不要多问问题。' },
+    { type: 'strat', text: '直接发PI，确认尺寸颜色，问付款方式。多问只会增加流失风险。10件试单，顺利的话后续会有更大订单。' },
+    { type: 'reply', text: '【中文话术，发时翻译成英文】\n"你的订单准备好了：\n• 保暖睡衣套装 × 10件\n• $4.39/件 + $3运费 = 总共$46.90\n• 发货到：广州白云区大朗北路68号\n\nPI已经做好了。你确认以下两点就行：\n1) 付款方式：TT还是阿里巴巴信保？\n2) 尺码和颜色和之前说的一样吗？\n\n确认后1-3天发出。😊"' },
+    { type: 'trigger', text: '确认 → 当天发货 | 3天不回复 → 发PI截图提醒' },
+  ], { color: C.orange, bgColor: C.orangeBg }));
+
+  children.push(...StdCard('10. rehema kiseyu — 坦桑尼亚 — A级 — 样品方案已发等确认', [
+    { type: 'diag', text: '16色×4码各1件=样品测试单。Apr 28刚发了详细方案（5-7天打样、样品费可退、需确认地址/包装/印花）。刚发完方案不宜催。' },
+    { type: 'strat', text: '等3天。3天后发轻量价值跟进：新到的面料花型/可免费加新图案。不要问「决定了吗"，给新的有价值信息让客户自然回来。' },
+    { type: 'reply', text: '【中文话术，3天后发，发时翻译成英文】\n"Rehema你好！顺便更新一下——我们刚到了一批新的运动套装面料花型。如果你感兴趣，可以在你的样品包里免费加几个新图案。不急，样品随时可以安排。😊"' },
+    { type: 'trigger', text: '3天后发上述跟进 | 7天不回复 → 问是否调整方案 | 14天不回复 → 归档' },
+  ], { color: C.orange, bgColor: C.orangeBg }));
+
+  // ================================================================
+  // 四、P2 本周内处理
+  // ================================================================
+  children.push(Divider());
+  children.push(Section('四、P2 本周内处理', C.yellow));
+
+  children.push(...StdCard('11. Cindy Nadal — 法语区 — B级 — 运费吓到客户', [
+    { type: 'diag', text: '6件产品$18 + DDP运费$68 = $86，运费是货值4倍。客户大概率被运费吓跑了。' },
+    { type: 'strat', text: '推荐增加到20件摊薄运费，总$131（约$6.55/件含运费）。给海运慢但便宜的选项。' },
+    { type: 'reply', text: '【中文，发时翻译成法语】\n"有个建议——6件的话运费占比太高。如果增加到20件：单价$2.80×20=$56 + 运费$75 = 总共$131（约$6.55/件含运费）。或者6件走海运约$30运费（25-30天）。你觉得哪个合适？"' },
+  ], { color: C.yellow, bgColor: C.yellowBg }));
+
+  children.push(...StdCard('12. Sifa Vano — C级 — 需确认身份', [
+    { type: 'diag', text: '回复"personal""I am own"，大概率个人买家。' },
+    { type: 'strat', text: '直接问是店主还是个人。店主→小B方案；个人→礼貌引导到零售渠道。' },
+    { type: 'reply', text: '【中文，发时翻译成英文】\n"确认一下——你是自己开店还是给孩子买？如果是店主，我们5件起订，可以做新手套餐。如果是自己用，我可以推荐零售渠道给你。"' },
+  ], { color: C.yellow, bgColor: C.yellowBg }));
+
+  children.push(...StdCard('13. Regina Kabanda — C级 — 基础询盘', [
+    { type: 'diag', text: '问2岁婴儿珊瑚绒连体衣，我方已确认有90cm。' },
+    { type: 'reply', text: '【中文，发时翻译成英文】\n"2岁宝宝的珊瑚绒连体衣（90cm）有现货：$4.00/件，5件起订，1-3天发货。你要多少件？我帮你算运费。"' },
+  ], { color: C.yellow, bgColor: C.yellowBg }));
+
+  children.push(...StdCard('14. Adm Reda — 阿拉伯国家 — C级 — 8岁尺码2套', [
+    { type: 'diag', text: '要150cm睡衣套装2套。量极小可能个人买家。' },
+    { type: 'reply', text: '【中文，发时翻译成阿拉伯语】\n"关于150cm（8岁）睡衣套装：$4.35/套，有现货，2套也可以发。需要的话确认一下发货地址就行。"' },
+  ], { color: C.yellow, bgColor: C.yellowBg }));
+
+  children.push(...StdCard('15 & 16. Sayfullaeva Shahnoza + maimouna cisse — 法语区 — Scraper名错', [
+    { type: 'diag', text: 'Sayfullaeva（Scraper: AnneMarie Nsomp）：女孩家居服1件，已发工厂介绍。maimouna（Scraper: Conteza Elias）：围兜$0.50/件10件起。都发了回复等回应中。' },
+    { type: 'strat', text: '本周内各发一条轻量跟进。围兜试单成本极低（$5+运费约$35），强调零风险。' },
+    { type: 'reply', text: '【Sayfullaeva】"Shahnoza你好，我们最近新增了女孩家居服的夏季印花款，感兴趣的话发给你看看。"\n【maimouna】"Maimouna你好，围兜试单几乎零风险：10件才$5 + 运费约$25-30 = 总共约$35。要不要试3个最畅销花色？"' },
+  ], { color: C.yellow, bgColor: C.yellowBg }));
+
+  // ================================================================
+  // 五、P3 低活跃
+  // ================================================================
+  children.push(Divider());
+  children.push(Section('五、P3 低活跃（本周统一激活）', C.light));
+
+  const low = [
+    ['TheodoraAdelaide Mahe', '1个产品卡+模板，零互动', '发法语畅销款推荐'],
+    ['Fathima (User name)', '印度，$5.60 vs <$2.13差价过大，客户已说Ok thankyou', '推荐$2以内替代品，最后一次尝试'],
+    ['Jemima Piema', '2条消息，零互动', '发法语工厂简介+畅销目录'],
+    ['Assiatou Barry', '4条消息，模板已发无互动', '标准激活+法语产品推荐'],
+    ['Lohgah Sharon', '2条消息', '暂不处理，观察1个月'],
+    ['同行推销', '中国工厂推销', '礼貌回复结束'],
+  ];
+
+  const lowTableRows = [
+    new TableRow({
+      tableHeader: true,
+      children: ['客户', '现状', '动作'].map((h, i) =>
+        new TableCell({
+          children: [new Paragraph({
+            children: [T(h, { size: 18, bold: true, color: C.white })],
+            alignment: i === 0 ? AlignmentType.LEFT : AlignmentType.CENTER,
+          })],
+          shading: { fill: C.light, type: ShadingType.CLEAR },
+          width: { size: i === 1 ? 3600 : i === 2 ? 2800 : 2400, type: WidthType.DXA },
+          margins: { top: 60, bottom: 60, left: 80, right: 80 },
+        })
+      ),
+    }),
+    ...low.map((r, i) =>
+      new TableRow({
+        children: [
+          new TableCell({
+            children: [new Paragraph({ children: [T(r[0], { size: 18, bold: true, color: C.ink })] })],
+            shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+            margins: { top: 50, bottom: 50, left: 80, right: 80 },
+          }),
+          new TableCell({
+            children: [new Paragraph({ children: [T(r[1], { size: 17, color: C.soft })] })],
+            shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+            margins: { top: 50, bottom: 50, left: 80, right: 80 },
+          }),
+          new TableCell({
+            children: [new Paragraph({ children: [T(r[2], { size: 17, color: C.accent })], alignment: AlignmentType.CENTER })],
+            shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+            margins: { top: 50, bottom: 50, left: 80, right: 80 },
+          }),
+        ],
+      })
+    ),
+  ];
+
+  children.push(
+    new Table({
+      rows: lowTableRows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  // ================================================================
+  // 六、执行检查清单
+  // ================================================================
+  children.push(Divider());
+  children.push(Section('六、今日执行检查清单', C.green));
+
+  const checklist = [
+    ['P0', 'amer ly — 确认现货库存，发阿拉伯语消息推进付款（给物流二选一）'],
+    ['P0', 'azaan ss — 报200pcs明确价格$760 FOB + 品质背书 + 问要不要实拍图'],
+    ['P0', 'zainab Babesets — 帮客户选最畅销款，给完整12件报价方案'],
+    ['P0', 'Amal Alamhrooqi — 发清关三步指南，消除恐惧，直接推订单创建'],
+    ['P0', 'Ahmed Darrat — 承认混淆+确认产品+直接回答RMB价格'],
+    ['P1', 'Krisgel Igros — 补全30pcs打包estimate含运费'],
+    ['P1', 'fernande Pochette (Mohammed) — 发品质价值+12件试单方案'],
+    ['P1', 'Aula Alsaad — 回应3产品+推荐最畅销款'],
+    ['P1', 'Susuanna ParkerAdentwi — 发PI+确认付款方式'],
+    ['P1', 'rehema kiseyu — 等3天后发新面料轻量跟进'],
+    ['P2', 'Cindy Nadal — 推荐20件方案摊薄运费'],
+    ['P2', 'Sifa Vano — 确认身份（个人or店主）'],
+    ['P2', 'Regina + Adm Reda — 直接报价+现货确认'],
+    ['P2', 'Sayfullaeva + maimouna — 法语轻量跟进'],
+    ['P3', '6个低活跃客户 — 统一发标准激活消息'],
+  ];
+
+  const clHeaderRow = new TableRow({
+    tableHeader: true,
+    children: [
+      { w: 600, t: '优先级' },
+      { w: 8200, t: '动作' },
+    ].map(h =>
+      new TableCell({
+        children: [new Paragraph({
+          children: [T(h.t, { size: 18, bold: true, color: C.white })],
+          alignment: AlignmentType.CENTER,
+        })],
+        shading: { fill: C.green, type: ShadingType.CLEAR },
+        width: { size: h.w, type: WidthType.DXA },
+        margins: { top: 70, bottom: 70 },
+      })
+    ),
+  });
+
+  children.push(
+    new Table({
+      rows: [clHeaderRow, ...checklist.map((c, i) =>
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({
+                children: [T(c[0], { size: 17, bold: true, color: c[0] === 'P0' ? C.red : c[0] === 'P1' ? C.orange : C.yellow })],
+                alignment: AlignmentType.CENTER,
+              })],
+              width: { size: 600, type: WidthType.DXA },
+              shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+              margins: { top: 50, bottom: 50 },
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [T(c[1], { size: 18, color: C.ink })] })],
+              width: { size: 8200, type: WidthType.DXA },
+              shading: { fill: i % 2 === 0 ? C.white : C.tableBg, type: ShadingType.CLEAR },
+              margins: { top: 50, bottom: 50, left: 120, right: 120 },
+            }),
+          ],
+        })
+      )],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  // ================================================================
+  // 七、系统问题
+  // ================================================================
+  children.push(Divider());
+  children.push(Section('七、系统问题 & 改进建议', C.purple));
+
+  const issues = [
+    '【严重】Scraper名字Bug：3个客户名错误 → arshavin amoah=Amal Alamhrooqi / Conteza Elias=maimouna cisse / AnneMarie Nsomp=Sayfullaeva Shahnoza。修复scraper.mjs中.contact-right提取逻辑。',
+    '【中等】分类器误判：rehema kiseyu和azaan ss因含"quality"被分到after_sales，实际是样品询盘/询价。建议去掉quality作为售后触发词。',
+    '【中等】回复流程：多次出现"I\'ll check with manager"然后客户等太久。建议为常见品类预设标准报价区间，客服可直接报参考价。',
+    '【注意】3-question模板不适用于已发具体产品卡片的客户——客户已告诉你要什么，应先报价再问补充信息。',
+    '【注意】Amal Alamhrooqi上一轮完全遗漏，UNREAD+20条消息却被跳过。确保后续scraper不漏客户。',
+    '定价公式：成本(RMB) ÷ 0.6 ÷ 6.8 = USD报价。例：¥15.2 ÷ 0.6 ÷ 6.8 = $3.72 → 报价$3.80。',
+  ];
+
+  for (const issue of issues) {
+    children.push(new Paragraph({
+      children: [T('• ' + issue, { size: 18, color: C.soft })],
+      spacing: { before: 24, after: 24 },
+      indent: { left: 200 },
+    }));
+  }
+
+  // ================================================================
+  // 页脚
+  // ================================================================
+  children.push(Divider());
+  children.push(new Paragraph({ spacing: { before: 200 } }));
+  children.push(
+    new Paragraph({
+      children: [T('小星星服饰 · 小满CRM客户跟进方案', { size: 17, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 40 },
+    }),
+    new Paragraph({
+      children: [T(`${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 生成  |  数据快照 2026-04-28  |  话术为中文参考版`, { size: 15, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    }),
+  );
+
+  // ================================================================
+  // 构建文档
+  // ================================================================
+  const doc = new Document({
+    creator: '小满CRM助手',
+    title: '小满CRM客户执行方案',
+    description: '专业客户跟进策略分析与回复话术',
+    styles: {
+      default: {
+        document: {
+          run: { size: 21, font: FONT },
+        },
+      },
+    },
+    sections: [{
+      properties: {
+        page: {
+          margin: { top: 1200, bottom: 1200, left: 1500, right: 1500 },
+        },
+      },
+      children,
+    }],
+  });
+
+  const ts = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+  const outPath = join(DESKTOP, `小满CRM客户执行方案_${ts}.docx`);
+  const buffer = await Packer.toBuffer(doc);
+  writeFileSync(outPath, buffer);
+  console.log(`\n✅ 文档已保存到桌面: ${outPath}`);
+  return outPath;
+}
+
+build().catch(err => { console.error('\n❌ 错误:', err.message); process.exit(1); });

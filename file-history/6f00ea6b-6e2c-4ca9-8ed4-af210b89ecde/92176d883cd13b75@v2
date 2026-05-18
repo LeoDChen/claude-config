@@ -1,0 +1,331 @@
+// OKKI CRM 全量聊天历史抓取
+// 通过 CDP 注入 JS，劫持 WebSocket 发 LWP 协议拉取
+// 用法: node scripts/lwp_scrape_all.js
+// 前提: Chrome 已启动 --remote-debugging-port=9222，TM 页面已打开
+
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data', 'chat_history');
+const BATCH_SIZE = 20;   // 每批并发数（LWP 走同一个 WS，不能太快）
+const MSG_COUNT = 50;    // 每次拉取条数
+const MAX_PAGES = 20;    // 单个会话最大翻页数
+const BATCH_DELAY = 500;  // 批次间延迟 ms
+
+// ========== 工具函数 ==========
+
+function ts() { return new Date().toISOString().replace(/[:.]/g, '-'); }
+
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+// ========== 主流程 ==========
+
+(async () => {
+  log('连接 CDP...');
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  // 找到 onetalk iframe
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { log('错误: 未找到 onetalk iframe，TM 页面是否已打开？'); process.exit(1); }
+  log('onetalk iframe 已找到');
+
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  // 响应收集
+  let evalResults = {};
+  let consoleMsgs = [];
+
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const m = JSON.parse(msg.message);
+      if (m.id && m.result) {
+        const val = m.result.result ? m.result.result.value : null;
+        if (val !== null && val !== undefined) {
+          try { evalResults[m.id] = JSON.parse(val); } catch (e) { evalResults[m.id] = val; }
+        } else {
+          evalResults[m.id] = m.result;
+        }
+      }
+      if (m.method === 'Runtime.consoleAPICalled') {
+        const text = (m.params.args || []).map(a => a.value || a.description || '').join(' ');
+        if (text.startsWith('[LWP')) consoleMsgs.push(text);
+      }
+    } catch (e) {}
+  });
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 0, method: 'Runtime.enable', params: {} })
+  });
+
+  // ========== Step 1: 检查并确保 SDK 已连接 ==========
+  log('检查 SDK 状态...');
+  await evaluate(sessionId, client, 1, `
+    (function(){var a=window._imBaaSSDK.getAuthService();return JSON.stringify({isLogin:a.isLogin(),status:a.connectionStatus,uid:a.getLoginUid()})})()
+  `);
+  await sleep(2000);
+  const sdkState = evalResults[1];
+  log(`SDK: isLogin=${sdkState.isLogin}, status=${sdkState.status}, uid=${sdkState.uid}`);
+
+  if (!sdkState.isLogin || sdkState.status < 4) {
+    log('SDK 未连接，尝试 reConnect...');
+    await evaluate(sessionId, client, 2, `
+      (async function(){var a=window._imBaaSSDK.getAuthService();try{await a.reConnect();await new Promise(r=>setTimeout(r,3000));return JSON.stringify({isLogin:a.isLogin(),status:a.connectionStatus})}catch(e){return JSON.stringify({error:e.message})}})()
+    `, true);
+    await sleep(8000);
+    log('reConnect 结果: ' + JSON.stringify(evalResults[2]));
+  }
+
+  // ========== Step 2: 劫持 WebSocket 并安装 LWP 收发器 ==========
+  // 策略：
+  //   1. 保存原始 send / addEventListener
+  //   2. 劫持 send → 捕获 WS 实例
+  //   3. 捕获后，用原始 addEventListener 给自己的 handler 订阅 message
+  //   4. 收到响应按 mid 匹配 promise，事件驱动，无需轮询
+  log('安装 LWP 收发器...');
+  await evaluate(sessionId, client, 3, `
+    (function() {
+      var _send = WebSocket.prototype.send;
+      var _ae = WebSocket.prototype.addEventListener;
+      var _rem = WebSocket.prototype.removeEventListener;
+
+      window.__lwpPending = {};
+      window.__lwpSeq = 0;
+
+      // 劫持 send → 第一次 send 时捕获 WS 并安装响应监听
+      WebSocket.prototype.send = function(data) {
+        if (!window.__lwpWs && this.readyState === 1) {
+          window.__lwpWs = this;
+          // 用原始 addEventListener 给自己的 handler 订阅（不经过劫持）
+          _ae.call(this, 'message', function(event) {
+            try {
+              var raw = typeof event.data === 'string' ? event.data : '';
+              if (raw.indexOf('"code"') < 0) return; // 不是 LWP 响应
+              var parsed = JSON.parse(raw);
+              var mid = parsed.headers && parsed.headers.mid;
+              if (mid && window.__lwpPending[mid]) {
+                var p = window.__lwpPending[mid];
+                delete window.__lwpPending[mid];
+                p.resolve(parsed);
+              }
+            } catch(e) {}
+          });
+          console.log('[LWP] WS captured: ' + this.url);
+        }
+        return _send.call(this, data);
+      };
+
+      // 发 LWP 请求，返回 Promise<response>
+      window.__lwpRequest = function(lwpPath, body) {
+        return new Promise(function(resolve, reject) {
+          var ws = window.__lwpWs;
+          if (!ws || ws.readyState !== 1) { reject(new Error('WS not ready')); return; }
+          var mid = Date.now() + ' ' + (++window.__lwpSeq);
+          var req = JSON.stringify({ lwp: lwpPath, headers: { mid: mid }, body: body });
+          window.__lwpPending[mid] = { resolve: resolve, reject: reject };
+          ws.send(req);
+          setTimeout(function() {
+            if (window.__lwpPending[mid]) { delete window.__lwpPending[mid]; reject(new Error('timeout')); }
+          }, 30000);
+        });
+      };
+
+      return JSON.stringify({ installed: true });
+    })()
+  `);
+  await sleep(2000);
+  log('收发器已安装');
+
+  // ========== Step 3: 确认 WS 已捕获 ==========
+  await evaluate(sessionId, client, 4, `(function(){return JSON.stringify({ws:!!window.__lwpWs,url:window.__lwpWs?window.__lwpWs.url:null})})()`);
+  await sleep(2000);
+  if (!evalResults[4] || !evalResults[4].ws) {
+    log('WS 未捕获，等待心跳触发 send...');
+    await sleep(15000);
+    await evaluate(sessionId, client, 5, `(function(){return JSON.stringify({ws:!!window.__lwpWs,url:window.__lwpWs?window.__lwpWs.url:null})})()`);
+    await sleep(2000);
+    log('WS 状态: ' + JSON.stringify(evalResults[5]));
+  } else {
+    log('WS 已捕获: ' + evalResults[4].url);
+  }
+
+  // ========== Step 4: 读取会话列表 ==========
+  log('读取会话列表...');
+  await evaluate(sessionId, client, 6, `
+    (function(){
+      var convs = window.__conversationListFullData__;
+      if (!convs) return JSON.stringify({error:'no convs'});
+      var list = convs.map(function(c){
+        return { cid: c.cid, name: c.name, hasMsg: !!(c.latestMessage && c.latestMessage.content) };
+      });
+      return JSON.stringify({ total: list.length, convs: list });
+    })()
+  `);
+  await sleep(3000);
+  const convData = evalResults[6];
+  log(`会话总数: ${convData.total}`);
+  const allConvs = convData.convs;
+
+  // 创建输出目录
+  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+  // 检查已抓取的会话（断点续传）
+  const fetched = new Set();
+  if (fs.existsSync(DATA_DIR)) {
+    fs.readdirSync(DATA_DIR).forEach(f => {
+      if (f.endsWith('.json')) fetched.add(f.replace('.json', ''));
+    });
+  }
+  const toFetch = allConvs.filter(c => !fetched.has(sanitizeFilename(c.cid)));
+  log(`待抓取: ${toFetch.length} / 已完成: ${fetched.size}`);
+
+  // ========== Step 5: 批量抓取 ==========
+  let totalMsgs = 0;
+  let errors = 0;
+  let msgIdCounter = 100;
+
+  // 先做一个快速测试，验证 LWP 能正常工作
+  if (toFetch.length > 0) {
+    log('测试 LWP 请求...');
+    const testCid = toFetch[0].cid;
+    await evaluate(sessionId, client, 7, `
+      (async function() {
+        try {
+          var result = await window.__lwpRequest('/r/MessageManager/listUserMessages', ['${testCid}', false, 9007199254740991, ${MSG_COUNT}, false]);
+          return JSON.stringify({ ok: true, code: result.code, msgCount: result.body ? result.body.userMessageModels ? result.body.userMessageModels.length : 0 : 0 });
+        } catch(e) {
+          return JSON.stringify({ ok: false, error: e.message });
+        }
+      })()
+    `, true);
+    await sleep(5000);
+    log('LWP 测试结果: ' + JSON.stringify(evalResults[7]));
+  }
+
+  for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
+    const batch = toFetch.slice(i, i + BATCH_SIZE);
+    log(`批次 ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(toFetch.length / BATCH_SIZE)} (${i + 1}-${Math.min(i + BATCH_SIZE, toFetch.length)})`);
+
+    for (const conv of batch) {
+      try {
+        const cid = conv.cid;
+        const safeName = sanitizeFilename(cid);
+
+        const allMessages = [];
+        let cursor = 9007199254740991;
+        let pageNum = 0;
+
+        while (pageNum < MAX_PAGES) {
+          const msgId = msgIdCounter++;
+          evalResults[msgId] = undefined;
+
+          await evaluate(sessionId, client, msgId, `
+            (async function() {
+              try {
+                var result = await window.__lwpRequest('/r/MessageManager/listUserMessages', ['${cid}', false, ${cursor}, ${MSG_COUNT}, false]);
+                return JSON.stringify(result);
+              } catch(e) {
+                return JSON.stringify({ __error: e.message });
+              }
+            })()
+          `, true);
+          await sleep(2000);
+
+          const raw = evalResults[msgId];
+          if (!raw || raw.__error) {
+            if (raw && raw.__error === 'timeout') { log(`  [${conv.name}] 超时，跳过`); }
+            break;
+          }
+
+          let response;
+          try {
+            response = typeof raw === 'string' ? JSON.parse(raw) : raw;
+          } catch (e) { log(`  [${conv.name}] 响应解析失败`); break; }
+
+          if (response.code !== 200) break;
+
+          const body = response.body;
+          if (!body || !body.userMessageModels || body.userMessageModels.length === 0) break;
+
+          const msgs = body.userMessageModels;
+          allMessages.push(...msgs);
+
+          if (msgs.length < MSG_COUNT || !body.nextCursor) break;
+          cursor = body.nextCursor;
+          pageNum++;
+        }
+
+        const output = {
+          cid: cid,
+          name: conv.name,
+          fetchedAt: new Date().toISOString(),
+          totalMessages: allMessages.length,
+          messages: allMessages
+        };
+
+        fs.writeFileSync(path.join(DATA_DIR, safeName + '.json'), JSON.stringify(output, null, 2));
+        totalMsgs += allMessages.length;
+        if (allMessages.length > 0) {
+          log(`  [${conv.name}] ${allMessages.length} 条`);
+        }
+
+      } catch (e) {
+        errors++;
+        if (errors <= 5) log(`  [${conv.name}] 错误: ${e.message}`);
+      }
+    }
+
+    log(`  批次完成，累计 ${totalMsgs} 条消息，${errors} 个错误`);
+    if (i + BATCH_SIZE < toFetch.length) await sleep(BATCH_DELAY);
+  }
+
+  // ========== Step 6: 汇总报告 ==========
+  log('');
+  log('========== 抓取完成 ==========');
+  log(`总会话: ${allConvs.length}`);
+  log(`本次抓取: ${toFetch.length}`);
+  log(`总消息数: ${totalMsgs}`);
+  log(`错误数: ${errors}`);
+  log(`输出目录: ${DATA_DIR}`);
+
+  // 生成汇总
+  const summary = {
+    exportedAt: new Date().toISOString(),
+    totalConversations: allConvs.length,
+    fetchedConversations: toFetch.length,
+    totalMessages: totalMsgs,
+    errors: errors,
+    dataDir: DATA_DIR
+  };
+  fs.writeFileSync(
+    path.join(DATA_DIR, '_summary.json'),
+    JSON.stringify(summary, null, 2)
+  );
+
+  process.exit(0);
+})().catch(e => { log('致命错误: ' + e.message); process.exit(1); });
+
+// ========== Helper ==========
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function evaluate(sessionId, client, id, expression, awaitPromise) {
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({
+      id,
+      method: 'Runtime.evaluate',
+      params: { expression, awaitPromise: !!awaitPromise }
+    })
+  });
+}
+
+function sanitizeFilename(cid) {
+  return cid.replace(/[<>:"/\\|?*#@]/g, '_').substring(0, 200);
+}

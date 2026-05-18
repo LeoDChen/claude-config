@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 看板 — 方案对比</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 24px; color: #333; }
+  h2 { font-size: 1.2em; margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
+  h2:first-child { margin-top: 0; }
+  .badge { font-size: 0.7em; padding: 2px 8px; border-radius: 10px; font-weight: normal; }
+  .badge-a { background: #e3f2fd; color: #1565c0; }
+  .badge-b { background: #fff3e0; color: #e65100; }
+
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); font-size: 0.88em; }
+  th { background: #fafafa; padding: 10px 10px; text-align: left; border-bottom: 2px solid #e0e0e0; font-weight: 600; font-size: 0.82em; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tr:hover td { background: #fafbfc; }
+  .section-row td { background: #f5f5f5; padding: 6px 10px; font-weight: 600; font-size: 0.8em; color: #888; border-bottom: 1px solid #e8e8e8; }
+  .section-row:hover td { background: #f5f5f5; }
+
+  .driver-tag { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 0.78em; margin: 1px 2px; white-space: nowrap; }
+  .driver-red { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+  .driver-yellow { background: #fff8e1; color: #e65100; border: 1px solid #ffecb3; }
+  .driver-none { color: #bbb; font-size: 0.82em; }
+
+  .name-col { font-weight: 500; min-width: 100px; }
+  .stage-col { font-size: 0.82em; }
+
+  .priority-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .dot-red { background: #d32f2f; }
+  .dot-yellow { background: #f57c00; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .panel h3 { font-size: 1em; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+
+  .diff-note { margin-top: 16px; padding: 10px 14px; border-radius: 6px; font-size: 0.82em; }
+  .diff-pro { background: #e8f5e9; color: #2e7d32; border-left: 3px solid #4caf50; }
+  .diff-con { background: #fbe9e7; color: #bf360c; border-left: 3px solid #ff7043; }
+
+  .interaction-hint { margin-top: 12px; font-size: 0.78em; color: #999; text-align: center; }
+  .action-col { font-size: 0.85em; color: #555; max-width: 200px; }
+
+  hr { border: 0; border-top: 1px solid #e0e0e0; margin: 32px 0; }
+  .verdict { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .verdict h3 { font-size: 1.1em; margin-bottom: 16px; }
+  .verdict ul { margin-left: 20px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<h2>方案 A：客户聚合式 <span class="badge badge-a">一个客户一行 · 驱动因子叠标签</span></h2>
+
+<table>
+<thead><tr><th style="width:110px">客户</th><th style="width:60px">国家</th><th style="width:80px">阶段</th><th style="width:70px">最后联系</th><th>驱动因子</th><th style="width:160px">下一步</th></tr></thead>
+<tbody>
+<tr class="section-row"><td colspan="6">🔴 需立即处理 — 3 人</td></tr>
+<tr>
+  <td class="name-col">Inderpreet kaur</td>
+  <td>美国</td>
+  <td class="stage-col">样品阶段</td>
+  <td>6天前</td>
+  <td><span class="driver-tag driver-red">🔴 未回复</span></td>
+  <td class="action-col">确认面料花型，推动样品单</td>
+</tr>
+<tr>
+  <td class="name-col">Nassir A</td>
+  <td>苏丹</td>
+  <td class="stage-col">已发货/在途</td>
+  <td>3天前</td>
+  <td>
+    <span class="driver-tag driver-red">🔴 承诺未兑现</span>
+    <span class="driver-tag driver-yellow">🟡 到港提醒</span>
+  </td>
+  <td class="action-col">先确认库存 → 再通知5/18到港</td>
+</tr>
+<tr>
+  <td class="name-col">jonathan aston</td>
+  <td>加纳</td>
+  <td class="stage-col">报价已发</td>
+  <td>7天前</td>
+  <td><span class="driver-tag driver-red">🔴 待发货(客已付)</span></td>
+  <td class="action-col">安排发货，给客户运单号</td>
+</tr>
+<tr class="section-row"><td colspan="6">🟡 需定时关注 — 4 人</td></tr>
+<tr>
+  <td class="name-col">Clara ElAssaad</td>
+  <td>法国</td>
+  <td class="stage-col">需求探索</td>
+  <td>7天前</td>
+  <td><span class="driver-tag driver-yellow">🟡 该追问</span></td>
+  <td class="action-col">追问客户需求，报价或推样品</td>
+</tr>
+<tr>
+  <td class="name-col">WELE Mounia</td>
+  <td>多哥</td>
+  <td class="stage-col">已签收</td>
+  <td>8天前</td>
+  <td><span class="driver-tag driver-yellow">🟡 该回访</span></td>
+  <td class="action-col">签收8天，回访问质量和复购</td>
+</tr>
+<tr>
+  <td class="name-col">arshavin amoah</td>
+  <td>加纳</td>
+  <td class="stage-col">待付款</td>
+  <td>11天前</td>
+  <td><span class="driver-tag driver-yellow">🟡 该追问</span></td>
+  <td class="action-col">报价$15.50已发11天，追问</td>
+</tr>
+<tr>
+  <td class="name-col">Hakim Ezat</td>
+  <td>沙特</td>
+  <td class="stage-col">报价已发</td>
+  <td>11天前</td>
+  <td><span class="driver-tag driver-yellow">🟡 该追问</span></td>
+  <td class="action-col">报价$3.68×500，客户沉默</td>
+</tr>
+<tr class="section-row"><td colspan="6">⚪ 冷冻 — 2 人</td></tr>
+<tr>
+  <td class="name-col">MENTZEKO Mathi</td>
+  <td>喀麦隆</td>
+  <td class="stage-col">报价已发</td>
+  <td>191天前</td>
+  <td class="driver-none">无</td>
+  <td class="action-col" style="color:#bbb">冷层维护</td>
+</tr>
+<tr>
+  <td class="name-col">Deekshith Shekar</td>
+  <td>印度</td>
+  <td class="stage-col">需求探索</td>
+  <td>149天前</td>
+  <td class="driver-none">无</td>
+  <td class="action-col" style="color:#bbb">冷层维护</td>
+</tr>
+</tbody>
+</table>
+
+<div class="diff-pro diff-note">✓ 一个客户一行，看板长度 = 客户数量。Nassir 的两个因子在同列可见</div>
+<div class="diff-con diff-note">✗ Nassir 处理完🔴后，🟡 可能被忽略。某客户的🟡标记夹在一堆🔴之间不显眼</div>
+
+<hr>
+
+<h2>方案 B：任务清单式 <span class="badge badge-b">每个驱动因子一行 · 纯待办</span></h2>
+
+<table>
+<thead><tr><th style="width:36px">优先级</th><th style="width:110px">客户</th><th style="width:80px">阶段</th><th style="width:70px">最后联系</th><th>该做什么</th><th>详情</th></tr></thead>
+<tbody>
+<tr class="section-row"><td colspan="6">🔴 需立即处理 — 3 件事</td></tr>
+<tr>
+  <td><span class="priority-dot dot-red"></span></td>
+  <td class="name-col">Inderpreet kaur</td>
+  <td class="stage-col">样品阶段</td>
+  <td>6天前</td>
+  <td><strong>未回复</strong></td>
+  <td style="color:#666;font-size:0.85em">客户5/14发消息等你回，已超时2天</td>
+</tr>
+<tr>
+  <td><span class="priority-dot dot-red"></span></td>
+  <td class="name-col">Nassir A</td>
+  <td class="stage-col">已发货/在途</td>
+  <td>3天前</td>
+  <td><strong>承诺未兑现</strong></td>
+  <td style="color:#666;font-size:0.85em">昨天说"明天确认库存"，还没回复</td>
+</tr>
+<tr>
+  <td><span class="priority-dot dot-red"></span></td>
+  <td class="name-col">jonathan aston</td>
+  <td class="stage-col">报价已发</td>
+  <td>7天前</td>
+  <td><strong>待发货</strong></td>
+  <td style="color:#666;font-size:0.85em">客户已付款，货还没出，该安排发货</td>
+</tr>
+<tr class="section-row"><td colspan="6">🟡 需定时关注 — 5 件事</td></tr>
+<tr>
+  <td><span class="priority-dot dot-yellow"></span></td>
+  <td class="name-col">Nassir A</td>
+  <td class="stage-col">已发货/在途</td>
+  <td>3天前</td>
+  <td><strong>到港提醒</strong></td>
+  <td style="color:#666;font-size:0.85em">5/18到港，该通知客户准备收货</td>
+</tr>
+<tr>
+  <td><span class="priority-dot dot-yellow"></span></td>
+  <td class="name-col">Clara ElAssaad</td>
+  <td class="stage-col">需求探索</td>
+  <td>7天前</td>
+  <td><strong>该追问</strong></td>
+  <td style="color:#666;font-size:0.85em">报价已发7天未回，温追问</td>
+</tr>
+<tr>
+  <td><span class="priority-dot dot-yellow"></span></td>
+  <td class="name-col">WELE Mounia</td>
+  <td class="stage-col">已签收</td>
+  <td>8天前</td>
+  <td><strong>该回访</strong></td>
+  <td style="color:#666;font-size:0.85em">签收8天，该回访问质量和复购</td>
+</tr>
+<tr>
+  <td><span class="priority-dot dot-yellow"></span></td>
+  <td class="name-col">arshavin amoah</td>
+  <td class="stage-col">待付款</td>
+  <td>11天前</td>
+  <td><strong>该追问</strong></td>
+  <td style="color:#666;font-size:0.85em">报价$15.50已发11天，需追问</td>
+</tr>
+<tr>
+  <td><span class="priority-dot dot-yellow"></span></td>
+  <td class="name-col">Hakim Ezat</td>
+  <td class="stage-col">报价已发</td>
+  <td>11天前</td>
+  <td><strong>该追问</strong></td>
+  <td style="color:#666;font-size:0.85em">报价$3.68×500，客户沉默11天</td>
+</tr>
+</tbody>
+</table>
+
+<div class="diff-pro diff-note">✓ Nassir 的两件事独立两行，处理完一件另一件不会丢。一眼知道"今天有几件事"</div>
+<div class="diff-con diff-note">✗ 同一个客户可能重复出现。无客户维度的阶段/国家，需要跳转状态卡才能看到背景</div>
+
+<hr>
+
+<div class="verdict">
+  <h3>方案 C（推荐）：混合模式</h3>
+
+  <p style="margin-bottom:16px; line-height:1.6;">
+    用 <strong>方案 A 作为「看板入口」</strong>，按客户聚合展示，快速扫"谁有问题"。<br>
+    点开任一客户后，<strong>用方案 B 的方式展示该客户的完整驱动因子清单</strong>。
+  </p>
+
+  <table>
+  <thead><tr><th>在哪</th><th>展示方式</th><th>解决问题</th></tr></thead>
+  <tbody>
+  <tr><td><strong>看板全局</strong></td><td>方案 A（客户聚合）</td><td>"谁有问题？" 一眼扫完</td></tr>
+  <tr><td><strong>点开单客户</strong></td><td>方案 B（任务清单）</td><td>"这个人的所有待办" 不遗漏</td></tr>
+  <tr><td><strong>状态卡</strong></td><td>驱动因子列表 + 聊天摘要</td><td>深度决策依据</td></tr>
+  </tbody>
+  </table>
+</div>
+
+</body>
+</html>

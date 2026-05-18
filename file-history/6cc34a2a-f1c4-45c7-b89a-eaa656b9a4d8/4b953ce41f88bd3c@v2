@@ -1,0 +1,251 @@
+// 探索 OKKI 页面的 tms 对象
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const okkiPage = targets.find(t =>
+        t.type === 'page' && t.url && t.url.includes('crm.xiaoman.cn/talk/hub/tm')
+    );
+    if (!okkiPage) { console.log('找不到 OKKI TM page'); process.exit(1); }
+
+    const ws = new WebSocket(okkiPage.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 探索 tms 对象 ===
+    console.log('=== tms 对象 ===\n');
+
+    const tms = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var tms = window.tms;
+                if (!tms) return { error: 'no tms' };
+
+                var result = {
+                    type: typeof tms,
+                    keys: Object.keys(tms).slice(0, 30)
+                };
+
+                // 列出所有属性和方法
+                var props = [];
+                for (var key in tms) {
+                    try {
+                        var val = tms[key];
+                        var t = typeof val;
+                        var desc = t;
+                        if (t === 'function') desc = 'fn(' + val.length + ')';
+                        else if (t === 'object' && val !== null) {
+                            desc = Array.isArray(val) ? 'array[' + val.length + ']' : 'object{' + Object.keys(val).slice(0,5).join(',') + '}';
+                        }
+                        else if (t === 'string') desc = 'str:' + val.substring(0, 40);
+                        props.push({ key: key, desc: desc });
+                    } catch(e) {
+                        props.push({ key: key, error: true });
+                    }
+                }
+                result.props = props;
+
+                // 如果有方法，列出方法源码片段
+                var methods = {};
+                for (var k in tms) {
+                    if (typeof tms[k] === 'function' && k.length < 30) {
+                        methods[k] = tms[k].toString().substring(0, 400);
+                    }
+                }
+                result.methodSources = methods;
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(tms.result?.value || '(无)');
+
+    // === 2. 看看 onetalk iframe 是否有暴露 API 给 OKKI ===
+    console.log('\n=== onetalk iframe contentWindow ===\n');
+
+    const iframeApi = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var iframe = document.querySelector('iframe[src*="onetalk"]');
+                if (!iframe || !iframe.contentWindow) return { error: 'no iframe/cw' };
+
+                var cw = iframe.contentWindow;
+                var result = {
+                    // 可访问的属性
+                    keys: Object.keys(cw).slice(0, 20),
+                };
+
+                // 看 iframe 里的 _imsdk
+                try {
+                    var sdk = cw._imsdk;
+                    if (sdk) {
+                        var auth = sdk.getAuthService();
+                        result.sdk = {
+                            isLogin: auth.isLogin(),
+                            nick: auth.getLoginNick()
+                        };
+                    }
+                } catch(e) {
+                    result.sdkError = e.message;
+                }
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(iframeApi.result?.value || '(无)');
+
+    // === 3. 看 TMS sub-app webpack modules ===
+    console.log('\n=== TMS webpack 模块 ===\n');
+
+    const tmsWp = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var wp = window.webpackJsonp_SUB_APP__TMS;
+                if (!wp) return { error: 'no wp' };
+
+                var result = {
+                    type: typeof wp,
+                    isArray: Array.isArray(wp),
+                    length: Array.isArray(wp) ? wp.length : 'N/A',
+                    pushType: typeof wp.push
+                };
+
+                // 如果有 push 方法，看最近的调用
+                if (wp.push && typeof wp.push === 'function') {
+                    result.hasPush = true;
+                }
+
+                return result;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(tmsWp.result?.value || '(无)');
+
+    // === 4. 直接在 OKKI 页面调 customerRead API（找正确的 URL） ===
+    console.log('\n=== 测试 OKKI API 正确路径 ===\n');
+
+    // 先看页面加载时用了什么 API
+    const apiXHR = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                // 看 window 上有没有缓存的 API 实例
+                var result = {};
+
+                // Vue 实例上的 $http
+                var appEl = document.querySelector('#app');
+                if (appEl && appEl.__vue__) {
+                    result.hasVue = true;
+                    var vm = appEl.__vue__;
+                    result.vmKeys = Object.keys(vm).slice(0, 20);
+                } else {
+                    result.hasVue = false;
+                }
+
+                // 看 __app__
+                if (window.__app__) {
+                    result.hasApp = true;
+                    result.appKeys = Object.keys(window.__app__).slice(0, 20);
+                }
+
+                return JSON.stringify(result);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log('页面实例:', apiXHR.result?.value);
+
+    // === 5. 从 OKKI 调 onetalk 里的 API ===
+    console.log('\n=== 通过 OKKI 调 onetalk API ===\n');
+
+    const crossFrame = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var iframe = document.querySelector('iframe[src*="onetalk"]');
+                    if (!iframe) { resolve('no iframe'); return; }
+
+                    var cw = iframe.contentWindow;
+                    try {
+                        var fullData = cw.__conversationListFullData__;
+                        if (fullData && fullData[0]) {
+                            // 在 iframe 内调 HTTP API
+                            var xhr = new cw.XMLHttpRequest();
+                            xhr.open('POST', 'https://onetalk.alibaba.com/message/listRecentConversationContactDetail.htm', true);
+                            xhr.withCredentials = true;
+                            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                            var conv = fullData[0];
+                            var params = 'params=' + encodeURIComponent(JSON.stringify({
+                                contactEncryptAliIdList: [conv.contact.aliIdEncrypt],
+                                contactEncryptAccountIdList: [],
+                                chatTokens: conv.chatToken
+                            }));
+
+                            xhr.onload = function() {
+                                resolve(JSON.stringify({
+                                    status: xhr.status,
+                                    body: xhr.responseText.substring(0, 1000)
+                                }));
+                            };
+                            xhr.onerror = function() {
+                                resolve(JSON.stringify({ error: 'XHR failed', status: xhr.status }));
+                            };
+                            xhr.send(params);
+                        } else {
+                            resolve('no conversations in iframe');
+                        }
+                    } catch(e) {
+                        resolve(JSON.stringify({ crossOriginError: e.message }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log('跨 frame API 调用:', crossFrame.result?.value);
+
+    ws.close();
+    console.log('\n完成');
+})();

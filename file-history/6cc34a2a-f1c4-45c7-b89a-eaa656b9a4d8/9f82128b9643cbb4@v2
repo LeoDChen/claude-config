@@ -1,0 +1,280 @@
+// Phase 1: 保存 __conversationListFullData__ + 修复网络连接 + 拉取消息
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+    const events = [];
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+        if (msg.method) events.push(msg);
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+    await cmd('Network.enable');
+
+    // === 1. 先统计 __conversationListFullData__ ===
+    console.log('=== 会话数据统计 ===\n');
+
+    const stats = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var data = window.__conversationListFullData__;
+                if (!data) return { error: 'not found' };
+
+                var stats = {
+                    total: data.length,
+                    withLatestMsg: 0,
+                    unread: 0,
+                    stayTop: 0,
+                    countries: {},
+                    levels: {},
+                    first10: []
+                };
+
+                for (var i = 0; i < data.length; i++) {
+                    var c = data[i];
+                    if (c.latestMessage && c.latestMessage.content) stats.withLatestMsg++;
+                    if (c.unreadCount > 0) stats.unread++;
+                    if (c.stayTop) stats.stayTop++;
+
+                    var cc = c.contact && c.contact.complianceCountryCode;
+                    if (cc) stats.countries[cc] = (stats.countries[cc] || 0) + 1;
+
+                    var lv = c.contact && c.contact.userNewLevel;
+                    if (lv) stats.levels[lv] = (stats.levels[lv] || 0) + 1;
+
+                    if (i < 10) {
+                        stats.first10.push({
+                            name: c.contact && c.contact.name,
+                            country: cc,
+                            level: lv,
+                            unread: c.unreadCount,
+                            stayTop: c.stayTop,
+                            latestMsg: c.latestMessage ? c.latestMessage.content && c.latestMessage.content.substring(0, 60) : null,
+                            lastTime: c.lastContactTimeLong
+                        });
+                    }
+                }
+
+                return stats;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(stats.result?.value || '(无)');
+
+    // === 2. 保存精简版到文件 ===
+    console.log('\n=== 保存数据到文件 ===\n');
+
+    const saveResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var data = window.__conversationListFullData__;
+                if (!data) return 'ERROR: no data';
+
+                // 只保留关键字段
+                var compact = [];
+                for (var i = 0; i < data.length; i++) {
+                    var c = data[i];
+                    compact.push({
+                        cid: c.cid,
+                        name: c.contact ? c.contact.name : null,
+                        loginId: c.contact ? c.contact.loginId : null,
+                        aliId: c.contact ? c.contact.aliId : null,
+                        accountId: c.contact ? c.contact.accountId : null,
+                        country: c.contact ? c.contact.complianceCountryCode : null,
+                        level: c.contact ? c.contact.userNewLevel : null,
+                        stayTop: c.stayTop,
+                        unread: c.unreadCount,
+                        mute: c.mute,
+                        lastContactTime: c.lastContactTimeLong,
+                        createAt: c.createAt,
+                        modifyTime: c.modifyTime,
+                        latestMsgContent: c.latestMessage ? c.latestMessage.content : null,
+                        latestMsgTime: c.latestMessage ? c.latestMessage.sendTime : null,
+                        latestMsgType: c.latestMessage ? c.latestMessage.msgType || c.latestMessage.imMessageType : null,
+                        contactRead: c.latestMessage ? c.latestMessage.contactRead : null,
+                        conversationType: c.conversationType,
+                        chatToken: c.chatToken
+                    });
+                }
+
+                // 存到 window 供后续写入
+                window.__compactData = JSON.stringify(compact);
+                return 'OK, compacted ' + compact.length + ' conversations, size=' + window.__compactData.length;
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(saveResult.result?.value || '(无)');
+
+    // 获取紧凑数据
+    const compactData = await cmd('Runtime.evaluate', {
+        expression: 'window.__compactData || "NOT FOUND"',
+        returnByValue: true
+    });
+
+    const jsonStr = compactData.result?.value;
+    if (jsonStr && jsonStr !== 'NOT FOUND') {
+        fs.writeFileSync(
+            'd:/ClaudeWorkspace/08_客户跟进/Okki/data/tm_conversations_compact.json',
+            jsonStr
+        );
+        const parsed = JSON.parse(jsonStr);
+        console.log('已保存', parsed.length, '个会话到 data/tm_conversations_compact.json');
+    }
+
+    // === 3. 尝试重新连接 ===
+    console.log('\n=== 尝试恢复连接 + 拉消息 ===\n');
+
+    const reconnect = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var auth = window._imsdk.getAuthService();
+                    var isLoggedIn = auth.isLogin();
+
+                    // 尝试重连
+                    try {
+                        auth.reConnect();
+                        setTimeout(function() {
+                            var stillLoggedIn = auth.isLogin();
+                            var nick = auth.getLoginNick();
+
+                            // 重连后再试拉消息
+                            var fullData = window.__conversationListFullData__;
+                            if (fullData && fullData[0] && stillLoggedIn) {
+                                var msgSvc = window._imsdk.getMessageService();
+                                msgSvc.listMessageWithConversationCodeForHistory({
+                                    conversationCode: fullData[0].cid,
+                                    count: 5,
+                                    dataCallback: function(result) {
+                                        resolve(JSON.stringify({
+                                            reconnected: true,
+                                            nick: nick,
+                                            wasLoggedIn: isLoggedIn,
+                                            isLoggedIn: stillLoggedIn,
+                                            msgCount: result.data ? result.data.length : 0,
+                                            hasMore: result.hasMore,
+                                            firstMsg: result.data && result.data[0] ? JSON.stringify(result.data[0]).substring(0, 300) : null
+                                        }));
+                                    },
+                                    errorCallBack: function(err) {
+                                        resolve(JSON.stringify({
+                                            reconnected: true,
+                                            nick: nick,
+                                            wasLoggedIn: isLoggedIn,
+                                            isLoggedIn: stillLoggedIn,
+                                            msgError: err && (err.message || err.err || String(err))
+                                        }));
+                                    }
+                                });
+                            } else {
+                                resolve(JSON.stringify({
+                                    reconnected: false,
+                                    wasLoggedIn: isLoggedIn,
+                                    isLoggedIn: stillLoggedIn,
+                                    nick: nick
+                                }));
+                            }
+                        }, 3000);
+                    } catch(e) {
+                        resolve(JSON.stringify({ reconnectError: e.message || String(e) }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(reconnect.result?.value || '(无)');
+
+    // === 4. 看有没有 MTOP API 可以用于获取消息 ===
+    // 之前的发现: listRecentConversationContactDetail.htm 能拿最近会话
+    // 找一下有没有 getMessageHistory 之类的调用
+    console.log('\n=== 底层 SDK API 探索 ===\n');
+
+    const lowLevel = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                // _imBaaSSDK 是底层SDK
+                var baas = window._imBaaSSDK;
+                if (!baas) return { error: 'no baas' };
+
+                // 列出 baas 的方法
+                var methods = [];
+                for (var key in baas) {
+                    if (typeof baas[key] === 'function') {
+                        methods.push(key);
+                    }
+                }
+
+                // 如果有 getMsgService
+                var msgSvc = baas.getMsgService ? baas.getMsgService() : null;
+                var msgMethods = [];
+                if (msgSvc) {
+                    var proto = Object.getPrototypeOf(msgSvc);
+                    while (proto) {
+                        var names = Object.getOwnPropertyNames(proto);
+                        for (var i = 0; i < names.length; i++) {
+                            if (typeof proto[names[i]] === 'function') {
+                                msgMethods.push(names[i]);
+                            }
+                        }
+                        proto = Object.getPrototypeOf(proto);
+                    }
+                }
+
+                return {
+                    baasMethods: methods,
+                    msgServiceMethods: msgMethods
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(lowLevel.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

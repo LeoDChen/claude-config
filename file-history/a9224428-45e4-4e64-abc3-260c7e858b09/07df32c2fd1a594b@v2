@@ -1,0 +1,46 @@
+# 解决 DeepSeek + CC-Switch 无法识别图片的问题
+
+## 问题根因
+
+DeepSeek 的 **Anthropic 兼容端点** (`/anthropic/v1/messages`) **不支持 image content block**。
+但 DeepSeek 的 **OpenAI 兼容端点** (`/v1/chat/completions`) **支持图片**（Open Eye 识图功能）。
+
+CC-Switch → Anthropic 端点 → 图片被拒。Claude Code Read 工具发的图片走 Anthropic 格式，到 DeepSeek 那端直接被丢弃。
+
+## 解决方案
+
+新增一个 **MCP 视觉工具**（`vision-reader`），调用 DeepSeek OpenAI 端点识图：
+
+```
+Claude Code → Read 工具(图片) → 仍不可用(底层模型限制)
+Claude Code → MCP vision-reader → DeepSeek OpenAI 端点 → ✅ 返回图片描述
+```
+
+### 核心逻辑
+
+1. MCP server 暴露 `describe_image` 工具，接收文件路径
+2. 读取图片文件 → base64 → `data:image/xxx;base64,...`
+3. 调用 `POST https://api.deepseek.com/v1/chat/completions`（OpenAI 格式）
+4. 返回文字描述
+
+### 文件计划
+
+| 文件 | 操作 |
+|------|------|
+| `C:\Users\Administrator\.claude\mcp-servers\vision-reader\package.json` | 新建 |
+| `C:\Users\Administrator\.claude\mcp-servers\vision-reader\server.mjs` | 新建 |
+| `C:\Users\Administrator\.claude\mcp.json` | 修改，注册 vision-reader |
+
+### 技术细节
+
+- 复用 `settings.json` 中的 DeepSeek API key (`ANTHROPIC_AUTH_TOKEN`)
+- 端点：`https://api.deepseek.com/v1/chat/completions`
+- 模型：`deepseek-v4-pro`（支持识图）
+- 图片格式：base64 data URI
+- 时延：单次调用 ~3-5秒
+
+## 验证方式
+
+1. 启动后调用 `describe_image` 读取 `C:\Users\Administrator\Desktop\01.png`
+2. 确认返回笔记本电脑配置文字描述
+3. 再用 `describe_image` 读取 `02.jpg` 验证

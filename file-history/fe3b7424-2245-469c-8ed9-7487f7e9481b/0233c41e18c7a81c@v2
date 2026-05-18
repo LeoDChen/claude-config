@@ -1,0 +1,175 @@
+# CC+OB 协作系统 — 配置瘦身审核文档 V3
+
+> 更新：2026-05-10 | 状态：待用户最终确认 | 变更：基于 OKKI 项目历史补充
+
+---
+
+## 零、Skills 最终保留清单（19 个）
+
+### 业务核心（9 个）
+`p4p-optimization` `inquiry-analysis` `customer-pitch` `b2b-visual-design` `copywriting` `product-listing` `order-followup` `logistics` `office-tools`
+
+### 手动层工具（7 个）
+`brainstorming` `grill-me` `writing-plans` `to-prd` `writing-skills` `systematic-debugging` `using-superpowers`
+
+### 通用辅助（3 个，原 V2 已确认）
+`deep-research` `search-first` `knowledge-ops` `claude-code-guide`
+
+修正：4 个。说明：deep-research=多源调研，search-first=先搜再动手，knowledge-ops=知识库管理，claude-code-guide=Claude Code 使用帮助。
+
+### OKKI 项目驱动新增（2 个）
+
+| 技能 | 解决的困扰 | 用途 |
+|------|-----------|------|
+| **token-budget-advisor** | 上下文衰减是你最核心的反复问题。415人批量质量崩塌、单对话多阶段退化，都需要你反复提醒拆分 | 任务开始前评估复杂度，主动建议拆批/控制深度，不等你提醒就提前预警 |
+| **prompt-optimizer** | 指令不够精确导致输出偏离（Mona跑偏、高价值客户被算法低估） | 分析你的原始需求，匹配对应技能/工具，输出优化后的 prompt |
+
+### 删除（~141 个）
+
+全部编程/前端/DevOps/区块链/医疗/其他行业专用 skills。
+
+---
+
+## 一、OKKI 项目困扰 → 工具映射
+
+| # | 困扰 | 严重程度 | 对应工具/技能 | 保留状态 |
+|---|------|---------|-------------|---------|
+| 1 | 415人批量分析质量崩塌，上下文衰减反复出现 | 核心 | token-budget-advisor | ✅ 新增 |
+| 2 | Chrome 147 CDP 方案失效，5天后才发现已有方案 | 高 | search-first | ✅ 已保留 |
+| 3 | latestMessage 统计错误（14人回复→0） | 高 | 防幻觉自检协议 | ✅ CLAUDE.md 内置 |
+| 4 | 声称 LWP 消息"编码不可读" | 中 | silent-failure-hunter | ✅ 已保留 Agent |
+| 5 | sync_okki.js 提取时机过早（466/473） | 中 | code-reviewer | ✅ 已保留 Agent |
+| 6 | Mona 分析完全跑偏（未查样品事实） | 高 | brainstorming | ✅ 已保留 |
+| 7 | 替用户做商业决策（$300-500测试费） | 高 | grill-me | ✅ 已保留 |
+| 8 | 高价值客户被算法低估 | 中 | brainstorming + prompt-optimizer | ✅ |
+| 9 | 客户沉默未穷举根因 | 中 | grill-me | ✅ 已保留 |
+| 10 | 报价数据错误（未从源数据核验） | 高 | 防幻觉自检 | ✅ CLAUDE.md 内置 |
+| 11 | 抖音视频内容用相关文章替代 | 中 | 防幻觉自检 | ✅ CLAUDE.md 内置 |
+| 12 | 工厂信息编造 | 高 | 工厂信息强制核实规则 | ✅ CLAUDE.md 内置 |
+| 13 | 回复默认出英文/双语 | 中 | 规则改为默认中文 | ✅ 已修复 |
+| 14 | 上下文衰减反复出现，需用户反复提醒拆分 | 核心 | token-budget-advisor | ✅ 新增 |
+
+---
+
+## 二、系统命令解释
+
+| 命令 | 干什么 | 保留？ |
+|------|--------|--------|
+| /plan | 进入规划模式：先出方案给你审批，确认后才动手 | ✅ 有用 |
+| /checkpoint | 保存当前对话快照，之后可回退 | ✅ 偶尔有用 |
+| /cleanup | 清理工作区垃圾文件 | ✅ 有用 |
+| /save-session | 把当前对话保存为文件，可恢复继续 | ✅ 长任务跨对话 |
+| /resume-session | 恢复之前保存的对话 | ✅ 同上 |
+| /projects | 管理多个项目目录切换 | ❌ 你只有一个项目 |
+
+---
+
+## 三、Agents 保留清单（8 个）
+
+> **"语言专用型"** = 只懂某一门语言的 agent（cpp-reviewer 只审 C++，rust-reviewer 只审 Rust）。你不写这些语言，永远用不到。
+
+### 保留
+
+| Agent | 用途 | OKKI 项目关联 |
+|-------|------|-------------|
+| code-explorer | 大规模搜索代码/文件 | 搜索 OKKI 50+ 脚本中的特定逻辑 |
+| code-reviewer | 审查代码质量 | 能提前发现 sync_okki.js 提取时机问题 |
+| security-reviewer | 检查安全漏洞 | OKKI SSO/Cookie 安全，CDP 连接安全 |
+| docs-lookup | 查库/API 最新文档 | CDP 方案失效时快速查 Playwright 最新文档 |
+| silent-failure-hunter | 查找被静默吞掉的错误 | 能发现"编码不可读"实际是未深挖 |
+| doc-updater | 更新文档 | OKKI STATE.md、知识库文件更新 |
+| planner | 复杂任务先规划 | OKKI 项目整体方案设计 |
+| general-purpose | 通用任务执行 | 兜底 |
+
+### 删除（42 个）
+
+全部语言专用 + 行业专用 agent。
+
+---
+
+## 四、全局 Rules（目标 0 文件）
+
+已删除：`common/` `zh/` `typescript/` `python/` `golang/` `swift/` `php/` `web/`
+
+待删除：`cpp/` `csharp/` `dart/` `java/` `kotlin/` `perl/` `rust/` `operations-rules.md`
+
+已备份到 `C:/Users/Administrator/.claude/backups/20260510/rules/`
+
+---
+
+## 五、全局 CLAUDE.md 精简对比
+
+### 当前版本（188 行）
+
+```
+# 交互原则（8 条，含第一性原理、指令质量驱动）
+# 强制自检（统计/验证规范，~15 行）
+# 经验沉淀到 OB（3 个经验库文件的写入规则，~12 行）
+# 持久化指令
+  - 工作产出目录
+  - 执行前必查清单
+  - Obsidian 对话保存规则
+  - 用户背景要点（工厂档案路径、硬性规则引用，~25 行）
+# 技能系统
+  - 9 个命令列表
+  - 9 个技能索引表（带文件路径）
+  - operations-rules.md 加载说明
+```
+
+### 精简后版本（30 行）
+
+```
+# 交互原则
+1. 不废话，直接干
+2. 有立场，不迎合
+3. 第一性原理
+4. 我的时间比算力值钱
+5. 指令质量驱动
+6. 不多做，不越界
+7. 复杂任务先出框架
+8. 不确定绝不猜测
+
+# 强制自检
+输出定量/分析结论前必须从源数据验证，不凭记忆。
+
+# 输出语言
+默认中文。英文/双语仅在用户明确要求时输出。
+
+# 经验沉淀
+有价值信息记录到 OB vault: E:\道友的宝贝\道友的宝贝\对话归档\CC\
+
+# 项目
+工作产出 → D:\ClaudeWorkspace\ 对应子目录。
+项目专属的规则、技能、知识库由各项目 .claude/ 目录管理。
+```
+
+### 删除的内容 → 去向
+
+| 删除内容 | 移到 |
+|---------|------|
+| 用户背景要点、工厂档案路径、硬性规则 | 项目 CLAUDE.md |
+| 技能索引表（9 命令+文件路径） | 项目 CLAUDE.md |
+| Obsidian 对话保存详细规则 | 项目 CLAUDE.md |
+| 经验库文件详细说明 | OB 知识库 |
+| 执行前必查清单 | 已由 inject-rules hook 注入 |
+
+---
+
+## 六、执行计划
+
+| 步骤 | 操作 | 预估影响 |
+|------|------|---------|
+| 1 | 全局 rules：删 7 剩余目录 + operations-rules.md | 已有备份 |
+| 2 | 全局 skills：160→19 | 删 141 个编程/行业 skills |
+| 3 | 全局 commands：86→~22 | 与 skills 对应 |
+| 4 | 全局 agents：50→8 | 删 42 个语言/行业 agents |
+| 5 | 全局 CLAUDE.md：188→30 行 | 见上面对比 |
+| 6 | 项目 rules：90→1（operations-rules.md） | 唯一业务规则 |
+| 7 | 项目 skills/commands/agents：与全局同步 | 消除全局/项目重复 |
+| 8 | 项目 CLAUDE.md：指针化改造 | 内嵌知识→路径引用 |
+| 9 | 写入 OB 笔记：记录修改+决策框架+同步机制 | 后续可追溯 |
+
+### 风险控制
+- 所有删除前备份到 `backups/20260510/`
+- 每步完成后暂停验证
+- 分对话执行

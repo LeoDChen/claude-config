@@ -1,0 +1,177 @@
+#!/usr/bin/env node
+
+/**
+ * 小满CRM — TM + 邮件数据整合
+ *
+ * 将 TM 聊天数据与邮件数据按客户名合并
+ * 生成完整客户档案 JSON + 摘要报告
+ *
+ * 用法: node integrate.mjs
+ */
+
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+
+// ============================================================
+// 加载最新的各类数据
+// ============================================================
+function loadLatest(pattern) {
+  const files = readdirSync(DATA_DIR)
+    .filter(f => f.startsWith(pattern) && f.endsWith('.json'))
+    .sort()
+    .reverse();
+  if (!files.length) return [];
+  return JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf-8'));
+}
+
+// ============================================================
+// 从邮箱地址或发件人提取客户名（模糊匹配）
+// ============================================================
+function matchCustomerName(text, customerNames) {
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  for (const name of customerNames) {
+    if (!name || name === 'User name') continue;
+    const nameLower = name.toLowerCase();
+    // Try full name match
+    if (lower.includes(nameLower)) return name;
+    // Try first name match (if name has multiple parts)
+    const parts = nameLower.split(/\s+/).filter(Boolean);
+    for (const part of parts) {
+      if (part.length > 2 && lower.includes(part)) return name;
+    }
+  }
+  return null;
+}
+
+// ============================================================
+// 主流程
+// ============================================================
+function main() {
+  console.log('╔══════════════════════════════════════╗');
+  console.log('║   小满CRM 数据整合                    ║');
+  console.log('║   TM + 邮件 → 客户档案                ║');
+  console.log('╚══════════════════════════════════════╝\n');
+
+  // 1. 加载所有数据
+  console.log('📂 加载数据...');
+  const tmData = loadLatest('数据_');
+  const mailData = loadLatest('邮件数据_');
+  const sentData = loadLatest('发件数据_');
+  console.log(`   TM 聊天: ${tmData.length} 个会话`);
+  console.log(`   收件匹配: ${mailData.length} 封`);
+  console.log(`   发件: ${sentData.length} 封\n`);
+
+  // 2. 提取所有客户名
+  const customerNames = [...new Set(tmData.map(c => c.name).filter(Boolean))];
+  console.log(`👥 客户: ${customerNames.length} 个`);
+
+  // 3. 为每个客户建立档案
+  const archives = customerNames.map(name => {
+    const tm = tmData.find(c => c.name === name);
+    const tmMessages = tm?.messages || [];
+    const tmImages = tm?.images || [];
+    const classification = tm?.classification || null;
+
+    // 匹配收件
+    const inboxMails = mailData.filter(m => m.customerName === name);
+    // 匹配发件（通过主题或收件人）
+    const sentMails = sentData.filter(m => {
+      if (matchCustomerName(m.senderName || m.senderEmail, [name])) return true;
+      if (matchCustomerName(m.subject || '', [name])) return true;
+      return false;
+    });
+
+    const totalEmails = inboxMails.length + sentMails.length;
+
+    return {
+      name,
+      classification,
+      tm: {
+        messageCount: tmMessages.length,
+        messages: tmMessages,
+        images: tmImages,
+      },
+      emails: {
+        total: totalEmails,
+        inbox: inboxMails.map(m => ({
+          subject: m.subject,
+          time: m.time,
+          body: m.bodyText?.substring(0, 3000) || '',
+          images: m.images || [],
+        })),
+        sent: sentMails.map(m => ({
+          to: m.senderName || m.senderEmail,
+          subject: m.subject,
+          time: m.time,
+          body: m.bodyText?.substring(0, 3000) || '',
+          images: m.images || [],
+        })),
+      },
+    };
+  });
+
+  // 4. 统计
+  const totalTmMsg = archives.reduce((s, a) => s + a.tm.messageCount, 0);
+  const totalTmImg = archives.reduce((s, a) => s + a.tm.images.length, 0);
+  const totalEmail = archives.reduce((s, a) => s + a.emails.total, 0);
+  const totalEmailImg = archives.reduce((s, a) => {
+    return s + a.emails.inbox.reduce((ss, m) => ss + m.images.length, 0) + a.emails.sent.reduce((ss, m) => ss + m.images.length, 0);
+  }, 0);
+
+  // 5. 统计未匹配邮件
+  const matchedMailSubjects = new Set(mailData.map(m => m.subject));
+  const matchedSentSubjects = new Set(sentData.map(m => m.subject));
+  const unmatchedMail = mailData.filter(m => !m.customerName || m.customerName === 'User name').length;
+  const unmatchedSent = sentData.filter(m => {
+    return !matchCustomerName(m.senderName || m.senderEmail, customerNames) &&
+           !matchCustomerName(m.subject || '', customerNames);
+  }).length;
+
+  // 6. 保存合并 JSON
+  const timestamp = new Date().toISOString().replace(/[:]/g, '-').substring(0, 19);
+  const mergedPath = join(DATA_DIR, `客户档案_${timestamp}.json`);
+  const summary = {
+    generatedAt: timestamp,
+    stats: {
+      totalCustomers: archives.length,
+      totalTmMessages: totalTmMsg,
+      totalTmImages: totalTmImg,
+      totalEmails: totalEmail,
+      totalEmailImages: totalEmailImg,
+      unmatchedEmails: unmatchedMail + unmatchedSent,
+    },
+    customers: archives,
+  };
+  writeFileSync(mergedPath, JSON.stringify(summary, null, 2), 'utf-8');
+
+  // 7. 输出摘要
+  console.log(`\n📊 整合摘要`);
+  console.log(`   ${'─'.repeat(40)}`);
+  console.log(`   客户: ${archives.length} 个`);
+  console.log(`   TM 消息: ${totalTmMsg} 条`);
+  console.log(`   TM 图片: ${totalTmImg} 张`);
+  console.log(`   关联邮件: ${totalEmail} 封（收件${mailData.length} + 发件${sentData.length}）`);
+  console.log(`   邮件图片: ${totalEmailImg} 张`);
+  console.log(`   未匹配邮件: ${unmatchedMail + unmatchedSent} 封（收件${unmatchedMail} + 发件${unmatchedSent}）`);
+  console.log(`\n   已保存: ${mergedPath}\n`);
+
+  // 8. 输出每个客户的清单
+  console.log('📋 客户档案清单：');
+  console.log(`   ${'─'.repeat(60)}`);
+  for (const a of archives) {
+    const name = a.name.padEnd(30);
+    const tmInfo = `${a.tm.messageCount}条/${a.tm.images.length}图`.padEnd(15);
+    const emailInfo = `${a.emails.total}封`;
+    const catLabel = a.classification ? (a.classification.categoryId || '') : '';
+    console.log(`   ${name} TM:${tmInfo} 邮件:${emailInfo}  [${catLabel}]`);
+  }
+
+  return summary;
+}
+
+main();

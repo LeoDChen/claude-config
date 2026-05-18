@@ -1,0 +1,575 @@
+#!/usr/bin/env node
+
+/**
+ * 小满CRM — 客户执行方案生成器
+ * 输出精美排版的 Word 文档到桌面
+ */
+
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  AlignmentType, WidthType, BorderStyle, ShadingType, TableLayoutType,
+} from 'docx';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+const DESKTOP = 'C:/Users/Administrator/Desktop';
+
+// ============================================================
+// 调色板 — 阅读舒适为首要目标
+// ============================================================
+const C = {
+  ink: '1A1A1A',        // 正文
+  soft: '555555',       // 辅助文字
+  light: '999999',      // 轻灰
+  line: 'D9D9D9',       // 分隔线
+
+  accent: '1A56DB',     // 主强调蓝
+  accentBg: 'EEF2FF',   // 蓝底
+
+  red: 'C92A2A',        // P0 紧急
+  redBg: 'FFF5F5',      // P0 底色
+  orange: 'D9480F',     // 高优
+  orangeBg: 'FFF4EC',   // 高优底色
+  yellow: 'B8860B',     // 关注
+  yellowBg: 'FFFBE6',   // 关注底色
+
+  green: '2B8A3E',      // 已处理
+  greenBg: 'EBFBEE',
+  purple: '7950F2',
+  teal: '0C8599',
+
+  white: 'FFFFFF',
+  bg: 'FAFBFD',
+};
+
+// ============================================================
+// 排版辅助
+// ============================================================
+
+function T(text, opts = {}) {
+  return new TextRun({
+    text,
+    size: opts.size || 21,
+    color: opts.color || C.ink,
+    bold: opts.bold,
+    italics: opts.italics,
+    font: opts.font || 'Microsoft YaHei',
+  });
+}
+
+function P(runs, opts = {}) {
+  return new Paragraph({
+    children: Array.isArray(runs) ? runs : [runs],
+    spacing: { before: opts.before || 0, after: opts.after || 60, line: opts.line || 340 },
+    indent: opts.indent,
+    alignment: opts.alignment || AlignmentType.LEFT,
+    border: opts.border,
+    shading: opts.shading,
+  });
+}
+
+function Spacer(h = 6) {
+  return new Paragraph({ spacing: { before: h, after: h } });
+}
+
+function Divider() {
+  return new Paragraph({
+    children: [],
+    spacing: { before: 120, after: 120 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: C.line } },
+  });
+}
+
+function Section(title, color) {
+  return new Paragraph({
+    children: [T(title, { size: 30, bold: true, color: color || C.accent })],
+    spacing: { before: 360, after: 160 },
+    border: { bottom: { style: BorderStyle.SINGLE, size: 3, color: color || C.accent } },
+  });
+}
+
+function Card(title, contents, { color = C.accent, bgColor = C.accentBg, icon = '' } = {}) {
+  const paragraphs = [];
+
+  // 卡片标题
+  paragraphs.push(new Paragraph({
+    children: [T((icon ? icon + ' ' : '') + title, { size: 24, bold: true, color })],
+    spacing: { before: 200, after: 80 },
+    shading: { fill: bgColor, type: ShadingType.CLEAR },
+    indent: { left: 200 },
+    border: { left: { style: BorderStyle.SINGLE, size: 8, color } },
+  }));
+
+  // 卡片内容
+  for (const item of contents) {
+    if (item.type === 'info') {
+      paragraphs.push(new Paragraph({
+        children: [
+          T(item.label + '：', { size: 19, color: C.soft, bold: true }),
+          T(item.value, { size: 19, color: C.ink }),
+        ],
+        spacing: { after: 30 },
+        indent: { left: 500 },
+      }));
+    } else if (item.type === 'msg') {
+      const sideLabel = item.side === 'received' ? '📩 客户' : '📤 我方';
+      const sideColor = item.side === 'received' ? C.purple : C.teal;
+      paragraphs.push(new Paragraph({
+        children: [
+          T(sideLabel + '：', { size: 18, bold: true, color: sideColor }),
+          T(item.text, { size: 18, color: C.soft }),
+        ],
+        spacing: { after: 20 },
+        indent: { left: 500 },
+      }));
+    } else if (item.type === 'action') {
+      paragraphs.push(new Paragraph({
+        children: [T('▸ ' + item.text, { size: 19, color: C.ink })],
+        spacing: { before: 40, after: 20 },
+        indent: { left: 500 },
+      }));
+    } else if (item.type === 'reply') {
+      paragraphs.push(new Paragraph({
+        children: [T(item.text, { size: 18, color: C.ink, italics: true })],
+        spacing: { before: 30, after: 40 },
+        indent: { left: 560 },
+        shading: { fill: 'F8F9FA', type: ShadingType.CLEAR },
+        border: { left: { style: BorderStyle.SINGLE, size: 4, color: C.line } },
+      }));
+    } else if (item.type === 'highlight') {
+      paragraphs.push(new Paragraph({
+        children: [T('⚠ ' + item.text, { size: 18, color: C.red, bold: true })],
+        spacing: { before: 40, after: 40 },
+        indent: { left: 500 },
+      }));
+    }
+  }
+
+  return paragraphs;
+}
+
+// ============================================================
+// 客户分析数据（硬编码 — 基于最新数据快照的分析结果）
+// ============================================================
+
+const actionPlan = {
+  generatedAt: new Date(),
+  summary: {
+    totalCustomers: 20,
+    p0Urgent: 13,
+    p1High: 3,
+    p2Normal: 2,
+    p3Low: 2,
+  },
+};
+
+// ============================================================
+// 构建文档
+// ============================================================
+async function build() {
+  const children = [];
+  const now = actionPlan.generatedAt;
+
+  // ==================== 封面 ====================
+  children.push(new Paragraph({ spacing: { before: 1200 } }));
+  children.push(
+    new Paragraph({
+      children: [T('小满CRM · 客户执行方案', { size: 48, bold: true, color: C.accent })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+    }),
+    new Paragraph({
+      children: [T('待处理客户回复建议 & 后续动作', { size: 26, color: C.soft })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 300 },
+    }),
+    new Paragraph({
+      children: [T('小星星服饰 · 阿里巴巴国际站', { size: 20, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 60 },
+    }),
+    new Paragraph({
+      children: [T(`${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日  生成`, { size: 20, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 600 },
+    }),
+  );
+
+  // ==================== 一、看板概览 ====================
+  children.push(Section('一、看板概览', C.accent));
+
+  // 统计卡片
+  const statItems = [
+    { label: '总会话', value: '20', sub: '个客户', color: C.accent, bg: C.accentBg },
+    { label: 'P0 紧急', value: '13', sub: '今日必须处理', color: C.red, bg: C.redBg },
+    { label: 'P1 重要', value: '3', sub: '48h内处理', color: C.orange, bg: C.orangeBg },
+    { label: 'P2/P3 常规', value: '4', sub: '本周处理', color: C.yellow, bg: C.yellowBg },
+  ];
+
+  children.push(
+    new Table({
+      rows: [
+        new TableRow({
+          children: statItems.map(s =>
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [T(s.value, { size: 36, bold: true, color: s.color })],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 20 },
+                }),
+                new Paragraph({
+                  children: [T(s.label, { size: 20, bold: true, color: C.ink })],
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 10 },
+                }),
+                new Paragraph({
+                  children: [T(s.sub, { size: 16, color: C.light })],
+                  alignment: AlignmentType.CENTER,
+                }),
+              ],
+              shading: { fill: s.bg, type: ShadingType.CLEAR },
+              width: { size: 2200, type: WidthType.DXA },
+              margins: { top: 200, bottom: 200 },
+            })
+          ),
+        }),
+      ],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  children.push(Spacer(80));
+
+  // 分类明细表
+  children.push(
+    new Paragraph({
+      children: [T('客户分类明细', { size: 22, bold: true, color: C.ink })],
+      spacing: { before: 200, after: 120 },
+    }),
+  );
+
+  const categoryRows = [
+    ['🔴 待回复', '6人', 'TheodoraAdelaide Mahe, User name(Fathima), Ahmed Darrat, zainab Babesets, Aula Alsaad, Adm Reda', C.red],
+    ['🟠 待报价', '5人', 'Cindy Nadal, fernande Pochette, Krisgel Igros, Sifa Vano, Regina Kabanda', C.orange],
+    ['⚠️ 分类需修正', '2人', 'rehema kiseyu(实为样品询盘), azaan ss(实为询价)', C.red],
+    ['🟡 待付款/确认', '2人', 'amer ly, Susuanna ParkerAdentwi', C.yellow],
+    ['🔵 低活跃', '5人', 'Jemima Piema, Assiatou Barry, Sayfullaeva Shahnoza, Lohgah Sharon, 同行推销', C.light],
+  ];
+
+  const headerRow = new TableRow({
+    tableHeader: true,
+    children: [
+      new TableCell({
+        children: [new Paragraph({ children: [T('状态', { size: 19, bold: true, color: C.white })] })],
+        shading: { fill: C.accent, type: ShadingType.CLEAR },
+        width: { size: 1600, type: WidthType.DXA },
+        margins: { top: 80, bottom: 80 },
+      }),
+      new TableCell({
+        children: [new Paragraph({ children: [T('数量', { size: 19, bold: true, color: C.white })], alignment: AlignmentType.CENTER })],
+        shading: { fill: C.accent, type: ShadingType.CLEAR },
+        width: { size: 800, type: WidthType.DXA },
+        margins: { top: 80, bottom: 80 },
+      }),
+      new TableCell({
+        children: [new Paragraph({ children: [T('客户', { size: 19, bold: true, color: C.white })] })],
+        shading: { fill: C.accent, type: ShadingType.CLEAR },
+        width: { size: 6400, type: WidthType.DXA },
+        margins: { top: 80, bottom: 80 },
+      }),
+    ],
+  });
+
+  const dataRows = categoryRows.map((r, i) =>
+    new TableRow({
+      children: [
+        new TableCell({
+          children: [new Paragraph({ children: [T(r[0], { size: 18, bold: true, color: r[3] })] })],
+          margins: { top: 60, bottom: 60 },
+          width: { size: 1600, type: WidthType.DXA },
+        }),
+        new TableCell({
+          children: [new Paragraph({ children: [T(r[1], { size: 18, color: C.ink })], alignment: AlignmentType.CENTER })],
+          width: { size: 800, type: WidthType.DXA },
+        }),
+        new TableCell({
+          children: [new Paragraph({ children: [T(r[2], { size: 17, color: C.soft })] })],
+          width: { size: 6400, type: WidthType.DXA },
+        }),
+      ],
+    })
+  );
+
+  children.push(
+    new Table({
+      rows: [headerRow, ...dataRows],
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      layout: TableLayoutType.FIXED,
+    }),
+  );
+
+  // ==================== 二、今日紧急处理 ====================
+  children.push(Divider());
+  children.push(Section('二、今日紧急处理（P0）', C.red));
+
+  // --- amer ly ---
+  children.push(...Card('1. amer ly  |  伊拉克  |  🟡待付款  |  S级 — 今日跟进', [
+    { type: 'info', label: '当前状态', value: '报价已发（$106.4 + $157运费 DAP），客户给了物流地址，我方最后发言。客户之前催过"هل أكملت؟"（弄好了吗？），说明有紧迫感' },
+    { type: 'info', label: '产品', value: 'Summer Boys Outfit Set, 7色×4尺码=28件, $3.8/pc' },
+    { type: 'info', label: '物流', value: '伊拉克Nasiriyah, DHL约$157, 7-9天' },
+    { type: 'info', label: '判断', value: '客户是真实买家，已到付款环节，拖延可能是价格敏感或比较其他供应商' },
+    { type: 'action', text: '今日行动：发催单消息，强调原材料价格波动 + 产能排期即将满（参考SOP第1招）' },
+    { type: 'reply', text: '【建议回复（阿拉伯语）】\n\nمرحباً، أردت فقط متابعة حالة الطلب. لقد قمنا بتجهيز المواد الخام لطلبك (28 قطعة، 7 ألوان). بمجرد استلام الدفعة المقدمة، يمكننا بدء الإنتاج فوراً.\n\nملاحظة: أسعار المواد الخام تتقلب حالياً. السعر الحالي ($3.8/قطعة) ساري حتى 2 مايو فقط.\n\nهل تحتاج إلى أي تعديل في الفاتورة الأولية؟ أو يمكنني إرسال رابط الدفع مباشرة.' },
+  ], { color: C.red, bgColor: C.redBg, icon: '🔴' }));
+
+  // --- azaan ss ---
+  children.push(...Card('2. azaan ss  |  国家未知  |  ⚠️询价未回复  |  S级 — 今日必须给价格', [
+    { type: 'info', 'label': '当前状态', value: '客户反复问"How much"，数量200pcs mix sizes。我方两次说"问经理确认价格"，但从未给出实际报价。客户最后一次消息仍是"How much"' },
+    { type: 'info', 'label': '产品', value: 'Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print, 200pcs mixed' },
+    { type: 'highlight', text: '我方说了两次"问经理"但没给价格，客户已经问了第三次。再拖客户就走了！' },
+    { type: 'action', text: '今日行动：立即给价格，先按200pcs起订量报价，不要等经理。参考同类产品$1.8-2.5/pc' },
+    { type: 'reply', text: '【建议回复（英语）】\n\nHi! Sorry for the wait — I have the pricing ready for you.\n\nFor the Kids Cotton Canvas Set (200pcs mixed sizes):\n- Unit price: $2.15/pc FOB\n- Total: approx $430\n- Lead time: 15-20 days after payment\n- Sample: $25/pc (deductible from bulk order)\n\nAs a Disney-approved factory, quality is guaranteed. I can also send our existing design catalog if you want more options.\n\nShipping cost depends on your city — could you share your delivery address?' },
+  ], { color: C.red, bgColor: C.redBg, icon: '🔴' }));
+
+  // --- zainab Babesets ---
+  children.push(...Card('3. zainab Babesets  |  伊拉克  |  🔴待回复  |  A级', [
+    { type: 'info', 'label': '当前状态', value: '客户发了多个产品卡片，我方发过价格表和节日问候。客户最后消息："هل من الممكن ان اطلع على العروض"（我能看看报价吗？）— 但这条消息之后我方没有回复！' },
+    { type: 'info', 'label': '产品', value: 'Custom Kids Set 2 Pcs Cotton Canvas + Children Cotton Vest Set + 2-Piece Cartoon Shorts Set' },
+    { type: 'highlight', text: '客户主动要报价，我方没有直接回应这个请求。分类为awaiting_reply B级太低了，应是A级。' },
+    { type: 'action', text: '今日行动：直接回复客户要的报价信息，附上3个产品的单价表' },
+    { type: 'reply', text: '【建议回复（阿拉伯语）】\n\nنعم بالطبع! إليك الأسعار للمنتجات التي استفسرت عنها:\n\n1. طقم أطفال مكون من قطعتين من القطن (Custom Kids Set): $2.15/قطعة\n2. طقم فيست قطني للأطفال (Cotton Vest Set): $2.50/قطعة  \n3. طقم شورت كرتوني (Cartoon Shorts Set): $1.80/قطعة\n\nالحد الأدنى للطلب: 500 قطعة لكل تصميم (يمكن مزج الألوان والمقاسات)\nالشحن: أحتاج عنوان التوصيل في العراق لحساب التكلفة بدقة\n\nأي من هذه المنتجات يناسب احتياجاتك أكثر؟' },
+  ], { color: C.red, bgColor: C.redBg, icon: '🔴' }));
+
+  // --- User name (Fathima) ---
+  children.push(...Card('4. User name → Fathima  |  印度  |  🔴待回复  |  A级 — 价格敏感型', [
+    { type: 'info', 'label': '当前状态', value: '客户预算<$2.13/pc，我方报价$5.60，差价太大。客户说"I have no profit"，最后说"Ok thankyou"（通常意味着放弃）。我方最后的回复解释了为什么$5.60，但没有给替代方案' },
+    { type: 'info', 'label': '需求', value: '婴儿服装，预算严格低于$2.13/pc，50件' },
+    { type: 'highlight', text: 'SOP建议：价格敏感型客户不要直接降价，改为提供"限定折扣+截止时间"，或推荐低价位替代品。' },
+    { type: 'action', text: '今日行动：推荐预算范围内的替代产品（如纯棉背心套装、基础款短袖），不要纠结原产品' },
+    { type: 'reply', text: '【建议回复（英语）】\n\nHi Fathima,\n\nI understand your budget concern. For orders around $2/pc, let me recommend these alternatives:\n\n1. Cotton Sleeveless Vest Set: $1.80/pc (simple design, breathable)\n2. Basic Cotton Shorts Set: $1.95/pc (solid color, great for summer)\n3. Muslin Swaddle Blanket: $1.50/pc (lightweight, high demand)\n\nAll are our own factory production, Disney-approved quality. For 50pcs mixed, I can do $2.05/pc including basic packaging.\n\nWould any of these work for your market? I can send photos.' },
+  ], { color: C.red, bgColor: C.redBg, icon: '🔴' }));
+
+  // --- Ahmed Darrat ---
+  children.push(...Card('5. Ahmed Darrat  |  国家未知  |  🔴待回复  |  A级', [
+    { type: 'info', 'label': '当前状态', value: '客户发了产品卡片（$3.40-3.80），问我"how much it will cost in rmb?"。我方回复了A/B/C模板（英文），但似乎模板在客户问具体问题之后发送。最后客户说"hello frend"，我方未回复' },
+    { type: 'highlight', text: '客户问了人民币价格 — 这是真实采购信号（可能是中国代理/贸易商）。我方用英文模板回复错失了回应具体问题的机会。' },
+    { type: 'action', text: '今日行动：用中文/英文双语回复，给出人民币报价，识别客户是否为贸易商' },
+    { type: 'reply', text: '【建议回复（中英双语）】\n\nHi friend! Sorry for the delay.\n\nFor the Children\'s Home Wear Set:\n- 5-100pcs: $3.60/pc (约¥25.9)\n- 100-500pcs: $3.20/pc (约¥23.0)\n- 500+pcs: $2.90/pc (约¥20.9)\n\n价格包含简单包装，不含运费。请问您是做内销还是出口？我们可以根据您的销售渠道推荐合适的款。\n\nAre you buying for domestic China market or export? This helps me recommend the right styles.' },
+  ], { color: C.red, bgColor: C.redBg, icon: '🔴' }));
+
+  // --- Aula Alsaad ---
+  children.push(...Card('6. Aula Alsaad  |  阿拉伯国家  |  🔴待回复  |  B级 — 需要引导', [
+    { type: 'info', 'label': '当前状态', value: '客户要春夏+秋冬款，各种颜色尺码。我方说"500件起订"+"不能直接给价"。客户最后说"منتجات عادية"（普通产品）。对话卡住了' },
+    { type: 'info', 'label': '判断', value: '客户可能觉得太复杂/起订量太高。需要简化给客户的决策路径' },
+    { type: 'action', text: '今日行动：降低门槛，给一个简单的"入门方案"，不要一次问太多问题' },
+    { type: 'reply', text: '【建议回复（阿拉伯语）】\n\nشكراً على توضيحك. أفهم أنك تبحث عن منتجات عادية بأسعار مناسبة.\n\nلدي اقتراح بسيط:\n- 3 موديلات صيفية أساسية (الأكثر مبيعاً)\n- 3 ألوان لكل موديل\n- مقاسات: 80-100-120 سم\n- الكمية: 100 قطعة لكل موديل (إجمالي 300 قطعة)\n- السعر التقريبي: $2.5-3.5 للقطعة حسب التصميم\n\nهل تود أن أرسل لك صور الموديلات الثلاثة الأكثر مبيعاً أولاً؟ بهذه الطريقة يمكنك اختيار ما يناسبك.' },
+  ], { color: C.red, bgColor: C.redBg, icon: '🔴' }));
+
+  // ==================== 三、48h内优先处理 ====================
+  children.push(Divider());
+  children.push(Section('三、48h内优先处理（P1）', C.orange));
+
+  // --- Krisgel Igros ---
+  children.push(...Card('7. Krisgel Igros  |  菲律宾  |  🟠待报价  |  A级 — 已明确数量', [
+    { type: 'info', 'label': '当前状态', value: '客户明确说"20-30pcs each shipping"，发了产品图片，我方说"Got it!"但后续没有给出具体报价。客户也说"once I have an estimate cost already"然后"ill post the items on my page" — 这是在线卖家' },
+    { type: 'info', 'label': '判断', value: '小额批发在线卖家。需要快速给报价+运费，她才能上架。时间窗口很窄' },
+    { type: 'action', text: '48h内行动：给出30pcs的打包报价（含快递费到菲律宾），列出可混款的条件' },
+    { type: 'reply', text: '【建议回复（英语）】\n\nHi! Here\'s the estimate you asked for:\n\nFor 30pcs mixed (kids clothing sets):\n- Unit price range: $2.20–3.50/pc (depends on style)\n- Estimated total: $66–105\n- Shipping to Philippines (DHL): approx $35–45 for 5-7 day delivery\n\nYou can mix up to 5 different styles in this 30pc order. All products are Disney-approved factory quality.\n\nOnce you confirm the styles you\'d like, I\'ll send the exact PI within 1 hour. Ready when you are!' },
+  ], { color: C.orange, bgColor: C.orangeBg, icon: '🟠' }));
+
+  // --- fernande Pochette ---
+  children.push(...Card('8. fernande Pochette  |  美国  |  🟠待报价  |  A级 — 已说需要24件', [
+    { type: 'info', 'label': '当前状态', value: '客户说"I need 24 pieces mix boys and girls"，问了"How much the shipping to USA"。我方说"Could you provide your city or zip code?"之后，客户没有再回复。对话记录显示我方后续发了多条"I\'ll get back to you"但没有实际报价' },
+    { type: 'info', 'label': '判断', value: '我方回复太多"等一等"，客户可能失去耐心。24pcs混款到美国是典型的小B买家' },
+    { type: 'action', text: '48h内行动：主动给一个基于"通用美国地址"的估算报价，不需要精确到城市' },
+    { type: 'reply', text: '【建议回复（英语）】\n\nHi! Sorry for the wait — here\'s what I\'ve prepared for you:\n\nBaby Footed Romper (100% Cotton Knitted):\n- 24pcs mixed boys/girls: $5.50/pc\n- Subtotal: $132\n- Shipping to USA (DHL Express): approx $55–65 (5-7 days)\n\nIf you\'re near a major city, shipping could be even lower. Just reply with your zip code and I\'ll lock in the exact rate.\n\nWe\'re a Disney-approved factory — the quality is guaranteed.' },
+  ], { color: C.orange, bgColor: C.orangeBg, icon: '🟠' }));
+
+  // --- Susuanna ParkerAdentwi ---
+  children.push(...Card('9. Susuanna ParkerAdentwi  |  广州收货  |  ⚠️特殊 — 中国地址', [
+    { type: 'info', 'label': '当前状态', value: '客户给了广州白云区地址（POG-ARABA PARKER），我方报价$4.39×10pcs = $46.9，运费$3。但这是DDP到广州的价格？客户"POG-ARABA PARKER"像非洲贸易公司的中国收货仓' },
+    { type: 'info', 'label': '判断', value: '这不是中国国内客户，是非洲贸易商在广州的集货仓。10件量太少，可能是试单' },
+    { type: 'action', text: '48h内行动：确认地址正确，给出PI，推进付款。简化流程不要多问' },
+    { type: 'reply', text: '【建议回复（英语）】\n\nHi! I\'ve confirmed the order details:\n\nProduct: Thermal Pajama Set × 10pcs\nPrice: $4.39/pc\nShipping to Guangzhou: $3\nTotal: $46.9\n\nI\'ve attached the PI. Once payment is received, we\'ll ship within 1-3 days.\n\nJust confirm: the sizes and colors are as discussed? Or would you like to make any changes?' },
+  ], { color: C.orange, bgColor: C.orangeBg, icon: '🟠' }));
+
+  // ==================== 四、需澄清/修正的客户 ====================
+  children.push(Divider());
+  children.push(Section('四、分类修正 & 待澄清', C.purple));
+
+  children.push(...Card('10. rehema kiseyu  |  坦桑尼亚  |  实为样品询盘（非售后）  |  A级', [
+    { type: 'info', 'label': '当前状态', value: '发了两款产品（Sleeveless Sport Set + Boys Clothing Set），16色各1件。我方已做了详细样品方案回复（16色各1件=测试单）。客户未继续回复' },
+    { type: 'info', 'label': '判断', value: '分类器误判为after_sales（因为消息含"quality"一词）。实际是样品测试订单。我方回复已经很详细，继续等或轻量跟进' },
+    { type: 'action', text: '本周行动：发轻量跟进消息，不要催，给价值信息（如"工厂最近新到的面料"）' },
+    { type: 'reply', text: '【建议回复（英语）】\n\nHi Rehema, hope you\'re well!\n\nJust a quick update — we\'ve just received new fabric swatches for the kids\' sport set collection. If you\'d like to see additional print options beyond the 16 colors you selected, I\'d be happy to share photos.\n\nNo rush on your decision — just wanted to keep you updated on what\'s available. 😊' },
+  ], { color: C.purple, bgColor: 'F8F0FF', icon: '🟣' }));
+
+  children.push(...Card('11. Cindy Nadal  |  法语区  |  🟠报价已发等回复  |  B级', [
+    { type: 'info', 'label': '当前状态', value: '客户要6件，问了运费。我方发了完整报价（含$68 DDP空运）。之后客户未回复' },
+    { type: 'info', 'label': '判断', value: '6件量太小，$68运费可能吓到客户。等3天不发，改为推荐更大数量摊薄运费' },
+    { type: 'action', text: '3天后跟进：如果客户不回复，建议"增加到20件可以免运费"' },
+  ], { color: C.purple, bgColor: 'F8F0FF', icon: '🟣' }));
+
+  // ==================== 五、低活跃/待观察 ====================
+  children.push(Divider());
+  children.push(Section('五、低活跃客户（本周统一处理）', C.light));
+
+  const lowActive = [
+    { name: 'TheodoraAdelaide Mahe', note: '发了1个产品卡片+法语自动回复模板，无后续互动。可能是比价客户', action: '本周内发一条价值信息（如畅销款推荐）激活' },
+    { name: 'Sifa Vano', note: '发了多个产品卡片，回复简短（"personal", "I am own"）。身份不清晰', action: '本周内明确客户身份：实体店还是线上卖家？' },
+    { name: 'Regina Kabanda', note: '问了2岁婴儿连体衣，我方确认有90cm。客户未回', action: '发保暖款产品图片+价格，直接引导下单' },
+    { name: 'Adm Reda', note: '要8岁尺码，我方解释了按身高更准。之后无回复', action: '发150cm款图片+报价，不要多问' },
+    { name: 'Jemima Piema', note: '仅2条消息（产品卡片+自动回复），无实质互动', action: '发工厂优势简介+畅销产品目录' },
+    { name: 'Assiatou Barry', note: '仅3条消息，产品卡片型客户', action: '同上，标准激活流程' },
+    { name: 'Sayfullaeva Shahnoza', note: '仅3条消息', action: '同上' },
+    { name: 'Lohgah Sharon', note: '1条消息，我方最后发言', action: '暂不处理，观察' },
+  ];
+
+  for (const c of lowActive) {
+    children.push(
+      new Paragraph({
+        children: [
+          T(c.name, { size: 20, bold: true, color: C.ink }),
+          T('  —  ' + c.note, { size: 18, color: C.soft }),
+          T('  → ' + c.action, { size: 17, color: C.accent }),
+        ],
+        spacing: { before: 40, after: 20 },
+        indent: { left: 200 },
+      }),
+    );
+  }
+
+  // ==================== 六、执行检查清单 ====================
+  children.push(Divider());
+  children.push(Section('六、今日执行检查清单', C.green));
+
+  const checklist = [
+    { done: false, text: 'amer ly — 发阿拉伯语催单消息（原材料涨价+排期）', pri: 'P0' },
+    { done: false, text: 'azaan ss — 立即给价格！$2.15/pc 200pcs FOB', pri: 'P0' },
+    { done: false, text: 'zainab Babesets — 回复3个产品的阿拉伯语报价', pri: 'P0' },
+    { done: false, text: 'Fathima (User name) — 推荐$2以内的替代产品', pri: 'P0' },
+    { done: false, text: 'Ahmed Darrat — 中英双语回复人民币价格', pri: 'P0' },
+    { done: false, text: 'Aula Alsaad — 发3款畅销品推荐（简化决策）', pri: 'P0' },
+    { done: false, text: 'Krisgel Igros — 发30pcs打包报价+菲律宾运费', pri: 'P1 48h' },
+    { done: false, text: 'fernande Pochette — 发24pcs报价+美国估算运费', pri: 'P1 48h' },
+    { done: false, text: 'Susuanna ParkerAdentwi — 发PI确认订单', pri: 'P1 48h' },
+    { done: false, text: 'rehema kiseyu — 轻量跟进（发新面料消息）', pri: 'P1 本周' },
+    { done: false, text: '5个低活跃客户 — 统一发工厂优势+畅销目录', pri: 'P2 本周' },
+  ];
+
+  for (const item of checklist) {
+    const priColor = item.pri.startsWith('P0') ? C.red : item.pri.startsWith('P1') ? C.orange : C.yellow;
+    children.push(
+      new Paragraph({
+        children: [
+          T('☐ ', { size: 22, color: C.light }),
+          T(item.text, { size: 19, color: C.ink }),
+          T('  [' + item.pri + ']', { size: 16, bold: true, color: priColor }),
+        ],
+        spacing: { before: 20, after: 30 },
+        indent: { left: 200 },
+      }),
+    );
+  }
+
+  // ==================== 七、关键提醒 ====================
+  children.push(Divider());
+  children.push(Section('七、关键提醒', C.red));
+
+  const reminders = [
+    '所有阿拉伯语客户的回复需要尽快处理 — 伊拉克和中东市场是核心目标市场，当前有4个阿拉伯语客户待回复',
+    'azaan ss 的"How much"被问了三次还没给价格 — 这是最紧急的，今天必须给',
+    '分类器把rehema kiseyu和azaan ss误判为"售后处理"，实际是询盘。需要修正分类规则：关键词"quality"不应单独触发after_sales',
+    '我方回复模式存在问题：太多"I\'ll check with manager"/"I\'ll get back to you"，客户等太久。建议为常见产品制定标准报价区间，减少"问经理"的频率',
+    '模板化A/B/C问卷对部分客户有效，但对已经发了具体产品卡片的客户，应该直接报价+提问，而不是先发问卷',
+  ];
+
+  for (const r of reminders) {
+    children.push(
+      new Paragraph({
+        children: [T('• ' + r, { size: 18, color: C.soft })],
+        spacing: { before: 20, after: 30 },
+        indent: { left: 200 },
+      }),
+    );
+  }
+
+  // ==================== 附录 ====================
+  children.push(Divider());
+  children.push(Section('附录：回复优先级排序逻辑', C.light));
+
+  children.push(
+    new Paragraph({
+      children: [T('排序依据：客户明确度 > 时效性 > 订单规模 > 市场价值', { size: 18, color: C.soft })],
+      spacing: { after: 60 },
+    }),
+    new Paragraph({
+      children: [T('• S级（今日必回）：客户已明确需求且多次追问，不回复即丢失', { size: 18, color: C.ink })],
+      spacing: { after: 30 }, indent: { left: 200 },
+    }),
+    new Paragraph({
+      children: [T('• A级（今日回）：客户发了询盘但有互动，需要报价或确认信息', { size: 18, color: C.ink })],
+      spacing: { after: 30 }, indent: { left: 200 },
+    }),
+    new Paragraph({
+      children: [T('• B级（48h内回）：有互动但进展早期，需要引导和培育', { size: 18, color: C.ink })],
+      spacing: { after: 30 }, indent: { left: 200 },
+    }),
+    new Paragraph({
+      children: [T('• C级（本周回）：低活跃客户，统一发送激活内容', { size: 18, color: C.ink })],
+      spacing: { after: 60 }, indent: { left: 200 },
+    }),
+  );
+
+  // ==================== 页脚 ====================
+  children.push(Divider());
+  children.push(
+    new Paragraph({
+      children: [T('小星星服饰 · 小满CRM智能助手自动生成 · ' + `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}`, { size: 16, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 200 },
+    }),
+    new Paragraph({
+      children: [T('所有建议回复话术基于外部专业调研SOP制定，请根据实际对话语境调整后发送', { size: 15, color: C.light })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    }),
+  );
+
+  // ==================== 构建文档 ====================
+  const doc = new Document({
+    creator: '小满CRM助手',
+    title: '小满CRM客户执行方案',
+    description: '待处理客户回复建议和后续动作',
+    styles: {
+      default: {
+        document: {
+          run: { size: 21, font: 'Microsoft YaHei' },
+        },
+      },
+    },
+    sections: [{
+      properties: {
+        page: {
+          margin: { top: 1200, bottom: 1200, left: 1400, right: 1400 },
+        },
+      },
+      children,
+    }],
+  });
+
+  // ==================== 保存到桌面 ====================
+  const ts = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+  const outPath = join(DESKTOP, `小满CRM客户执行方案_${ts}.docx`);
+  const buffer = await Packer.toBuffer(doc);
+  writeFileSync(outPath, buffer);
+  console.log(`\n✅ 文档已保存到桌面: ${outPath}`);
+  return outPath;
+}
+
+build().catch(err => { console.error('\n❌ 错误:', err.message); process.exit(1); });

@@ -1,0 +1,194 @@
+# factor_baselines 初始化二轮修正方案
+
+> 日期：2026-05-18  
+> 输入：两份独立审查报告的交叉对比分析  
+> 对象：`scripts/init_factor_baselines.js` + 4 个输出文件
+
+---
+
+## 一、经双审交叉验证后确认的 bug
+
+### P0 — 逻辑错误，必须修
+
+| # | Bug | 代码位置 | 影响 |
+|---|-----|---------|------|
+| A | **S-tier 被排除在高价值分层外** | 脚本 257 行 `tier === 'A' \|\| tier === 'B'` 漏了 S | 3个S级冷层客户错分入"普通沉睡" |
+| B | **冷层分层条件顺序颠倒** | 脚本 255 行 `days > 180` 先于 tier 检查 | C级沉默超180天→高价值桶，语义错误 |
+| C | **非洲国家列表不全** | 脚本 112 行 isAfricaOrMiddleEast 缺少 CG/GA/MR/SO 等 | target_market 误判，签收兜底天数错误 |
+| D | **节奏终点未定义** | 脚本 365 行 `rhythmHit()` 只精确匹配累计天数 | 超期客户从 SOON 层静默消失（5个待付款客户已证实） |
+| E | **S5b has_address 假阳性** | 脚本 156 行 `has_address: false` 硬编码 | 55个待发货客户全员触发"该要地址了" |
+
+### P1 — 设计改进，应该修
+
+| # | 问题 | 代码位置 | 说明 |
+|---|------|---------|------|
+| F | **stage_updated 语义错误** | 脚本 166 行 `lastMsgTime` 代理 | 阶段变更日≠最后消息日，作显示字段会误导 |
+| G | **S5a 超期分支无 guard** | 脚本 computeFactors 内 S5a 段 | committed_ship_date null 时分支不触发是对的，但缺少显式 guard 导致代码意图不清 |
+| H | **tier 匹配无覆盖率报告** | 脚本 94-99 行 getTier() | 匹配结果无统计输出，未来退化无法发现 |
+
+### 不修 — 审1 误判，数据推翻
+
+| 指控 | 推翻证据 |
+|------|---------|
+| "S级全部降级为C" | `factor_baselines.json` 全量 tier 分布：S=21, A=143, B=213, C=89 |
+| "tier匹配大量丢失" | name-only 匹配率 99.6%，name+country 99.4% |
+| "冷层tier全部失败" | 冷层 143 人 tier：S=3, A=51, B=69, C=20 |
+
+---
+
+## 二、各 Fix 具体做法
+
+### Fix-A: S-tier 补入高价值桶（脚本 257 行）
+
+```
+// 当前
+} else if (cc.tier === 'A' || cc.tier === 'B') {
+
+// 改为
+} else if (cc.tier === 'S' || cc.tier === 'A' || cc.tier === 'B') {
+```
+
+### Fix-B: 冷层条件重排（脚本 254-263 行）
+
+先 tier 后 days。超过 180 天的 C 级客户不应进高价值桶：
+
+```
+// 修正顺序
+if (cc.tier === 'S' || cc.tier === 'A' || cc.tier === 'B') {
+  frozenLayers.highValue.push(cc);   // 高价值客户（不论沉默天数）
+} else if (cc.tier === 'D') {
+  frozenLayers.neverDeal.push(cc);
+} else if (cc.daysSinceLastContact > 180) {
+  frozenLayers.deepFrozen.push(cc);  // 新增：超长沉默桶（独立于高价值）
+} else {
+  frozenLayers.normal.push(cc);
+}
+```
+
+同时输出结构加 `deepFrozen` 桶。
+
+### Fix-C: 补充非洲国家代码（脚本 112 行）
+
+```
+const africaME = ['SD','EG','CD','ZM','CI','SA','AE','IQ','GH','NG','KE',
+  'TZ','UG','ET','CM','SN','ML','BF','BJ','TG','LY','MA','DZ','TN','KW',
+  'QA','BH','OM','JO','LB','YE','SY','PS',
+  'CG','GA','MR','SO','GM','GN','SL','LR','TD','NE','RW','BI','MW','MZ',
+  'ZW','BW','NA','AO','GQ','CF','SS','ER','DJ','KM','MU','SC','CV','ST'];
+```
+
+### Fix-D: 节奏终点降级（脚本 computeFactors 函数）
+
+`rhythmHit()` 改为两段式：
+
+```
+function getFactorHit(days, rhythmArr, endBehavior) {
+  // 第一段：精确节奏匹配
+  const hitIdx = rhythmHit(days, rhythmArr);
+  if (hitIdx >= 0) return { hit: true, type: 'rhythm', index: hitIdx };
+
+  // 第二段：超过终点 → 降级规则
+  const maxDay = rhythmArr.reduce((a,b)=>a+b, 0);
+  if (days <= maxDay) return { hit: false };  // 节奏间隔内，不命中
+  return endBehavior ? endBehavior(days, maxDay) : { hit: false };
+}
+```
+
+各因子终点行为：
+
+| 因子 | 最大累计天数 | 终点后 |
+|------|:---:|------|
+| S1 | 72 | Day 45 兜底：≤45 继续命中最后一个间隔，>45 静默 |
+| S2 | 54 | Day 30 后静默 |
+| S3 | 61 | Day 30 后静默 |
+| S4 | 16 | 每 7 天观察：`(days - 16) % 7 === 0` → flag observer |
+| S7a | 60+ | Day 60 后静默 |
+| S7b | — | Day 60 后静默 |
+| S8 | 63 | Day 45 后静默 |
+| S9 | — | Day 60 后静默 |
+| S5a/S5b/S6 | — | 维持最后一个间隔 |
+
+### Fix-E: has_address 三态化（脚本 156 行 + computeFactors S5b 段）
+
+```
+// init 处
+meta.has_address = null;  // null=未知(跳过), false=确认无(触发), true=有(跳过)
+
+// S5b 触发条件
+if (meta.has_address === false && bl.S5b && days >= 1) {
+  factors.push({ factor: 'S5b 该要地址了', ... });
+}
+```
+
+### Fix-F: stage_updated 诚实化（脚本 166 行）
+
+```
+// 当前
+const stageUpdated = c.lastMsgTime; // proxy
+
+// 改为 → 不设值，标注来源
+// stage_updated 在 factor_baselines 中设为 null
+// 加 _stage_updated_note: "初始化为 null，待 AI 首次阶段判定后写入真实日期"
+```
+
+### Fix-G: S5a guard 显式化（脚本 computeFactors S5a 段）
+
+```
+// 当前：隐式依赖 committed_ship_date 为 null 时不触发
+// 改为：显式 guard
+if (meta.committed_ship_date) {
+  const shipDate = parseDate(meta.committed_ship_date);
+  if (shipDate && today > shipDate) {
+    factors.push({ factor: 'S5a 该更新进度了(超期)', priority: 'high' });
+  }
+}
+// else: committed_ship_date 未设定，仅走正常间隔
+```
+
+### Fix-H: tier 匹配覆盖率输出（脚本 main 末尾）
+
+```
+// 输出统计时加
+const tierMatched = Object.values(baselines).filter(v => v.meta._tier_source !== 'default_C').length;
+const tierDefault = Object.values(baselines).filter(v => v.meta._tier_source === 'default_C').length;
+console.log(`tier 匹配覆盖率: ${tierMatched}/${tierMatched+tierDefault} (${(tierMatched/(tierMatched+tierDefault)*100).toFixed(1)}%)`);
+```
+
+---
+
+## 三、涉及文件
+
+| 文件 | 改动范围 |
+|------|---------|
+| `scripts/init_factor_baselines.js` | 8 处改动（见上） |
+| `output/factor_baselines.json` | 重新生成 |
+| `output/soon_layer_cards.json` | 重新生成 |
+| `output/cold_layer_stratification.json` | 重新生成（deepFrozen 新桶） |
+| `output/init_report_2026-05-18.md` | 重新生成 |
+
+---
+
+## 四、预期变化
+
+| 指标 | 修复前 | 修复后 |
+|------|:---:|:---:|
+| SOON 层总人数 | 90 | ~35-40 |
+| S5b 触发 | 55 人 | 0 人（等 AI 判定 has_address） |
+| S4 观察提醒 | 0 人（丢失） | 5 人恢复 |
+| 冷层高价值沉睡 | 120 | S+A+B（不论天数）+ 超180天拆入 deepFrozen |
+| 冷层 neverDeal | 0 | 0（dashboard 无 D 级） |
+| 冷层 deepFrozen | 不存在 | 新增桶 |
+| has_address | false=466 | null=466 |
+| committed_ship_date | null=466 | null=466（不变） |
+
+---
+
+## 五、验证步骤
+
+1. 运行修正后脚本，S5b 触发数 = 0
+2. 检查 9 个待付款客户中 >16 天的 5 人都有 S4 observer 标记
+3. 检查冷层 S 级 3 人在 highValueDormant 桶
+4. 检查冷层 C 级 >180 天客户在 deepFrozen 桶
+5. 检查 tier 匹配覆盖率输出 ≈99%
+6. 检查 isAfricaOrMiddleEast 含 CG/GA/MR/SO
+7. 检查 stage_updated 全量为 null，_stage_updated_note 存在

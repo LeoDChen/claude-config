@@ -1,0 +1,234 @@
+// Phase 1 v3: 直接用 CDP attach 到 onetalk iframe target
+
+const CDP = require('chrome-remote-interface');
+const fs = require('fs');
+
+const CAPTURED = [];
+
+function log(msg) { console.log(msg); }
+
+(async () => {
+    // 1. 获取所有 CDP targets
+    const targets = await CDP.List({ host: 'localhost', port: 9222 });
+    log(`📋 共 ${targets.length} 个 CDP targets\n`);
+
+    // 找 onetalk iframe
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url.includes('onetalk.alibaba.com')
+    );
+
+    if (!onetalk) {
+        log('❌ 找不到 onetalk iframe target');
+        targets.forEach(t => log(`  ${t.type}: ${t.title?.substring(0,60)} | ${t.url?.substring(0,100)}`));
+        process.exit(1);
+    }
+
+    log(`📍 找到 onetalk target: ${onetalk.id}`);
+    log(`   URL: ${onetalk.url}\n`);
+
+    // 2. Attach 到 onetalk target
+    const client = await CDP({ host: 'localhost', port: 9222, target: onetalk.id });
+
+    // 3. 启用必要的 domains
+    await client.Network.enable();
+    await client.Runtime.enable();
+    await client.Page.enable();
+    await client.DOM.enable();
+
+    log('✅ CDP 已连接到 onetalk iframe\n');
+
+    // 4. 监听网络请求
+    client.Network.requestWillBeSent((params) => {
+        const url = params.request.url;
+        // 捕获 API 请求（非静态资源）
+        if (!url.match(/\.(js|css|png|jpg|gif|svg|woff2?|ico|ttf|jsonp)(\?|$)/i)) {
+            CAPTURED.push({
+                url: url,
+                method: params.request.method,
+                postData: params.request.postData,
+                timestamp: Date.now()
+            });
+            log(`📡 ${params.request.method} ${url.substring(0, 160)}`);
+            if (params.request.postData) {
+                log(`   📤 ${params.request.postData.substring(0, 300)}`);
+            }
+        }
+    });
+
+    client.Network.responseReceived((params) => {
+        const url = params.response.url;
+        const match = CAPTURED.find(c => c.url === url);
+        if (match) {
+            match.status = params.response.status;
+            match.mimeType = params.response.mimeType;
+            log(`📥 ${params.response.status} ${params.response.mimeType} ${url.substring(0, 120)}`);
+        }
+    });
+
+    // 5. 探测页面结构
+    log('\n=== 页面结构探测 ===\n');
+
+    const getDocResult = await client.DOM.getDocument({ depth: 2 });
+    const rootNodeId = getDocResult.root.nodeId;
+
+    // 获取 body 的直接子元素
+    const bodyQuery = await client.DOM.querySelector({ nodeId: rootNodeId, selector: 'body' });
+    if (bodyQuery.nodeId) {
+        const bodyHTML = await client.DOM.getOuterHTML({ nodeId: bodyQuery.nodeId });
+        log('BODY HTML (前 2000 字符):');
+        log(bodyHTML.outerHTML.substring(0, 2000));
+    }
+
+    // 6. 用 JS 查找联系人列表结构
+    log('\n=== JS 探测 ===\n');
+
+    const probeResult = await client.Runtime.evaluate({
+        expression: `
+            (function() {
+                const result = {
+                    url: location.href,
+                    title: document.title,
+                    bodyChildCount: document.body?.children.length || 0,
+                };
+
+                // 找所有 class 里含特定关键词的元素
+                const keywords = ['contact', 'chat', 'session', 'conversation', 'message', 'recycle', 'scroll'];
+                const matches = [];
+                for (const kw of keywords) {
+                    const els = document.querySelectorAll('[class*="' + kw + '"]');
+                    if (els.length > 0 && els.length < 100) {
+                        const el = els[0];
+                        matches.push({
+                            keyword: kw,
+                            count: els.length,
+                            tag: el.tagName,
+                            class: (el.className?.baseVal || el.className || '').toString().substring(0, 80),
+                            text: el.textContent?.trim().substring(0, 60),
+                            children: el.children.length
+                        });
+                    }
+                }
+                result.keywordMatches = matches;
+
+                // 找 ul > li 结构
+                const uls = document.querySelectorAll('ul');
+                const ulInfos = [];
+                for (const ul of uls) {
+                    const lis = ul.querySelectorAll(':scope > li');
+                    if (lis.length >= 3) {
+                        const texts = [];
+                        for (let i = 0; i < Math.min(5, lis.length); i++) {
+                            texts.push(lis[i].textContent?.trim().substring(0, 40));
+                        }
+                        ulInfos.push({ count: lis.length, sampleTexts: texts });
+                    }
+                }
+                result.ulLists = ulInfos;
+
+                // 找 vue-recycle-scroller
+                const vrs = document.querySelectorAll('[class*="recycle"]');
+                result.recycleScrollers = vrs.length;
+
+                return JSON.stringify(result, null, 2);
+            })()
+        `,
+        returnByValue: true
+    });
+
+    log(probeResult.result?.value || '无结果');
+
+    // 7. 尝试点击联系人
+    log('\n=== 点击联系人 ===\n');
+
+    const clickResult = await client.Runtime.evaluate({
+        expression: `
+            (function() {
+                // 试 ul > li
+                const uls = document.querySelectorAll('ul');
+                for (const ul of uls) {
+                    const lis = ul.querySelectorAll(':scope > li');
+                    for (const li of lis) {
+                        const text = li.textContent?.trim() || '';
+                        if (text.length > 2 &&
+                            !text.includes('网站聊天') &&
+                            !text.includes('WhatsApp') &&
+                            !text.includes('新使用指南') &&
+                            !text.includes('TM') &&
+                            li.offsetHeight > 20) {
+                            li.click();
+                            return JSON.stringify({ success: true, via: 'ul > li', text: text.substring(0, 50) });
+                        }
+                    }
+                }
+
+                // 试 vue-recycle-scroller item
+                const items = document.querySelectorAll('.vue-recycle-scroller__item-view, [class*="recycle"][class*="item"]');
+                for (const item of items) {
+                    const text = item.textContent?.trim() || '';
+                    if (text.length > 2) {
+                        item.click();
+                        return JSON.stringify({ success: true, via: 'recycle-item', text: text.substring(0, 50) });
+                    }
+                }
+
+                // 试任何看起来像列表项的
+                const allDivs = document.querySelectorAll('div[class*="item"], div[class*="row"], div[class*="cell"]');
+                for (const div of allDivs) {
+                    const text = div.textContent?.trim() || '';
+                    if (text.length > 3 && div.offsetHeight > 30 && div.offsetHeight < 200) {
+                        div.click();
+                        return JSON.stringify({ success: true, via: 'div[class*=item]', text: text.substring(0, 50) });
+                    }
+                }
+
+                return JSON.stringify({ success: false, reason: 'no clickable contact found' });
+            })()
+        `,
+        returnByValue: true
+    });
+
+    log('点击结果:', clickResult.result?.value);
+
+    // 8. 等待请求
+    log('\n⏳ 等待 8 秒收集网络请求...');
+    await new Promise(r => setTimeout(r, 8000));
+
+    // 9. 汇总
+    log('\n' + '='.repeat(70));
+    log('📊 结果汇总');
+    log('='.repeat(70));
+    log(`\n共捕获 ${CAPTURED.length} 个 API 请求:\n`);
+
+    const apiReqs = CAPTURED.filter(c =>
+        c.url.includes('mtop') ||
+        c.url.includes('acs.') ||
+        c.url.includes('h5.alibaba') ||
+        c.url.includes('message') ||
+        c.url.includes('chat') ||
+        c.url.includes('im.')
+    );
+
+    if (apiReqs.length > 0) {
+        log('🎯 可能是聊天 API:');
+        for (const r of apiReqs) {
+            log(`  ${r.method} ${r.url.substring(0, 180)}`);
+            if (r.postData) log(`    Payload: ${r.postData.substring(0, 300)}`);
+            if (r.status) log(`    Status: ${r.status} ${r.mimeType}`);
+        }
+    } else {
+        log('所有非静态请求:');
+        for (const r of CAPTURED) {
+            log(`  ${r.method} ${r.url.substring(0, 180)}`);
+            if (r.postData) log(`    Payload: ${r.postData.substring(0, 200)}`);
+        }
+    }
+
+    fs.writeFileSync(
+        'd:/ClaudeWorkspace/08_客户跟进/Okki/data/phase1_captured.json',
+        JSON.stringify({ captured: CAPTURED, apiReqs }, null, 2)
+    );
+    log('\n💾 保存到 data/phase1_captured.json');
+
+    await client.close();
+    log('✅ 完成');
+})();

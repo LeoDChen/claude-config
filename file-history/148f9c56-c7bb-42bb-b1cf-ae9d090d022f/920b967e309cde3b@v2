@@ -1,0 +1,438 @@
+/**
+ * P0客户专项深抓 — 先滚动侧边栏加载全部会话，再逐个抓取P0对话
+ * 用法: node deep-scrape-p0-only.mjs
+ * 前置: Chrome 9222已开，小满TM页面已登录
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+async function scrollSidebarToLoadAll(frame) {
+  // Find the sidebar scroll container and scroll down repeatedly to load all conversations
+  const containerInfo = await frame.evaluate(() => {
+    const selectors = [
+      '.contact-list-container', '.session-list', '.im-session-list',
+      '[class*="contact-list"]', '[class*="session-list"]',
+      '.chat-list-container', '[class*="conversation-list"]',
+    ];
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el && el.scrollHeight > el.clientHeight) {
+        return { selector: sel, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
+      }
+    }
+    // Fallback: try to find any scrollable container with contact items
+    const contacts = document.querySelectorAll('.contact-item-container');
+    if (contacts.length > 0) {
+      const parent = contacts[0].closest('[class*="scroll"], [class*="list"], [class*="container"]');
+      if (parent && parent.scrollHeight > parent.clientHeight) {
+        return { selector: null, element: true, scrollHeight: parent.scrollHeight, clientHeight: parent.clientHeight };
+      }
+    }
+    return null;
+  });
+
+  if (!containerInfo) {
+    console.log('  ⚠️ 未找到可滚动侧边栏容器，使用当前DOM');
+    return;
+  }
+
+  console.log(`  侧边栏容器: ${containerInfo.selector || '(直接元素)'}, 总高${containerInfo.scrollHeight}px, 可见${containerInfo.clientHeight}px`);
+
+  let prevCount = 0;
+  let stableCount = 0;
+  const maxScrolls = 60;
+
+  for (let i = 0; i < maxScrolls; i++) {
+    const result = await frame.evaluate((info) => {
+      let container;
+      if (info.selector) {
+        container = document.querySelector(info.selector);
+      } else {
+        const contacts = document.querySelectorAll('.contact-item-container');
+        if (contacts.length > 0) {
+          container = contacts[0].closest('[class*="scroll"], [class*="list"], [class*="container"]');
+        }
+      }
+      if (!container) return { count: 0, atBottom: true };
+
+      const oldScroll = container.scrollTop;
+      container.scrollTop = container.scrollTop + container.clientHeight * 0.7;
+      const newScroll = container.scrollTop;
+
+      return {
+        count: document.querySelectorAll('.contact-item-container').length,
+        atBottom: oldScroll === newScroll || newScroll >= container.scrollHeight - container.clientHeight - 10,
+      };
+    }, containerInfo);
+
+    const currentCount = await frame.evaluate(() =>
+      document.querySelectorAll('.contact-item-container').length
+    );
+
+    if (currentCount === prevCount) {
+      stableCount++;
+      if (stableCount >= 3) break;
+    } else {
+      stableCount = 0;
+    }
+    prevCount = currentCount;
+
+    if (result.atBottom) break;
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  const finalCount = await frame.evaluate(() =>
+    document.querySelectorAll('.contact-item-container').length
+  );
+  console.log(`  侧边栏滚动完成: ${finalCount}个会话已加载到DOM`);
+  return finalCount;
+}
+
+async function getConversationList(frame) {
+  return frame.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map((el, idx) => {
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+      return { index: idx, name, fullText: nameText.substring(0, 80) };
+    });
+  });
+}
+
+async function clickConversation(frame, index) {
+  await frame.evaluate((idx) => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    const target = containers[idx];
+    if (target) {
+      target.scrollIntoView({ block: 'center' });
+      target.click();
+    }
+  }, index);
+  for (let i = 0; i < 20; i++) {
+    await new Promise(r => setTimeout(r, 300));
+    const loaded = await frame.evaluate(() => {
+      const header = document.querySelector('.im-header-title, .session-header-title, .chat-header-title');
+      return header ? (header.textContent || '').trim() : '';
+    });
+    if (loaded.length > 0) break;
+  }
+}
+
+async function verifyConversationIdentity(frame, expectedName) {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const actualName = await frame.evaluate(() => {
+      const header = document.querySelector('.im-header-title, .session-header-title, .chat-header-title');
+      if (header) return (header.textContent || '').trim();
+      const selected = document.querySelector('.contact-item-container.selected .contact-right');
+      if (selected) return (selected.textContent || '').trim().substring(0, 30);
+      return '';
+    });
+
+    if (actualName && (
+      actualName.includes(expectedName) ||
+      expectedName.includes(actualName) ||
+      actualName.toLowerCase() === expectedName.toLowerCase()
+    )) {
+      return true;
+    }
+
+    if (!actualName || actualName.length === 0) {
+      await new Promise(r => setTimeout(r, 500));
+      continue;
+    }
+
+    console.log(` [⏳等待切换: 期望${expectedName}, 实际${actualName}]`);
+    await new Promise(r => setTimeout(r, 800));
+  }
+  return false;
+}
+
+async function waitForMessages(frame, targetName) {
+  for (let i = 0; i < 15; i++) {
+    const hasContent = await frame.evaluate(() =>
+      document.querySelectorAll('.session-rich-content.text, .session-rich-content.card').length > 0
+    );
+    if (hasContent) {
+      if (targetName) {
+        const verified = await verifyConversationIdentity(frame, targetName);
+        if (verified) return true;
+        await new Promise(r => setTimeout(r, 500));
+        continue;
+      }
+      return true;
+    }
+    await new Promise(r => setTimeout(r, 500));
+  }
+  return false;
+}
+
+async function scrollChatToLoadAll(frame, { maxScrolls = 40, stableThreshold = 3 } = {}) {
+  const containerInfo = await frame.evaluate(() => {
+    const selectors = [
+      '.message-list-container', '.chat-list', '.im-chat-list',
+      '.message-list', '[class*="message-list"]', '[class*="chat-list"]',
+      '[class*="chat-content"]', '.session-message-list-wrapper',
+    ];
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el && el.scrollHeight > el.clientHeight) {
+        return { selector: sel, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
+      }
+    }
+    return null;
+  });
+
+  if (!containerInfo) return 0;
+
+  let prevCount = 0;
+  let stableCount = 0;
+
+  for (let i = 0; i < maxScrolls; i++) {
+    const { scrolled } = await frame.evaluate((sel) => {
+      const container = document.querySelector(sel);
+      if (!container) return { count: 0, scrolled: false };
+      const old = container.scrollTop;
+      container.scrollTop = 0;
+      return {
+        count: document.querySelectorAll('.message-item-wrapper.messenger').length,
+        scrolled: old > 0,
+      };
+    }, containerInfo.selector);
+
+    if (scrolled) await new Promise(r => setTimeout(r, 600));
+
+    const newCount = await frame.evaluate(() =>
+      document.querySelectorAll('.message-item-wrapper.messenger').length
+    );
+
+    if (newCount === prevCount) {
+      stableCount++;
+      if (stableCount >= stableThreshold) break;
+    } else {
+      stableCount = 0;
+    }
+    prevCount = newCount;
+    if (!scrolled) break;
+  }
+
+  return prevCount;
+}
+
+async function getRenderedMessages(frame) {
+  return frame.evaluate(() => {
+    const messages = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(wrapper => {
+      const isLeft = wrapper.classList.contains('item-left');
+      const isRight = wrapper.classList.contains('item-right');
+      const securityEl = wrapper.querySelector('.session-security');
+      if (securityEl) return;
+
+      const textEl = wrapper.querySelector('.session-rich-content.text');
+      const cardEl = wrapper.querySelector('.session-rich-content.card');
+
+      let content = '';
+      let isCard = false;
+      let cardData = null;
+
+      if (textEl) {
+        content = textEl.textContent.trim()
+          .replace(/翻译中…反馈$/, '')
+          .replace(/由阿里翻译提供反馈$/, '')
+          .replace(/阿里国际Marco大模型翻译反馈$/, '')
+          .replace(/由阿里翻译提供$/, '')
+          .trim();
+      } else if (cardEl) {
+        content = cardEl.textContent.trim();
+        isCard = true;
+        const expinfo = cardEl.getAttribute('data-expinfo');
+        if (expinfo) {
+          try { cardData = JSON.parse(expinfo); } catch (e) {}
+        }
+      } else {
+        return;
+      }
+
+      const timeEl = wrapper.querySelector('p.item-base-info span:last-child');
+      const timestamp = timeEl ? (timeEl.textContent || '').trim() : null;
+
+      messages.push({
+        side: isLeft ? 'received' : isRight ? 'sent' : 'system',
+        content: content.substring(0, 2000),
+        timestamp,
+        isCard,
+        cardData,
+      });
+    });
+
+    return messages;
+  });
+}
+
+// Fuzzy name matching for DOM lookup
+function fuzzyMatch(targetName, domName, domFullText) {
+  const t = targetName.toLowerCase().replace(/\s+/g, '');
+  const d = domName.toLowerCase().replace(/\s+/g, '');
+  const f = (domFullText || '').toLowerCase();
+
+  if (t === d) return true;
+  if (d.includes(t) || t.includes(d)) return true;
+  if (f.includes(t) || t.includes(f.substring(0, 20))) return true;
+  // Try partial match: first 8 chars
+  if (t.length >= 8 && d.length >= 8 && t.substring(0, 8) === d.substring(0, 8)) return true;
+  return false;
+}
+
+async function main() {
+  const listFile = (await import('fs')).readdirSync(DATA_DIR)
+    .filter(f => f.includes('P0P1深抓清单'))
+    .sort().reverse()[0];
+
+  if (!listFile) {
+    console.log('❌ 未找到P0P1深抓清单');
+    return;
+  }
+
+  const p0p1List = JSON.parse(readFileSync(join(DATA_DIR, listFile), 'utf8'));
+  const p0Customers = p0p1List.filter(c => c.priority === 'P0');
+
+  console.log(`[deep-scrape-p0] 目标: ${p0Customers.length}个P0客户\n`);
+
+  const { browser, talkFrame } = await connect();
+  console.log('✅ 已连接小满\n');
+
+  // Step 1: Scroll sidebar to load all conversations
+  console.log('📜 滚动侧边栏加载全部会话...');
+  await scrollSidebarToLoadAll(talkFrame);
+
+  // Step 2: Build name→index map with fuzzy matching
+  const convList = await getConversationList(talkFrame);
+  console.log(`\n📋 DOM中共${convList.length}个会话\n`);
+
+  const nameToIndex = {};
+  const unmatched = [];
+
+  for (const target of p0Customers) {
+    let found = false;
+    for (const conv of convList) {
+      if (fuzzyMatch(target.name, conv.name, conv.fullText)) {
+        nameToIndex[target.name] = conv.index;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      unmatched.push(target.name);
+    }
+  }
+
+  if (unmatched.length > 0) {
+    console.log(`⚠️ ${unmatched.length}个P0客户未在DOM中找到: ${unmatched.join(', ')}`);
+    console.log('  继续抓取可匹配的P0客户...\n');
+  }
+
+  // Step 3: Scrape each P0 customer
+  const results = [];
+  const skipped = [];
+  let successCount = 0;
+  let total = 0;
+
+  for (const target of p0Customers) {
+    total++;
+    const idx = nameToIndex[target.name];
+
+    if (idx === undefined) {
+      skipped.push({ name: target.name, reason: 'DOM中未找到' });
+      console.log(`[${total}/${p0Customers.length}] P0 ${target.name}... ⏭️ DOM中未找到`);
+      continue;
+    }
+
+    process.stdout.write(`[${total}/${p0Customers.length}] P0 ${target.name}...`);
+
+    try {
+      await clickConversation(talkFrame, idx);
+      const hasMsgs = await waitForMessages(talkFrame, target.name);
+
+      if (!hasMsgs) {
+        console.log(' ⚠️ 无消息或身份验证失败');
+        skipped.push({ name: target.name, reason: '身份验证失败' });
+        continue;
+      }
+
+      const msgCount = await scrollChatToLoadAll(talkFrame);
+      const messages = await getRenderedMessages(talkFrame);
+
+      results.push({
+        name: target.name,
+        priority: target.priority,
+        tier: target.tier,
+        countryCode: target.countryCode,
+        reasons: target.reasons,
+        messageCount: messages.length,
+        messages,
+        scrapedAt: new Date().toISOString(),
+      });
+
+      successCount++;
+      console.log(` ✅ ${messages.length}条`);
+    } catch (e) {
+      console.log(` ❌ ${e.message.substring(0, 60)}`);
+      skipped.push({ name: target.name, reason: e.message.substring(0, 50) });
+    }
+
+    // Refresh index every 3 to avoid stale positions
+    if (total % 3 === 0) {
+      const refreshed = await getConversationList(talkFrame);
+      for (const target2 of p0Customers) {
+        if (nameToIndex[target2.name] !== undefined) continue; // already found
+        for (const conv of refreshed) {
+          if (fuzzyMatch(target2.name, conv.name, conv.fullText)) {
+            nameToIndex[target2.name] = conv.index;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Save
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const outputPath = join(DATA_DIR, `deep_scrape_p0_${dateStr}.json`);
+
+  writeFileSync(outputPath, JSON.stringify({
+    scrapedAt: now.toISOString(),
+    totalTargeted: p0Customers.length,
+    successCount,
+    skippedCount: skipped.length,
+    skipped,
+    results,
+  }, null, 2));
+
+  console.log(`\n✅ P0深抓完成: ${successCount}/${p0Customers.length} 成功, ${skipped.length} 跳过`);
+  console.log(`   已保存: ${outputPath}`);
+}
+
+main().catch(err => {
+  console.error('[deep-scrape-p0] 错误:', err.message);
+  process.exit(1);
+});

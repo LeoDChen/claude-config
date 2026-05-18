@@ -1,0 +1,199 @@
+/**
+ * 客户状态清单 — 基于逐条阅读对话后的人工判断
+ * 不再使用任何关键词/元数据自动分类
+ */
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType, ShadingType } from 'docx';
+import { writeFileSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import os from 'os';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const DESKTOP = join(os.homedir(), 'Desktop');
+
+const SYS = [/automatic reception/i,/由于您介入/i,/Marco大模型/i,/买家有流失/i,/AI给您生成/i,/建议查看/i,/一旦离开平台/i,/反馈/,/You have a visitor/i,/pre-screened/i,/系统自动发送/];
+
+function loadLatest(prefix) {
+  const files = readdirSync(DATA_DIR).filter(f => f.startsWith(prefix) && f.endsWith('.json')).sort().reverse();
+  return JSON.parse(readFileSync(join(DATA_DIR, files[0]), 'utf8'));
+}
+function getRealMsgs(messages) {
+  return (messages || []).filter(m => m.text && m.text.length > 3 && !SYS.some(p => p.test(m.text || '')));
+}
+function summary(msgs, maxLen = 130) {
+  const last = msgs.slice(-2);
+  return last.map(m => (m.side === 'received' ? '←' : '→') + (m.text || '').substring(0, maxLen).replace(/\n/g, ' ')).join(' | ');
+}
+
+// ===== 人工判断结果（逐条读过对话后得出） =====
+const MANUAL = {
+  // 💰 待确认付款/订单 — 地址已确认，PI已发或即将发
+  'Susuanna ParkerAdentwi': { cat: 'payment', note: '地址白云区已确认，10件$46.9已报价，shipping mark已给' },
+  'amer ly': { cat: 'payment', note: '伊拉克地址已确认，7色×4码=28件，PI准备中' },
+  'YULIA GOLUBTSOVA': { cat: 'payment', note: 'DDP莫斯科3567₽已报，阶梯价已发，等确认' },
+  'arshavin amoah': { cat: 'payment', note: '广东地址已给，3件，"I will create order for you"' },
+
+  // 🔥 谈判中·近期活跃 — 双方有来有回，在讨论具体细节
+  'azaan ss': { cat: 'active', note: '200件混码$3.80已报，客户问面料，"问经理中"' },
+  'Sara Dibes': { cat: 'active', note: '有中国办公室，要实拍图，产品有现货' },
+  'Christine Muwela': { cat: 'active', note: '在讨论裙子还是短裤，要2岁+5岁码' },
+  'zainab Babesets': { cat: 'active', note: '价格表已发，Eid跟进，等确认数量和地址' },
+  'Djany Konzi': { cat: 'active', note: '法语，要4件3-9月龄，已回复' },
+  'Charlotte Asibey': { cat: 'active', note: '要BR款视频，工厂下班了次日拍' },
+  'Krisgel Igros': { cat: 'active', note: '讨论10件150码，每批20-30件' },
+  'Mezna Alawfi': { cat: 'active', note: '阿拉伯语，选款中，问其他款式' },
+  'Angela O': { cat: 'active', note: '西班牙语，从CO编号里选款' },
+  'Patience Mensah Agyeman Prempeh': { cat: 'active', note: '"I will calculate my order and forward it"' },
+  'Abdulrhman alal': { cat: 'active', note: '要设计图案+50件价格，"Okay I will send later"' },
+  'Claudia Mersilus': { cat: 'active', note: '要样品，我们回复5-7天定制样' },
+
+  // ⏳ 报价已发·等客户回应
+  'Brian Robert Ocholi': { cat: 'quoted', note: '20件$2.65/pc FOB已报，等回复' },
+  'Diana Yao': { cat: 'quoted', note: '两款围兜$0.78已报价' },
+  'Dario Callini': { cat: 'quoted', note: 'Romper $8.5已报价' },
+  'raymond cramotte': { cat: 'quoted', note: '8款52件价格已算好发过去' },
+  'Tanaya Mallick': { cat: 'quoted', note: '礼盒$25.5/1000件已报价' },
+
+  // 🆕 初询阶段·发了模板/刚开聊
+  'Aldane Elister': { cat: 'initial', note: '"How much 4 set"，说发地址给价格' },
+  'Kings Sikaz': { cat: 'initial', note: '"how much"，要数量才报价' },
+  'adm hsyn': { cat: 'initial', note: '阿拉伯语，问价格+运费到Hurghada' },
+  'Wigdan Gasim': { cat: 'initial', note: '阿拉伯语，"有现货，要多少件？"' },
+  'Sifa Vano': { cat: 'initial', note: '发了多个产品卡，说Disney工厂' },
+  'Asma Noor': { cat: 'initial', note: '要尺码表，发了工厂图' },
+  'LISKEY RIVERO': { cat: 'initial', note: '"tendrán disponible catálogo"要目录' },
+  'Mel Paccot': { cat: 'initial', note: '问围兜kit装几个+价格区间' },
+  'Hakim Ezat': { cat: 'initial', note: '阿拉伯语，7岁，"问价格"，已回复' },
+  'Israa Fawzi': { cat: 'initial', note: '2套，问了尺码颜色，没回' },
+  'Aloh Voma': { cat: 'initial', note: '20件，不定制，要好价格' },
+  'Mumtaz Aziz': { cat: 'initial', note: '要目录，发了产品卡，已回复' },
+  'Eddie Kilumba': { cat: 'initial', note: '法语，训练裤产品卡，已回问数量' },
+  'rehema kiseyu': { cat: 'initial', note: '多发产品卡+询盘，运动套装' },
+  'Regina Kabanda': { cat: 'initial', note: '问2岁尺码，已回答90cm' },
+  'irfan khan': { cat: 'initial', note: '系统自动提问(MOQ/样品/价格/物流)' },
+  'Vie Merveilleux': { cat: 'initial', note: '"deux pièces font combien"问价' },
+  'Sayfullaeva Shahnoza': { cat: 'initial', note: 'OEM询盘，模板问题已回' },
+
+  // 📋 模板回复后沉了
+  'Aka-Mwau Esme': { cat: 'stalled', note: '产品卡后我们问了尺寸数量，没回' },
+  'TheodoraAdelaide Mahe': { cat: 'stalled', note: '模板3问已发，客户没回' },
+  'Assiatou Barry': { cat: 'stalled', note: '模板3问已发，客户没回' },
+  'AnneMarie Nsomp': { cat: 'stalled', note: '模板3问已发，客户没回' },
+  'maimouna cisse': { cat: 'stalled', note: '模板跟进已发，客户没回' },
+  'Ruth mutambo': { cat: 'stalled', note: '模板3问已发，客户没回' },
+  'nshwan altayy': { cat: 'stalled', note: '模板3问已发，客户没回' },
+
+  // ⚪ 低意向/非采购
+  'Talosh talosh': { cat: 'low', note: '仅产品卡+系统消息，无实质对话' },
+  'Lohgah Sharon': { cat: 'low', note: '仅1条系统消息' },
+  'Emad Jumah': { cat: 'low', note: '仅1条"选好了告诉我"' },
+  'd zm': { cat: 'low', note: '问店铺转让，不是采购客户' },
+};
+
+function countryOf(name, data) {
+  const c = data.customers.find(x => x.name === name);
+  return c ? c.countryCode : '?';
+}
+
+async function main() {
+  const data = loadLatest('2026-');
+  const ds = loadLatest('deep_scrape_v7_');
+  const dsMap = {};
+  for (const r of (ds.results || [])) dsMap[r.name] = r;
+
+  const groups = {
+    payment: { label: '💰 待确认付款/订单', emoji: '💰', desc: '地址已确认，PI已发或即将发，推进到最后一步', customers: [] },
+    active: { label: '🔥 谈判中·近期活跃', emoji: '🔥', desc: '双方有来有回，在讨论价格/样品/规格/选款', customers: [] },
+    quoted: { label: '⏳ 报价已发·等客户回应', emoji: '⏳', desc: '报价或详情已发，客户暂未继续回应', customers: [] },
+    initial: { label: '🆕 初询阶段·需有效推进', emoji: '🆕', desc: '客户发了产品卡/问了价，刚开聊或用模板回了', customers: [] },
+    stalled: { label: '📋 模板回复后客户沉默', emoji: '📋', desc: '我们发了模板问题（3问等），客户没再回应', customers: [] },
+    low: { label: '⚪ 低意向/非采购', emoji: '⚪', desc: '对话极少、系统消息为主、或非真实采购意向', customers: [] },
+  };
+
+  for (const [name, info] of Object.entries(MANUAL)) {
+    const dsC = dsMap[name];
+    const msgs = dsC ? getRealMsgs(dsC.messages || []) : [];
+    groups[info.cat].customers.push({
+      name, country: countryOf(name, data),
+      note: info.note,
+      summary: msgs.length > 0 ? summary(msgs) : '[无对话]',
+      msgs,
+    });
+  }
+
+  // ===== 生成 Word =====
+  const now = new Date();
+  const children = [
+    new Paragraph({
+      children: [new TextRun({ text: '小满 OKKI 客户状态清单', bold: true, size: 44, color: '16213E', font: 'Microsoft YaHei' })],
+      alignment: AlignmentType.CENTER, spacing: { after: 100 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: `基于真实对话逐条判断  ·  ${now.toLocaleDateString('zh-CN')}  ·  P0+P1 共 ${Object.keys(MANUAL).length} 人`, size: 20, color: '636E72', font: 'Microsoft YaHei' })],
+      alignment: AlignmentType.CENTER, spacing: { after: 300 },
+    }),
+  ];
+
+  for (const [key, g] of Object.entries(groups)) {
+    if (g.customers.length === 0) continue;
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: `${g.emoji} ${g.label}  (${g.customers.length}人)`, bold: true, size: 24, color: '16213E', font: 'Microsoft YaHei' })],
+        spacing: { before: 300, after: 40 },
+        border: { bottom: { color: 'E94560', size: 2, space: 1 } },
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: g.desc, size: 16, color: '888888', font: 'Microsoft YaHei', italics: true })],
+        spacing: { after: 120 },
+      })
+    );
+
+    const headerRow = new TableRow({
+      children: ['客户', '国家', '判断说明', '最近对话'].map(text =>
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text, bold: true, size: 16, color: 'FFFFFF', font: 'Microsoft YaHei' })], alignment: AlignmentType.CENTER })],
+          shading: { type: ShadingType.SOLID, color: '16213E' },
+          width: { size: text === '客户' ? 18 : text === '最近对话' ? 40 : text === '判断说明' ? 28 : 10, type: WidthType.PERCENTAGE },
+        })
+      ),
+    });
+
+    const rows = g.customers.map(c => new TableRow({
+      children: [
+        c.name, c.country, c.note, c.summary,
+      ].map((text, i) =>
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text, size: 15, font: 'Microsoft YaHei' })], alignment: i < 3 ? AlignmentType.LEFT : AlignmentType.LEFT })],
+          width: { size: i === 0 ? 18 : i === 3 ? 40 : i === 2 ? 28 : 10, type: WidthType.PERCENTAGE },
+        })
+      ),
+    }));
+
+    children.push(new Table({ rows: [headerRow, ...rows], width: { size: 100, type: WidthType.PERCENTAGE } }));
+  }
+
+  children.push(
+    new Paragraph({ spacing: { before: 400 }, children: [] }),
+    new Paragraph({
+      children: [new TextRun({ text: '判断方法：逐条阅读每个客户的完整对话后人工归类，不使用关键词或平台元数据。选中具体客户后可做五步分析和执行方案。', size: 16, color: '888888', font: 'Microsoft YaHei', italics: true })],
+      alignment: AlignmentType.CENTER,
+    })
+  );
+
+  const doc = new Document({ sections: [{ children }] });
+  const buffer = await Packer.toBuffer(doc);
+  const ts = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const outPath = join(DESKTOP, `客户状态清单_${ts}.docx`);
+  writeFileSync(outPath, buffer);
+
+  // Console summary
+  console.log(`\n✅ 已生成: ${outPath}`);
+  for (const [key, g] of Object.entries(groups)) {
+    if (g.customers.length > 0) {
+      console.log(`\n${g.label} (${g.customers.length}人)`);
+      g.customers.forEach(c => console.log(`  ${c.name.padEnd(24)} | ${c.country} | ${c.note}`));
+    }
+  }
+}
+main().catch(e => { console.error(e.message); process.exit(1); });

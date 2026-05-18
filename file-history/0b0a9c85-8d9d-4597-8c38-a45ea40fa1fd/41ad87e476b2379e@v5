@@ -1,0 +1,156 @@
+# OKKI 客户分类准确度重构 — 实施计划
+
+## Context
+
+两个问题同时修：
+1. `enhanced_classify.js` 的 `determineLifecycle()` 和 `getAction()` 基于关键词正则匹配 + 计时器做阶段/紧急度判定，无法区分语义差异，用户已不信任脚本判断模式
+2. 数据源头 bug：sync_okki.js 漏新客户（缺滚动）、sync_orders.js 订单数据串列（硬编码列索引）
+
+## 核心设计决策
+
+| 决策 | 结论 |
+|------|------|
+| 分工 | 脚本：提取+分桶+生成HTML / AI：生命周期+紧急度+grade修正 |
+| 生命周期 | 9阶段 (需求探索→报价已发→谈判中→待付款→待发货→已发货/在途→已签收→售后→待返单) |
+| 终态 | 搁置（自然中断）/ 未成交（明确拒绝），独立池展示 |
+| 紧急度 | 3级 now/soon/idle，球在谁+时效压力+关系温度三维判定 |
+| 质量等级 | 脚本继续算，AI 可覆盖修正 |
+| 分桶 | 60天沉默阈值，桶2(AI正常读) / 桶1(AI扫一眼) |
+| 片段提取 | 脚本统一取最近12条真实消息，AI自适应使用(先看3-5条，够就停，不够再看) |
+| 不确定标记 | AI不确定的客户标⚠️，附具体问题和判断依据 |
+
+## 项目工作流（完整固定链路）
+
+```
+sync_okki.js ──→ sync_orders.js ──→ enhanced_classify.js ──→ AI 判定 ──→ 生成 HTML
+     │                  │                    │                   │              │
+     │                  │                    │                   │              │
+  tm_conversations  orders_latest    s2_ai_input.json    s3_ai_judgments   dashboard
+  _latest.json       .json                               .json            .html
+  chat_history/*                          ↑
+                                          │
+                                    脚本只提取，不做判断
+```
+
+每次运行的三步（终端命令 + AI 对话）：
+```
+1. node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js
+2. 新对话：读 s2_ai_input.json → AI 全权判定 → 输出 s3_ai_judgments.json
+3. node scripts/enhanced_classify.js --dashboard-only  → 生成 HTML 看板
+```
+
+## 实施步骤
+
+### 第〇步：修 sync_okki.js — 补滚动逻辑
+
+**问题**：读取 `__conversationListFullData__` 前不滚动。虚拟列表只渲染可见窗口（~50人），窗口外的新客户直接漏掉
+**根因**：`sync_okki.js` 重写时滚动步骤被删。`scroll_sync.js`（5/10验证过，抓到473人含当天新客户）证明滚动才完整
+**修复**：把 scroll_sync.js 第103-144行滚动逻辑合并进去 — 找会话列表容器 → 循环 scrollTop=scrollHeight → 连续3轮无增长停止 → 再读 `__conversationListFullData__`
+
+**附修：不关浏览器** — 正常完成时去掉 `browser.close()`（第301行、第443行）。只在报错退出时关（第120行、第234行）。这样 sync_orders.js 可以通过 CDP 直接复连同一浏览器，不用重启。
+
+### 第〇步：修 sync_orders.js — 表头匹配 + 日期标准化
+
+**问题一**：硬编码列索引 `texts[3]~texts[8]`。OKKI 列可拖拽自定义，列顺序变就全串
+**修复**：先读表头行 `.row-item__title` 建映射 `{'订单号': N, '订单金额': N, ...}`，再按映射读数据行
+
+**问题二**：日期存相对值（"昨天""05月10日"）
+**修复**：统一转 YYYY-MM-DD 绝对格式
+
+### 第一步：改 enhanced_classify.js — 判断全砍，只提取
+
+**砍掉：**
+- `determineLifecycle()` — 整个函数删除
+- `getAction()` — 整个函数删除
+- 所有信号标记字段 (hasPI/hasPrice/hasSample/hasQuantity/hasAddress)
+- `generateDashboard()` 中的核心市场管道密度区块
+
+**新增：**
+- `extractConversationSnippet(cid, N=12)` — 提取最近12条真实消息（跳过系统消息），每条截断200字符
+- `matchOrder(name, ordersData)` — 用客户名模糊匹配 orders_latest.json，返回订单状态或 null
+- `bucketFilter(client)` — 分桶：60天+无客户消息 + C/D级 + 消息少 + 无订单匹配 → 桶1，其余→桶2
+
+**保留：**
+- `determineQuality()` — 不变，继续用
+- 方向判定 (to_us/to_them) — 脚本算这个很稳
+
+**输出新增：** `data/s2_ai_input.json`
+
+```json
+// s2_ai_input.json 每人字段
+{
+  "name": "...",
+  "country": "...",
+  "cid": "...",
+  "grade": "B",
+  "totalMsgs": 24,
+  "customerMsgs": 8,
+  "ourMsgs": 16,
+  "lastCustomerMsgDays": 2,
+  "direction": "to_them",
+  "bucket": 2,
+  "order": { "matched": true, "status": "待发货", "paidAt": "2026-05-10" } | null,
+  "snippet": ["[我方] 2026-05-13 | ...", "[客户] 2026-05-12 | ...", "最多12条"]
+}
+```
+
+### 第二步：AI 工作流（新对话内完成）
+
+1. 跑完脚本后，开新对话，读 `data/s2_ai_input.json`
+2. 桶2：逐人自适应读片段（从最近3-5条开始，够就停；不够翻到10条；还看不清翻全部12条）
+3. 桶1：快速扫一眼，确认没有"明明该进桶2但被过滤掉的人"
+4. 输出 `data/s3_ai_judgments.json` — 结构化 JSON，脚本用来填矩阵
+
+```json
+// s3_ai_judgments.json 每人字段
+{
+  "name": "...",
+  "cid": "...",
+  "stage": "待付款",
+  "direction": "to_them",
+  "priority": "soon",
+  "grade": "B",
+  "gradeOverride": false,
+  "confidence": "certain",
+  "reason": "客户5/12回复ok确认收到PI，至今未付",
+  "actionHint": "温和提醒PI到期时间，问是否需要调整"
+}
+```
+
+**AI 判定原则（少规则，多理解）：**
+- 通过理解对话语义判断阶段，不依赖关键词列表
+- 能确定就直接输出 (confidence: "certain")
+- 不确定就标 confidence: "uncertain"，reason 写清楚卡在哪、需要用户确认什么
+- grade 有误就覆盖 (gradeOverride: true, grade: 新值)
+- 待付款判定必须从原文找到客户明确确认信号
+
+### 第三步：改 HTML 看板生成
+
+修改 `generateDashboard()`：
+- 双轴矩阵：9列阶段 × 5行等级 (S/A/B/C/D)
+- 终态池：矩阵下方，搁置和未成交两个独立区块，每个客户标注从哪个阶段掉出
+- 删除核心市场管道密度
+- 数据源改为读 `data/s3_ai_judgments.json`
+- 支持 `--dashboard-only` 参数，跳过提取直接生成 HTML
+
+## 文件变更清单
+
+| 文件 | 动作 |
+|------|------|
+| `08_客户跟进/Okki/scripts/sync_okki.js` | 修改：合并 scroll_sync.js 滚动逻辑 |
+| `08_客户跟进/Okki/scripts/sync_orders.js` | 修改：表头匹配代替硬编码索引 + 日期标准化 |
+| `08_客户跟进/Okki/scripts/enhanced_classify.js` | 重构：砍判断 + 加提取+分桶+订单匹配+读s3生成HTML |
+| `08_客户跟进/Okki/data/s2_ai_input.json` | 新增：脚本产出，AI读取 |
+| `08_客户跟进/Okki/data/s3_ai_judgments.json` | 新增：AI产出，脚本读来生成HTML |
+| `08_客户跟进/Okki/CLAUDE.md` | 修改：启动指令从条件式改为强制同步 |
+| `08_客户跟进/Okki/knowledge/classification-rules.md` | 更新：新生命周期定义+判定说明 |
+| `08_客户跟进/Okki/STATE.md` | 更新：新工作流 + 已修复bug记录 |
+
+## 验证
+
+1. 跑 sync_okki.js → 确认总人数 ≥ 之前（不漏），含当天新询盘
+2. 跑 sync_orders.js → 随机抽查3个订单字段值 vs OKKI页面显示，确认匹配
+3. 跑 enhanced_classify.js → 检查 s2_ai_input.json 格式完整，桶标记正确
+4. 新对话跑 AI 判定 → 检查 s3_ai_judgments.json，抽样验证 Lifecycle 判定
+5. 跑 `--dashboard-only` → 确认 HTML 矩阵9列+终态池+市场管道密度已删
+6. 对比 Jonathan/Earnestina 新旧判定差异（旧标 urgent → 新应为 idle）

@@ -1,0 +1,67 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let allReqs = [];
+  let wsFrames = [];
+
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+
+      // Capture Network events
+      if (response.method === 'Network.requestWillBeSent') {
+        const r = response.params.request;
+        allReqs.push({ type: 'REQ', method: r.method, url: r.url.substring(0, 200), postData: r.postData ? r.postData.substring(0, 300) : null });
+      }
+      if (response.method === 'Network.responseReceived') {
+        const r = response.params.response;
+        allReqs.push({ type: 'RESP', status: r.status, url: r.url.substring(0, 200), mimeType: r.mimeType });
+      }
+      if (response.method === 'Network.webSocketCreated') {
+        wsFrames.push({ type: 'WS_OPEN', url: response.params.url });
+      }
+      if (response.method === 'Network.webSocketFrameSent') {
+        wsFrames.push({ type: 'WS_SENT', payload: response.params.response.payloadData.substring(0, 500) });
+      }
+      if (response.method === 'Network.webSocketFrameReceived') {
+        wsFrames.push({ type: 'WS_RECV', payload: response.params.response.payloadData.substring(0, 500) });
+      }
+      if (response.method === 'Network.webSocketClosed') {
+        wsFrames.push({ type: 'WS_CLOSE' });
+      }
+    } catch (e) {}
+  });
+
+  // Enable Network and WebSocket monitoring
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({ id: 0, method: 'Network.enable', params: {} })
+  });
+
+  console.log('Monitoring active. Click a conversation NOW!');
+  console.log('(Listening for 8 seconds)');
+  await new Promise(r => setTimeout(r, 8000));
+
+  // Filter XHR/fetch requests (not analytics)
+  const businessReqs = allReqs.filter(r => {
+    const url = (r.url || '');
+    return !url.includes('aplus.alibaba.com') && !url.includes('sc.ma.im');
+  });
+
+  console.log('\n=== WebSocket Events (' + wsFrames.length + ') ===');
+  wsFrames.forEach(f => console.log(JSON.stringify(f).substring(0, 300)));
+
+  console.log('\n=== Business Requests (' + businessReqs.length + ') ===');
+  businessReqs.forEach(r => console.log(JSON.stringify(r).substring(0, 300)));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

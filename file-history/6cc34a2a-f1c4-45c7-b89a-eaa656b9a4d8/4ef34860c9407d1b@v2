@@ -1,0 +1,198 @@
+// Phase 1: 深入探索 getMessageService / getConversationService
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 探索 getMessageService ===
+    console.log('=== MessageService 方法 ===\n');
+
+    const msgService = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imsdk.getMessageService();
+                if (!svc) return { error: 'null' };
+
+                var methods = [];
+                var obj = svc;
+                while (obj) {
+                    var proto = Object.getPrototypeOf(obj);
+                    if (!proto) break;
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name !== 'constructor' && typeof proto[name] === 'function') {
+                            methods.push(name + '(' + proto[name].length + ')');
+                        }
+                    }
+                    obj = proto;
+                }
+
+                // 也找对象自有属性
+                var ownProps = {};
+                for (var key in svc) {
+                    if (svc.hasOwnProperty(key)) {
+                        ownProps[key] = typeof svc[key];
+                    }
+                }
+
+                return { methods: methods, ownProps: ownProps };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(msgService.result?.value || '(无)');
+
+    // === 探索 getConversationService ===
+    console.log('\n=== ConversationService 方法 ===\n');
+
+    const convService = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imsdk.getConversationService();
+                if (!svc) return { error: 'null' };
+
+                var methods = [];
+                var obj = svc;
+                while (obj) {
+                    var proto = Object.getPrototypeOf(obj);
+                    if (!proto) break;
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name !== 'constructor' && typeof proto[name] === 'function') {
+                            methods.push(name + '(' + proto[name].length + ')');
+                        }
+                    }
+                    obj = proto;
+                }
+                return methods;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(convService.result?.value || '(无)');
+
+    // === 探索 getAuthService ===
+    console.log('\n=== AuthService 方法 ===\n');
+
+    const authService = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imsdk.getAuthService();
+                if (!svc) return { error: 'null' };
+
+                var methods = [];
+                var obj = svc;
+                while (obj) {
+                    var proto = Object.getPrototypeOf(obj);
+                    if (!proto) break;
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name !== 'constructor' && typeof proto[name] === 'function') {
+                            methods.push(name + '(' + proto[name].length + ')');
+                        }
+                    }
+                    obj = proto;
+                }
+                return methods;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(authService.result?.value || '(无)');
+
+    // === 探索 getChannel ===
+    console.log('\n=== Channel 方法 ===\n');
+
+    const channel = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var ch = window._imsdk.getChannel();
+                if (!ch) return { error: 'null' };
+
+                var methods = [];
+                var obj = ch;
+                while (obj) {
+                    var proto = Object.getPrototypeOf(obj);
+                    if (!proto) break;
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name !== 'constructor' && typeof proto[name] === 'function') {
+                            methods.push(name + '(' + proto[name].length + ')');
+                        }
+                    }
+                    obj = proto;
+                }
+                return methods;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(channel.result?.value || '(无)');
+
+    // === 找 window 上所有包含 "im" 或 "message" 或 "chat" 的对象 ===
+    console.log('\n=== Window 上 IM 相关对象 ===\n');
+
+    const imObjects = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify(Object.keys(window).filter(function(k) {
+                var lower = k.toLowerCase();
+                return lower.includes('im') || lower.includes('chat') || lower.includes('message') || lower.includes('conversation');
+            }))
+        `,
+        returnByValue: true
+    });
+    console.log(imObjects.result?.value || '(无)');
+
+    // 保存
+    ws.close();
+    console.log('\n完成');
+})();

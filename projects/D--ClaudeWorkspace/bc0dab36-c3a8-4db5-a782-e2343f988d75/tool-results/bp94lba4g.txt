@@ -1,0 +1,823 @@
+===== WELE Mounia (110 msgs) =====
+[2026-02-07] US: Hello! Our new baby clothing products feature soft, eco-friendly fabrics with comfortable designs. We have a strong manufacturing base in Hunan, China, with 201-300 employees ensuring quality. Feel free to ask for details or share your needs!
+[2026-02-07] CUST: c'est de zéro à quelle âge ?
+[2026-02-07] US: Ce produit est pour les garçons de 3 à 8 ans. Vous voulez en savoir plus ? 🙂
+[2026-02-07] CUST: j'aimerais 30 pièces celà revient à combien l'unité ?
+[2026-02-07] US: Pour 30 pièces, le prix unitaire est de 1,59 USD. Ça vous va ?
+[2026-02-07] CUST: de 2 à 8ans
+[2026-02-07] US: Le produit est prévu pour 3 à 8 ans. Pour 2 ans, je peux vérifier une alternative. Quelle couleur préférez-vous ?
+[2026-02-07] CUST: okk c'est bon
+[2026-02-07] US: Super ! Quelle couleur voulez-vous pour les 30 pièces ?
+[2026-02-07] CUST: vous avez combien de couleur svp
+[2026-02-07] US: Nous avons 4 couleurs : gris foncé, gris clair, rose et kaki. Laquelle vous tente ?
+[2026-02-08] US: Bonjour, ce produit est disponible en 4 couleurs, comme indiqué dans le lien du produit.
+[2026-02-08] CUST: mélange de ces trois couleurs
+[2026-02-08] US: D'accord, pas de problème.
+[2026-02-08] US: Quelle taille est nécessaire pour chaque couleur et combien de pièces pour chacune ?
+[2026-02-08] US: Vérifiez les détails et je créerai votre commande.
+[2026-02-08] CUST: couleur kaki mélange de toute les tailles 10 pieces 
+couleur gris clair mélange de toute les âges 10 pieces
+ rose aussi même chose 10 pièce
+[2026-02-08] CUST: livraison a Guangzhou
+[2026-02-08] US: Oui, c'est possible.
+[2026-02-08] CUST: vu que vous êtes en congé la livraison serait quand ?
+[2026-02-08] US: Trois couleurs, 10 pièces de chaque couleur, avec deux pièces par taille.
+[2026-02-08] US: Nous reprendrons le travail le 24 février.
+[2026-02-08] US: Expédition immédiate / Expédition dans les plus brefs délais
+[2026-02-08] US: Si tout est en ordre, envoyez-moi l'adresse de votre transitaire et je créerai la commande pour vous.
+[2026-02-08] US: Voici notre usine, nous sommes tout à fait en mesure de livrer à temps.
+[2026-02-08] CUST: ok
+[2026-02-08] US: J'attends ton adresse de livraison.
+[2026-02-08] CUST: vu que c'est 4 taille 
+la taille 100 de rose 4 piece le reste 2 chacun 
+
+la taille 110 de kaki 4 piece le reste 2 chacun 
+
+pour la 3è couleur la taille 100
+4 piece les reste 2 chacun
+[2026-02-08] US: Je ne suis pas certain(e), il faut que je vérifie à nouveau les dimensions. 
+ Les dimensions de ce produit sont les suivantes : 90-100-110-120-130-140 cm, six tailles disponibles. Quelles sont les tailles disponibles pour le rose, le kaki et le gris, et combien de pièces pour chaque taille ?
+[2026-02-08] US: Je suis désolé, le souci du détail est important pour éviter les imprévus par la suite, j'espère que vous comprenez.
+[2026-02-08] CUST: je veux 30 pièces des trois couleurs que je t'ai envoyé 10 chacun 
+pour les tailles 
+exemple : couleur rose 
+taille 100 : 2 pièce 
+taille 110: 2 pièce 
+taille 120: 2 pièce 
+taille 130: 2 pièce 
+taille 140: 2 pièce 
+même chose pour les deux autres couleurs restant
+[2026-02-08] US: D'accord, j'ai compris.
+[2026-02-08] US: Heureusement, je vais créer la commande pour vous et vous l'enverrai une fois terminée.
+[2026-02-08] CUST: okk cool
+[2026-02-08] US: /:smile.
+[2026-02-08] US: Les éléments à vérifier : le montant total de la commande, les informations d'adresse et les remarques.
+[2026-02-08] US: Chéri(e), pourrais-tu confirmer les détails de la commande ? Si tu as des questions ou si tu souhaites des modifications, n'hésite pas à nous le faire savoir. 😊
+[2026-02-08] CUST: oui c'est bon
+[2026-02-08] CUST: je vous fait signe quand le paiement sera fait
+[2026-02-08] US: D'accord 👌, après le paiement, je vais emballer votre produit et le stocker à l'usine, et je l'expédierai dès la reprise du travail.
+[2026-02-08] US: D'accord.
+[2026-02-08] CUST: sa me ferais plaisir /:pray.
+[2026-02-08] US: Quand est-ce que vous prévoyez de payer, afin que je puisse préparer les produits ?
+[2026-02-14] CUST: bonjour
+[2026-02-14] US: Bonjour
+[2026-02-14] CUST: je vais effectuer le paiement aujourd'hui
+[2026-02-14] US: D'accord, nous expédierons la commande dès que nous serons de retour au travail après le paiement.
+[2026-02-14] CUST: okkk
+[2026-02-14] US: En cas de problème, n'hésitez pas à me contacter, je suis toujours disponible.
+[2026-02-14] CUST: c'est fait
+[2026-02-14] CUST: NOM : WELE
+PRÉNOM : MOUNIYA 
+NUMÉRO : 90388091
+ADRESSE : LOMÉ -TOGO
+[2026-02-14] CUST: The system identifies the risk information. In order to protect the security of your order, please be sure to modify the shipping address information through the background of Alibaba International Station, otherwise you may not enjoy the anti-payment protection service.
+[2026-02-14] US: 这是新地址吗
+[2026-02-14] US: 之前的地址是这个
+[2026-02-14] US: J'ai bien reçu l'acompte, mais les deux adresses que vous avez fournies ne correspondent pas. J'ai besoin de confirmer si l'adresse de livraison est bien celle qui est sur cette image.
+[2026-02-14] CUST: oui c'est à Guangzhou
+[2026-02-14] US: D'accord, c'est correct.
+[2026-02-14] US: L'adresse que vous avez envoyée en deuxième lieu est-elle l'adresse de livraison dans votre pays ?
+[2026-02-14] CUST: oui c'est celle que vous allez écrire sur mon colis
+[2026-02-14] US: D'accord.
+[2026-03-02] US: Hello, we have resumed work. Due to a recent surge in order shipments, I have already processed your order and it is scheduled to be shipped this afternoon
+[2026-03-02] US: Before that, I would like to ask you to double-check the delivery address and product information to avoid any unnecessary issues later on
+[2026-03-02] US: https://biz.alibaba.com/ta/detail.htm?tradeId=291891318001023117
+[2026-03-02] US: The shipped products are: 
+ Colors: The three colors other than light gray are white, pink, and dark gray. 
+ Sizes: 100, 110, 120, 130, 140 cm 
+ Quantity: 10 pieces of each color, 2 pieces of each size (100-140cm).
+[2026-03-02] CUST: je veux 30 pièces des trois couleurs que je t'ai envoyé 10 chacun 
+pour les tailles 
+exemple : couleur rose 
+taille 100 : 2 pièce 
+taille 110: 2 pièce 
+taille 120: 2 pièce 
+taille 130: 2 pièce 
+taille 140: 2 pièce 
+même chose pour les deux autres couleurs restant
+[2026-03-02] US: D'accord, nous sommes prêts et pouvons expédier immédiatement.
+[2026-03-02] US: Je te transmets les dernières nouvelles.
+[2026-03-02] US: Produits expédiés et confirmés conformes : les trois couleurs de l'image, 10 pièces par couleur, tailles : 100-140 cm, mei.
+[2026-03-02] US: La commande est prête à être expédiée dès aujourd'hui et devrait arriver à l'entrepôt du transitaire dans environ trois jours.
+[2026-03-02] CUST: okkk Merci beaucoup🙏
+[2026-03-02] CUST: /:handshake.
+[2026-03-02] US: Combien de temps faut-il environ pour que le transitaire expédie la marchandise depuis l'entrepôt et qu'elle arrive dans votre pays ?
+[2026-03-02] CUST: environ 45 jour
+[2026-03-02] US: D'accord, j'attends avec impatience votre retour après réception de la marchandise.
+[2026-03-02] CUST: cool
+[2026-03-09] US: Bonjour, la marchandise a-t-elle déjà été expédiée de l'adresse du transitaire vers votre pays ? Ici, il est indiqué que l'adresse du transitaire a déjà...
+[2026-05-05] CUST: cc
+[2026-05-05] CUST: bjr comment vous allez ?
+[2026-05-06] US: Bonjour, désolé, j'ai été retardé par une urgence aujourd'hui et je n'ai pas pu répondre à temps.
+[2026-05-06] CUST: oui bonjour j'ai reçu mon colis c'est /:ok. merci bien
+[2026-05-06] US: Formidable, j'attends avec impatience les retours ultérieurs.
+[2026-05-06] CUST: vous en avez encore ?
+[2026-05-06] US: Est-ce le produit que vous avez commandé précédemment ?
+[2026-05-06] US: Je vérifie le stock, un instant.
+[2026-05-06] CUST: a part sa vous Avez quoi encore ?
+[2026-05-06] US: Je te recommande quelques produits.
+[2026-05-06] US: Voici ce qui pourrait vous intéresser.
+
+===== Keinjol Tata (55 msgs) =====
+[2026-05-04] US: Could you share the intended use, quantity, and destination for the new product card?
+[2026-05-04] CUST: Dear Supplier,
+Hello,
+My name is [Amit saini], and I am the owner of Kinjolluxe brand from India.
+I am looking to manufacture customized products under my own brand name Kinjolluxe with private labeling and customized packaging.
+My Requirements:
+Brand Name Printing: Kinjolluxe logo/name on product
+Custom Packaging: Pack of 3 pieces per box
+Packaging Type: Premium branded box packaging
+Destination: Uttarakhand, India (PIN Code: 249407)
+Shipping Requirement: Door-to-door delivery to my location
+Quantity: Please share MOQ (Minimum Order Quantity)
+Customization Needed:
+Product branding
+Custom packaging design
+Barcode/labeling if available
+Please Provide:
+Product price per piece
+Pack of 3 box price
+Custom branding charges
+Packaging charges
+Shipping charges to India (Door-to-door)
+Delivery timeline
+Sample availability and sample cost
+Payment terms
+Expected Cost Estimate Example:
+Product Cost (per piece): $X
+Pack of 3 Product Cost: $X × 3
+Branding Cost: $X
+Packaging Box Cost: $X
+Shipping + Customs + Delivery: $X
+Total Estimated Cost Per Box: $X
+I am planning for long-term business and bulk orders, so please provide your best quotation.
+Looking forward to your response.
+Best Regards,
+[Amit saini]
+Brand: Kinjolluxe
+Location: Uttarakhand, India – 249407
+[2026-05-04] US: Thanks for the detailed info! Could you confirm the MOQ you’re aiming for? Also, a bit more on the branding print, packaging design, and barcode details would help us get your quote and sample ready.
+[2026-05-04] CUST: Thank you for your response.
+Our MOQ requirement is [your desired quantity, e.g. 500 / 1000 / 2000 sets depending on pricing].
+Branding Details:
+Brand Name: Kinjolluxe
+Custom logo printing on product and packaging
+Preferred print style: Premium clear branding with durable finish
+Packaging: Pack of 3 products per box
+Packaging design: Custom branded box with our logo, product details, and professional retail-ready design
+Barcode: Yes, barcode required on each box for retail and Amazon selling
+Delivery Location: Uttarakhand, India (PIN 249407)
+Please share:
+MOQ-based pricing
+Sample cost
+Custom packaging charges
+Printing charges
+Barcode setup details
+Door-to-door shipping cost to India
+Looking forward to your quotation and sample options.
+[2026-05-04] US: Could you please confirm the exact MOQ you want to proceed with? This will help me provide accurate pricing and sample details.
+[2026-05-04] CUST: 500moq first order and second order 1000 moq
+[2026-05-04] US: Got it on the MOQ: 500 for the first order and 1000 for the second. Let me know if you want samples and any shipping info so I can get you an accurate quote.
+[2026-05-04] CUST: Thank you.
+Yes, we would like samples first so we can check the product quality, printing, and packaging.
+Shipping Information:
+Delivery Location: Uttarakhand, India (PIN 249407)
+We need door-to-door shipping cost
+Please share sample cost, shipping charges, and estimated delivery time
+Order Plan:
+First Order: 500 units
+Second Order: 1000 units
+Please provide a detailed quotation for both MOQ options.
+[2026-05-04] US: Sample cost is low and refundable with your order. Delivery takes about 15-20 days. I’m still confirming the door-to-door shipping cost to Uttarakhand, India. Could you let me know if you have any special packaging details to include?
+[2026-05-04] CUST: Thank you for the update.
+Our special packaging requirements are as follows:
+Custom branded packaging under our brand name Kinjolluxe
+Pack of 3 products per box
+Premium retail-ready box design
+Our logo printed clearly on both the box and product
+Product details, size information, size variations (such as S, M, L, XL, etc.), and barcode on each package
+Proper packaging arrangement according to different size variations
+Strong and secure packaging for safe international shipping
+Professional and attractive design suitable for Amazon selling
+Please also share:
+Sample refund terms
+Final shipping cost
+Packaging customization charges
+Barcode setup charges
+Any additional cost for size variations (if applicable)
+We look forward to receiving your complete quotation.
+[2026-05-04] US: Sample cost is refundable with your order, and delivery takes about 15-20 days. We can handle your custom branding, packaging with 3 pcs per box including size variations, barcode setup, and strong packaging for safe shipping. To finalize shipping and customization charges, could you please confirm the packaging design files and the exact size range?
+[2026-05-04] CUST: Thank you for the information.
+Could you please share the available size variations for this product?
+Please provide:
+All available sizes (such as S, M, L, XL, XXL, etc.)
+Whether this product is based on regular size categories (S, M, L, etc.) or age groups (such as 0-6 months, 6-12 months, 1-2 years, etc.)
+Measurements and details for each size/age group
+Any additional cost for different sizes or age categories (if applicable)
+This will help us finalize our packaging, branding, and order planning accurately
+[2026-05-04] US: The product comes in 90cm, 100cm, and 110cm sizes, fitting babies aged 1-3 years, so it’s based on age rather than S/M/L. We’ll need to confirm exact measurements and any extra costs for different sizes. Also, please share your packaging design files and measurement standards to help us plan everything accurately.
+[2026-05-04] CUST: Currently, we have our brand logo ready, but we may need your support for professional packaging design, barcode placement, and final retail box setup for Amazon selling.
+[2026-05-04] US: We can help with professional packaging design, barcode placement, and retail box setup. Could you share your specific needs? If you'd like, we can also provide design samples and a quote to help plan everything accurately.
+[2026-05-04] CUST: Thank you for your support.
+Our specific requirements are:
+Brand Name: Kinjolluxe
+Premium professional retail-ready packaging design
+Pack of 3 products per box
+Custom logo printing on product and packaging
+Barcode placement for Amazon selling
+Age-based size labeling (90cm, 100cm, 110cm for 1-3 years)
+Strong and secure export packaging
+Attractive product presentation suitable for online retail
+We would appreciate:
+Packaging design samples
+Branding mockups
+Barcode setup options
+Complete quotation including customization and shipping costs
+Please share your best design options and pricing so we can finalize the project accurately.
+[2026-05-04] US: As you can see from the image, we offer full customization—color, pattern, logo, label, and packaging design. We’ll provide your premium retail-ready packaging with Kinjolluxe branding, 3 products per box, barcode setup for Amazon, and strong export packaging. Sample costs are refundable with your order. To finalize pricing and prepare design mockups, could you please share your packaging design files and exact size details?
+[2026-05-04] US: 收到了您分享的品牌Logo，感谢！接下来请您提供包装设计文件和产品详细尺寸，这样我们能更好地做专业设计和报价。样品费订单确认后可退，您需要设计样品确认吗？
+[2026-05-04] CUST: Thank you.
+Please find attached our official Kinjolluxe brand logo and packaging reference images for your review.
+Brand Details:
+Brand Name: Kinjolluxe
+Premium luxury branding style
+Official logo provided for custom printing and packaging
+Logo color theme: navy blue, maroon/burgundy, and gold accents
+Elegant, feminine, and luxury-focused brand presentation
+Packaging Requirements:
+Pack of 3 products per box
+Premium drawer-style retail packaging
+Packaging design should match our brand logo color scheme
+Luxury-quality finish with strong visual appeal
+Product display window preferred
+Professional inside folding arrangement similar to our reference packaging
+Barcode placement for Amazon selling
+Product details, material information, and size/age labeling
+Durable, strong export packaging for international shipping
+Customization Requirements:
+Custom logo printing on: • Product • Packaging box • Labels • Tags
+High-end printing and premium finishing
+Retail-ready professional appearance
+Attached Files:
+Official Kinjolluxe Logo Design
+Preferred Packaging Design Reference
+Please review these files and prepare:
+Custom packaging mockups
+Branding design samples
+Accurate quotation
+Sample production details
+Customization and shipping charges
+We look forward to your best professional proposal based on our brand standards.
+[2026-05-04] US: Thanks for sharing your detailed brand logo and packaging references. We can prepare custom packaging mockups, branding samples, and a full quotation including customization, sample production, and shipping charges. Shall we start with confirming the design samples?
+[2026-05-04] CUST: Thank you for your support.
+Yes, we would like to proceed with confirming the design samples first.
+Please prepare:
+Custom packaging mockups based on our provided logo and packaging reference
+Branding samples for product, labels, and retail box
+Barcode placement options for Amazon selling
+Premium retail-ready packaging design samples
+Kindly share:
+Design preview/mockups for approval
+Sample production cost
+Full customization quotation
+Estimated shipping charges and delivery timeline
+Once we review and approve the design samples, we will proceed with sample production and bulk order planning.
+We look forward to your professional proposal.
+[2026-05-04] US: We'll get started on the custom packaging mockups, branding samples, barcode options, and pricing details. Could you please confirm your shipping address and order quantity? This will help us provide accurate shipping costs and a full quotation.
+[2026-05-04] CUST: Thank you for your support.
+Please find our confirmed shipping and order details below:
+Shipping Address:
+Brand Name: Kinjolluxe
+House Number: 518, Vishnu Lok Colony
+Area: Jwalapur, Haridwar
+State: Uttarakhand
+Country: India
+PIN Code: 249407
+Door-to-door delivery is required
+Order Quantity:
+Samples are required before bulk production
+First order: 500 MOQ units
+Second order: Future planning based on performance
+We require samples for all three size variations (90cm, 100cm, 110cm)
+Special Requirements:
+Design sample confirmation first
+Physical samples for all size variations
+Bulk production only after sample approval
+Custom branding, packaging, barcode, and retail box setup
+Please prepare:
+Accurate door-to-door shipping cost
+Full product quotation
+Sample production cost
+Customization charges
+Packaging and branding cost
+Estimated delivery timeline
+We look forward to reviewing your complete proposal and sample confirmation.
+[2026-05-04] US: Got your shipping and order info. We'll prepare a full quote including samples, customization, packaging, shipping, and delivery for the 500 units in 90cm, 100cm, and 110cm. Just double-checking—are these sample sizes correct?
+[2026-05-04] CUST: Thank you for the confirmation.
+Yes, the sample sizes are correct.
+We would like samples for all three size variations:
+90cm
+100cm
+110cm
+Please proceed with:
+Design mockups
+Physical samples for all three sizes
+Full quotation including customization, packaging, barcode setup, shipping, and delivery
+Once we review and approve the samples, we will proceed with the 500-unit bulk order.
+We look forward to your final proposal.
+[2026-05-04] US: Got it! We'll get the design mockups, physical samples for all sizes, and the full quote ready. I'll check shipping costs and delivery times with the team and get back to you soon with the complete proposal.
+[2026-05-04] CUST: Thank you for your support.
+I want to build Kinjolluxe as an international premium brand, so product quality must be excellent with no compromise at any stage.
+Our brand is focused on ladies’ undergarments, and this first product is very important for establishing our market presence. If this product meets our branding, quality, and pricing expectations, we are planning to expand further and launch many more SKUs with your company.
+Our long-term goals are:
+Secure and professional brand development
+Premium international-quality products
+Competitive and accurate pricing
+Multiple future product launches under Kinjolluxe
+Strong long-term business partnership
+For us, quality, branding, and pricing are the top priorities.
+If your company can support us with consistent quality and professional manufacturing, we are interested in building a long-term partnership for future expansion.
+[2026-05-04] US: Your vision for Kinjolluxe as a premium international brand is inspiring. We’re fully on board with your focus on top-notch quality and professional manufacturing. Our commitment is to deliver consistent, high-quality products and support your brand’s growth and SKU expansion. Just let us know any specific product specs or customization details so we can get the exact quotations and sample plans ready.
+[2026-05-04] CUST: Thank you for your strong support and commitment to our brand vision.
+We appreciate your professional approach and long-term partnership mindset.
+For now, our priority is to successfully finalize and launch the current product we are already discussing, with the exact branding, quality, packaging, and customization standards we have shared.
+Current Focus:
+Complete development of our first product
+Premium quality with no compromise
+Kinjolluxe custom branding
+Professional packaging
+Accurate pricing
+Successful sample approval and bulk production
+Once this product is successfully completed and meets our expectations, we will absolutely explore expanding into additional products and launching multiple future SKUs with your company.
+At this stage, we would like to focus on perfecting this first project before moving forward with broader expansion plans.
+Please proceed with the current product quotation, samples, and customization process as discussed.
+[2026-05-04] US: Got it! We'll concentrate on perfecting this first product with your exact branding, quality, packaging, and pricing needs. If there’s anything else to add, just let us know. We’ll get the full quotation, design mockups, sample costs, and shipping details ready for you soon.
+[2026-05-04] CUST: Thank you for your support and professional assistance.
+We appreciate your efforts in preparing the full quotation, design mockups, sample costs, and shipping details.
+Please also let us know:
+Estimated timeline for design mockup completion
+Expected production time for physical samples
+Approximate delivery time for samples to our shipping address in Uttarakhand, India
+Total expected timeline from design approval to sample delivery
+This information will help us plan our product launch schedule accurately.
+We look forward to your update and successful collaboration.
+[2026-05-04] US: Design mockups take about 3-5 days, and samples need 5-7 days to produce. Shipping time to Uttarakhand varies, so overall, expect around 15-20 days from design approval to sample delivery. We’ll confirm the exact shipping details shortly.
+[2026-05-04] CUST: Thank you for the timeline update.
+The estimated 15-20 day process from design approval to sample delivery sounds reasonable for our launch planning.
+Please proceed with:
+Design mockups
+Sample production for all three sizes
+Full quotation
+Shipping confirmation
+We appreciate timely updates throughout each stage, especially:
+Design completion
+Sample production progress
+Shipping dispatch details
+Maintaining quality and accuracy remains our top priority.
+We look forward to reviewing the mockups and moving forward successfully.
+[2026-05-04] US: We'll keep you updated promptly on design completion, sample progress, and shipping to maintain quality. The quotation and shipping details are underway. Let me know if there are any other customization points to confirm for your premium brand.
+[2026-05-04] CUST: At this stage, these are our confirmed customization requirements, and everything is finalized from our side for now.
+Please proceed accordingly with:
+Design mockups
+Sample production
+Full quotation
+Shipping details
+If there are any further questions or additional details needed regarding this project, please feel free to message me in the morning.
+For now, everything is confirmed.
+Thank you, and I look forward to your updates.
+[2026-05-04] CUST: good night dear
+[2026-05-04] US: Got all your confirmed details—design mockups, sample production, quoting, and shipping are all in progress. I'll keep you posted! Have a good night 😊
+[2026-05-04] US: The automatic reception has engaged upper limit and will no longer intervene in the conversation.
+[2026-05-04] CUST: TQ so much dear
+[2026-05-05] US: Please wait a moment, I will reply to you/:handshake.
+[2026-05-05] CUST: Sure, I’ll wait for your reply. 🤝
+[2026-05-05] US: Haha, okay, your response needs to be taken seriously and cannot be done half-heartedly/:smile.
+[2026-05-05] CUST: Hello, thank you for your response. I would also like to know if you have other related products available, such as period panties, seamless panties, or similar women’s innerwear products.
+If available, please share full details including:
+• Product types and available designs
+• Material and fabric quality
+• Custom branding/private label options
+• MOQ (Minimum Order Quantity)
+• Pricing per piece and bulk pricing
+• Packaging options
+• Sample availability
+• Shipping charges to India
+Please send your latest catalog or product list for these categories. Thank you.
+[2026-05-05] US: Our factory mainly produces textile products for infants and toddlers, such as cloth diapers, sleeping bags, swaddles, sets, bibs, etc. If you need to customize these types of period panties or other women's products, I can confirm with the factory design team and get back to you
+[2026-05-05] CUST: When will you be able to provide me with this information?
+[2026-05-05] US: By tomorrow morning at the latest
+[2026-05-05] CUST: What position do you hold in the company, and who are you?
+[2026-05-05] US: I am the manager of the company's foreign trade department
+
+===== Christine Muwela (54 msgs) =====
+[2026-05-01] CUST: are those available
+[2026-05-01] US: Hi Christine! We focus on quality baby products like cloth diapers and pajamas. Our factory in Hunan has been going strong since 2015. Let me know if you'd like more info or samples! 🙂
+[2026-05-01] US: Yes, the kids summer clothing set is ready! Could you share your order quantity and delivery country?
+[2026-05-01] CUST: can insee real picture please
+[2026-05-01] CUST: country zambia
+[2026-05-01] CUST: quantity 20
+[2026-05-01] CUST: which ages ranges do u have ?
+[2026-05-01] US: Got your order for 20 to Zambia. Any specific styles or customizations? Also, I'll check on the real pictures for you! 🙂
+[2026-05-01] US: The kids set fits ages 3-8 (sizes 80-130). I'll check the real pics for you and get back soon!
+[2026-05-01] CUST: 3 to 8 years old
+[2026-05-01] US: The kids set is for ages 3-8. I'll check on real pics for you. Any color or style you prefer? Also, could you confirm your delivery address?
+[2026-05-01] CUST: pink and purple
+[2026-05-01] US: We have pink for the kids set, but purple isn’t available. Can you confirm your delivery address?
+[2026-05-01] CUST: okay
+[2026-05-01] US: Thanks for the picture! Is this the pink style you want? MOQ is 5 pieces. Need customization or samples? Also, please confirm your delivery address.
+[2026-05-01] CUST: yes same style..okay 2 years 5 years
+[2026-05-01] US: Got it, pink style it is! For 2 years, we might need to customize. Want us to do that? Also, could you confirm your delivery address?
+[2026-05-01] CUST: is that style for boy child
+[2026-05-01] CUST: delivery adress i wil send
+[2026-05-01] US: This pink style is suitable for boys too. Please send delivery address when ready.
+[2026-05-01] CUST: is thata short or skirt
+[2026-05-01] CUST: ??
+[2026-05-01] US: The pink bottom is a skirt, not shorts. Do you want the 2-year size customized? Also, please send your delivery address.
+[2026-05-01] CUST: okay...yes i want 2 years old and 5
+[2026-05-01] CUST: how about these are they for boys or girls
+[2026-05-01] US: This is for girls
+[2026-05-01] CUST: do u have real pictures for those cause those i need 20 s i need to see real pictures
+[2026-05-01] US: This is the real photo
+[2026-05-01] US: These are the details of the first product; can you take a look at this photo?
+[2026-05-01] US: We are currently on vacation, and once our vacation ends, I can have the factory directly take videos or photos of the products on-site for you, which might better meet your requirements
+[2026-05-01] CUST: okay
+[2026-05-01] US: Okay, thank you for your understanding.
+[2026-05-04] US: Good morning, here are the actual photos of the product for you to check the quality and fabric
+[2026-05-04] CUST: okay
+[2026-05-04] US: Thank you for confirming! Would you like to proceed with the order or need any additional details? 😊
+[2026-05-04] CUST: the other one u dint send
+[2026-05-04] CUST: the pink shirt with white collar and pink skirt
+[2026-05-04] US: Sorry, I'll check tomorrow if the factory has any stock available. If there is, I'll finish shooting it and send it to you as soon as possible
+
+===== ali Amjid (234 msgs) =====
+[2026-05-04] US: Our pillow is breathable and anti-dust mite, perfect for ages 1-2. You can customize size, color, and material, with a MOQ of 100 pieces. What quantity or customization do you have in mind?
+[2026-05-05] US: Hello, do you need a sample?
+[2026-05-05] CUST: Good day
+[2026-05-05] US: Hello
+[2026-05-05] CUST: Its pillow for 2 years baby ?
+[2026-05-05] US: Yes, do you need it for personal use or for sale?
+[2026-05-05] CUST: Personal
+[2026-05-05] CUST: I want some pillow. & clothe & some thing more
+[2026-05-05] US: Do you have a Chinese freight forwarder, or what is your delivery address? I can help you check
+[2026-05-05] CUST: Yes have
+[2026-05-05] CUST: SZ city
+[2026-05-05] US: Having a freight forwarder makes things much more convenient
+[2026-05-05] CUST: Yes I have
+[2026-05-05] CUST: I see ur quality look nice
+[2026-05-05] US: Our main products include cloth diapers, changing pads, sweat-absorbing towels, homewear sets, sleeping bags, bibs/pockets, and Muslim swaddle wraps
+[2026-05-05] CUST: I want best for my baby’s
+[2026-05-05] US: We are glad to receive your recognition. We are partners with Disney and Pampers, and quality is our minimum guarantee
+[2026-05-05] US: Yes, the products used for babies must be of good quality
+[2026-05-05] US: Take a look at what other products you might need, and I'll recommend suitable ones for you, ensuring they are made of pure cotton and free of harmful substances
+[2026-05-05] CUST: First show For 2 year baby pillow
+[2026-05-05] US: Okay, I will send you detailed pictures for your reference
+[2026-05-05] US: Here are the details of the product; take a look and see if there's anything else you'd like to know. The fabric is made of pure cotton gauze
+[2026-05-05] CUST: How much of this
+[2026-05-05] US: The unit price of this product is $2.10
+[2026-05-05] US: How many pieces do you need?
+[2026-05-05] CUST: For new born baby 6 month. U have pillow ?
+[2026-05-05] US: Yes, there are
+[2026-05-05] US: I recommend you take a look
+[2026-05-05] CUST: 2 years and 6 month baby different right
+[2026-05-05] US: The pillows for 2-year-olds are generally universal, but those for newborns may only be suitable for the current stage; using them later might not be the right size
+[2026-05-05] US: How old is your baby? I can recommend something suitable for you
+[2026-05-05] CUST: One is 6 month & one is 2 year
+[2026-05-05] CUST: Clothe and pillow want for both baby
+[2026-05-05] US: In that case, I still recommend buying two types of pillows and clothes
+[2026-05-05] CUST: Yes
+[2026-05-05] US: Do you need recommendations for summer or winter clothing?
+[2026-05-05] CUST: So we start from 6 month baby
+[2026-05-05] CUST: Summer
+[2026-05-05] US: Okay, the pillow I just recommended is suitable for babies around 6 months old, and now I will recommend clothing for 6-month-old babies for you
+[2026-05-05] US: Boy or girl baby?
+[2026-05-05] CUST: 6 month for girl
+[2026-05-05] US: ok
+[2026-05-05] CUST: Like this have wt u ?
+[2026-05-05] US: I have sent this product before, and there are currently no similar products for this item
+[2026-05-05] CUST: Ok
+[2026-05-05] US: Is there anything else I can help with? Do you need any clothing recommendations?
+[2026-05-05] CUST: Ok
+[2026-05-05] CUST: 6 month lady
+[2026-05-05] US: OK
+[2026-05-05] US: Do you like these products?
+[2026-05-05] CUST: Yes I see
+[2026-05-05] US:  Great! Which styles do you prefer for your 6-month-old girl? I can provide more details or sizes for you.
+[2026-05-05] CUST: 6 month to 1 years
+[2026-05-05] CUST: Used for legs cover also show me
+[2026-05-05] US: Long clothing, right?
+[2026-05-05] CUST: Ok
+[2026-05-05] US: These sizes are for products ranging from 3 months to about 1 year old, suitable for your baby
+[2026-05-05] US: You have already sent the product images that are of interest, right?
+[2026-05-05] US: Okay, you have selected products that interest you, all made of pure cotton fabric, which is safe, eco-friendly, and free of harmful substances. Sizes are available for ages 6 months to 1 year. Do you need more information? Or can you tell me how many pieces of each product you need, and which sizes (6M, 9M, 12M) you require?
+[2026-05-05] CUST: Like this have more design?
+[2026-05-05] US: And these two as well
+[2026-05-05] CUST: But downside use have something
+[2026-05-05] US: What restrictions?
+[2026-05-05] CUST: This ok. But I want also use for cover legs
+[2026-05-05] US: I'll check again to see if there are any long styles in this style; it would be even better if there are
+[2026-05-05] CUST: Check these
+[2026-05-05] US: Hello, is this the product style that is needed?
+[2026-05-05] CUST: Yes.
+[2026-05-05] US: OK
+[2026-05-05] US: I am watching
+[2026-05-05] CUST: 6 month to one year
+[2026-05-05] CUST: For lady.
+[2026-05-05] US: Our sizes are 6M, 9M, and 12M. Which specific size should you choose?
+[2026-05-05] CUST: 9M for how many KG baby
+[2026-05-05] US: Around 18-22kg
+[2026-05-05] CUST: It’s for 6 month to 1 year baby right
+[2026-05-05] US: 9m is suitable for a 9-month-old baby
+[2026-05-05] US: How old is your baby now? 
+ What size would I recommend for you?
+[2026-05-05] CUST: She 6 month
+[2026-05-05] CUST: She have good health
+[2026-05-05] US: I recommend you choose the 73cm size because babies under 1 year old grow quickly, so it's better to pick a slightly larger size. Your baby is 6 months old now, so I recommend choosing the 73cm size, which is equivalent to a size between 6-9 months. Does that sound okay to you?
+[2026-05-05] CUST: 73CM is which size  9 M ?
+[2026-05-05] US: The 73cm dimension is the same for all products
+[2026-05-05] CUST: So 80CM is ok
+[2026-05-05] US: 80 might be a bit too large
+[2026-05-05] CUST: His mom says ok this
+[2026-05-05] US: OK, that's fine, the child's mother knows best/:smile.
+[2026-05-05] CUST: Yes
+[2026-05-05] US: I still have a few questions. You've confirmed the size you need, but for some products, I'm not sure which styles you require
+[2026-05-05] CUST: Send u photos already
+[2026-05-05] US: Which specific style is needed among these three pictures?
+[2026-05-05] US: Okay, what is the quantity required for each product? Once confirmed, I will send you the complete quotation information, and if everything is correct, I can draft the letter of credit order for you
+[2026-05-05] CUST: As I told u. I need for personal
+[2026-05-05] CUST: So each model one pc. Total 10pcs
+[2026-05-05] US: I'm really sorry, but most of our products have a minimum order quantity of 2 pieces. Let me see if I can apply for an exception for this special case
+[2026-05-05] CUST: Ok 2 pcs for some design. But different colors
+[2026-05-05] US: OK
+[2026-05-05] CUST: These 3 same one designs
+[2026-05-05] US: Okay, let me take a look
+[2026-05-05] US: Hello, I have confirmed it. There are the following pieces of information I need to tell you
+[2026-05-05] US: This style is not in stock, but you can choose others. The minimum order quantity for this product is 2 pieces
+[2026-05-05] CUST: This model 2 different design no have ?
+[2026-05-05] US: This model of product comes in many styles
+[2026-05-05] US: That is, different designs; take a look to see if there are any other styles you like
+[2026-05-05] CUST: This also ok
+[2026-05-05] US: The two images show different styles of the same product
+[2026-05-05] US: This product is a set of three pieces of clothing, and you can only choose which three combinations to select; individual items cannot be chosen separately
+[2026-05-05] CUST: This ok
+[2026-05-05] CUST: These 2 ok
+[2026-05-05] US: This is okay
+[2026-05-05] US: These two items have a smallest size of 90cm, which the baby can wear once they grow a bit more in a few months. Do you think that's acceptable? If there's no problem, then we can proceed
+[2026-05-05] US: And this one, these two styles are different versions of the same product
+[2026-05-05] CUST: So these both model no have 80CM ?
+[2026-05-05] US: Yes
+[2026-05-05] US: I think this is okay; clothes that are 90cm long can probably be worn by the baby in about 2-3 months
+[2026-05-05] CUST: Ok
+[2026-05-05] US: Do you need any other products?
+[2026-05-05] CUST: Now how many done already ?
+[2026-05-05] US: These three have already been completed
+[2026-05-06] CUST: Good day
+[2026-05-06] CUST: today not working
+[2026-05-06] US: Sorry, I was delayed today due to an urgent matter. I will reply to your message later. I'm really sorry
+[2026-05-06] US: I checked the messages, and the currently confirmed styles are as follows:
+[2026-05-06] US: Do you need anything else?
+[2026-05-06] CUST: It’s ok.
+[2026-05-06] CUST: Baby for 2 year body have some ?
+[2026-05-06] US: I'm not sure which aspect you would like to know about? But based on our experience, there are a few things to consider when choosing clothing for a 2-year-old baby: 
+ 1. Fabric quality: Preferably made of pure cotton, free from harmful substances, so as not to harm the baby's delicate skin. 
+ 2. The sewing process requires choosing a seamless technique that won't irritate the baby's skin. 
+ 3. Good breathability
+[2026-05-06] CUST: I want cotton and good quality
+[2026-05-06] CUST: Bcoz I want for my baby
+[2026-05-06] US: The fabrics of the products I just sent are all cotton, and the quality is good, meeting your requirements
+[2026-05-06] CUST: Ok
+[2026-05-06] CUST: So moring send me some designs for 2 years boy
+[2026-05-06] US: OK
+[2026-05-06] US: After seeing the message, you can check out the recommended products.
+[2026-05-06] CUST: Each model 2 pcs or can select one pcs ?
+[2026-05-06] US: You can choose the specifications for 1 item
+[2026-05-07] US: Okay, I'll check the inventory
+[2026-05-07] US: Hello, all the styles you just selected are in stock
+[2026-05-07] US: What size and how many pieces are needed?
+[2026-05-07] CUST: 2 year to 3 years
+[2026-05-07] CUST: These I select from each model 2 or 3 designs
+[2026-05-07] US: Yes, I saw that you selected 3 different models
+[2026-05-07] US: For 2-3 year olds, it is recommended to choose 100cm
+[2026-05-07] CUST: Ok
+[2026-05-07] CUST: So these 9 designs each one one pcs ok
+[2026-05-07] US: What was the size of the girl's clothing that was chosen earlier?
+[2026-05-07] US: OK
+[2026-05-07] US: The women's clothing in the front are all 80s styles, right?
+[2026-05-07] CUST: Yea
+[2026-05-07] US: Except for two products that are only 90
+[2026-05-07] US: I am now creating an order to send to you, what is your delivery address?
+[2026-05-07] CUST: SZ
+[2026-05-07] US: Okay, can you send me the detailed address?
+[2026-05-07] CUST: 深圳市顺芯达电子产品有限公司
+深圳宝安区沙井街道壆岗社区岗夏路12-3号3楼305（君鼎创富 2栋）
+李先生
+13302436109
+[2026-05-07] CUST: Which 2 designs have 90 ?
+[2026-05-07] US: These two
+[2026-05-07] CUST: Ok
+[2026-05-07] US: Okay, I will draft the order and send it to you
+[2026-05-07] US: Total of 16 items, shipping cost $2
+[2026-05-07] CUST: Ok
+[2026-05-07] CUST: RMB how much total
+[2026-05-07] US: About 510 RMB
+[2026-05-07] CUST: Ok
+[2026-05-07] US: Okay, we will arrange it as soon as possible after payment, and the estimated shipping time is within 1 to 7 days
+
+===== yoselyn Rodriguez (230 msgs) =====
+[2026-03-20] US: You haven't responded to this buyer yet, which may risk losing this lead. Enable AI Auto Reception to instantly respond to new business opportunities.
+[2026-03-20] US: ¡Hola! Es un placer. He revisado su selección de tallas y colores para nuestro conjunto de algodón 100%. Contamos con stock disponible y apoyamos servicios de OEM/ODM. ¿Desea que calcule el costo de envío para estas unidades iniciales?
+[2026-03-20] CUST: si
+[2026-03-20] CUST: mi dirección es EEUU Houston texas 77036
+[2026-03-20] US: De acuerdo, lo estoy consultando ahora y te lo enviaré cuando lo termine.
+[2026-03-20] US: ¿Prefieres un tiempo de envío más corto o un método de envío más económico?
+[2026-03-20] CUST: económico
+[2026-03-20] US: De acuerdo, espere un momento.
+[2026-03-20] US: Esta es la presentación de nuestra empresa, puedes consultarla mientras reviso los costos de envío.
+[2026-03-20] CUST: Gracias
+[2026-03-20] US: /:handshake./:handshake.
+[2026-03-20] US: Los detalles de los gastos de envío son los siguientes: 
+ 
+ Cantidad: 37,9 dólares estadounidenses 
+ 
+ Términos de comercio: DDP (entrega con impuestos pagados) 
+ 
+ Modo de transporte: marítimo 
+ 
+ Tiempo de envío: aproximadamente 25-30 días.
+[2026-03-20] CUST: cual seria el valor total
+[2026-03-20] US: Disculpa, justo recibí una llamada, ahora mismo...
+[2026-03-20] CUST: ya le envió otra vez el pedido
+[2026-03-20] US: Estos son los precios unitarios de las cuatro tallas: 
+ 73 cm ------ 0,94 dólares 
+ 80 cm ------ 1,1 dólares 
+ 90 cm ------ 1,26 dólares 
+ 100 cm ------ 1,41 dólares 
+ 110 cm ------- 1,57 dólares
+[2026-03-20] US: La cantidad que necesitas es de 7 modelos, uno de cada modelo en las tallas 73-80-90-100-110cm. El costo total del producto es: 43.96 dólares estadounidenses.
+[2026-03-20] US: ¿Revisas si hay algún problema? Si no hay problema, voy a preparar el pedido para ti.
+[2026-03-20] CUST: que colores tienes disponibles para saber
+[2026-03-20] CUST: o son los que yo seleccione
+[2026-03-20] US: Sí, los que has seleccionado, ya los he visto en la información de la consulta. He visto que has seleccionado cada modelo, por ejemplo, modelo 1, modelo 3, modelo 4, modelo 6, modelo 8...
+[2026-03-20] CUST: sii
+[2026-03-20] US: Has seleccionado 7 modelos, con las siguientes cantidades y tallas: 73-80-90-100-110cm, una unidad de cada talla.
+[2026-03-20] US: Si estás satisfecho con los gastos de envío y el precio del producto, ahora mismo creo el pedido para ti, pero necesito que me envíes el número de teléfono del destinatario.
+[2026-03-20] CUST: si estoy satisfecho
+[2026-03-20] US: De acuerdo, ¿quieres que te recomiende otros modelos?
+[2026-03-20] CUST: si porfa para haci pedir variedad
+[2026-03-20] CUST: pero los primero si me interesan
+[2026-03-20] US: De acuerdo, te recomiendo esto.
+[2026-03-20] CUST: me gustan
+[2026-03-20] US: ¡Genial! ¿Qué tallas, cantidades y estilos de productos necesitas? Puedes decirme.
+[2026-03-20] US: Excelente, "Xie" es uno de nuestros productos más vendidos.
+[2026-03-20] US: De acuerdo, ¿cuál es tu dirección de envío?
+[2026-03-20] US: ¿Vendes en tu propia tienda?
+[2026-03-20] CUST: es algo que quiero comenzar
+[2026-03-20] CUST: tienes algo más de niñas ?
+[2026-03-20] CUST: el valor de envío aumenta?
+[2026-03-20] US: ¡Genial! Te recomiendo modelos para chicas.
+[2026-03-20] US: No, me equivoqué al recordar.
+[2026-03-20] US: Échale un vistazo y dime si encuentras algún estilo que te guste.
+[2026-03-20] CUST: ya regalame unos minutos
+[2026-03-20] US: Bien.
+[2026-03-20] CUST: pregunta envío a Venezuela estado zulia maracaibo
+[2026-03-20] CUST: tienen envio
+[2026-03-20] US: Necesito un poco de tiempo, no sé si el personal de carga se dio cuenta.
+[2026-03-20] US: Solo se podrán consultar los costos de envío exactos mañana.
+[2026-03-20] US: Ya se han tomado un descanso.
+[2026-03-20] CUST: esta bien quedo atenta a su respuesta
+[2026-03-20] US: De acuerdo, te contactaré mañana.
+[2026-03-20] CUST: una pregunta si compro más cosas aumenta el valor del envío?
+[2026-03-20] CUST: Este modelo también quisiera 8
+[2026-03-21] US: Los gastos de envío aumentarán, pero no demasiado.
+[2026-03-21] CUST: puedes hacerme un pequeño presupuesto de todo para calcular
+[2026-03-21] US: Claro que sí.
+[2026-03-21] US: Te lo envío más tarde.
+[2026-03-21] US: Hola, esta es la tabla de precios del producto, excepto para los 2 productos cuyas necesidades no conozco.
+[2026-03-21] US: No sé exactamente qué modelos y tallas necesitas de estos dos.
+[2026-03-21] US: Ya he consultado sobre el envío a Venezuela, estado Zulia, Maracaibo, pero la ruta de transporte desde China a esa dirección no incluye DDP, necesitas hacer el despacho de aduana tú mismo. ¿Estás de acuerdo?
+[2026-03-21] US: De acuerdo, déjame ver.
+[2026-03-21] US: Te lo envío en un momento.
+[2026-03-21] US: El precio unitario de este producto es de 3.2 dólares, el precio es el mismo para cada estilo y también para cada talla.
+[2026-03-21] US: El número total de unidades de este producto es de 8, y el costo total es de 25.6 dólares.
+[2026-03-21] US: El precio unitario de este producto es de 2,85 dólares, el precio es el mismo para todos los modelos y para todas las tallas, todos cuestan 2,85 dólares.
+[2026-03-21] US: El producto tiene un total de 12 unidades y el costo total es de 34.2 dólares.
+[2026-03-21] CUST: ok en cuanto quedaría el envío
+[2026-03-21] US: Aquí tienes la información de precios de los dos productos restantes. Combinándola con la tabla de precios anterior, podrás entender la situación claramente.
+[2026-03-21] US: Durante el día consulté sobre los costos de envío, desde China a Venezuela, sin DDP, necesitas hacer el despacho de aduana. Si te parece bien, te lo envío ahora.
+[2026-03-21] CUST: no mejor hagamoslo a EEUU
+[2026-03-21] US: Eso sería lo mejor, así se ahorrarán muchos gastos de envío.
+[2026-03-21] CUST: si
+[2026-03-21] US: Porque revisé los costos de envío a Venezuela y son muy altos.
+[2026-03-21] US: Entonces, voy a recalcular el precio al Estados Unidos, ya que se han añadido muchos productos y el costo de envío podría variar bastante.
+[2026-03-21] CUST: si para sacar cuenta y ver que tal 🤔
+[2026-03-21] US: Espere un momento.
+[2026-03-21] US: Detalles de envío: 
+ Gastos de envío: 145 dólares. 
+ Términos de comercio: DDP 
+ Modo de transporte: marítimo 
+ Tiempo de envío: 18 a 20 días.
+[2026-03-21] CUST: lo entregan directamente a mi domicilio fiscal ?
+[2026-03-21] CUST: incluye costo de aduanas ?
+[2026-03-21] US: Sí, es envío puerta a puerta e incluye aranceles aduaneros.
+[2026-03-21] US: Solo tienes que esperar a que te entreguen la mercancía, no tienes que preocuparte por lo demás.
+[2026-03-21] CUST: me parece cual seria el valor total 🤔
+[2026-03-21] US: ¿El precio del producto incluye el envío?
+[2026-03-21] CUST: si
+[2026-03-21] US: Te lo reviso y te lo envío cuando lo termine.
+[2026-03-21] US: 417,3 dólares
+[2026-03-21] CUST: esta bien
+[2026-03-21] US: Entonces, ahora voy a crear el pedido para ti.
+[2026-03-21] CUST: disculpa en los 18 a 20 días incluyendo fines de semana ?
+[2026-03-21] US: Sí, pero este tiempo se cuenta a partir de la salida del barco, no he incluido el tiempo que tardé en enviar la mercancía desde la fábrica al puerto.
+[2026-03-21] CUST: entiendo
+[2026-03-21] US: De acuerdo, para redactar la nueva versión del pedido, necesitamos el número de teléfono del destinatario.
+[2026-03-21] US: La dirección es Houston, Texas, EE. UU., 77036. Por favor, confírmalo.
+[2026-03-21] CUST: 7222 bellerive Dr apto 1905
+[2026-03-21] CUST: EEUU Houston texas 
+7222 bellerive Dr apto 1905 
+zip 77036
+[2026-03-21] US: De acuerdo, ¿y el número de teléfono del destinatario?
+[2026-03-21] CUST: 3462796637
+[2026-03-21] US: Recibido, necesito un poco de tiempo. Te lo enviaré inmediatamente una vez que lo haya creado.
+[2026-03-21] CUST: ok
+[2026-03-21] US: Hola, hay un cargo de impuestos de 34.4 dólares, por favor, revísalo.
+[2026-03-21] CUST: pregunta que tiempo más o menos se tarda en salir el barco ?
+[2026-03-21] US: I need to ship from the factory to the port within one week
+[2026-03-21] CUST: disculpa estoy calculando el valor es que me sube un poco la factura
+[2026-03-21] US: OK
+[2026-03-21] CUST: disculpa es que me sale en 467 regalarme unos minutos
+[2026-03-21] US: OK
+[2026-03-21] CUST: Dirección
+
+1905, 7222 Bellerive Drive, Houston, Texas, 77036, United States
+[2026-03-21] US: Let me make some changes
+[2026-03-21] US: Once confirmed, you can make the payment
+[2026-03-21] CUST: ya realice el pago
+[2026-03-22] US: He recibido el pago, te actualizaré la información de envío una vez que lo haya enviado.
+[2026-03-23] US: Hola, dos modelos están agotados. ¿Te parece bien si te los cambio por otros modelos?
+[2026-03-23] US: Este modelo está agotado, lo hemos reemplazado por el siguiente modelo.
+[2026-03-23] US: Este es el primer modelo.
+[2026-03-23] US: Este modelo está agotado, puedes cambiarlo por el siguiente modelo.
+[2026-03-23] US: Este es el segundo modelo.
+[2026-03-23] US: Por favor, confirma si es viable.
+[2026-03-25] CUST: esta bien
+[2026-03-25] CUST: me parece
+[2026-03-25] US: Okay 👌
+[2026-03-30] CUST: hola como esta
+[2026-03-30] US: Hola
+[2026-03-30] US: Su producto está agotado en una de las variantes, pero estamos organizando la producción y se estima que estará listo mañana. Lo enviaremos lo antes posible.
+[2026-03-31] CUST: gracias
+[2026-03-31] US: /:handshake./:handshake.You're welcome
+[2026-03-31] CUST: Dirección
+
+1905, 7222 Bellerive Drive, Houston, Texas, 77036, United States
+[2026-03-31] CUST: The system identifies the risk information. In order to protect the security of your order, please be sure to modify the shipping address information through the background of Alibaba International Station, otherwise you may not enjoy the anti-payment protection service.
+[2026-04-01] US: Recibido, ya lo hemos enviado al puerto, está en camino y se estima que el número de seguimiento estará disponible en dos días.
+[2026-04-01] CUST: muchas gracias apenas lo tenga me lo podría enviar
+[2026-04-01] US: De acuerdo, no hay problema.
+[2026-04-02] US: Tu paquete ha sido entregado a la dirección del agente de carga y se estima que será enviado a tu país en las próximas 24-48 horas. Te actualizaremos el número de seguimiento del tramo internacional en ese momento.
+[2026-04-02] CUST: ok gracias
+[2026-04-02] US: /:love.
+[2026-04-18] CUST: hola
+[2026-04-18] US: Hola
+[2026-04-18] CUST: como se encuentra
+[2026-04-18] US: ¿Recibiste el pedido?
+[2026-04-18] CUST: quisiera saber el estado de mi pedido
+[2026-04-18] CUST: aun no
+[2026-04-18] US: Déjame consultarlo por ti.
+[2026-04-18] CUST: gracias 🙂
+[2026-04-18] US: Jaja, te lo envío lo antes posible.
+[2026-04-18] US: Esta es la información de logística, que muestra: 
+ Es posible que ya se haya enviado, la entrega está prevista para el 24 de abril.
+[2026-04-18] CUST: muchas gracias
+[2026-04-24] CUST: hola como estas
+[2026-04-24] CUST: me puedes facilitar el número de rastreo
+[2026-04-24] CUST: es que me dijiste que llegaba hoy la entrega y aun no llego
+[2026-04-25] US: De acuerdo, voy a revisar.
+[2026-04-25] US: Te lo diré cuando esté listo.
+[2026-04-25] US: Ya estoy en el puesto, a la espera de la descarga del barco.
+[2026-04-25] US: No te preocupes, debería ser pronto.
+[2026-04-25] CUST: muchas gracias
+[2026-04-25] US: /:smile./:smile./:smile.
+[2026-04-25] US: Está bien, avísame cuando recibas el pedido.
+[2026-04-26] CUST: esta bien sabes que agencia hará la entrega
+[2026-04-26] US: FedEx
+[2026-04-27] CUST: gracias
+[2026-04-27] US: ¿Ya llegó? Debería estar cerca de llegar.
+[2026-04-27] CUST: aun no llega
+[2026-04-27] US: De acuerdo, pero debería ser pronto, estamos esperando a que se descargue el barco.
+[2026-04-27] CUST: ok gracias sigo a la espera
+[2026-04-28] US: /:smile.
+[2026-04-28] CUST: hola
+[2026-04-29] US: /:smile.
+[2026-04-29] US: Hola, ¿lo has recibido?
+[2026-04-29] CUST: aun no
+[2026-04-29] US: ¿Hay algo en lo que pueda ayudarte en particular?
+[2026-04-30] CUST: hola 👋
+[2026-04-30] CUST: me encantaron los conjuntos todos preciosos sin duda volvería a pedirlos
+[2026-05-01] US: You haven't responded to this buyer yet, which may risk losing this lead. Enable AI Auto Reception to instantly respond to new business opportunities.
+[2026-05-01] US: /:yeah. ¡Muchas gracias por su reconocimiento! Me alegra que le gusten estos conjuntos y que los considere bonitos. Su satisfacción es muy importante para nosotros. Esperamos su próxima visita y, si necesita alguna recomendación o ayuda, no dude en contactarnos. ¡Le invitamos a volver a comprar cuando lo desee!
+[2026-05-01] CUST: hola como estas disculpa
+[2026-05-01] CUST: ropa de mujer venden ?
+[2026-05-02] US: Solo fabricamos ropa para bebés y niños pequeños.
+

@@ -1,0 +1,110 @@
+# OKKI 数据新鲜度 + sync 可靠性修复
+
+> 日期：2026-05-18
+> 背景：因子系统已落地，但数据源头不可靠
+
+---
+
+## 一、两个问题
+
+### 问题 1：数据新鲜度无感知
+下游脚本静默跑旧数据，无任何提醒。用户可能不知道数据是 3 天前的。
+
+### 问题 2：sync_okki.js 本身不可靠（更严重）
+2026-05-15 已诊断但未修复，记录在 `memory/okki_reliability_debate.md`：
+
+| Bug | 现象 | 影响 |
+|-----|------|------|
+| 虚拟列表滚动不可靠 | 会话数 490→466（-24人） | `scrollTop = scrollHeight` 不一定触发虚拟列表渲染新项 |
+| 全量覆盖写入 | 每次 sync 覆盖 `tm_conversations_latest.json` | 本次未加载到的会话永久丢失，累积叠加 |
+
+你遇到的"说了左侧虚拟滚动但输出还是没新客户"就是这两个 bug 叠加的结果。
+
+---
+
+## 二、修复方案
+
+### Fix 1: 下游脚本加数据新鲜度提醒（软警告）
+
+`init_factor_baselines.js` 和 `batch_classify_heat.js` 的 main() 开头加：
+
+```js
+function checkFreshness() {
+  const syncPath = path.join(__dirname, '..', 'data', '.last_sync.json');
+  if (!fs.existsSync(syncPath)) {
+    console.log('⚠️  未找到同步记录，数据新鲜度未知。建议先运行 sync_okki.js');
+    return;
+  }
+  const sync = JSON.parse(fs.readFileSync(syncPath, 'utf-8'));
+  const daysAgo = daysBetween(new Date(sync.date), TODAY_DATE);
+  if (daysAgo > 0) {
+    console.log(`⚠️  数据 ${daysAgo} 天前同步（${sync.date}），如有新询盘请先 sync`);
+  } else {
+    console.log(`✅ 今日已同步: ${sync.date}，${sync.conversations} 会话`);
+  }
+}
+```
+
+**不阻断，只提醒。** 用户说"不同步"直接继续。
+
+### Fix 2: sync_okki.js 累积合并替代全量覆盖
+
+**现状**：`tm_conversations_latest.json` 每次全量覆盖 → 本次窗口外的会话丢失。
+
+**改为**：维护 `data/tm_conversations_master.json`（只增不删的真相源），新 sync 结果 merge 进去：
+
+```
+sync 流程:
+1. 从 OKKI 抓取当前会话列表 → convList (例如 460 条)
+2. 加载 master.json (如有) → masterMap<cid>
+3. 合并: masterMap.set(cid, 新数据)   // 有则更新，无则新增
+4. 写入 master.json (累积全集)
+5. 写入 .last_sync.json (含新增/更新计数)
+```
+
+**效果**：
+- 每次 sync 只会增加/更新，永不会丢失老客户
+- master.json 的 size 只会增长，不会波动
+- 下游脚本统一读 master.json（替代 tm_conversations_latest.json）
+
+### Fix 3: 虚拟列表滚动的替代策略
+
+当前 `sync_okki.js:206` 用 `best.scrollTop = best.scrollHeight` 触发滚动。
+
+`okki_order_sync.md` 记忆记录：`page.evaluate` 设 `scrollTop` 不能触发 `vue-recycle-scroller` 重渲染，必须用 `page.mouse.wheel`。
+
+TM 会话列表可能也受此影响。加一个 fallback 策略：
+
+```js
+// 策略1: scrollTop 设置 (当前方式，对某些虚拟列表有效)
+best.scrollTop = best.scrollHeight;
+
+// 策略2: 如果 3 轮后数量没变，改 mouse.wheel
+if (unchangedRounds >= 1) {
+  await iframePage.mouse.wheel(0, 9999);  // 大幅滚轮
+}
+```
+
+同时加入**验证环节**：sync 完成后对比 `master.json` 的历史最高会话数。如果本次抓取数 < 历史最高 * 0.95，打印 ⚠️ 警告"可能遗漏会话"。
+
+---
+
+## 三、涉及文件
+
+| 文件 | 改动 | 优先级 |
+|------|------|:--:|
+| `scripts/sync_okki.js` | 加 master.json 累积合并 + mouse.wheel fallback + 写 .last_sync.json | P0 |
+| `scripts/init_factor_baselines.js` | 加 checkFreshness() + 改读 master.json | P1 |
+| `scripts/batch_classify_heat.js` | 加 checkFreshness() + 改读 master.json | P1 |
+| `.claude/skills/okki/SKILL.md` | 补充 sync 可靠性说明 + 用户可跳过 sync | P2 |
+| `memory/okki_reliability_debate.md` | 更新状态：累计合并已实施 | P2 |
+
+---
+
+## 四、验证
+
+1. 删除 `tm_conversations_master.json` → 运行 sync → 应新建 master.json
+2. 连续运行两次 sync → master.json 会话数不应减少
+3. 模拟 master.json 有 500 人，本次只抓到 400 → 应打印 ⚠️ 遗漏警告
+4. 下游脚本无 `.last_sync.json` → 打印 ⚠️ 但正常完成
+5. 下游脚本 `.last_sync.json` 为昨天 → 打印 "1 天前同步" 提醒

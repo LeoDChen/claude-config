@@ -1,0 +1,58 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-04 17:15
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**数据抓取方案待定。CDP端口问题需在新会话中优先解决。**
+
+## 待办优先级
+
+1. **🔥 修复CDP连接**：Chrome带 `--remote-debugging-port=9222` 启动后调试端口不监听
+2. **🔥 跑API诊断**：`scripts/diagnose_api.js` — 定位返回432人全量客户列表的API端点
+3. **完成数据抓取方案设计**：确立全量抓取+不影响同事的最终方案
+4. **阶段2全量版**：用全量432人文件重跑AI分类
+
+## 本次会话进展（5/4 16:33-）
+
+### 已确认
+- Chrome路径：`%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe`（用户级安装，已记入memory）
+- 用户OKKI用"云超数码"Chrome个人资料登录
+- 用户有多个Chrome资料（001/金刚数码/琪琪数码二号/芊芊数码二号店/云超数码/芝桦祺/ACCIO）
+- `--remote-debugging-port=9222` 参数出现在所有Chrome子进程命令行中，但调试端口始终不监听
+- 不存在Chrome策略（GPO）阻止DevTools
+- `DevToolsActivePort` 文件未生成，说明调试服务器根本没有启动
+- 之前的CDP脚本（extract_cdp.js）同样失败
+
+### 待排查方向
+- 多用户资料环境下调试端口行为
+- 尝试 `--profile-directory` 跳过资料选择器直接启动
+- 尝试启动时显式指定 `--user-data-dir`
+- 尝试 `--remote-debugging-pipe` 替代 `--remote-debugging-port`
+- 检查是否有安全软件拦截端口
+
+### 工具文件
+- `scripts/diagnose_api.js` — API诊断脚本（已写，待CDP修复后运行）
+- `scripts/launch_chrome.js` — Node.js启动Chrome封装（未成功启动）
+- `启动CDP_Chrome.bat` — 批处理启动器（CMD中文编码问题）
+- memory记录：`chrome_cdp_path.md` — Chrome路径备忘
+
+## 已完成
+
+- `scripts/preprocess_cdp.js` — 阶段0 ✅
+- `scripts/classify_rules.js` — 阶段1 ✅
+- `scripts/classify_ai.js` — 阶段2 ✅（已修复字段映射，5/4运行通过21人版）
+- `scripts/generate_report.js` — 阶段5 ✅
+
+## 下次启动指令
+
+> 继续OKKI CRM数据抓取方案。先读STATE.md和knowledge/下四个文件。优先解决CDP调试端口不监听的问题：Chrome路径 `%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe`，OKKI用"云超数码"资料。diagnose_api.js已就绪，CDP修复后立即跑。目标：找到OKKI CRM返回全量432人的API端点，完成数据抓取方案设计。
+
+## 关键数据文件
+
+- 设计文档：`DESIGN.md`
+- 全量432人（5/3快照）：`data/2026-05-03T01-19-12_全量客户分类.json`
+- API诊断脚本：`scripts/diagnose_api.js`
+- CDP提取脚本：`scripts/extract_cdp.js`
+- Playwright提取：`scripts/safe_extract.js`

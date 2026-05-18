@@ -1,0 +1,60 @@
+<h2>质量五级硬判定标准（草案）</h2>
+<p class="subtitle">满足条件越多，等级越高。一项满足即可定级。</p>
+
+<div class="section">
+  <h3>S 级 — 战略客户</h3>
+  <p style="color:#94a3b8;">满足以下 <strong>任意一条</strong>：</p>
+  <table>
+    <tr><td style="padding:4px 10px;">品牌商/ODM + 首单或预期 ≥ 500 件 + 定制包装/吊牌/条形码</td></tr>
+    <tr><td style="padding:4px 10px;">有明确线上/线下分销渠道（Amazon店铺、连锁零售、区域代理网络）</td></tr>
+    <tr><td style="padding:4px 10px;">已成交复购客户，累计订单 ≥ 1000 件或金额 ≥ $3000</td></tr>
+    <tr><td style="padding:4px 10px;">公司规模大（50+员工、多门店、年进口量可查 ≥ $100K）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>A 级 — 优质客户</h3>
+  <table>
+    <tr><td style="padding:4px 10px;">批发商/零售商 + 明确批量需求（≥ 200 件） + 沟通专业</td></tr>
+    <tr><td style="padding:4px 10px;">核心市场（苏丹/埃及/刚果/赞比亚/科特迪瓦/沙特/阿联酋） + 需求精准</td></tr>
+    <tr><td style="padding:4px 10px;">定制/OEM 需求 + 量未确认但态度认真（反复沟通细节）</td></tr>
+    <tr><td style="padding:4px 10px;">已成交客户，首单 200-500 件</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>B 级 — 普通客户</h3>
+  <table>
+    <tr><td style="padding:4px 10px;">小零售商 + 需求模糊 + 量未定</td></tr>
+    <tr><td style="padding:4px 10px;">非核心市场 + 初询 + 仅问价未深入</td></tr>
+    <tr><td style="padding:4px 10px;">需求明确但量小（50-200 件）的非定制</td></tr>
+    <tr><td style="padding:4px 10px;">信息不足但对话活跃（暂时无法判断真实规模的）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>C 级 — 低价值</h3>
+  <table>
+    <tr><td style="padding:4px 10px;">个人买家/自用/送礼 + 极小量（≤ 30 件）</td></tr>
+    <tr><td style="padding:4px 10px;">一次性采购，无复购可能</td></tr>
+    <tr><td style="padding:4px 10px;">行为散漫（问完价消失、多个不相关产品、无决策权）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>D 级 — 无关/废弃</h3>
+  <table>
+    <tr><td style="padding:4px 10px;">品类完全不匹配（要成人服装/我们不做）</td></tr>
+    <tr><td style="padding:4px 10px;">仅系统消息、无任何真实客户对话</td></tr>
+    <tr><td style="padding:4px 10px;">非采购意图（问转让/加盟/找工作）</td></tr>
+    <tr><td style="padding:4px 10px;">误入/垃圾询盘</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h3>两个补充规则</h3>
+  <p><strong>1. 信息不足时默认降一级</strong> — 看不出规模的先放 B，不要因为"可能是大客户"就拉高</p>
+  <p><strong>2. 可升级规则</strong> — B 级客户在谈判中展现出品牌/渠道/批量信号后，手动升级到 A 或 S</p>
+</div>
+
+<p style="margin-top:24px;color:#94a3b8;">重点是：这些硬线你觉得合理吗？有没有该加/该删/该改的？</p>

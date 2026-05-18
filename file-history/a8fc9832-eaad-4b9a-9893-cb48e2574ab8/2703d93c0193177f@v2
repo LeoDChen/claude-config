@@ -1,0 +1,135 @@
+/**
+ * 探查：客户列表完整分页 + 对话历史滚动 + 图片URL
+ */
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) { console.log('no page'); return; }
+
+  // 已经在客户页面了，检查分页结构
+  console.log('=== 客户列表分页结构 ===');
+  const pageInfo = await page.evaluate(() => {
+    // 分页控件
+    const pagination = document.querySelector('.okki-pagination, [class*="pagination"]');
+    if (!pagination) return 'no pagination found';
+    return {
+      html: pagination.innerHTML.replace(/</g, '&lt;').substring(0, 2000),
+      text: pagination.textContent?.trim().substring(0, 200),
+    };
+  });
+  console.log(JSON.stringify(pageInfo, null, 2));
+
+  // 检查客户列表行结构
+  const rowInfo = await page.evaluate(() => {
+    const rows = document.querySelectorAll('table tr, [class*="row"], [class*="list-item"], .okki-table-row');
+    return Array.from(rows).slice(0, 5).map((row, i) => ({
+      idx: i,
+      text: (row.textContent || '').trim().substring(0, 200),
+      class: typeof row.className === 'string' ? row.className.substring(0, 80) : '',
+      html: row.innerHTML.replace(/</g, '&lt;').substring(0, 500),
+      cells: Array.from(row.querySelectorAll('td, th, [class*="cell"]')).map(c => ({
+        text: (c.textContent || '').trim().substring(0, 60),
+        class: (typeof c.className === 'string' ? c.className : '').substring(0, 40),
+      })),
+    }));
+  });
+  console.log('\n=== 表格行结构 ===');
+  rowInfo.forEach(r => {
+    console.log(`\nRow ${r.idx}: class=${r.class}`);
+    r.cells.forEach((c, i) => console.log(`  Cell ${i}: "${c.text}" (${c.class})`));
+  });
+
+  // 尝试点击第2页
+  console.log('\n=== 分页导航测试 ===');
+  const testPage = await page.evaluate(() => {
+    // 找页码按钮
+    const links = document.querySelectorAll('.okki-pagination li, .okki-pagination a, .okki-pagination button, [class*="pagination"] a, a[class*="page"]');
+    for (const el of links) {
+      if (el.textContent?.trim() === '2') {
+        el.click();
+        return `clicked page 2: ${el.outerHTML?.substring(0, 200)}`;
+      }
+    }
+    // Alternative: find the page input or next button
+    return 'page 2 not found';
+  });
+  console.log(testPage);
+  await new Promise(r => setTimeout(r, 2000));
+
+  // 检查URL是否变了
+  console.log('当前URL:', page.url().substring(0, 300));
+
+  // 回到TM页面，检查消息区的"加载更多"按钮
+  console.log('\n=== TM消息区加载更多 ===');
+  // 先回到TM页面
+  await page.evaluate(() => {
+    const items = document.querySelectorAll('.fixed-menu-item, a');
+    for (const el of items) {
+      if (el.textContent?.trim() === '沟通') {
+        el.click();
+        return;
+      }
+    }
+  });
+  await new Promise(r => setTimeout(r, 3000));
+
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) { console.log('no talk frame'); return; }
+
+  // 检查消息区顶部是否有加载更多按钮
+  const loadMore = await talkFrame.evaluate(() => {
+    // 滚动消息区到顶
+    const msgFlow = document.querySelector('.message-flow-container.messenger');
+    if (msgFlow) msgFlow.scrollTop = 0;
+    // 等待是否有加载触发
+    return new Promise(resolve => {
+      setTimeout(() => {
+        // Check for load more indicators
+        const loadMoreBtns = document.querySelectorAll('button, a, [class*="load"], [class*="more"], [class*="history"]');
+        const found = [];
+        loadMoreBtns.forEach(b => {
+          const text = b.textContent?.trim() || '';
+          if (text.toLowerCase().includes('load') || text.toLowerCase().includes('more') || text.includes('历史') || text.includes('加载') || text.includes('更多')) {
+            found.push(text);
+          }
+        });
+        // Check number of messages again
+        const msgCount = document.querySelectorAll('.message-item-wrapper.messenger').length;
+        resolve({ found, msgCount });
+      }, 3000);
+    });
+  });
+  console.log('加载更多按钮:', JSON.stringify(loadMore));
+
+  // 检查消息区是否可无限滚动
+  const scrollTest = await talkFrame.evaluate(() => {
+    const msgFlow = document.querySelector('.message-flow-container.messenger');
+    if (!msgFlow) return { error: 'no message flow' };
+    const before = msgFlow.scrollHeight;
+    // Scroll to very top
+    msgFlow.scrollTop = -100; // Try negative to force trigger
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const after = msgFlow.scrollHeight;
+        resolve({ before, after, diff: after - before, scrollTop: msgFlow.scrollTop });
+      }, 3000);
+    });
+  });
+  console.log('消息区滚动测试:', JSON.stringify(scrollTest));
+
+  // 获取可点击的图片查看其完整src
+  const imageUrls = await talkFrame.evaluate(() => {
+    const urls = new Set();
+    document.querySelectorAll('.message-item-wrapper.messenger img').forEach(img => {
+      if (img.src) urls.add(img.src.substring(0, 200));
+    });
+    return Array.from(urls).slice(0, 10);
+  });
+  console.log('\n图片URL样例:');
+  imageUrls.forEach((url, i) => console.log(`  [${i}] ${url}`));
+
+  await browser.close();
+})().catch(err => { console.error(err.message); });

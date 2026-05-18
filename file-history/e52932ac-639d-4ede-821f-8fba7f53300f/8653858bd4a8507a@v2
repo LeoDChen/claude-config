@@ -1,0 +1,678 @@
+#!/usr/bin/env node
+/**
+ * gen_dashboard.js — OKKI 矩阵看板 + 弹窗详情
+ *
+ * 数据源:
+ *   - output/factor_baselines.json   (全员阶段+基线+等级)
+ *   - output/soon_layer_cards.json   (SOON 因子命中清单)
+ *   - output/cold_layer_stratification.json (冷层/冷冻分层)
+ *   - data/briefs/*.md              (状态卡，弹窗聊天/下一步)
+ *
+ * 用法:
+ *   node scripts/gen_dashboard.js                  → 矩阵 HTML → output/dashboard.html
+ *   node scripts/gen_dashboard.js --md              → Markdown 表格 → stdout
+ *   node scripts/gen_dashboard.js --html            → 旧版 HTML 表格 → stdout
+ *   node scripts/gen_dashboard.js -o board.html     → 指定输出路径
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = path.resolve(__dirname, "..");
+const OUTPUT_DIR = path.join(ROOT, "output");
+const BRIEFS_DIR = path.join(ROOT, "data", "briefs");
+const TODAY = new Date().toISOString().slice(0, 10);
+
+const args = process.argv.slice(2);
+const mdMode = args.includes("--md");
+const htmlTableMode = args.includes("--html");
+const outFile = (() => {
+  const idx = args.indexOf("-o");
+  return idx >= 0 ? args[idx + 1] : null;
+})();
+
+// ═══════════════════════════════════════════════════════
+// 国家代码 → 中文
+// ═══════════════════════════════════════════════════════
+const COUNTRY_CN = {
+  US:"美国",GB:"英国",DE:"德国",FR:"法国",IT:"意大利",ES:"西班牙",NL:"荷兰",BE:"比利时",PT:"葡萄牙",RU:"俄罗斯",TR:"土耳其",
+  IN:"印度",PK:"巴基斯坦",BD:"孟加拉",JP:"日本",KR:"韩国",HK:"香港",ID:"印尼",MY:"马来西亚",PH:"菲律宾",VN:"越南",TH:"泰国",
+  SD:"苏丹",EG:"埃及",CD:"刚果民主",ZM:"赞比亚",CI:"科特迪瓦",SA:"沙特",AE:"阿联酋",GH:"加纳",NG:"尼日利亚",KE:"肯尼亚",TZ:"坦桑尼亚",
+  ZA:"南非",MA:"摩洛哥",DZ:"阿尔及利亚",TN:"突尼斯",LY:"利比亚",ET:"埃塞俄比亚",UG:"乌干达",RW:"卢旺达",CM:"喀麦隆",SN:"塞内加尔",
+  ML:"马里",TG:"多哥",BJ:"贝宁",BF:"布基纳法索",CG:"刚果",GA:"加蓬",ZR:"刚果(金)",LR:"利比里亚",SL:"塞拉利昂",GN:"几内亚",
+  IQ:"伊拉克",LB:"黎巴嫩",JO:"约旦",KW:"科威特",QA:"卡塔尔",OM:"阿曼",BH:"巴林",IL:"以色列",SY:"叙利亚",YE:"也门",
+  BR:"巴西",AR:"阿根廷",CL:"智利",CO:"哥伦比亚",PE:"秘鲁",MX:"墨西哥",BO:"玻利维亚",VE:"委内瑞拉",EC:"厄瓜多尔",PY:"巴拉圭",
+  AU:"澳大利亚",NZ:"新西兰",CA:"加拿大",PL:"波兰",UA:"乌克兰",RO:"罗马尼亚",HU:"匈牙利",CZ:"捷克",SE:"瑞典",DK:"丹麦",
+  MD:"摩尔多瓦",PA:"巴拿马",ZW:"津巴布韦",DJ:"吉布提",PT:"葡萄牙",NP:"尼泊尔",MZ:"莫桑比克",
+};
+function countryCN(code) { return COUNTRY_CN[code] || code; }
+
+// ═══════════════════════════════════════════════════════
+// 横轴：生命周期阶段（8 列）
+// ═══════════════════════════════════════════════════════
+const COLUMNS = [
+  { key: "需求探索", label: "需求探索", icon: "🔍" },
+  { key: "报价已发", label: "报价已发", icon: "💰" },
+  { key: "谈判中",   label: "谈判中",   icon: "🤝" },
+  { key: "待付款",   label: "待付款",   icon: "💳" },
+  { key: "待发货",   label: "待发货",   icon: "📦" },
+  { key: "已发货/在途", label: "在途",  icon: "🚢" },
+  { key: "已签收",   label: "已签收",   icon: "✅" },
+  { key: "其他",     label: "售后/返单", icon: "🔄" },
+];
+
+const COL_KEY_SET = new Set(COLUMNS.map((c) => c.key));
+
+// 将阶段映射到列 key
+function stageColKey(stage) {
+  if (COL_KEY_SET.has(stage)) return stage;
+  if (stage === "售后" || stage === "待返单") return "其他";
+  return "其他";
+}
+
+// ═══════════════════════════════════════════════════════
+// 纵轴：紧急度（4 行）
+// ═══════════════════════════════════════════════════════
+const URGENCY = {
+  RED:    { key: "red",    label: "需立即处理", dot: "red",    icon: "🔴" },
+  YELLOW: { key: "yellow", label: "需定时关注", dot: "yellow", icon: "🟡" },
+  GREY:   { key: "grey",   label: "正常流转",   dot: "grey",   icon: "⚪" },
+  FROZEN: { key: "frozen", label: "冷冻",       dot: "grey",   icon: "❄️" },
+};
+
+/**
+ * 判定客户紧急度
+ *   - S3(该推进了) / S4(该催款了,非observe) → RED
+ *   - S1/S2/S5a/S6/S7/S8/S9 → YELLOW
+ *   - 冷层 → FROZEN
+ *   - 其余 → GREY
+ */
+function classifyUrgency(factors) {
+  if (!factors || factors.length === 0) return "grey";
+  for (const f of factors) {
+    const code = (f.factor || "").split("(")[0].trim();
+    if (code === "S3 该推进了") return "red";
+    if (code === "S4 该催款了" && !f.observeMode) return "red";
+  }
+  // S4(观察) 和其他因子均为 yellow
+  for (const f of factors) {
+    const code = (f.factor || "").split("(")[0].trim();
+    if (/^S\d/.test(code)) return "yellow";
+  }
+  return "grey";
+}
+
+// ═══════════════════════════════════════════════════════
+// 因子 → 中文描述
+// ═══════════════════════════════════════════════════════
+const FACTOR_DESC = {
+  "S1 该深挖需求了":    { title: "该深挖需求——了解采购背景和真实需求", level: "yellow" },
+  "S2 该追问了":        { title: "该追问——报价后客户沉默，需跟进反馈", level: "yellow" },
+  "S3 该推进了":        { title: "该推进——谈判阶段客户待回应，需推动决策", level: "red" },
+  "S4 该催款了":        { title: "该催款——PI已发等付款，需提醒客户", level: "red" },
+  "S4 该催款了(观察)":   { title: "该催款(观察)——长期未付，观察模式", level: "yellow" },
+  "S5a 该更新进度了":    { title: "该更新进度——备货/生产中，需同步进展给客户", level: "yellow" },
+  "S6 该更新物流了":    { title: "该更新物流——货物在途，需跟踪并通知客户", level: "yellow" },
+  "S7a 该回访了":       { title: "该回访——客户已签收，需回访满意度和复购意向", level: "yellow" },
+  "S7b 该推返单了":     { title: "该推返单——签收后进入复购窗口，推新品", level: "yellow" },
+  "S8 该收尾了":        { title: "该收尾——售后问题需跟进解决", level: "yellow" },
+  "S9 该接触了":        { title: "该接触——待返单客户定期触达", level: "yellow" },
+};
+
+function factorDesc(f) {
+  const base = (f.factor || "").split("(")[0].trim();
+  const entry = FACTOR_DESC[base] || FACTOR_DESC[f.factor] || { title: f.factor, level: "yellow" };
+  let detail = `${f.days || "?"}天前基线(${f.baseline || "?"})`;
+  if (f.rhythmDay) detail += `，节奏第${f.rhythmDay}天`;
+  if (f.observeMode) detail = `观察模式 | ${detail}`;
+  if (f.priority === "high") detail = `⚠ 高优先级 | ${detail}`;
+  return { ...entry, detail };
+}
+
+// ═══════════════════════════════════════════════════════
+// 加载数据
+// ═══════════════════════════════════════════════════════
+
+function loadJSON(filename) {
+  const p = path.join(OUTPUT_DIR, filename);
+  if (!fs.existsSync(p)) return null;
+  return JSON.parse(fs.readFileSync(p, "utf-8"));
+}
+
+function loadBriefs() {
+  const map = {};
+  if (!fs.existsSync(BRIEFS_DIR)) return map;
+  for (const file of fs.readdirSync(BRIEFS_DIR)) {
+    if (!file.endsWith(".md")) continue;
+    const content = fs.readFileSync(path.join(BRIEFS_DIR, file), "utf-8");
+    const fm = parseFrontmatter(content);
+    if (fm.cid) map[fm.cid] = { frontmatter: fm, content, file };
+  }
+  return map;
+}
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const fm = {};
+  for (const line of match[1].split("\n")) {
+    const kv = line.match(/^(\w+):\s*(.+)$/);
+    if (kv) fm[kv[1]] = kv[2].trim();
+  }
+  return fm;
+}
+
+function extractSection(content, heading) {
+  const re = new RegExp(`## ${heading}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`, "i");
+  const m = content.match(re);
+  return m ? m[1].trim() : "";
+}
+
+function extractTalkSummary(content) {
+  const section = extractSection(content, "最近动态");
+  const lines = section.split("\n").filter((l) => l.trim() && !l.startsWith("[初稿]") && !l.startsWith("→"));
+  if (lines.length > 0) {
+    const last = lines[lines.length - 1];
+    return last.replace(/^-\s*\d{4}-\d{2}-\d{2}\s*(我|客):\s*/, "").replace(/（MsgID:[\w.]+）$/, "").substring(0, 120);
+  }
+  return "";
+}
+
+function extractNextStep(content) {
+  const section = extractSection(content, "下一步");
+  const m = section.match(/→(?:\s*\[初稿\]\s*)?(.+)/);
+  return m ? m[1].trim() : section.substring(0, 80);
+}
+
+function extractKeyNums(content) {
+  const section = extractSection(content, "关键数字");
+  if (!section) return [];
+  return section.split("\n").filter((l) => l.trim().startsWith("-")).map((l) => l.replace(/^-\s*/, "").trim());
+}
+
+// ═══════════════════════════════════════════════════════
+// 构建客户卡片数据
+// ═══════════════════════════════════════════════════════
+
+function buildCustomerCards() {
+  const baselines = loadJSON("factor_baselines.json");
+  const soon = loadJSON("soon_layer_cards.json");
+  const cold = loadJSON("cold_layer_stratification.json");
+  const briefs = loadBriefs();
+
+  if (!baselines) {
+    console.error("factor_baselines.json 不存在，请先运行 init_factor_baselines.js");
+    return null;
+  }
+
+  // 建立 SOON 因子查找表
+  const factorMap = new Map();
+  if (soon) {
+    for (const c of soon.customers || []) {
+      factorMap.set(c.cid, c);
+    }
+  }
+
+  // 建立冷层查找表
+  const coldCids = new Set();
+  if (cold) {
+    for (const layer of Object.values(cold.frozen || {})) {
+      for (const c of layer) coldCids.add(c.cid);
+    }
+  }
+
+  const cards = [];
+
+  for (const [cid, data] of Object.entries(baselines)) {
+    const stage = data.stage || "未知";
+    const soonData = factorMap.get(cid);
+    const factors = soonData ? soonData.factors : [];
+    const urgencyKey = coldCids.has(cid) ? "frozen" : classifyUrgency(factors);
+    const urgency = URGENCY[urgencyKey.toUpperCase()] || URGENCY.GREY;
+    const colKey = stageColKey(stage);
+    const tier = (data.meta && data.meta.customer_tier) || "C";
+
+    // 计算最后联系天数 (从基线取最近日期)
+    let daysSince = null;
+    let lastContactDate = null;
+    if (data.baselines) {
+      let latest = null;
+      for (const v of Object.values(data.baselines)) {
+        if (v && (!latest || v > latest)) latest = v;
+      }
+      if (latest) {
+        lastContactDate = latest;
+        daysSince = Math.floor((new Date(TODAY) - new Date(latest)) / 86400000);
+      }
+    }
+
+    // 首次联系：取最早基线日期
+    let firstContact = null;
+    if (data.baselines) {
+      let earliest = null;
+      for (const v of Object.values(data.baselines)) {
+        if (v && (!earliest || v < earliest)) earliest = v;
+      }
+      firstContact = earliest;
+    }
+
+    // 从状态卡获取补充信息
+    const brief = briefs[cid];
+    let talkSummary = "", nextStep = "", keyNums = [];
+    if (brief) {
+      talkSummary = extractTalkSummary(brief.content);
+      nextStep = extractNextStep(brief.content);
+      keyNums = extractKeyNums(brief.content);
+    }
+
+    cards.push({
+      cid,
+      name: data.name || "?",
+      country: data.country || "?",
+      countryCN: countryCN(data.country),
+      stage,
+      colKey,
+      tier,
+      urgencyKey,
+      urgency,
+      factors,
+      daysSince,
+      lastContactDate,
+      firstContact,
+      talkSummary,
+      nextStep,
+      keyNums,
+      hasBrief: !!brief,
+      briefFile: brief ? brief.file : null,
+    });
+  }
+
+  // 在"正常流转"行：折叠显示（仅保留前几个名字 + 计数）
+  // 冷冻行同理
+
+  return cards;
+}
+
+// ═══════════════════════════════════════════════════════
+// HTML 渲染
+// ═══════════════════════════════════════════════════════
+
+function renderMatrixHTML(cards) {
+  // 按 (urgencyKey, colKey) 分组
+  const matrix = {};
+  for (const u of Object.values(URGENCY)) {
+    matrix[u.key] = {};
+    for (const col of COLUMNS) {
+      matrix[u.key][col.key] = [];
+    }
+  }
+  for (const c of cards) {
+    const bucket = matrix[c.urgencyKey];
+    if (bucket && bucket[c.colKey]) {
+      bucket[c.colKey].push(c);
+    }
+  }
+
+  // 汇总计数
+  const counts = { red: 0, yellow: 0, grey: 0, frozen: 0 };
+  for (const c of cards) {
+    counts[c.urgencyKey] = (counts[c.urgencyKey] || 0) + 1;
+  }
+
+  // 冷冻行：合并为一列
+  const frozenList = cards.filter((c) => c.urgencyKey === "frozen");
+  const frozenNames = frozenList.slice(0, 5).map((c) => c.name).join(" · ");
+
+  const now = TODAY;
+  let html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户看板 — ${now}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 20px; color: #333; }
+  h1 { font-size: 1.15em; margin-bottom: 2px; }
+  .subtitle { color: #999; font-size: 0.78em; margin-bottom: 14px; }
+  .summary-bar { display: flex; gap: 14px; margin-bottom: 10px; font-size: 0.8em; align-items: center; flex-wrap: wrap; }
+
+  .matrix { display: grid; gap: 1px; background: #e0e0e0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+  .cell { background: #fff; padding: 6px; min-height: 48px; display: flex; flex-wrap: wrap; gap: 3px; align-content: start; }
+  .cell-header { background: #fafafa; padding: 6px 4px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.71em; color: #666; text-align: center; }
+  .row-label { background: #fafafa; padding: 4px 8px; display: flex; align-items: center; gap: 5px; font-size: 0.74em; font-weight: 600; white-space: nowrap; }
+
+  .customer-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 12px; font-size: 0.71em; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: all .12s; text-decoration: none; }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  .chip-red { background: #ffebee; border-color: #ffcdd2; color: #b71c1c; }
+  .chip-yellow { background: #fff8e1; border-color: #ffecb3; color: #e65100; }
+  .chip-grey { background: #f5f5f5; border-color: #eee; color: #888; }
+  .chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: #d32f2f; }
+  .chip-dot-yellow { background: #f57c00; }
+  .chip-dot-grey { background: #bbb; }
+  .chip-badge { font-size: 0.66em; padding: 1px 3px; border-radius: 6px; background: rgba(0,0,0,.06); }
+  .chip-tier-s { background: #ffd700; color: #5d4037; font-size: 0.6em; padding: 0px 3px; border-radius: 4px; margin-left: 1px; }
+  .chip-tier-a { background: #c8e6c9; color: #2e7d32; font-size: 0.6em; padding: 0px 3px; border-radius: 4px; margin-left: 1px; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; justify-content: center; align-items: center; }
+  .overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 14px; box-shadow: 0 8px 40px rgba(0,0,0,.18); width: 680px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; animation: modalIn .2s ease; }
+  @keyframes modalIn { from { opacity:0; transform:scale(.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-header h2 { font-size: 1.1em; }
+  .modal-close { background: none; border: none; font-size: 1.3em; cursor: pointer; color: #999; padding: 6px; border-radius: 6px; }
+  .modal-close:hover { background: #f5f5f5; }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; font-size: 0.86em; }
+  .modal-footer { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; flex-shrink: 0; font-size: 0.8em; color: #999; }
+
+  .fm-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .fm-item { background: #fafafa; border-radius: 8px; padding: 8px 12px; }
+  .fm-label { color: #999; font-size: 0.72em; text-transform: uppercase; letter-spacing: 0.5px; }
+  .fm-value { font-weight: 600; font-size: 0.95em; margin-top: 2px; }
+
+  .section { margin-bottom: 14px; }
+  .section-title { font-weight: 600; font-size: 0.8em; color: #888; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .driver-list { display: flex; flex-direction: column; gap: 6px; }
+  .driver-item { display: flex; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 0.88em; align-items: flex-start; }
+  .driver-item-red { background: #fff5f5; border: 1px solid #ffcdd2; }
+  .driver-item-yellow { background: #fffdf5; border: 1px solid #ffecb3; }
+  .driver-icon { font-size: 1.1em; flex-shrink: 0; margin-top: 1px; }
+
+  .chat-snippet { background: #fafafa; border-radius: 8px; padding: 10px 14px; font-size: 0.84em; }
+  .chat-line { padding: 3px 0; display: flex; gap: 8px; align-items: baseline; }
+  .chat-who { font-weight: 600; flex-shrink: 0; min-width: 22px; }
+  .chat-who-me { color: #1976d2; }
+  .chat-who-cust { color: #d32f2f; }
+  .chat-time { color: #bbb; font-size: 0.8em; flex-shrink: 0; }
+
+  .key-num { background: #f5f5f5; border-radius: 6px; padding: 7px 10px; margin-bottom: 3px; font-size: 0.84em; }
+  .info-note { background: #fff9c4; border-radius: 6px; padding: 8px 12px; font-size: 0.8em; color: #666; }
+</style>
+</head>
+<body>
+
+<h1>OKKI 客户看板</h1>
+<p class="subtitle">横轴：生命周期 → ｜ 纵轴：紧急度 ｜ 点击卡片查看详情 ｜ 数据: ${now}</p>
+
+<div class="summary-bar">
+  <span>🔴 需立即处理 <strong>${counts.red}</strong></span>
+  <span>🟡 需定时关注 <strong>${counts.yellow}</strong></span>
+  <span>⚪ 正常流转 <strong>${counts.grey}</strong></span>
+  <span>❄️ 冷冻 <strong>${counts.frozen}</strong></span>
+</div>
+
+<div class="matrix" style="grid-template-columns: 80px repeat(${COLUMNS.length}, 1fr);">
+  <div class="cell-header"></div>
+${COLUMNS.map((col) => `  <div class="cell-header">${col.icon} ${col.label}</div>`).join("\n")}
+`;
+
+  // 渲染每一行
+  for (const u of [URGENCY.RED, URGENCY.YELLOW, URGENCY.GREY, URGENCY.FROZEN]) {
+    const dotClass = `chip-dot-${u.dot}`;
+    const opacityStyle = u.key === "frozen" ? ' style="opacity:0.5"' : "";
+
+    if (u.key === "frozen") {
+      // 冷冻行合并
+      const display = frozenList.length > 0
+        ? frozenList.slice(0, 8).map((c) => `<span class="customer-chip chip-grey">${c.name}</span>`).join("")
+        : "（无）";
+      const more = frozenList.length > 8 ? ` +${frozenList.length - 8}人` : "";
+      html += `  <div class="row-label"${opacityStyle}><span class="chip-dot ${dotClass}"></span>${u.icon} ${u.label}</div>\n`;
+      html += `  <div class="cell" colspan="${COLUMNS.length}" style="padding:6px 12px;font-size:0.72em;color:#aaa;opacity:0.6">${display}${more}</div>\n`;
+      continue;
+    }
+
+    html += `  <div class="row-label"${opacityStyle}><span class="chip-dot ${dotClass}"></span>${u.icon} ${u.label}</div>\n`;
+
+    for (const col of COLUMNS) {
+      const bucket = matrix[u.key][col.key] || [];
+      if (bucket.length === 0) {
+        html += `  <div class="cell"></div>\n`;
+        continue;
+      }
+
+      // 正常流转：折叠显示
+      if (u.key === "grey") {
+        const show = bucket.slice(0, 3);
+        const rest = bucket.length - 3;
+        const chips = show.map((c) => `<span class="customer-chip chip-grey" onclick="openModal('${esc(c.cid)}')">${esc(c.name)}</span>`).join("");
+        const more = rest > 0 ? `<span class="customer-chip chip-grey">+${rest}</span>` : "";
+        html += `  <div class="cell">${chips}${more}</div>\n`;
+        continue;
+      }
+
+      // RED / YELLOW：展示所有芯片
+      const chipClass = u.key === "red" ? "chip-red" : "chip-yellow";
+      const chips = bucket.map((c) => {
+        const badge = c.factors.length > 0 ? shortBadge(c.factors[0]) : "";
+        const tierMark = (c.tier === "S" || c.tier === "A") ? `<span class="chip-tier-${c.tier.toLowerCase()}">${c.tier}</span>` : "";
+        return `<span class="customer-chip ${chipClass}" onclick="openModal('${esc(c.cid)}')"><span class="chip-dot ${dotClass}"></span>${esc(c.name)}${tierMark}${badge}</span>`;
+      }).join("\n    ");
+      html += `  <div class="cell">${chips}</div>\n`;
+    }
+  }
+
+  html += `</div>
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modal"></div>
+</div>
+
+<script>
+const CARDS = ${JSON.stringify(cards, null, 0)};
+const COUNTRY_CN = ${JSON.stringify(COUNTRY_CN)};
+const COLUMNS = ${JSON.stringify(COLUMNS)};
+const FACTOR_DESC = ${JSON.stringify(FACTOR_DESC)};
+
+function openModal(cid) {
+  const c = CARDS.find(x => x.cid === cid);
+  if (!c) return;
+  let html = '';
+  html += '<div class="modal-header"><h2>' + esc(c.name) + '</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  html += '<div class="modal-body">';
+
+  // Frontmatter
+  html += '<div class="fm-grid">';
+  for (const [k,v] of [['国家',c.countryCN||c.country],['阶段',c.stage],['等级',c.tier+'级'],['最后联系',c.daysSince!==null?c.daysSince+'天前':'?']]) {
+    html += '<div class="fm-item"><div class="fm-label">'+k+'</div><div class="fm-value">'+esc(String(v))+'</div></div>';
+  }
+  if (c.firstContact) html += '<div class="fm-item"><div class="fm-label">首次联系</div><div class="fm-value">'+c.firstContact+'</div></div>';
+  html += '</div>';
+
+  // Driver factors
+  if (c.factors && c.factors.length) {
+    html += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="driver-list">';
+    for (const f of c.factors) {
+      const fd = factorDesc(f);
+      const cls = fd.level==='red'?'driver-item-red':'driver-item-yellow';
+      const icon = fd.level==='red'?'🔴':'🟡';
+      html += '<div class="driver-item '+cls+'"><span class="driver-icon">'+icon+'</span><div><strong>'+esc(fd.title)+'</strong><div style="color:#999;font-size:0.85em;margin-top:2px;">'+esc(fd.detail)+'</div></div></div>';
+    }
+    html += '</div></div>';
+  } else {
+    html += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">无活跃因子。该客户在正常流转中。</div></div>';
+  }
+
+  // Chat / key numbers from brief
+  if (c.hasBrief) {
+    if (c.talkSummary) {
+      html += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">'+esc(c.talkSummary)+'</div></div>';
+    }
+    if (c.keyNums && c.keyNums.length) {
+      html += '<div class="section"><div class="section-title">🔢 关键数字</div>';
+      for (const n of c.keyNums) html += '<div class="key-num">'+esc(n)+'</div>';
+      html += '</div>';
+    }
+    if (c.nextStep) {
+      html += '<div class="section"><div class="section-title">→ 下一步</div><div style="font-size:0.88em;line-height:1.6;white-space:pre-line">'+esc(c.nextStep)+'</div></div>';
+    }
+  } else {
+    html += '<div class="info-note">📝 暂无状态卡。运行 /okki 深度分析创建。</div>';
+  }
+
+  html += '</div>';
+  html += '<div class="modal-footer">路径: ' + (c.briefFile || '未建卡') + ' | 数据源: factor_baselines + soon_layer_cards</div>';
+
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function factorDesc(f) {
+  var base = (f.factor||'').split('(')[0].trim();
+  var entry = FACTOR_DESC[base] || FACTOR_DESC[f.factor] || {title:f.factor,level:'yellow'};
+  var detail = (f.days||'?')+'天前基线('+(f.baseline||'?')+')';
+  if (f.rhythmDay) detail += '，节奏第'+f.rhythmDay+'天';
+  if (f.observeMode) detail = '观察模式 | '+detail;
+  if (f.priority==='high') detail = '⚠ 高优先级 | '+detail;
+  return {title:entry.title, level:entry.level, detail:detail};
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function esc(s) {
+  if (typeof s !== 'string') return s;
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+</script>
+
+</body>
+</html>`;
+
+  return html;
+}
+
+function shortBadge(f) {
+  const code = (f.factor || "").split("(")[0].trim();
+  const map = {
+    "S1 该深挖需求了": "深挖", "S2 该追问了": "追问", "S3 该推进了": "推进",
+    "S4 该催款了": "催款", "S5a 该更新进度了": "进度", "S6 该更新物流了": "物流",
+    "S7a 该回访了": "回访", "S7b 该推返单了": "返单", "S8 该收尾了": "收尾", "S9 该接触了": "接触",
+  };
+  const tag = map[code] || "待办";
+  return `<span class="chip-badge">${tag}</span>`;
+}
+
+function esc(s) {
+  if (typeof s !== "string") return String(s);
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+// ═══════════════════════════════════════════════════════
+// Markdown 表格（兼容旧模式）
+// ═══════════════════════════════════════════════════════
+
+function renderMarkdown(cards) {
+  const active = cards.filter((c) => c.urgencyKey !== "frozen");
+  const counts = { red: 0, yellow: 0, grey: 0, frozen: 0 };
+  for (const c of cards) counts[c.urgencyKey] = (counts[c.urgencyKey] || 0) + 1;
+
+  let md = `# OKKI 客户看板\n\n`;
+  md += `> ${TODAY} | 🔴需立即处理:${counts.red} 🟡需定时关注:${counts.yellow} ⚪正常:${counts.grey} ❄️冷冻:${counts.frozen}\n\n`;
+  md += `| 客户 | 国家 | 等级 | 阶段 | 最后联系 | 驱动因子 | 下一步 |\n`;
+  md += `|------|------|:---:|------|----------|----------|--------|\n`;
+
+  const order = ["red", "yellow", "grey"];
+  let lastU = "";
+  for (const u of order) {
+    for (const c of active) {
+      if (c.urgencyKey !== u) continue;
+      if (c.urgencyKey !== lastU) {
+        lastU = c.urgencyKey;
+        const label = URGENCY[u.toUpperCase()] ? URGENCY[u.toUpperCase()].label : u;
+        md += `| **── ${label} ──** | | | | | | |\n`;
+      }
+      const factorNames = c.factors.map((f) => (f.factor || "").split("(")[0].trim().replace("S1 ", "").replace("S3 ", "").replace("S4 ", "").replace("S5a ", "")).join(" · ") || "—";
+      const daysStr = c.daysSince !== null ? `${c.daysSince}天前` : "?";
+      md += `| ${c.name} | ${c.countryCN} | ${c.tier} | ${c.stage} | ${daysStr} | ${factorNames} | ${c.nextStep || "—"} |\n`;
+    }
+  }
+  return md;
+}
+
+// ═══════════════════════════════════════════════════════
+// 旧版 HTML 表格（--html 兼容）
+// ═══════════════════════════════════════════════════════
+
+function renderHTMLTable(cards) {
+  const active = cards.filter((c) => c.urgencyKey !== "frozen");
+  const heatIcon = { red: "🔴", yellow: "🟡", grey: "⚪" };
+
+  let html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>OKKI 客户看板 — ${TODAY}</title>
+<style>
+  body { font-family: -apple-system, sans-serif; margin: 20px; color: #333; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+  th { background: #f5f5f5; padding: 10px 8px; text-align: left; border-bottom: 2px solid #ddd; }
+  td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .heat-red { color: #d32f2f; font-weight: bold; }
+  .heat-yellow { color: #f57c00; }
+  .heat-grey { color: #999; }
+  .section-row td { background: #f0f0f0; font-weight: bold; padding: 6px 8px; font-size: 0.85em; }
+</style></head><body>
+<h1>OKKI 客户看板</h1>
+<p>${TODAY}</p>
+<table><thead><tr><th>客户</th><th>国家</th><th>等级</th><th>阶段</th><th>最后联系</th><th>驱动因子</th><th>下一步</th></tr></thead><tbody>`;
+
+  let lastU = "";
+  for (const c of active) {
+    if (c.urgencyKey !== lastU) {
+      lastU = c.urgencyKey;
+      html += `<tr class="section-row"><td colspan="7">── ${URGENCY[c.urgencyKey.toUpperCase()]?.label || c.urgencyKey} ──</td></tr>\n`;
+    }
+    const cls = `heat-${c.urgencyKey}`;
+    const factors = c.factors.map((f) => (f.factor || "").split("(")[0].trim()).join(" · ") || "—";
+    html += `<tr>
+  <td>${esc(c.name)}</td><td>${c.countryCN}</td><td>${c.tier}</td><td>${c.stage}</td>
+  <td>${c.daysSince !== null ? c.daysSince + "天前" : "?"}</td>
+  <td>${esc(factors)}</td><td>${esc(c.nextStep || "—")}</td></tr>\n`;
+  }
+
+  html += `</tbody></table></body></html>`;
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════
+// 写入 + 运行统计
+// ═══════════════════════════════════════════════════════
+
+function main() {
+  const cards = buildCustomerCards();
+  if (!cards) process.exit(1);
+
+  const counts = { red: 0, yellow: 0, grey: 0, frozen: 0 };
+  for (const c of cards) counts[c.urgencyKey] = (counts[c.urgencyKey] || 0) + 1;
+
+  let output;
+  if (mdMode) {
+    output = renderMarkdown(cards);
+  } else if (htmlTableMode) {
+    output = renderHTMLTable(cards);
+  } else {
+    output = renderMatrixHTML(cards);
+  }
+
+  const dest = outFile || (mdMode || htmlTableMode ? null : path.join(OUTPUT_DIR, "dashboard.html"));
+
+  if (dest) {
+    fs.writeFileSync(dest, output, "utf-8");
+    console.log(`✅ 看板已生成: ${dest}`);
+  } else {
+    console.log(output);
+  }
+
+  console.error(`\n── OKKI 看板 ${TODAY} ──`);
+  console.error(`🔴 需立即处理: ${counts.red}人`);
+  console.error(`🟡 需定时关注: ${counts.yellow}人`);
+  console.error(`⚪ 正常流转:   ${counts.grey}人`);
+  console.error(`❄️ 冷冻:       ${counts.frozen}人`);
+  console.error(`📊 总计:       ${cards.length}人`);
+}
+
+main();

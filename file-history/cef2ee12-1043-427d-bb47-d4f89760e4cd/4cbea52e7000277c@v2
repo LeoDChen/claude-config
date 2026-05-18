@@ -1,0 +1,211 @@
+/**
+ * OKKI CRM API 拦截注入脚本
+ *
+ * 使用方式：
+ * 1. 正常打开 Chrome，登录 crm.xiaoman.cn
+ * 2. F12 打开 DevTools → Console 标签
+ * 3. 粘贴此脚本全部内容，回车执行
+ * 4. 页面出现浮动面板，显示捕获状态
+ * 5. 正常浏览客户管理页面
+ * 6. 看到目标 API 后，点击面板上的"导出"按钮
+ *
+ * 零风险：纯页面内运行，不发新请求，不走新认证
+ */
+
+(function() {
+  'use strict';
+
+  // ====== 浮动UI面板 ======
+  const panel = document.createElement('div');
+  panel.id = '__okki_intercept_panel';
+  panel.innerHTML = `
+    <div style="
+      position:fixed; bottom:20px; right:20px; z-index:999999;
+      background:#1a1a2e; color:#e0e0e0; border-radius:12px;
+      padding:16px; font:12px/1.5 'Consolas','Monaco',monospace;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5); min-width:360px; max-width:480px;
+      border:1px solid #333;
+    ">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:700;color:#4fc3f7;">🔍 OKKI API Monitor</span>
+        <span id="__okki_status" style="font-size:11px;color:#66bb6a;">● 监听中</span>
+      </div>
+      <div id="__okki_counter" style="margin-bottom:8px;font-size:11px;color:#999;">
+        已捕获: 0 个API | 含数据: 0
+      </div>
+      <div id="__okki_list" style="max-height:250px;overflow-y:auto;margin-bottom:10px;
+        font-size:10px;color:#aaa;">
+        <div style="color:#555;">等待API调用...</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="__okki_export" style="
+          flex:1;padding:8px;background:#4fc3f7;color:#000;border:none;
+          border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;
+        ">📥 导出JSON</button>
+        <button id="__okki_clear" style="
+          flex:1;padding:8px;background:#333;color:#ccc;border:none;
+          border-radius:6px;cursor:pointer;font-size:12px;
+        ">清空</button>
+        <button id="__okki_close" style="
+          padding:8px 12px;background:#444;color:#999;border:none;
+          border-radius:6px;cursor:pointer;font-size:12px;
+        ">✕</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  // ====== 数据存储 ======
+  const captured = [];
+  const seenUrls = new Set();
+  let dataCount = 0;
+
+  function isXiaomanApi(url) {
+    return url.includes('xiaoman.cn') &&
+           (url.includes('/api/') || url.includes('/gateway/') || url.includes('/v1/') || url.includes('/v2/'));
+  }
+
+  function updateUI(url, status, recordCount) {
+    dataCount++;
+    const list = document.getElementById('__okki_list');
+    if (list.querySelector('div[style]')) list.innerHTML = '';
+
+    const entry = document.createElement('div');
+    entry.style.cssText = 'padding:3px 0;border-bottom:1px solid #222;word-break:break-all;';
+    const rc = recordCount ? ` <span style="color:#ffab40;font-weight:700;">[${recordCount}条]</span>` : '';
+    entry.innerHTML = `<span style="color:#66bb6a;">${status}</span> ${url.substring(0, 80)}${rc}`;
+    list.insertBefore(entry, list.firstChild);
+
+    // Keep max 30 visible entries
+    while (list.children.length > 30) list.removeChild(list.lastChild);
+
+    document.getElementById('__okki_counter').innerHTML =
+      `已捕获: ${captured.length} 个API | 含数据: ${dataCount}`;
+  }
+
+  // ====== 拦截 fetch ======
+  const origFetch = window.fetch;
+  window.fetch = async function(...args) {
+    const response = await origFetch.apply(this, args);
+    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+
+    if (isXiaomanApi(url) && !seenUrls.has(url)) {
+      seenUrls.add(url);
+      try {
+        const cloned = response.clone();
+        const ct = cloned.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          const body = await cloned.json();
+          const isArray = Array.isArray(body);
+          const records = isArray ? body.length : (body?.data && Array.isArray(body.data) ? body.data.length : null);
+
+          captured.push({
+            url: url.substring(0, 300),
+            status: response.status,
+            method: args[1]?.method || 'GET',
+            bodyKeys: !isArray && typeof body === 'object' ? Object.keys(body).slice(0, 20) : null,
+            isArray,
+            recordCount: records,
+            sample: JSON.stringify(body).substring(0, 400),
+            timestamp: new Date().toISOString(),
+          });
+
+          updateUI(url, response.status, records);
+        }
+      } catch(e) {
+        captured.push({ url: url.substring(0, 300), status: response.status, error: e.message });
+        updateUI(url, response.status + ' (parse err)', null);
+      }
+    }
+    return response;
+  };
+
+  // ====== 拦截 XMLHttpRequest ======
+  const origOpen = XMLHttpRequest.prototype.open;
+  const origSend = XMLHttpRequest.prototype.send;
+
+  XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+    this.__okki_url = url;
+    this.__okki_method = method;
+    return origOpen.apply(this, [method, url, ...rest]);
+  };
+
+  XMLHttpRequest.prototype.send = function(...args) {
+    const xhr = this;
+    const url = xhr.__okki_url || '';
+
+    xhr.addEventListener('load', function() {
+      if (!isXiaomanApi(url) || seenUrls.has(url)) return;
+      seenUrls.add(url);
+
+      try {
+        const ct = xhr.getResponseHeader('content-type') || '';
+        if (ct.includes('json')) {
+          const body = JSON.parse(xhr.responseText);
+          const isArray = Array.isArray(body);
+          const records = isArray ? body.length : (body?.data && Array.isArray(body.data) ? body.data.length : null);
+
+          captured.push({
+            url: url.substring(0, 300),
+            status: xhr.status,
+            method: xhr.__okki_method || 'GET',
+            bodyKeys: !isArray && typeof body === 'object' ? Object.keys(body).slice(0, 20) : null,
+            isArray,
+            recordCount: records,
+            sample: JSON.stringify(body).substring(0, 400),
+            timestamp: new Date().toISOString(),
+          });
+
+          updateUI(url, xhr.status, records);
+        }
+      } catch(e) {}
+    });
+
+    return origSend.apply(this, args);
+  };
+
+  // ====== 按钮事件 ======
+  document.getElementById('__okki_export').addEventListener('click', () => {
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    const blob = new Blob([JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      totalApis: captured.length,
+      apis: captured,
+      summary: {
+        total: captured.length,
+        withRecords: captured.filter(c => c.recordCount).map(c => ({
+          url: c.url, records: c.recordCount, status: c.status, method: c.method
+        })),
+      }
+    }, null, 2)], { type: 'application/json' });
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `okki_api_dump_${ts}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+
+    document.getElementById('__okki_status').innerHTML =
+      '<span style="color:#ffab40;">✅ 已导出 ' + captured.length + ' 个API</span>';
+  });
+
+  document.getElementById('__okki_clear').addEventListener('click', () => {
+    captured.length = 0;
+    seenUrls.clear();
+    dataCount = 0;
+    document.getElementById('__okki_list').innerHTML = '<div style="color:#555;">已清空，等待新API...</div>';
+    document.getElementById('__okki_counter').innerHTML = '已捕获: 0 个API | 含数据: 0';
+    document.getElementById('__okki_status').innerHTML = '<span style="color:#66bb6a;">● 监听中</span>';
+  });
+
+  document.getElementById('__okki_close').addEventListener('click', () => {
+    document.getElementById('__okki_intercept_panel').remove();
+    window.fetch = origFetch;
+    console.log('[OKKI Monitor] 面板已关闭，fetch已还原。');
+  });
+
+  console.log('%c✅ OKKI API Monitor 已激活 %c| %c浮动面板在右下角 | 浏览客户页面后点"导出JSON"',
+    'color:#4fc3f7;font-weight:bold;', '', 'color:#999;');
+  console.log('%c🛡️ 纯页面内运行，不发起任何请求，同事账号零风险。',
+    'color:#66bb6a;');
+})();

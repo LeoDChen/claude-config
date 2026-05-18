@@ -3,9 +3,6 @@ cache/
 debug/
 telemetry/
 backups/
-file-history/
-history.jsonl
-sessions/
 session-env/
 shell-snapshots/
 plans/
@@ -13,12 +10,7 @@ ide/
 scheduled_tasks.lock
 .last-cleanup
 
-# 排除 projects 下除了 memory 之外的所有内容
-projects/**/*
-!projects/**/memory/
-!projects/**/memory/**
-
-# 排除 MCP servers（在笔记本重新安装即可）
+# MCP servers（笔记本重新安装即可）
 mcp-servers/
 
 # 大文件

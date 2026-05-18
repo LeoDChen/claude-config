@@ -1,0 +1,9 @@
+// Stop: Auto-update STATE.md timestamp
+const fs = require('fs');
+const f = 'd:/ClaudeWorkspace/08_客户跟进/Okki/STATE.md';
+if (fs.existsSync(f)) {
+  const content = fs.readFileSync(f, 'utf8');
+  const ts = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const updated = content.replace(/最后更新.*/, '最后更新：' + ts);
+  if (updated !== content) fs.writeFileSync(f, updated);
+}

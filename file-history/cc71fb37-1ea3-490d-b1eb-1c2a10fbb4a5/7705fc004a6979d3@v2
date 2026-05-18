@@ -1,0 +1,146 @@
+# OKKI 重构方案：从"对话AI批处理"到"确定性脚本+AI语言助手"
+
+## Context
+
+当前 OKKI 项目的根本问题是**架构错配**：用对话式 AI 做批处理数据管道。导致三个用户核心痛点：
+1. 结果正确性差（LLM 不适合计数/分类/比对这种确定性任务）
+2. 自动化不足（一次分析需要多个对话才能完成）
+3. 判断规则不透明（规则散落在 prompt 里，用户不可读不可改）
+
+重构目标：**一条命令 30 秒出结果，分类规则用户可读可改，AI 只做写话术。**
+
+---
+
+## 设计方案
+
+### 架构对比
+
+```
+【旧】                             【新】
+多对话流水线                       单次脚本执行
+Claude 逐条读467个文件分类  →      确定性规则引擎（JSON配置，毫秒级）
+Claude 写分析结论            →      模板填充（基于阶段自动生成）
+Claude 写话术草稿            →      Claude API 调用（仅P0客户，可选）
+报告 Word + Excel            →      Excel 看板 + 简要Markdown + 话术草稿
+```
+
+### 文件结构
+
+```
+08_客户跟进/Okki/
+├── scripts/
+│   ├── sync_okki.js          # 保留，数据抓取
+│   └── daily_pipeline.js     # 【新】一键流水线主脚本
+├── config/
+│   ├── tier_rules.json       # 【新】五梯队分类规则（用户可读可改）
+│   ├── stage_rules.json      # 【新】客户阶段判断规则
+│   └── scoring.json          # 【新】优先级评分权重
+├── data/                     # 保留，数据文件
+├── output/                   # 【新】日常产出
+│   ├── daily_YYYY-MM-DD.xlsx  # Excel 看板
+│   ├── actions_YYYY-MM-DD.md  # 今日行动清单
+│   └── drafts_YYYY-MM-DD.md   # P0客户话术草稿（AI生成）
+├── knowledge/                # 保留
+└── reports/                  # 保留，历史报告归档
+```
+
+### 核心改造
+
+#### 1. 分类规则配置化（config/tier_rules.json）
+
+把 `knowledge/business-rules.md` 翻译成可执行的 JSON 规则：
+
+```json
+{
+  "p0_triggers": [
+    { "name": "PI已发等付款", "conditions": { "hasPI": true, "hasAddress": true, "daysSinceLastContact": [0, 7] }},
+    { "name": "客户主动说下单", "keywords": ["place order", "make order", "send PI", "下单"], "inCustomerMsg": true },
+    { "name": "选款完成+地址已给", "conditions": { "hasAddress": true, "hasProductCode": true }}
+  ],
+  "p1_triggers": [
+    { "name": "报价已发等回复", "conditions": { "hasPrice": true, "customerReplied": false, "daysAgo": [3, 14] }},
+    { "name": "近期活跃谈判中", "conditions": { "realMsgs": [">", 20], "customerMsgs": [">", 5], "daysAgo": [0, 3] }}
+  ],
+  "system_msg_patterns": [
+    "自动接待将不再触发",
+    "Marco大模型翻译",
+    "Since you have read the conversation",
+    "买家有流失风险",
+    "Buyer has churn risk",
+    "AI给您生成了一条回复建议",
+    "You have a visitor",
+    "This buyer has been pre-screened"
+  ],
+  "silence_thresholds": {
+    "negotiating": { "warning": 3, "danger": 7 },
+    "quoted": { "warning": 5, "danger": 14 },
+    "initial": { "warning": 2, "danger": 5 },
+    "ordered": { "warning": 7, "danger": 21 }
+  }
+}
+```
+
+**用户可以打开这个 JSON 文件直接修改调整，不需要理解 prompt 工程。**
+
+#### 2. 一键流水线（scripts/daily_pipeline.js）
+
+```bash
+# 用法
+node scripts/daily_pipeline.js           # 完整流程
+node scripts/daily_pipeline.js --no-ai   # 跳过AI话术（更快）
+node scripts/daily_pipeline.js --p0-only # 只看P0客户
+```
+
+执行步骤：
+1. **抓取**：调用 `sync_okki.js`（如果今天数据已存在则跳过）
+2. **清洗**：过滤系统消息，提取真实对话数据
+3. **分类**：按 config/tier_rules.json 做确定性分类（0.1秒）
+4. **排序**：按 config/scoring.json 权重打分排序
+5. **异常检测**：沉默超阈值/突然活跃/价值变化（纯时间计算）
+6. **生成 Excel 看板**：分级着色，一目了然
+7. **生成行动清单**：今天该联系谁、说什么（模板生成，非AI）
+8. **（可选）AI 话术草稿**：仅对 P0 客户，调用 Claude API 逐人生成回复草稿
+
+#### 3. AI 定位变化
+
+| 旧角色 | 新角色 |
+|--------|--------|
+| 数据处理器（读467文件分类） | ~~删除~~ |
+| 分析判断（阶段/卡点/优先级） | ~~删除~~，改由确定性代码完成 |
+| 报告撰写 | ~~删除~~，改由模板填充 |
+| 写回复话术 | 保留，但改为 Claude API 单次调用（非对话） |
+
+#### 4. 对话式使用保留（不是删除）
+
+`/inquiry` 技能、单个客户深度分析、特定问题讨论 —— 这些对话场景仍然保留。只是不再用对话做批量处理。
+
+---
+
+## 关键文件
+
+### 新建
+- `08_客户跟进/Okki/config/tier_rules.json` — 分类规则配置
+- `08_客户跟进/Okki/config/scoring.json` — 评分权重
+- `08_客户跟进/Okki/scripts/daily_pipeline.js` — 一键流水线
+
+### 保留不动
+- `scripts/sync_okki.js` — 数据抓取
+- `scripts/scrape_okki.js` — CDP抓取
+- `data/` 目录 — 数据文件
+- `knowledge/` 目录 — 知识库
+- `reports/` 目录 — 历史报告
+
+### 归档（不再使用）
+- `s1_classify.js` / `s2_deep.js` / `s3_report.js` / `enhanced_classify.js` — 被 daily_pipeline.js 替代
+- `generate_report.js` / `generate_p0_report.js` / `generate_today_report.js` — 被新的报告生成替代
+- `NEXT_BATCH.md` / `NEXT_START.md` / `STATE.md` — 不再需要多对话接力
+
+---
+
+## 验证方式
+
+1. 运行 `node scripts/daily_pipeline.js --no-ai`
+2. 打开 `output/daily_YYYY-MM-DD.xlsx`，抽查 5 个客户的分类是否合理
+3. 打开 `output/actions_YYYY-MM-DD.md`，确认行动清单可执行
+4. 用户检查 `config/tier_rules.json`，确认规则是否符合业务直觉
+5. 如有调整，直接改 JSON，重新运行，对比结果变化

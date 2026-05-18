@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "vision-reader": {
+      "command": "node",
+      "args": ["C:\\Users\\Administrator\\.claude\\mcp-servers\\vision-reader\\server.mjs"],
+      "env": {
+        "VISION_API_KEY": "YOUR_GEMINI_API_KEY_HERE"
+      }
+    }
+  }
+}

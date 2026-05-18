@@ -1,0 +1,650 @@
+/**
+ * OKKI 管道看板生成器
+ * 读取分类数据 + 会话元数据 → 生成自包含 HTML 看板
+ *
+ * 用法：node scripts/generate_dashboard.js
+ * 输出：output/dashboard_YYYY-MM-DD.html
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..');
+const DATA = path.join(ROOT, 'data');
+const OUTPUT = path.join(ROOT, 'output');
+
+// ============================================================
+// 1. 加载数据
+// ============================================================
+
+const enhanced = JSON.parse(fs.readFileSync(path.join(DATA, 's1_enhanced_full.json'), 'utf8'));
+const tm = JSON.parse(fs.readFileSync(path.join(DATA, 'tm_conversations_latest.json'), 'utf8'));
+
+// 建立 CID → tm 会话的索引（用于获取 complianceCountryCode 和 daysSinceLastContact）
+const tmByCid = {};
+for (const c of tm.conversations) {
+  tmByCid[c.cid] = c;
+}
+// 也建一个 name 索引
+const tmByName = {};
+for (const c of tm.conversations) {
+  const key = (c.name || '').toLowerCase().trim();
+  tmByName[key] = c;
+}
+
+// ============================================================
+// 2. 合并数据 + 推导生命周期阶段 & 质量等级
+// ============================================================
+
+const CORE_MARKETS = ['SD', 'EG', 'CD', 'ZM', 'CI', 'SA', 'AE'];
+
+// 生命周期阶段定义（排序用）
+const LIFECYCLE_ORDER = [
+  '待回复', '初询沟通', '报价已发', '谈判/样品',
+  'PI已发', '订单执行', '已签收', '售后'
+];
+
+const QUALITY_ORDER = ['S', 'A', 'B', 'C', 'D'];
+
+function deriveLifecycle(c) {
+  // 按优先级推导生命周期阶段
+  if (c.hasOrderSignal && (c.hasPI || c.hasPrice)) return '订单执行';
+  if (c.hasPI) return 'PI已发';
+  if (c.hasOrderSignal) return '谈判/样品';
+  if (c.hasPrice && c.hasQuantity) return '报价已发';
+  if (c.hasPrice) return '报价已发';
+  if (c.hasSample) return '谈判/样品';
+  if (c.hasQuantity || c.customerMsgs > 0) return '初询沟通';
+  if (c.realMsgs > 0) return '初询沟通';
+  return '待回复';
+}
+
+function deriveQuality(c) {
+  // 基于信号推导质量等级
+  const signals = [
+    c.hasPI, c.hasAddress, c.hasOrderSignal, c.hasPrice,
+    c.hasSample, c.hasQuantity, c.hasMOQ, c.hasFreight
+  ].filter(Boolean).length;
+  const isCore = CORE_MARKETS.includes(c.country);
+
+  // S 级：PI+地址+核心市场+高互动
+  if (c.hasPI && c.hasAddress && isCore && c.realMsgs > 10) return 'S';
+  if (c.hasOrderSignal && c.realMsgs > 20) return 'S';
+
+  // A 级：有明确交易信号
+  if (c.hasPI || c.hasOrderSignal) return 'A';
+  if (c.hasPrice && c.hasQuantity && c.realMsgs > 5) return 'A';
+  if (c.hasSample && c.realMsgs > 10) return 'A';
+
+  // B 级：有询盘信号
+  if (signals >= 2 && c.realMsgs > 3) return 'B';
+  if (c.hasPrice || c.hasSample || c.hasQuantity) return 'B';
+  if (c.realMsgs > 5) return 'B';
+
+  // C 级：有微弱互动
+  if (c.realMsgs > 0) return 'C';
+
+  // D 级：无有效互动
+  return 'D';
+}
+
+function getSilenceTier(days) {
+  if (days > 90) return { tier: 'deep', label: '深度静默 90天+', color: '#c0392b', bg: 'rgba(192,57,43,0.08)' };
+  if (days > 30) return { tier: 'long', label: '长期静默 30-90天', color: '#e67e22', bg: 'rgba(230,126,34,0.08)' };
+  if (days > 14) return { tier: 'mid', label: '中期静默 14-30天', color: '#f39c12', bg: 'rgba(243,156,18,0.08)' };
+  if (days > 7) return { tier: 'short', label: '短期静默 7-14天', color: '#3498db', bg: 'rgba(52,152,219,0.08)' };
+  if (days >= 3) return { tier: 'active', label: '近期活跃 3-7天', color: '#27ae60', bg: 'rgba(39,174,96,0.08)' };
+  return { tier: 'hot', label: '近期活跃 <3天', color: '#27ae60', bg: 'rgba(39,174,96,0.08)' };
+}
+
+// 标准跟进动作（按生命周期阶段）
+const STANDARD_ACTIONS = {
+  '待回复': {
+    label: '待回复',
+    urgency: '24h内回复',
+    defaultAction: '客户发来消息未回复，24小时内首次响应',
+    byQuality: {
+      'S': '优先回复，搜索客户品牌/渠道背景后定制话术',
+      'A': '24h内回复，附工厂认证+大牌合作案例',
+      'B': '24h内回复，标准模板确认需求',
+      'C': '24h内回复，简要确认需求',
+      'D': '确认是否真实询盘后回复'
+    }
+  },
+  '初询沟通': {
+    label: '初询沟通',
+    urgency: '48h内有效推进',
+    defaultAction: '了解客户需求，发送目录/工厂资料',
+    byQuality: {
+      'S': '研究客户品牌/店铺/渠道，定制话术，建立"同级别工厂伙伴"认知',
+      'A': '发送精选目录+工厂认证+BSCI/ISO证书，推进需求确认',
+      'B': '标准目录发送，确认MOQ和产品需求',
+      'C': '简要回复，对方表达需求后再深挖',
+      'D': '确认是否真实询盘，标准模板回复'
+    }
+  },
+  '报价已发': {
+    label: '报价已发',
+    urgency: '第3天首次跟进',
+    defaultAction: '跟进报价反馈，解答疑问',
+    byQuality: {
+      'S': '48h跟进，每次带新信息/价值（新品/案例/市场数据）',
+      'A': '48h跟进，附相关产品推荐或同行案例',
+      'B': '3-5天温和提醒，确认是否收到报价',
+      'C': '3-5天提醒一次，3轮无回应转入沉默管理',
+      'D': '5-7天一次，标准提醒'
+    }
+  },
+  '谈判/样品': {
+    label: '谈判/样品',
+    urgency: '48h跟进',
+    defaultAction: '推动决策，解决疑虑',
+    byQuality: {
+      'S': '主动做mockup/方案，不等客户开口，48h跟进',
+      'A': '关注样品反馈/价格谈判进展，48h确认状态',
+      'B': '确认是否需调整报价或规格，48-72h跟进',
+      'C': '对方确认意向后才做额外方案',
+      'D': '跟进但不投入过多定制资源'
+    }
+  },
+  'PI已发': {
+    label: 'PI已发',
+    urgency: '48h确认收到，7天催款',
+    defaultAction: '确认PI收到，跟进付款',
+    byQuality: {
+      'S': 'PI发出48h确认收到，第5天提醒付款，第7天催款',
+      'A': 'PI发出48h确认收到，第5天提醒，PI到期前提醒',
+      'B': '48h确认收到，PI有效期结束前提醒',
+      'C': '确认收到，到期前提醒一次',
+      'D': '确认收到即可'
+    }
+  },
+  '订单执行': {
+    label: '订单执行中',
+    urgency: '每周同步',
+    defaultAction: '关键节点主动通知（排产/完成/发货）',
+    byQuality: {
+      'S': '每周主动同步进度，拍照/视频，关键节点提前通知',
+      'A': '每周同步，关键节点通知',
+      'B': '关键节点通知（排产/发货）',
+      'C': '发货时通知',
+      'D': '发货时通知'
+    }
+  },
+  '已签收': {
+    label: '已签收',
+    urgency: '签收后7天回访',
+    defaultAction: '确认收货满意，推动复购',
+    byQuality: {
+      'S': '签收7天回访，同步新品+定制方案，争取复购',
+      'A': '签收7天回访，发新品目录',
+      'B': '签收7天回访，确认满意度',
+      'C': '签收后回访一次',
+      'D': '签收后回访一次'
+    }
+  },
+  '售后': {
+    label: '售后',
+    urgency: '投诉≤1h，常规24h',
+    defaultAction: '快速响应，妥善处理',
+    byQuality: {
+      'S': '≤1h响应，主动提供补偿方案',
+      'A': '≤1h响应，24h内给方案',
+      'B': '24h响应',
+      'C': '24h内回复',
+      'D': '24h内回复'
+    }
+  }
+};
+
+// 合并客户数据
+const customers = [];
+const nameSet = new Set();
+
+for (const c of enhanced) {
+  const name = (c.name || '').trim();
+  if (!name || nameSet.has(name.toLowerCase())) continue;
+  nameSet.add(name.toLowerCase());
+
+  // 从 tm 获取补充数据
+  const tmConv = tmByCid[c.cid] || tmByName[name.toLowerCase()];
+  const country = tmConv ? (tmConv.complianceCountryCode || c.country || '??') : (c.country || '??');
+  const daysSinceLastContact = tmConv
+    ? (tmConv.preComputed ? tmConv.preComputed.daysSinceLastContact : (c.daysAgo || 999))
+    : (c.daysAgo || 999);
+  const isCore = CORE_MARKETS.includes(country);
+  const unreadCount = tmConv ? (tmConv.unreadCount || 0) : 0;
+
+  const lifecycle = deriveLifecycle(c);
+  const quality = deriveQuality(c);
+  const silence = getSilenceTier(daysSinceLastContact);
+
+  // 状态标签
+  let status = 'normal';
+  if (unreadCount > 0) status = 'unread';
+  else if (daysSinceLastContact > 14 && (quality === 'S' || quality === 'A')) status = 'attention';
+  else if (daysSinceLastContact > 7 && lifecycle !== '待回复') status = 'watch';
+
+  customers.push({
+    name,
+    country,
+    isCore,
+    lifecycle,
+    quality,
+    daysSinceLastContact,
+    unreadCount,
+    realMsgs: c.realMsgs || 0,
+    customerMsgs: c.customerMsgs || 0,
+    status,
+    silence,
+    hasPI: c.hasPI,
+    hasAddress: c.hasAddress,
+    hasOrderSignal: c.hasOrderSignal,
+    hasPrice: c.hasPrice,
+    lastCustomerMsgDays: c.lastCustomerMsgDays,
+    latestCustMsg: (c.latestCustMsg || '').substring(0, 80),
+    latestOurMsg: (c.latestOurMsg || '').substring(0, 80),
+  });
+}
+
+// ============================================================
+// 3. 统计计算
+// ============================================================
+
+const totalCustomers = customers.length;
+const active3d = customers.filter(c => c.daysSinceLastContact <= 3).length;
+const silent90d = customers.filter(c => c.daysSinceLastContact > 90).length;
+const totalUnread = customers.reduce((s, c) => s + c.unreadCount, 0);
+
+// 待行动：有未读 或 (S/A级 + 超过跟进窗口)
+const actionNeeded = customers.filter(c => {
+  if (c.unreadCount > 0) return true;
+  if ((c.quality === 'S' || c.quality === 'A') && c.daysSinceLastContact >= 2) return true;
+  if (c.lifecycle === 'PI已发' && c.daysSinceLastContact >= 3) return true;
+  if (c.lifecycle === '报价已发' && c.daysSinceLastContact >= 4) return true;
+  return false;
+}).length;
+
+// 双轴矩阵
+const matrix = {};
+for (const ls of LIFECYCLE_ORDER) {
+  matrix[ls] = {};
+  for (const q of QUALITY_ORDER) {
+    matrix[ls][q] = [];
+  }
+}
+for (const c of customers) {
+  const ls = LIFECYCLE_ORDER.includes(c.lifecycle) ? c.lifecycle : '待回复';
+  const q = QUALITY_ORDER.includes(c.quality) ? c.quality : 'D';
+  matrix[ls][q].push(c);
+}
+
+// 静默分级
+const silenceGroups = {
+  deep: [], long: [], mid: [], short: [], active: [], hot: []
+};
+for (const c of customers) {
+  silenceGroups[c.silence.tier].push(c);
+}
+for (const key of Object.keys(silenceGroups)) {
+  silenceGroups[key].sort((a, b) => b.daysSinceLastContact - a.daysSinceLastContact);
+}
+
+// 市场分布
+const marketStats = {};
+for (const m of CORE_MARKETS) {
+  marketStats[m] = { total: 0, sa: 0, action: 0 };
+}
+const countryNames = { SD: '苏丹', EG: '埃及', CD: '刚果民主', ZM: '赞比亚', CI: '科特迪瓦', SA: '沙特', AE: '阿联酋' };
+for (const c of customers) {
+  if (marketStats[c.country]) {
+    marketStats[c.country].total++;
+    if (c.quality === 'S' || c.quality === 'A') marketStats[c.country].sa++;
+    if (c.unreadCount > 0 || (c.quality === 'S' || c.quality === 'A') && c.daysSinceLastContact >= 2) marketStats[c.country].action++;
+  }
+}
+
+// 加载上次快照计算变动
+let changes = { up: 0, down: 0, new_: 0, lost: 0, upDetail: [], downDetail: [], newDetail: [], lostDetail: [] };
+const snapshotPath = path.join(OUTPUT, '.dashboard_snapshot.json');
+if (fs.existsSync(snapshotPath)) {
+  const prev = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
+  const prevMap = {};
+  for (const pc of prev.customers || []) {
+    prevMap[pc.name.toLowerCase()] = pc;
+  }
+  const currNames = new Set(customers.map(c => c.name.toLowerCase()));
+
+  for (const c of customers) {
+    const prevC = prevMap[c.name.toLowerCase()];
+    if (!prevC) {
+      changes.new_++;
+      if (changes.newDetail.length < 20) changes.newDetail.push(`${c.name} (${c.country})`);
+      continue;
+    }
+    const prevQ = QUALITY_ORDER.indexOf(prevC.quality);
+    const currQ = QUALITY_ORDER.indexOf(c.quality);
+    if (currQ < prevQ) {
+      changes.up++;
+      if (changes.upDetail.length < 20) changes.upDetail.push(`${c.name}: ${prevC.quality}→${c.quality}`);
+    } else if (currQ > prevQ) {
+      changes.down++;
+      if (changes.downDetail.length < 20) changes.downDetail.push(`${c.name}: ${prevC.quality}→${c.quality}`);
+    }
+  }
+  for (const [name, pc] of Object.entries(prevMap)) {
+    if (!currNames.has(name)) {
+      changes.lost++;
+      if (changes.lostDetail.length < 20) changes.lostDetail.push(`${pc.name} (${pc.country})`);
+    }
+  }
+}
+
+// 保存快照
+fs.writeFileSync(snapshotPath, JSON.stringify({
+  date: new Date().toISOString().split('T')[0],
+  total: customers.length,
+  customers: customers.map(c => ({ name: c.name, country: c.country, lifecycle: c.lifecycle, quality: c.quality }))
+}, null, 2));
+
+// ============================================================
+// 4. 生成 HTML
+// ============================================================
+
+function esc(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function cellColor(count) {
+  if (count === 0) return 'transparent';
+  if (count <= 2) return 'rgba(255,159,10,0.2)';
+  if (count <= 5) return 'rgba(255,159,10,0.35)';
+  return 'rgba(255,159,10,0.5)';
+}
+
+function statusBadge(s) {
+  if (s === 'unread') return '<span style="background:#c0392b;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">未读</span>';
+  if (s === 'attention') return '<span style="background:#e67e22;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">关注</span>';
+  if (s === 'watch') return '<span style="background:#f39c12;color:#fff;padding:1px 6px;border-radius:3px;font-size:10px;">观察</span>';
+  return '';
+}
+
+// 构建矩阵格子 HTML
+function buildCellHTML(ls, q) {
+  const list = matrix[ls][q];
+  const count = list.length;
+  if (count === 0) return '<td style="text-align:center;padding:6px 8px;border:1px solid var(--border);color:var(--text-tertiary);">0</td>';
+
+  const action = STANDARD_ACTIONS[ls];
+  const actionText = action ? (action.byQuality[q] || action.defaultAction) : '';
+
+  let rows = '';
+  for (const c of list) {
+    rows += `<tr>
+      <td style="padding:4px 8px;border-bottom:1px solid var(--border);">${esc(c.name)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid var(--border);text-align:center;">${esc(c.country)}</td>
+      <td style="padding:4px 8px;border-bottom:1px solid var(--border);text-align:center;">${c.daysSinceLastContact}d</td>
+      <td style="padding:4px 8px;border-bottom:1px solid var(--border);text-align:center;">${statusBadge(c.status)}</td>
+    </tr>`;
+  }
+
+  return `<td style="text-align:center;padding:6px 8px;border:1px solid var(--border);cursor:pointer;background:${cellColor(count)};font-weight:600;position:relative;"
+    onclick="var d=document.getElementById('detail-${ls.replace(/[\/ ]/g,'_')}-${q}');d.style.display=d.style.display==='block'?'none':'block'">
+    ${count}
+    <div id="detail-${ls.replace(/[\/ ]/g,'_')}-${q}" style="display:none;position:absolute;top:0;left:100%;z-index:100;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;min-width:420px;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-align:left;font-weight:normal;font-size:12px;">
+      <div style="padding:10px 12px;background:var(--bg-tertiary);border-radius:8px 8px 0 0;font-weight:600;">
+        ${esc(ls)} × ${q}级 — ${count}人
+      </div>
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);color:var(--accent);font-size:11px;">
+        📋 标准动作：${esc(actionText)}
+      </div>
+      <div style="max-height:360px;overflow-y:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <tr style="background:var(--bg-tertiary);"><th style="padding:4px 8px;text-align:left;">客户</th><th style="padding:4px 8px;">国家</th><th style="padding:4px 8px;">静默</th><th style="padding:4px 8px;">状态</th></tr>
+          ${rows}
+        </table>
+      </div>
+      <div style="padding:4px 12px;font-size:10px;color:var(--text-tertiary);">点击外部关闭</div>
+    </div>
+  </td>`;
+}
+
+// 构建静默风险列表
+function buildSilenceRows(list, limit = 15) {
+  let rows = '';
+  const show = list.slice(0, limit);
+  for (const c of show) {
+    rows += `<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px;">
+      <span>${esc(c.name)} <span style="color:var(--text-secondary);">${esc(c.country)}</span></span>
+      <span>${c.daysSinceLastContact}天</span>
+    </div>`;
+  }
+  if (list.length > limit) {
+    rows += `<div style="color:var(--text-secondary);padding-top:4px;font-size:10px;">... 还有 ${list.length - limit} 人</div>`;
+  }
+  return rows;
+}
+
+function buildSilenceSection(tierKey) {
+  const list = silenceGroups[tierKey] || [];
+  if (list.length === 0) return '';
+  const label = list[0].silence.label;
+  const color = list[0].silence.color;
+  const bg = list[0].silence.bg;
+
+  return `<div>
+    <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'"
+         style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;">
+      <span>● <strong style="color:${color};">${esc(label)}</strong></span>
+      <strong style="font-size:16px;color:${color};">${list.length}</strong>
+    </div>
+    <div style="display:none;padding:8px 14px;background:${bg};border-bottom:1px solid var(--border);">
+      ${buildSilenceRows(list)}
+    </div>
+  </div>`;
+}
+
+// 构建市场分布行
+function buildMarketRows() {
+  let rows = '';
+  const sorted = Object.entries(marketStats).sort((a, b) => b[1].total - a[1].total);
+  for (const [code, stats] of sorted) {
+    const name = countryNames[code] || code;
+    const actionColor = stats.action > 0 ? 'color:#c0392b;font-weight:bold;' : '';
+    rows += `<tr>
+      <td style="padding:8px;border:1px solid var(--border);font-weight:600;">${esc(name)}</td>
+      <td style="text-align:center;padding:8px;border:1px solid var(--border);">${stats.total}</td>
+      <td style="text-align:center;padding:8px;border:1px solid var(--border);">${stats.sa}</td>
+      <td style="text-align:center;padding:8px;border:1px solid var(--border);${actionColor}">${stats.action}</td>
+    </tr>`;
+  }
+  return rows;
+}
+
+const today = new Date().toISOString().split('T')[0];
+
+const html = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>OKKI 客户管道看板 — ${today}</title>
+<style>
+  :root {
+    --bg-primary: #f5f5f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e5e5e7;
+    --border: #d1d1d6;
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --text-tertiary: #aeaeb2;
+    --accent: #0071e3;
+    --success: #34c759;
+    --warning: #ff9f0a;
+    --error: #ff3b30;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1d1d1f;
+      --bg-secondary: #2d2d2f;
+      --bg-tertiary: #3d3d3f;
+      --border: #424245;
+      --text-primary: #f5f5f7;
+      --text-secondary: #86868b;
+      --text-tertiary: #636366;
+      --accent: #0a84ff;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    padding: 20px 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+  .kpi { color: #fff; padding: 14px 12px; border-radius: 8px; text-align: center; }
+  .kpi .num { font-size: 28px; font-weight: 700; }
+  .kpi .lbl { font-size: 11px; opacity: 0.9; }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+  .card-hd { background: var(--bg-tertiary); padding: 10px 14px; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .card-hd span { font-weight: normal; font-size: 11px; color: var(--text-secondary); }
+
+  table.mx { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.mx th { padding: 6px 8px; border: 1px solid var(--border); background: var(--bg-tertiary); font-weight: 600; }
+  table.mx td { border: 1px solid var(--border); }
+  table.mx td.rl { text-align: left; font-weight: 600; padding: 6px 8px; }
+
+  .flex { display: flex; gap: 16px; margin-bottom: 16px; }
+  .flex-1 { flex: 1; }
+  .flex-320 { flex: 0 0 340px; }
+
+  .silence-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .silence-detail { display: none; padding: 8px 14px; border-bottom: 1px solid var(--border); }
+
+  table.sub { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.sub th { padding: 8px; border: 1px solid var(--border); text-align: left; background: var(--bg-tertiary); font-weight: 600; }
+  table.sub td { padding: 8px; border: 1px solid var(--border); }
+  table.sub td.nc { text-align: center; }
+
+  .trend-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .trend-row .det { font-size: 11px; color: var(--text-secondary); }
+
+  .footer { margin-top: 24px; padding: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-secondary); text-align: center; }
+  .footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<h1>OKKI 客户管道看板</h1>
+<div class="subtitle">生成时间：${today} | 数据源：s1_enhanced_full.json + tm_conversations_latest.json | 全覆盖 ${totalCustomers} 客户</div>
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi" style="background:#1a5276;"><div class="num">${totalCustomers}</div><div class="lbl">总客户</div></div>
+  <div class="kpi" style="background:#1a5276;"><div class="num">${active3d}</div><div class="lbl">3天活跃</div></div>
+  <div class="kpi" style="background:#c0392b;"><div class="num">${silent90d}</div><div class="lbl">超90天无互动</div></div>
+  <div class="kpi" style="background:#e67e22;"><div class="num">${totalUnread}</div><div class="lbl">未读消息</div></div>
+  <div class="kpi" style="background:#27ae60;"><div class="num">${changes.up + changes.down + changes.new_}</div><div class="lbl">本期变动</div></div>
+  <div class="kpi" style="background:#8e44ad;"><div class="num">${actionNeeded}</div><div class="lbl">需行动</div></div>
+</div>
+
+<!-- 双轴矩阵 -->
+<div class="card">
+  <div class="card-hd">客户双轴矩阵 <span>（生命周期 × 质量）— 点击格子展开客户名单 + 标准动作</span></div>
+  <div style="overflow-x:auto;">
+    <table class="mx">
+      <tr>
+        <th style="text-align:left;min-width:80px;">阶段 \\ 等级</th>
+        ${QUALITY_ORDER.map(q => `<th>S ${q}</th>`).join('')}
+      </tr>
+      ${LIFECYCLE_ORDER.map(ls => `<tr>
+        <td class="rl">${esc(ls)}</td>
+        ${QUALITY_ORDER.map(q => buildCellHTML(ls, q)).join('')}
+      </tr>`).join('')}
+    </table>
+  </div>
+  <div style="padding:6px 14px;font-size:10px;color:var(--text-secondary);">
+    颜色越深=该格客户越多 | 点击数字弹出详情（标准动作 + 客户名单）
+  </div>
+</div>
+
+<!-- 静默风险 + 变动 并排 -->
+<div class="flex">
+  <div class="flex-320 card">
+    <div class="card-hd">静默风险分级</div>
+    ${buildSilenceSection('deep')}
+    ${buildSilenceSection('long')}
+    ${buildSilenceSection('mid')}
+    ${buildSilenceSection('short')}
+    ${buildSilenceSection('active')}
+    ${buildSilenceSection('hot')}
+  </div>
+
+  <div class="flex-1 card" style="align-self:flex-start;">
+    <div class="card-hd">本期变动（相较上次运行）</div>
+    <div style="padding:10px 14px;font-size:13px;">
+      <div class="trend-row">
+        <span>📈 升级</span><strong style="color:#27ae60;">${changes.up}人</strong>
+        <span class="det">${changes.upDetail.slice(0, 5).join(', ') || '-'}</span>
+      </div>
+      <div class="trend-row">
+        <span>📉 降级</span><strong style="color:#e74c3c;">${changes.down}人</strong>
+        <span class="det">${changes.downDetail.slice(0, 5).join(', ') || '-'}</span>
+      </div>
+      <div class="trend-row">
+        <span>🆕 新进入</span><strong style="color:#3498db;">${changes.new_}人</strong>
+        <span class="det">${changes.newDetail.slice(0, 5).join(', ') || '-'}</span>
+      </div>
+      <div class="trend-row" style="border-bottom:none;">
+        <span>⏸️ 流失</span><strong style="color:var(--text-secondary);">${changes.lost}人</strong>
+        <span class="det">${changes.lostDetail.slice(0, 5).join(', ') || '-'}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 市场分布 -->
+<div class="card">
+  <div class="card-hd">核心市场管道密度</div>
+  <table class="sub">
+    <tr><th>市场</th><th>客户数</th><th>S/A级</th><th>需行动</th></tr>
+    ${buildMarketRows()}
+  </table>
+</div>
+
+<div class="footer">
+  管道看板 — 脚本自动生成，覆盖全部 ${totalCustomers} 客户 |
+  深度分析请新开对话：<code>/okki 深度分析 [客户名]</code> |
+  上次生成：${today}
+</div>
+
+<script>
+// 点击页面任意处关闭弹出的详情
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('[onclick]') || !e.target.closest('td')) {
+    document.querySelectorAll('[id^="detail-"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }
+});
+</script>
+</body>
+</html>`;
+
+// 写入文件
+const outPath = path.join(OUTPUT, `dashboard_${today}.html`);
+fs.writeFileSync(outPath, html, 'utf8');
+
+console.log('Dashboard written to:', outPath);
+console.log('Customers:', totalCustomers);
+console.log('Matrix cells:', LIFECYCLE_ORDER.length * QUALITY_ORDER.length);
+console.log('Active (3d):', active3d);
+console.log('Silent (90d+):', silent90d);
+console.log('Action needed:', actionNeeded);

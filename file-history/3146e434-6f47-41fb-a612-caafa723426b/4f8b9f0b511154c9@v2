@@ -1,0 +1,175 @@
+/**
+ * TM页面结构诊断 — 找出数据存储方式和正确的抓取策略
+ * 用法: node diagnose-tm.mjs
+ */
+
+import { chromium } from 'playwright';
+
+const CDP_URL = 'http://127.0.0.1:9222';
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+async function main() {
+  const { talkFrame } = await connect();
+  console.log('=== TM页面诊断 ===\n');
+
+  // 1. 检查有多少个frame
+  const frames = talkFrame.childFrames();
+  console.log('子frame数:', frames.length);
+
+  // 2. 找到对话列表的容器和数据结构
+  const diag = await talkFrame.evaluate(() => {
+    const info = {};
+
+    // 查找滚动容器
+    const containers = [];
+    document.querySelectorAll('*').forEach(el => {
+      if (el.scrollHeight > el.clientHeight + 10 && el.clientHeight > 100) {
+        containers.push({
+          tag: el.tagName,
+          id: el.id || '',
+          className: (el.className?.toString() || '').substring(0, 80),
+          scrollHeight: el.scrollHeight,
+          clientHeight: el.clientHeight,
+          childCount: el.children.length,
+        });
+      }
+    });
+    info.scrollContainers = containers.slice(0, 10);
+
+    // 查找 contact-item-container
+    const contactItems = document.querySelectorAll('.contact-item-container');
+    info.contactItemCount = contactItems.length;
+
+    // 查找可能的列表数据
+    const listEl = document.querySelector('.seller-conversation-list') ||
+      document.querySelector('.conversation-list-content') ||
+      document.querySelector('.im-conversation-list-container');
+
+    if (listEl) {
+      info.listContainerTag = listEl.tagName;
+      info.listContainerClass = (listEl.className?.toString() || '').substring(0, 100);
+      info.listContainerScrollH = listEl.scrollHeight;
+      info.listContainerClientH = listEl.clientHeight;
+      info.listContainerScrollTop = listEl.scrollTop;
+    }
+
+    // 尝试从React fiber中提取数据
+    const rootEl = document.getElementById('root') || document.getElementById('app') || document.body.children[0];
+    if (rootEl) {
+      const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance'));
+      info.hasReactFiber = !!fiberKey;
+      info.fiberKey = fiberKey || 'none';
+    }
+
+    // 尝试从Vue中提取
+    const vueKey = Object.keys(rootEl || document.body).find(k => k.startsWith('__vue__'));
+    info.hasVue = !!vueKey;
+
+    // 检查window上的数据
+    const windowKeys = Object.keys(window).filter(k =>
+      k.includes('store') || k.includes('state') || k.includes('data') ||
+      k.includes('contact') || k.includes('conversation') || k.includes('list')
+    );
+    info.windowDataKeys = windowKeys.slice(0, 20);
+
+    // 检查是否有全局数据存储
+    info.hasReduxStore = !!window.__REDUX_DEVTOOLS_EXTENSION__;
+
+    return info;
+  });
+
+  console.log('滚动容器:', JSON.stringify(diag.scrollContainers, null, 2));
+  console.log('\ncontact-item-container 当前渲染数:', diag.contactItemCount);
+  console.log('\n列表容器信息:', JSON.stringify(diag.listContainer, null, 2));
+  console.log('\nReact Fiber:', diag.hasReactFiber, diag.fiberKey);
+  console.log('Vue:', diag.hasVue);
+  console.log('Redux DevTools:', diag.hasReduxStore);
+  console.log('Window数据key:', diag.windowDataKeys);
+
+  // 3. 尝试深入React组件树获取数据
+  if (diag.hasReactFiber) {
+    console.log('\n=== 尝试提取React state ===');
+    const reactData = await talkFrame.evaluate(() => {
+      // 从根节点遍历fiber树找conversation数据
+      const rootEl = document.getElementById('root') || document.body.children[0];
+      const fiberKey = Object.keys(rootEl).find(k => k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance'));
+      if (!fiberKey) return { error: 'no fiber key' };
+
+      // 递归搜索包含contact/conversation数据的fiber节点
+      function searchFiber(fiber, depth, maxDepth) {
+        if (!fiber || depth > maxDepth) return null;
+
+        const memoizedState = fiber.memoizedState;
+        const memoizedProps = fiber.memoizedProps;
+
+        // 检查memoizedProps中是否有列表数据
+        if (memoizedProps) {
+          if (memoizedProps.contactList || memoizedProps.conversations || memoizedProps.list) {
+            return { source: 'memoizedProps', data: memoizedProps };
+          }
+          if (memoizedProps.dataSource || memoizedProps.items) {
+            const arr = memoizedProps.dataSource || memoizedProps.items;
+            if (Array.isArray(arr) && arr.length > 20) {
+              return { source: 'memoizedProps.list', count: arr.length, sample: arr[0] };
+            }
+          }
+        }
+
+        // 检查hooks state
+        if (memoizedState) {
+          let state = memoizedState;
+          while (state) {
+            if (state.queue) {
+              // 可能是useState的state
+            }
+            const val = state.memoizedState;
+            if (Array.isArray(val) && val.length > 20) {
+              return { source: 'hookState', count: val.length, sample: val[0] };
+            }
+            state = state.next;
+          }
+        }
+
+        // 递归子节点
+        let child = fiber.child;
+        while (child) {
+          const result = searchFiber(child, depth + 1, maxDepth);
+          if (result) return result;
+          child = child.sibling;
+        }
+
+        return null;
+      }
+
+      const fiber = rootEl[fiberKey];
+      return searchFiber(fiber, 0, 30);
+    });
+
+    console.log('React数据:', JSON.stringify(reactData, null, 2));
+  }
+
+  // 4. 尝试用CDP执行网络拦截（看XHR/Fetch请求）
+  console.log('\n=== 滚动测试 ===');
+  console.log('当前 contact-item-container 数:', diag.contactItemCount);
+
+  if (diag.listContainer) {
+    console.log('列表scrollHeight:', diag.listContainer.scrollH);
+    console.log('列表clientHeight:', diag.listContainer.clientH);
+    console.log('如果scrollHeight远大于clientHeight，说明有更多数据在DOM之外(虚拟滚动)');
+    console.log('比例:', (diag.listContainer.scrollH / diag.listContainer.clientH).toFixed(1));
+  }
+}
+
+main().catch(err => {
+  console.error('诊断错误:', err.message);
+  process.exit(1);
+});

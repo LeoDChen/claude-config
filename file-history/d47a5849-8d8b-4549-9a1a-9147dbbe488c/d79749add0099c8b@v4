@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code + CC-Switch + DeepSeek 完整安装指南</title>
+<style>
+  :root {
+    --primary: #6C47FF;
+    --bg: #f7f8fc;
+    --card: #fff;
+    --text: #2d3748;
+    --muted: #718096;
+    --border: #e2e8f0;
+    --accent: #F0E7FF;
+    --warn-bg: #FFF8EB;
+    --warn-border: #FFE4B5;
+    --success-bg: #ECFDF5;
+    --success-text: #065F46;
+    --danger-bg: #FEF2F2;
+    --danger-text: #991B1B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    padding: 40px 20px;
+  }
+  .container { max-width: 880px; margin: 0 auto; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 56px 24px 48px;
+    margin-bottom: 36px;
+    background: linear-gradient(135deg, #6C47FF 0%, #8B6FFF 100%);
+    border-radius: 20px;
+    color: #fff;
+  }
+  .header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
+  .header .sub { font-size: 1rem; opacity: 0.85; }
+
+  /* Table of Contents */
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+  }
+  .toc h3 { font-size: 1rem; color: var(--primary); margin-bottom: 12px; }
+  .toc ol { padding-left: 20px; }
+  .toc ol li { margin-bottom: 6px; }
+  .toc ol li a { color: var(--text); text-decoration: none; font-weight: 500; }
+  .toc ol li a:hover { color: var(--primary); }
+
+  /* Step Cards */
+  .step {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 32px 36px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.02);
+    border: 1px solid var(--border);
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    background: var(--accent);
+    color: var(--primary);
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .step-header h2 { font-size: 1.2rem; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge-must { background: #FEF2F2; color: #DC2626; }
+  .badge-opt { background: #F0E7FF; color: #6C47FF; }
+  .badge-info { background: #DBEAFE; color: #2563EB; }
+
+  /* Typography */
+  ol.steps { padding-left: 20px; margin: 8px 0; }
+  ol.steps > li { margin-bottom: 12px; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+
+  /* Inline code */
+  code {
+    background: #f1f3f8;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+    font-size: 0.88em;
+    color: #5534d9;
+  }
+
+  /* Code blocks */
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+    font-size: 0.88rem;
+    margin: 10px 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 0.92rem;
+  }
+  th {
+    background: #F5F3FF;
+    color: var(--primary);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 700;
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  table td:first-child { white-space: nowrap; font-weight: 600; }
+
+  /* Alert boxes */
+  .alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin: 14px 0;
+    font-size: 0.93rem;
+    border-left: 4px solid;
+  }
+  .alert-warn { background: var(--warn-bg); border-color: #E8A838; }
+  .alert-info { background: #EFF6FF; border-color: #3B82F6; }
+  .alert-success { background: var(--success-bg); border-color: #10B981; color: var(--success-text); }
+  .alert-danger { background: var(--danger-bg); border-color: #EF4444; color: var(--danger-text); }
+
+  /* Highlight box */
+  .highlight-box {
+    background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+    border: 1px solid #C4B5FD;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .highlight-box strong { color: #5B21B6; }
+
+  a { color: var(--primary); text-decoration: none; font-weight: 500; }
+  a:hover { text-decoration: underline; }
+  strong { font-weight: 700; }
+  .text-muted { color: var(--muted); font-size: 0.88rem; }
+  .text-danger { color: #DC2626; }
+
+  /* Section divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ====== Header ====== -->
+<div class="header">
+  <h1>Claude Code + CC-Switch + DeepSeek</h1>
+  <p class="sub">Windows 完整安装指南</p>
+  <p class="sub" style="font-size:0.85rem; margin-top:6px;">零基础可操作 · 绕过 Anthropic 登录 · 国内直连 · 成本约 10 元</p>
+</div>
+
+<!-- ====== 目录 ====== -->
+<div class="toc">
+  <h3>安装步骤总览（按顺序操作）</h3>
+  <ol>
+    <li><a href="#s0">前置准备：检查清单</a></li>
+    <li><a href="#s1">安装 Node.js（Claude Code 运行环境）</a></li>
+    <li><a href="#s2">安装 VS Code</a></li>
+    <li><a href="#s3">安装 Claude Code 扩展</a></li>
+    <li><a href="#s4">注册 DeepSeek，获取 API Key</a></li>
+    <li><a href="#s5">安装 CC-Switch（模型切换工具）</a></li>
+    <li><a href="#s6">CC-Switch 中配置 DeepSeek</a></li>
+    <li><a href="#s7">启用并启动 Claude Code</a></li>
+    <li><a href="#s8">验证安装</a></li>
+    <li><a href="#s9">日常使用流程</a></li>
+    <li><a href="#faq">常见问题排查</a></li>
+  </ol>
+</div>
+
+<!-- ====== S0 前置准备 ====== -->
+<div class="step" id="s0">
+  <div class="step-header">
+    <span class="step-num">0</span>
+    <h2>前置准备：开始前的检查清单</h2>
+  </div>
+
+  <table>
+    <tr><td>需要什么</td><td>说明</td></tr>
+    <tr><td>一台能上网的 Windows 电脑</td><td>Win10 或 Win11，Win7 不行</td></tr>
+    <tr><td>DeepSeek 账号</td><td>在 <code>platform.deepseek.com</code> 注册，手机号就能注册</td></tr>
+    <tr><td>10 元人民币</td><td>DeepSeek 充值最低 10 元，能用很久（每次对话几分钱）</td></tr>
+    <tr><td>约 20 分钟</td><td>从零到能用的总时间</td></tr>
+  </table>
+
+  <div class="alert alert-warn">
+    <strong>如果电脑上有"云壳系统"或其他公司 IT 安全管理软件</strong>，可能会拦截安装或 API 请求。建议先问公司 IT：是否允许自己装 VS Code 和外部软件。
+  </div>
+</div>
+
+
+<!-- ====== S1 Node.js ====== -->
+<div class="step" id="s1">
+  <div class="step-header">
+    <span class="step-num">1</span>
+    <h2>安装 Node.js <span class="badge badge-must">必须</span></h2>
+  </div>
+
+  <p>Claude Code 需要 Node.js 才能运行。这是最底层的基础环境。</p>
+
+  <ol class="steps">
+    <li>浏览器打开 <a href="https://nodejs.org" target="_blank">https://nodejs.org</a></li>
+    <li>点左边的 <strong>LTS</strong> 按钮（长期支持版，目前是 v24.x）<br>
+        <span class="text-muted">不要点右边的 Current 版，那是不稳定的尝鲜版</span></li>
+    <li>下载完成后得到一个 <code>node-v24.x.x-x64.msi</code> 文件，双击运行</li>
+    <li>一路 Next，但到 <strong>"Custom Setup"</strong> 页面时，注意看：
+      <ul>
+        <li>找到 <strong>"Add to PATH"</strong> 这一项</li>
+        <li>点它前面的图标，选择 <strong>"Will be installed on local hard drive"</strong></li>
+        <li>这确保 Node.js 能被系统全局识别</li>
+      </ul>
+    </li>
+    <li>其余全部 Next，Install，Finish</li>
+  </ol>
+
+  <p><strong>验证是否装好：</strong></p>
+  <ol>
+    <li>按键盘 <code>Win + R</code>，输入 <code>cmd</code>，回车</li>
+    <li>在黑色窗口输入以下命令，回车：</li>
+  </ol>
+  <div class="code-block">node --version</div>
+  <p>如果显示 <code>v24.x.x</code>（x 是数字），说明装好了。</p>
+
+  <div class="alert alert-danger">
+    <strong>如果提示 "node 不是内部或外部命令"</strong> → Node.js 没装上或没加入 PATH。<br>
+    解决：重新运行安装包，确认勾选 "Add to PATH"。装完重启电脑再试。
+  </div>
+</div>
+
+
+<!-- ====== S2 VS Code ====== -->
+<div class="step" id="s2">
+  <div class="step-header">
+    <span class="step-num">2</span>
+    <h2>安装 VS Code</h2>
+  </div>
+
+  <ol class="steps">
+    <li>浏览器打开 <a href="https://code.visualstudio.com" target="_blank">https://code.visualstudio.com</a></li>
+    <li>点蓝色大按钮 <strong>"Download for Windows"</strong></li>
+    <li>双击安装包，安装时建议勾选：
+      <ul>
+        <li>"Add 'Open with Code' action to Windows Explorer file context menu"</li>
+        <li>"Add 'Open with Code' action to Windows Explorer directory context menu"</li>
+      </ul>
+      这两项让你以后右键文件夹就能用 VS Code 打开。
+    </li>
+    <li>完成安装，打开 VS Code</li>
+  </ol>
+
+  <hr class="divider">
+  <h3 style="font-size:1.05rem; margin-bottom:10px;">把 VS Code 界面改成中文</h3>
+  <p>VS Code 默认是英文界面。如果你朋友不习惯英文，可以装中文语言包：</p>
+  <ol class="steps">
+    <li>点击左侧 <strong>扩展图标</strong>（四个方块），或按 <code>Ctrl + Shift + X</code></li>
+    <li>在搜索框输入：<strong>"Chinese"</strong></li>
+    <li>找到 <strong>"Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code"</strong><br>
+        发布者是 <strong>Microsoft</strong></li>
+    <li>点 <strong>Install</strong>（安装）</li>
+    <li>安装完成后，右下角会弹出提示：<strong>"Would you like to change VS Code's UI language to Chinese?"</strong><br>
+        点 <strong>"Change Language and Restart"</strong>（更改语言并重启）</li>
+    <li>VS Code 自动重启后就变成中文了</li>
+  </ol>
+
+  <div class="alert alert-info">
+    <strong>如果没有弹出切换提示：</strong>按 <code>Ctrl + Shift + P</code>，输入 <code>Configure Display Language</code>，选择 <code>zh-cn</code>，然后重启 VS Code。
+  </div>
+</div>
+
+
+<!-- ====== S3 Claude Code 扩展 ====== -->
+<div class="step" id="s3">
+  <div class="step-header">
+    <span class="step-num">3</span>
+    <h2>安装 Claude Code 扩展</h2>
+  </div>
+
+  <ol class="steps">
+    <li>打开 VS Code</li>
+    <li>点击左侧竖排工具栏的 <strong>扩展图标</strong>（四个小方块叠在一起的图标）<br>
+        或者直接按键盘 <code>Ctrl + Shift + X</code></li>
+    <li>在搜索框输入：<strong>"Claude Code"</strong></li>
+    <li>找到发布者为 <strong>"Anthropic"</strong> 的那个结果，点 <strong>Install</strong>（安装）</li>
+    <li>安装完成后，左侧工具栏会出现 Claude Code 图标（一个类似 ∞ 的符号）</li>
+  </ol>
+
+  <div class="alert alert-info">
+    <strong>点击 Claude Code 图标时可能会弹出 Anthropic 登录页面</strong>——先不管它，关掉。<br>
+    继续往下走，装完 CC-Switch 后这个登录页就不会再出现了。
+  </div>
+</div>
+
+
+<!-- ====== S4 DeepSeek ====== -->
+<div class="step" id="s4">
+  <div class="step-header">
+    <span class="step-num">4</span>
+    <h2>注册 DeepSeek 并获取 API Key <span class="badge badge-must">必须</span></h2>
+  </div>
+
+  <p>Claude Code 需要 AI 模型才能工作。我们用 DeepSeek 替代 Claude，因为：</p>
+  <ul>
+    <li>DeepSeek 是国内公司，直接访问，不需要翻墙</li>
+    <li>价格极低，10 块钱能用很久</li>
+    <li>效果足够好，能跑全部 Claude Code 功能</li>
+  </ul>
+
+  <hr class="divider">
+
+  <h3 style="font-size:1.05rem; margin-bottom:10px;">注册与充值</h3>
+  <ol class="steps">
+    <li>浏览器打开 <a href="https://platform.deepseek.com" target="_blank">https://platform.deepseek.com</a></li>
+    <li>点右上角注册，手机号就能注册（不需要国外邮箱）</li>
+    <li>登录后进入控制台</li>
+    <li>点左侧菜单 <strong>"API Keys"</strong></li>
+    <li>点 <strong>"创建 API Key"</strong>，取个名字比如 <code>claude-code</code></li>
+    <li><strong>Key 只显示一次！立刻复制保存到记事本</strong></li>
+    <li>找到 <strong>"充值"</strong> 入口，最低充 10 元即可</li>
+  </ol>
+
+  <div class="alert alert-warn">
+    <strong>Key 不要泄露给别人。</strong>它是花钱的凭证，别人拿到会用你的余额。<br>
+    Key 的格式是 <code>sk-</code> 开头的一长串字母数字。
+  </div>
+
+  <div class="alert alert-info">
+    <strong>关于模型选择：</strong>DeepSeek 新用户默认使用 V4 系列模型。<br>
+    旧模型 <code>deepseek-chat</code> 和 <code>deepseek-reasoner</code> 将于 2026-07-24 停用，不要用。
+  </div>
+</div>
+
+
+<!-- ====== S5 CC-Switch 安装 ====== -->
+<div class="step" id="s5">
+  <div class="step-header">
+    <span class="step-num">5</span>
+    <h2>安装 CC-Switch（模型切换工具）<span class="badge badge-must">核心</span></h2>
+  </div>
+
+  <p>CC-Switch 是一个桌面工具，它做的事情很简单：<strong>让 Claude Code 不去找 Anthropic，而是去找 DeepSeek</strong>。</p>
+
+  <div class="highlight-box">
+    <strong>为什么需要它？</strong><br>
+    Claude Code 默认只能用 Claude 模型（Anthropic 公司的）。国内用不了 Anthropic。<br>
+    CC-Switch 偷偷把 Claude Code 的"后台地址"改成 DeepSeek，这样你就能用了——不需要翻墙，不需要国外信用卡。
+  </div>
+
+  <h3 style="font-size:1.05rem; margin:16px 0 10px;">下载</h3>
+  <ol class="steps">
+    <li>浏览器打开 <a href="https://github.com/farion1231/cc-switch/releases" target="_blank">https://github.com/farion1231/cc-switch/releases</a></li>
+    <li>页面会列出所有版本，<strong>看最上面第一条</strong>（最新版）</li>
+    <li>往下翻到 <strong>"Assets"</strong>（文件列表）</li>
+    <li>找到 <strong><code>CC-Switch-vX.X.X-Windows.msi</code></strong>（安装版）</li>
+    <li>点击下载</li>
+  </ol>
+
+  <div class="alert alert-info">
+    <strong>GitHub 打不开或下载很慢？</strong>用这个加速站：<br>
+    <code>https://gh-proxy.com/https://github.com/farion1231/cc-switch/releases</code><br>
+    把页面里找到的 .msi 下载链接拼到 gh-proxy.com 后面即可。<br>
+    或者直接让已经下好的朋友传给你。
+  </div>
+
+  <p class="text-muted">注意：下载 <code>.msi</code> 后缀的安装版，不要下载 <code>Portable.zip</code> 免装版（免装版不能自动更新）。</p>
+
+  <h3 style="font-size:1.05rem; margin:16px 0 10px;">安装</h3>
+  <ol class="steps">
+    <li>双击下载好的 <code>CC-Switch-vX.X.X-Windows.msi</code></li>
+    <li>Windows 可能会弹出蓝色警告窗口：
+      <div class="alert alert-warn" style="margin:8px 0;">
+        <strong>"Windows Defender SmartScreen 阻止了无法识别的应用"</strong>
+      </div>
+      这是正常的，因为开源作者没有花钱买微软的代码签名证书（一年几千块）。<br>
+      操作：点 <strong>"更多信息"</strong> → 点 <strong>"仍然运行"</strong>
+    </li>
+    <li>进入安装向导后：Next → 选安装路径（默认即可）→ Next → Install → Finish</li>
+    <li>安装完成后桌面会出现 <strong>CC-Switch 图标</strong></li>
+  </ol>
+</div>
+
+
+<!-- ====== S6 配置 DeepSeek ====== -->
+<div class="step" id="s6">
+  <div class="step-header">
+    <span class="step-num">6</span>
+    <h2>在 CC-Switch 中配置 DeepSeek</h2>
+  </div>
+
+  <ol class="steps">
+    <li>双击桌面 <strong>CC-Switch 图标</strong> 打开程序</li>
+    <li>主界面目前是空的（还没添加任何模型）</li>
+    <li>点右上角的 <strong>＋</strong>（加号）按钮</li>
+    <li>弹出一个配置窗口，按下面的表格填写：</li>
+  </ol>
+
+  <table>
+    <tr><th>字段</th><th>填什么</th><th>说明</th></tr>
+    <tr>
+      <td>预设</td>
+      <td>下拉选择 <strong>DeepSeek</strong></td>
+      <td>会自动填充端点地址</td>
+    </tr>
+    <tr>
+      <td>端点地址<br>(Base URL)</td>
+      <td><code>https://api.deepseek.com/anthropic</code></td>
+      <td>选择 DeepSeek 预设后自动填充，不用手动改</td>
+    </tr>
+    <tr>
+      <td>API Key</td>
+      <td>粘贴你在第4步获取的 Key<br>（<code>sk-</code>开头那长串）</td>
+      <td>这是最重要的字段，填错全部白干</td>
+    </tr>
+  </table>
+
+  <p style="margin-top:14px;"><strong>然后是模型名称配置：</strong></p>
+
+  <table>
+    <tr><th>模型配置项</th><th>填的值</th><th>用途</th></tr>
+    <tr><td>主模型</td><td><code>deepseek-v4-pro</code></td><td>日常使用的主力模型</td></tr>
+    <tr><td>快速模型</td><td><code>deepseek-v4-flash</code></td><td>简单任务用，速度快</td></tr>
+    <tr><td>标准模型</td><td><code>deepseek-v4-pro</code></td><td>中等复杂度任务</td></tr>
+    <tr><td>顶级模型</td><td><code>deepseek-v4-pro</code></td><td>最高质量输出</td></tr>
+  </table>
+
+  <div class="alert alert-info">
+    <strong>如果想开启 100 万 Token 超长上下文：</strong><br>
+    主模型填 <code>deepseek-v4-pro[1m]</code>，快速模型填 <code>deepseek-v4-flash[1m]</code><br>
+    <code>[1m]</code> 就是把上下文窗口拉到 100 万 Token，适合处理超大文件。
+  </div>
+
+  <ol class="steps" start="5">
+    <li>全部填完后，点左下角的 <strong>"添加"</strong> 按钮</li>
+    <li>主界面出现一张 DeepSeek 卡片，说明添加成功</li>
+  </ol>
+</div>
+
+
+<!-- ====== S7 启用 ====== -->
+<div class="step" id="s7">
+  <div class="step-header">
+    <span class="step-num">7</span>
+    <h2>启用 DeepSeek 并启动 Claude Code</h2>
+  </div>
+
+  <ol class="steps">
+    <li>在 CC-Switch 主界面，点 DeepSeek 卡片上的 <strong>"启用"</strong> 按钮</li>
+    <li>卡片会高亮，CC-Switch 图标变绿 → 说明已启用</li>
+    <li>打开 VS Code，点击左侧 Claude Code 图标</li>
+    <li>之前的 Anthropic 登录页面不会再弹出了</li>
+  </ol>
+
+  <div class="highlight-box">
+    <strong>CC-Switch 做了什么？</strong><br>
+    它在后台修改了 Claude Code 的配置文件，把底层模型从 Anthropic Claude 切换到了 DeepSeek。<br>
+    等效于在配置文件里写入了：
+    <div class="code-block" style="margin-top:8px;">ANTHROPIC_BASE_URL = "https://api.deepseek.com/anthropic"
+ANTHROPIC_AUTH_TOKEN = "你的DeepSeek Key"</div>
+    所以 Claude Code 的所有请求都会发到 DeepSeek 而不是 Anthropic。<br>
+    <strong>不需要登录 Anthropic，不需要国外账号。</strong>
+  </div>
+</div>
+
+
+<!-- ====== S8 验证 ====== -->
+<div class="step" id="s8">
+  <div class="step-header">
+    <span class="step-num">8</span>
+    <h2>验证安装是否成功</h2>
+  </div>
+
+  <ol class="steps">
+    <li>在 Claude Code 输入框里输入：</li>
+  </ol>
+  <div class="code-block">你好，请简单介绍一下自己</div>
+  <ol class="steps" start="2">
+    <li>如果有正常的中文回复 → <strong>安装成功</strong></li>
+  </ol>
+
+  <div class="alert alert-success">
+    <strong>成功标志：</strong>Claude Code 能正常对话，输入输出不报错。
+  </div>
+
+  <div class="alert alert-danger">
+    <strong>如果提示 API 错误或认证失败：</strong>
+    <ul>
+      <li>检查 DeepSeek Key 是否粘贴正确（有没有多空格、少字母）</li>
+      <li>去 <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> 查看 Key 是否还有余额</li>
+      <li>确认 CC-Switch 中是"启用"状态（卡片高亮、图标绿色）</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ====== S9 日常使用 ====== -->
+<div class="step" id="s9">
+  <div class="step-header">
+    <span class="step-num">9</span>
+    <h2>日常使用流程</h2>
+  </div>
+
+  <p>安装是一次性的，之后每次使用很简单：</p>
+
+  <table>
+    <tr><th>步骤</th><th>操作</th></tr>
+    <tr><td>1</td><td>确认 CC-Switch 在运行（Windows 右下角系统托盘有图标）</td></tr>
+    <tr><td>2</td><td>确认图标是 <strong>绿色</strong>（绿色 = DeepSeek 启用中；灰色 = 未启用）</td></tr>
+    <tr><td>3</td><td>打开 VS Code</td></tr>
+    <tr><td>4</td><td>点击左侧 Claude Code 图标，开始对话</td></tr>
+  </table>
+
+  <p style="margin-top:12px;">CC-Switch 默认开机自动启动，不需要每次手动打开。</p>
+
+  <div class="alert alert-info">
+    <strong>切换模型：</strong>如果想换不同模型（比如从 V4-Pro 换到 V4-Flash），在 CC-Switch 中点击对应卡片切换即可。不需要重启 VS Code。
+  </div>
+</div>
+
+
+<!-- ====== FAQ ====== -->
+<div class="step" id="faq">
+  <div class="step-header">
+    <span class="step-num">?</span>
+    <h2>常见问题排查</h2>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th style="width:28%;">问题 / 报错信息</th><th style="width:32%;">为什么会出现</th><th>解决方法</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>"node 不是内部或外部命令"</strong></td>
+        <td>Node.js 安装时没勾选 "Add to PATH"，系统找不到 node 这个程序</td>
+        <td>重新运行 Node.js 安装包，在 Custom Setup 页面确保 "Add to PATH" 选中。装完<strong>重启电脑</strong>再试。</td>
+      </tr>
+      <tr>
+        <td><strong>Claude Code 图标没在 VS Code 左侧出现</strong></td>
+        <td>扩展没装上，或 VS Code 扩展宿主没刷新</td>
+        <td>完全<strong>关闭</strong> VS Code（不是最小化到任务栏），再重新打开。如果还是没有，去扩展市场重新搜 "Claude Code" 确认已安装。</td>
+      </tr>
+      <tr>
+        <td><strong>点了 Claude Code 图标弹出 Anthropic 登录页面</strong></td>
+        <td>CC-Switch 没有成功启用。Claude Code 还在走默认的 Anthropic 通道</td>
+        <td>① 打开 CC-Switch → 确认 DeepSeek 卡片是<strong>"启用"状态</strong>、图标是绿色<br>② <strong>完全退出</strong> VS Code 再重开<br>③ 如果还弹，检查 CC-Switch 中 Key 是否粘贴正确</td>
+      </tr>
+      <tr>
+        <td><strong>"401 Unauthorized" 或 "Authentication failed"</strong></td>
+        <td>DeepSeek API Key 错误：可能粘贴少了字母、多了空格、或者 Key 已被删除</td>
+        <td>去 <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com/api_keys</a> → 重新创建一个新 Key → 完整复制 → 粘贴到 CC-Switch 的 API Key 栏 → 重新点"启用"</td>
+      </tr>
+      <tr>
+        <td><strong>"402 Payment Required" 或 "Insufficient balance"</strong></td>
+        <td>DeepSeek 账户余额用完了</td>
+        <td>去 <a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a> → 充值。最低 10 元，充完等 1 分钟生效。</td>
+      </tr>
+      <tr>
+        <td><strong>"Connection refused" 或 "Network error" 或请求超时</strong></td>
+        <td>网络到 DeepSeek API 不通。可能原因：<br>① 代理/VPN 拦截了 api.deepseek.com<br>② 公司防火墙拦截了对外 API 请求<br>③ DeepSeek 服务端临时抽风</td>
+        <td>① 关掉代理/VPN 试试<br>② 浏览器打开 <code>https://api.deepseek.com</code> 看能否显示（能显示说明网络通）<br>③ 等几分钟再试，有时是服务端临时拥堵</td>
+      </tr>
+      <tr>
+        <td><strong>回复速度非常慢（等几十秒才吐一个字）</strong></td>
+        <td>可能选的是深度推理模型，或 DeepSeek 当前负载高</td>
+        <td>在 CC-Switch 中确认模型选的是 <code>deepseek-v4-flash</code>（快速模型）而不是 V4-Pro。Flash 响应快得多。</td>
+      </tr>
+      <tr>
+        <td><strong>回复内容是乱码、英文、或者完全不相关</strong></td>
+        <td>端点地址不对。如果用了 <code>/v1</code> 结尾的地址，API 格式不匹配</td>
+        <td>确认 CC-Switch 中端点地址是：<br><code>https://api.deepseek.com/<strong>anthropic</strong></code><br><strong>不是</strong> <code>/v1</code>、<code>/v1/chat</code> 等。选 DeepSeek 预设会自动填对。</td>
+      </tr>
+      <tr>
+        <td><strong>"Rate limit exceeded" 或 "Too many requests"</strong></td>
+        <td>短时间内请求太频繁，触发了 DeepSeek 的频率限制</td>
+        <td>等 30 秒到 1 分钟再发。DeepSeek 免费/低价用户有并发限制，这是正常的。</td>
+      </tr>
+      <tr>
+        <td><strong>CC-Switch 安装时 Windows 弹出蓝色拦截窗口</strong><br>（"Windows 已保护你的电脑"）</td>
+        <td>CC-Switch 没有微软代码签名证书（开源作者买不起，一年几千块）</td>
+        <td>点 <strong>"更多信息"</strong> → <strong>"仍然运行"</strong>。CC-Switch 是 GitHub 开源项目，代码公开，不存在病毒。</td>
+      </tr>
+      <tr>
+        <td><strong>GitHub 完全打不开、下载不动</strong></td>
+        <td>部分网络运营商屏蔽了 GitHub 的访问</td>
+        <td>① 用 gh-proxy 加速：<code>https://gh-proxy.com/</code> + 文件链接<br>② 让能打开的朋友下载后通过微信/QQ 传 .msi 文件给你</td>
+      </tr>
+      <tr>
+        <td><strong>装完所有步骤，输入问题后什么反应都没有</strong></td>
+        <td>通常是 CC-Switch 没启用，或者 VS Code 没检测到配置变更</td>
+        <td>① 确认 CC-Switch 图标是绿色<br>② 点 CC-Switch 的"禁用"再重新"启用"一次<br>③ 完全退出 VS Code → 重新打开<br>④ 还不行就重启电脑</td>
+      </tr>
+      <tr>
+        <td><strong>DeepSeek 后台找不到充值入口</strong></td>
+        <td>后台菜单偶尔会调整位置</td>
+        <td>登录后看左侧菜单："用量充值" / "Billing" / "充值" / "Top Up"。如果实在找不到，联系 DeepSeek 客服。</td>
+      </tr>
+      <tr>
+        <td><strong>不确定 CC-Switch 是否在运行</strong></td>
+        <td>—</td>
+        <td>看 Windows 右下角系统托盘（任务栏右侧小图标区，点 <code>^</code> 展开），有 CC-Switch 图标就是正在运行。图标绿色=已启用，灰色=未启用。</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ====== Footer ====== -->
+<div class="footer">
+  <p>整理于 2026.05</p>
+  <p style="margin-top:4px;">CC-Switch 开源项目：<a href="https://github.com/farion1231/cc-switch" target="_blank">github.com/farion1231/cc-switch</a></p>
+</div>
+
+</div>
+</body>
+</html>

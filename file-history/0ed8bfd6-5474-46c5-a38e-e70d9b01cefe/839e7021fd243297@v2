@@ -1,0 +1,227 @@
+/**
+ * 定向拉取指定客户的聊天历史
+ */
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CHAT_DIR = path.join(DATA_DIR, 'chat_history');
+const MSG_COUNT = 50;
+const MAX_PAGES = 10;
+
+const TARGETS = [
+  { name: 'Abigail Mutuku', cid: '133341149734-2500000853693#11011@icbu' },
+  { name: 'Noslen Gonzalez', cid: '1507604597007-2500000853693#11011@icbu' },
+  { name: 'ivy quarcoo', cid: '17301762067-2500000853693#11011@icbu' },
+  { name: 'Elton daNadia', cid: '1507597605831-2500000853693#11011@icbu' },
+  { name: 'Samia Guenad', cid: '1507567810538-2500000853693#11011@icbu' },
+  { name: 'RebeccaNytanieAude SEHE', cid: null },
+];
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+async function main() {
+  log('启动 Chrome...');
+  const browser = await chromium.launchPersistentContext(PROFILE, {
+    channel: 'chrome',
+    headless: false,
+    viewport: { width: 1440, height: 900 },
+  });
+
+  const page = await browser.newPage();
+  await page.goto('https://crm.xiaoman.cn/im/', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+
+  // 登录检测
+  if (page.url().includes('login')) {
+    log('请在浏览器中登录 OKKI...');
+    const start = Date.now();
+    while (Date.now() - start < 5 * 60 * 1000) {
+      if (!page.url().includes('login')) { log('登录成功!'); break; }
+      await sleep(2000);
+    }
+  }
+
+  await sleep(3000);
+
+  // 等onetalk
+  let otFrame = null;
+  for (let i = 0; i < 30; i++) {
+    otFrame = page.frames().find(f => f.url().startsWith('https://onetalk.alibaba.com/'));
+    if (otFrame) break;
+    await sleep(2000);
+  }
+  if (!otFrame) { log('onetalk未找到'); await browser.close(); return; }
+  log('onetalk已加载');
+
+  // 如果Rebecca没找到cid，先搜索
+  const rebecca = TARGETS.find(t => t.name === 'RebeccaNytanieAude SEHE');
+  if (rebecca && !rebecca.cid) {
+    rebecca.cid = await otFrame.evaluate((name) => {
+      const d = window.__conversationListFullData__ || [];
+      const c = d.find(x => x.name === name);
+      return c ? c.cid : null;
+    }, rebecca.name);
+    log('Rebecca cid: ' + (rebecca.cid || 'NOT FOUND'));
+  }
+
+  // CDP连接
+  const cdpClient = await page.context().newCDPSession(page);
+  const targets = await cdpClient.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { log('CDP target未找到'); await browser.close(); return; }
+  const attached = await cdpClient.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+  const sessionId = attached.sessionId;
+  log('CDP已连接');
+
+  // 安装LWP
+  await sendToTarget(cdpClient, sessionId, 1, `
+    (function() {
+      var _send = WebSocket.prototype.send;
+      var _ae = WebSocket.prototype.addEventListener;
+      window.__lwpPending = {};
+      window.__lwpSeq = 0;
+      WebSocket.prototype.send = function(data) {
+        if (!window.__lwpWs && this.readyState === 1) {
+          window.__lwpWs = this;
+          _ae.call(this, 'message', function(event) {
+            try {
+              var raw = typeof event.data === 'string' ? event.data : '';
+              if (raw.indexOf('\"code\"') < 0) return;
+              var parsed = JSON.parse(raw);
+              var mid = parsed.headers && parsed.headers.mid;
+              if (mid && window.__lwpPending[mid]) {
+                var p = window.__lwpPending[mid];
+                delete window.__lwpPending[mid];
+                p.resolve(parsed);
+              }
+            } catch(e) {}
+          });
+        }
+        return _send.call(this, data);
+      };
+      window.__lwpRequest = function(lwpPath, body) {
+        return new Promise(function(resolve, reject) {
+          var ws = window.__lwpWs;
+          if (!ws || ws.readyState !== 1) { reject(new Error('WS not ready')); return; }
+          var mid = Date.now() + ' ' + (++window.__lwpSeq);
+          var req = JSON.stringify({ lwp: lwpPath, headers: { mid: mid }, body: body });
+          window.__lwpPending[mid] = { resolve: resolve, reject: reject };
+          ws.send(req);
+          setTimeout(function() {
+            if (window.__lwpPending[mid]) { delete window.__lwpPending[mid]; reject(new Error('timeout')); }
+          }, 30000);
+        });
+      };
+      return 'ok';
+    })()
+  `);
+  await sleep(2000);
+
+  // 等待WS
+  await sleep(15000);
+  let msgId = 100;
+
+  const validTargets = TARGETS.filter(t => t.cid);
+  for (let i = 0; i < validTargets.length; i++) {
+    const t = validTargets[i];
+    log(`拉取: ${t.name}...`);
+
+    const allMessages = [];
+    let cursor = 9007199254740991;
+    let pageNum = 0;
+
+    while (pageNum < MAX_PAGES) {
+      const raw = await evalInIframe(cdpClient, sessionId, msgId++,
+        `(async function() {
+          try {
+            var result = await window.__lwpRequest('/r/MessageManager/listUserMessages', ['${t.cid}', false, ${cursor}, ${MSG_COUNT}, false]);
+            return JSON.stringify(result);
+          } catch(e) { return JSON.stringify({ __error: e.message }); }
+        })()`,
+        true
+      );
+
+      await sleep(1500);
+
+      if (!raw || raw.__error) break;
+
+      let response;
+      try { response = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { break; }
+      if (response.code !== 200) break;
+
+      const body = response.body;
+      if (!body?.userMessageModels || body.userMessageModels.length === 0) break;
+
+      allMessages.push(...body.userMessageModels);
+
+      if (body.userMessageModels.length < MSG_COUNT || !body.nextCursor) break;
+      cursor = body.nextCursor;
+      pageNum++;
+    }
+
+    // 保存
+    const safeName = t.cid.replace(/[<>:"/\\|?*#@]/g, '_').substring(0, 200);
+    const output = {
+      cid: t.cid,
+      name: t.name,
+      fetchedAt: new Date().toISOString(),
+      totalMessages: allMessages.length,
+      messages: allMessages,
+    };
+    fs.writeFileSync(path.join(CHAT_DIR, safeName + '.json'), JSON.stringify(output, null, 2));
+    log(`  ${t.name}: ${allMessages.length} 条消息`);
+
+    // 打印最近3条消息
+    for (const m of allMessages.slice(-3)) {
+      const ts = new Date(m.message?.createAt || 0).toISOString();
+      const sender = m.message?.sender?.uid === '2500000853693@icbu' ? '我' : '客';
+      const content = (m.message?.content?.text?.content || '').slice(0, 120);
+      log(`    ${ts} ${sender}: ${content}`);
+    }
+  }
+
+  await browser.close();
+  log('完成');
+}
+
+async function evalInIframe(cdpClient, sessionId, id, expression, awaitPromise) {
+  const raw = await sendToTarget(cdpClient, sessionId, id, expression, awaitPromise);
+  if (!raw) return raw;
+  try { return JSON.parse(raw); } catch (e) { return raw; }
+}
+
+async function sendToTarget(cdpClient, sessionId, id, expression, awaitPromise) {
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(null), 35000);
+    const handler = (msg) => {
+      if (sessionId && msg.sessionId !== sessionId) return;
+      try {
+        const m = JSON.parse(msg.message);
+        if (m.id === id) {
+          clearTimeout(timeout);
+          cdpClient.off('Target.receivedMessageFromTarget', handler);
+          if (m.result?.result?.value !== null && m.result?.result?.value !== undefined) {
+            resolve(m.result.result.value);
+          } else if (m.result) {
+            resolve(m.result);
+          } else {
+            resolve(null);
+          }
+        }
+      } catch (e) { clearTimeout(timeout); resolve(null); }
+    };
+    cdpClient.on('Target.receivedMessageFromTarget', handler);
+    cdpClient.send('Target.sendMessageToTarget', {
+      sessionId: sessionId,
+      message: JSON.stringify({
+        id, method: 'Runtime.evaluate',
+        params: { expression, awaitPromise: !!awaitPromise, returnByValue: true }
+      })
+    }).catch(() => { clearTimeout(timeout); resolve(null); });
+  });
+}
+
+main().catch(e => { console.error(e.message); process.exit(1); });

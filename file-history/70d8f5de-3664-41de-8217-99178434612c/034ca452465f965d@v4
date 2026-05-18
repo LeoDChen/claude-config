@@ -1,0 +1,114 @@
+# AI外贸顾问系统 — 项目重启
+
+**创建日期**：2026-04-29  
+**最后更新**：2026-04-29  
+**当前阶段**：Phase 1-4 完成（全系统就绪），Phase 5 进行中（持续优化）
+
+---
+
+## 项目目标
+
+把 Claude Code 打造为专属外贸军师——自动监控 300+ 小满客户，进行专业诊断，生成可执行的话术和策略。
+
+## 核心文件位置
+
+### 方案文件
+`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+
+### 知识库（6个文件）
+```
+D:\ClaudeWorkspace\08_客户跟进\knowledge\
+├── factory.md              ← 工厂硬实力/品牌背书/技术/品类
+├── business-rules.md       ← 商务规则 + 交期标准 + 现货判断 + 报价区分
+├── value-translation.md    ← 16个卖点体感翻译（禁止说法 vs 正确表述）
+├── market-psychology.md    ← 5区域客户决策心理 + 策略
+├── hooks-library.md        ← 7类钩子 × 素材状态 × 话术模板 × 制备优先级
+└── system-prompt.md        ← 五步分析引擎 + 报价区分 + 交期判断 + 禁止事项
+```
+
+### 分析引擎 + 脚本
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\scripts\
+├── snapshot.mjs              ← 索引快照（60秒扫300人，只抓列表）
+├── diff.mjs                  ← 快照对比引擎（P0-P3自动分类 + 终端摘要）
+├── daily-check.mjs           ← 每日巡检调度器（snapshot → diff → 报告JSON）
+├── generate-daily-report.mjs ← 每日战报生成器（Markdown + CC分析提示词）
+├── generate-weekly-report.mjs← 每周巡检报告（7天+休眠客户批量激活）
+├── scraper.mjs               ← (已有) Playwright全量深挖
+├── run-scrape.mjs            ← (已有) 全流程编排（采集→分类→报告）
+├── classifier.mjs            ← (已有) 11类S/A/B/C分类引擎
+└── generate-action-plan.mjs  ← (已有) Word方案生成器
+```
+
+### 客户数据
+```
+D:\ClaudeWorkspace\08_客户跟进\Okki\data\
+├── snapshots/           ← 索引快照 JSON（每次60秒产出）
+├── diffs/               ← 对比结果 JSON
+├── daily-reports/       ← 每日摘要 JSON（P0/P1客户列表）
+├── 客户档案_*.json       ← 全量整合客户数据（TM+邮件+分类）
+└── 数据快照_*.json       ← 原始爬取数据
+
+D:\ClaudeWorkspace\08_客户跟进\Okki\reports\
+├── 每日战报_*.md         ← P0/P1跟进清单 + CC分析提示
+└── 每周巡检_*.md         ← 休眠客户批量激活方案
+```
+
+### 工厂背景
+`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+
+---
+
+## 新对话重启提示词
+
+复制以下内容发给 CC 即可恢复项目：
+
+> 我正在做一个 AI 外贸顾问系统项目。请先读取以下文件了解全貌：
+>
+> 1. 方案文件：`C:\Users\Administrator\.claude\plans\1-2-3-crm-4-crm-iridescent-donut.md`
+> 2. 知识库目录：`D:\ClaudeWorkspace\08_客户跟进\knowledge\`（6个文件全部读取）
+> 3. 工厂背景：`D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt`
+> 4. 最新客户快照：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\snapshots\`（找最新文件）
+> 5. 最新每日报告：`D:\ClaudeWorkspace\08_客户跟进\Okki\data\daily-reports\`（找最新文件）
+>
+> 读取完毕后告诉我当前项目状态和下一步该做什么。
+
+**如果是继续处理某个具体客户**，在上述提示词后追加：
+> 请针对客户 {客户名} 运行完整的五步分析（画像→卡点→策略→话术→分支预演）。先到 `D:\ClaudeWorkspace\08_客户跟进\Okki\data\客户档案_*.json` 中找到该客户的完整对话。
+
+---
+
+## 日常操作流
+
+```
+每天早上 9:00
+  ↓
+node daily-check.mjs           ← 快照 + 对比 + 每日JSON
+  ↓
+node generate-daily-report.mjs ← 生成可读战报
+  ↓
+打开 reports/每日战报_*.md     ← 查看P0客户列表
+  ↓
+复制"CC分析提示"发给CC          ← CC读对话+加载知识库→五步分析
+  ↓
+审核话术 → 发送给客户           ← 人做最后审核
+
+每周一
+  ↓
+node generate-weekly-report.mjs ← 休眠客户批量激活方案
+```
+
+## 当前进度
+
+| 阶段 | 状态 | 备注 |
+|------|------|------|
+| Phase 1：知识库构建 | ✅ | 6个文件（factory/rules/translation/psychology/hooks/system-prompt） |
+| Phase 2：分析引擎 | ✅ | azaan ss 8.5/10，amer ly 8/10，DeepSeek双审通过 |
+| Phase 3：数据采集升级 | ✅ | 增量快照 + 对比引擎 + 每日调度 |
+| Phase 4：报告系统 | ✅ | P0实时/P1每日/P2每周三级报告 |
+| Phase 5：持续优化 | ⏳ | 素材积累 + 知识扩展 + 双AI迭代 |
+
+## 讨论记录
+
+- 第一轮方案讨论（含DeepSeek协作）：桌面 `0101.txt`
+- DeepSeek第二轮评审：对话中

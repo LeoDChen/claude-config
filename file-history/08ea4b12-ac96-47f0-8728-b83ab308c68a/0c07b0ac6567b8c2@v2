@@ -1,0 +1,222 @@
+/**
+ * 直接从window变量提取小满TM全部客户数据（绕过虚拟滚动DOM限制）
+ * 用法: node extract-full-data.mjs
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const SNAPSHOT_DIR = join(DATA_DIR, 'snapshots');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(SNAPSHOT_DIR)) mkdirSync(SNAPSHOT_DIR, { recursive: true });
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+async function main() {
+  console.log('[extract] 连接小满...');
+  const { talkFrame } = await connect();
+
+  // 直接从window变量提取数据
+  const extracted = await talkFrame.evaluate(() => {
+    const result = {
+      sources: {},
+      totalUnique: 0,
+      customers: [],
+      errors: [],
+    };
+
+    // 尝试多个数据源
+    const sourceKeys = [
+      '__conversationListFullData__',
+      '__conversationListMapFullData__',
+      '__conversationListData__',
+    ];
+
+    for (const key of sourceKeys) {
+      try {
+        const raw = window[key];
+        if (raw === undefined || raw === null) {
+          result.sources[key] = 'not found';
+          continue;
+        }
+
+        // 可能是Map/数组/对象
+        if (raw instanceof Map) {
+          result.sources[key] = `Map with ${raw.size} entries`;
+          const entries = [];
+          raw.forEach((value, key) => {
+            entries.push({ key, value });
+          });
+          result.sources[key + '_entries'] = entries.length;
+          if (entries.length > 0) {
+            result.sources[key + '_sampleKey'] = JSON.stringify(entries[0].key).substring(0, 200);
+            result.sources[key + '_sampleValue'] = JSON.stringify(entries[0].value).substring(0, 500);
+          }
+        } else if (Array.isArray(raw)) {
+          result.sources[key] = `Array with ${raw.length} items`;
+          if (raw.length > 0) {
+            result.sources[key + '_sample'] = JSON.stringify(raw[0]).substring(0, 500);
+          }
+        } else if (typeof raw === 'object') {
+          const keys = Object.keys(raw);
+          result.sources[key] = `Object with ${keys.length} keys: ${keys.slice(0, 10).join(', ')}`;
+          if (keys.length > 0) {
+            const firstKey = keys[0];
+            result.sources[key + '_sample'] = JSON.stringify(raw[firstKey]).substring(0, 500);
+          }
+        } else {
+          result.sources[key] = `typeof ${typeof raw}`;
+        }
+      } catch (e) {
+        result.errors.push(`${key}: ${e.message}`);
+      }
+    }
+
+    // 尝试从全局变量提取客户列表
+    // 常见模式: 数据可能在闭包内，但List组件的state暴露在window
+    const allWindowKeys = Object.keys(window).filter(k =>
+      !k.startsWith('on') && typeof window[k] !== 'function' &&
+      k !== 'window' && k !== 'self' && k !== 'top' && k !== 'parent'
+    );
+
+    result.allCustomKeys = allWindowKeys.filter(k =>
+      k.includes('contact') || k.includes('list') || k.includes('customer') ||
+      k.includes('message') || k.includes('chat') || k.includes('conversation') ||
+      k.includes('im') || k.includes('data') || k.includes('store') ||
+      k.includes('state')
+    );
+
+    return result;
+  });
+
+  console.log('=== 数据源分析 ===');
+  for (const [key, value] of Object.entries(extracted.sources)) {
+    console.log(`  ${key}: ${value}`);
+  }
+  console.log('\n自定义数据key:', extracted.allCustomKeys);
+  if (extracted.errors.length > 0) {
+    console.log('\n错误:', extracted.errors);
+  }
+
+  // 如果有Array类型的数据源，直接提取所有客户
+  let rawData = null;
+
+  // 先尝试 Array
+  const arrayResult = await talkFrame.evaluate(() => {
+    // 检查所有可能的全局变量
+    const dataSources = [];
+    for (const key of Object.keys(window)) {
+      if (key.startsWith('__') && key.includes('conversation')) {
+        try {
+          const val = window[key];
+          if (Array.isArray(val)) {
+            dataSources.push({ key, type: 'array', length: val.length });
+          } else if (val instanceof Map) {
+            dataSources.push({ key, type: 'map', size: val.size });
+          } else if (typeof val === 'object' && val !== null) {
+            dataSources.push({ key, type: 'object', keys: Object.keys(val).length });
+          }
+        } catch (e) {}
+      }
+    }
+    return dataSources;
+  });
+
+  console.log('\n=== 找到的数据源 ===');
+  console.log(JSON.stringify(arrayResult, null, 2));
+
+  // 如果没有直接的Array，试试从Map/Object中提取
+  const customerList = await talkFrame.evaluate(() => {
+    // 尝试多种路径提取客户列表
+    const data = window.__conversationListFullData__ ||
+      window.__conversationListMapFullData__ ||
+      window.__conversationListData__;
+
+    if (!data) return null;
+
+    let entries = [];
+
+    if (data instanceof Map) {
+      data.forEach((value, key) => {
+        entries.push({ key, value });
+      });
+    } else if (Array.isArray(data)) {
+      entries = data;
+    } else if (typeof data === 'object') {
+      entries = Object.entries(data).map(([key, value]) => ({ key, value }));
+    }
+
+    // 尝试解析每个entry中的客户信息
+    const customers = entries.map(e => {
+      const v = e.value || e;
+      const k = e.key || '';
+
+      let name = '';
+      let lastMsg = '';
+      let lastTime = '';
+      let isUnread = false;
+
+      if (typeof v === 'object' && v !== null) {
+        name = v.name || v.buyerName || v.contactName || v.companyName || '';
+        lastMsg = (v.lastMessage || v.latestMsg || v.summary || '').substring(0, 200);
+        lastTime = v.lastTime || v.lastContactTime || v.time || '';
+        isUnread = v.unread || v.isUnread || v.unreadCount > 0 || false;
+      } else {
+        // 如果value是简单类型，key可能是名字
+        name = String(k);
+        lastMsg = String(v).substring(0, 200);
+      }
+
+      return { name, lastMsg, lastTime, isUnread };
+    });
+
+    return customers.filter(c => c.name && c.name !== 'undefined');
+  });
+
+  if (customerList && customerList.length > 0) {
+    console.log(`\n✅ 成功提取 ${customerList.length} 个客户!`);
+
+    // 保存
+    const now = new Date();
+    const dateStr = now.toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    const filename = `full_customers_${dateStr}.json`;
+
+    const snapshot = {
+      capturedAt: now.toISOString(),
+      totalCustomers: customerList.length,
+      unreadCount: customerList.filter(c => c.isUnread).length,
+      method: 'window-variable-extraction',
+      customers: customerList,
+    };
+
+    writeFileSync(join(SNAPSHOT_DIR, filename), JSON.stringify(snapshot, null, 2));
+    console.log(`   已保存: ${filename}`);
+
+    // 打印前10个
+    console.log('\n前10个客户:');
+    customerList.slice(0, 10).forEach((c, i) => {
+      console.log(`  ${i+1}. ${c.name} | 未读:${c.isUnread} | 时间:${c.lastTime} | ${(c.lastMsg||'').substring(0,50)}`);
+    });
+  } else {
+    console.log('\n⚠️ 未能从window变量提取客户列表');
+    console.log('需要进一步分析数据结构');
+  }
+}
+
+main().catch(err => {
+  console.error('[extract] 错误:', err.message);
+  process.exit(1);
+});

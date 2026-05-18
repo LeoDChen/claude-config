@@ -1,0 +1,186 @@
+---
+date: 2026-05-09
+type: 经验库
+status: 持续更新
+---
+
+# 技术参考汇总
+
+> MCP 配置、API 路径、脚本参数、环境配置、Chrome 路径等技术事实
+
+---
+
+## Chrome 相关
+
+### 安装路径（用户级安装）
+```
+C:\Users\Administrator\AppData\Local\Google\Chrome\Application\chrome.exe
+```
+不在 Program Files，不在系统 PATH。`where chrome` 在 CMD 中可以找到但 bash 环境路径映射不同。
+
+### CDP 启动命令（Win+R 粘贴）
+```
+"C:\Users\Administrator\AppData\Local\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
+```
+
+### OKKI 登录 Profile
+- Profile 4 = 云超数码（OKKI 已登录）
+- 路径：`C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Profile 4`
+- Playwright 复用方式：`launchPersistentContext` 指向 Profile 4 目录
+
+---
+
+## 模型代理配置
+
+### CC-Switch 代理
+- 端点：`http://127.0.0.1:15721`
+- 模型：`claude-sonnet-4-6[1m]`
+- 最大上下文：1,000,000 tokens（通过 `CLAUDE_CODE_MAX_CONTEXT_TOKENS` 环境变量）
+
+### GrsAI MCP
+- API Key：`sk-5d0b88ba7e0945d79213682dc06e0119`
+- API Base：`https://grsai.dakka.com.cn`
+- 可用模型：`nano-banana`、`gpt-image-2`
+- `nano-banana-pro` 不可用（404）
+- MCP 服务器：`C:\Users\Administrator\.claude\mcp-servers\grsai\server.mjs`
+- 图片保存：`D:\ClaudeWorkspace\01_P4P\主图素材\`
+
+---
+
+## OKKI 数据文件
+
+### 会话元数据
+- 最新：`data/tm_conversations_latest.json`（466条，393KB，2026-05-08）
+- 全量：`data/tm_conversations_full.json`（453条，403KB，2026-05-05）
+- 精简：`data/tm_conversations_compact.json`（466条，399KB，2026-05-05）
+
+### 聊天历史
+- `data/chat_history/{conversationId}.json`（467个文件）
+
+### 客户详情
+- `data/customers/{buyerId}.json`（346个文件）
+
+### 快照
+- `data/snapshots/snapshot_full_2026-04-29T11-52-55.json`
+- `data/snapshots/full_customers_2026-04-29T12-04-33.json`
+
+### 差异
+- `data/diffs/diff_2026-04-30T02-52-18.json`
+
+---
+
+## 一键同步命令
+```bash
+cd D:\ClaudeWorkspace\08_客户跟进\Okki
+node scripts/sync_okki.js
+```
+
+---
+
+## OKKI 平台消息过滤
+
+以下为 OKKI 系统自动推送，不是客户消息：
+
+| 消息内容（英文） | 中文含义 |
+|---|---|
+| `Since you have read the conversation, the automatic reception will no longer intervene in this session.` | 你介入了会话，自动接待停止 |
+| `You have a visitor. Follow up with them as soon as possible.` | 有访客，请尽快跟进 |
+| `This buyer has been pre-screened and has a clear request. Please respond...` | 买家预筛选提示 |
+| `买家有流失风险，AI给您生成了一条回复建议，去看看` | 流失预警 |
+| `当前买家首次给您发消息，建议查看买家特征...` | 新买家提示 |
+| `阿里国际Marco大模型翻译` | AI翻译标签 |
+| `反馈` | 平台反馈标签 |
+| `一旦离开平台发生纠纷或遭遇欺诈，您的权益将无法得到平台保障...` | 站外交易合规警告 |
+
+---
+
+## GrsAI 主图合成
+
+### 产品特征坐标（800x800 产品图）
+| 特征 | 坐标 |
+|------|------|
+| 双向拉链 | x≈421, y=100~745 |
+| 手部翻转袖口 | ~(100, 300) |
+| 脚部翻转裤脚 | ~(175, 690) |
+| 领口拉链盖 | ~(421, 140) |
+| 领口尺码标 | ~(320, 80) |
+
+### 合成脚本
+- `compose.cjs`：产品图 → 1600x1600 标注主图（使用 sharp）
+- `detect.cjs`：特征检测（拉链、袖口、领口坐标识别）
+- `analyze.cjs` / `analyze2.cjs`：色彩、布局、标注元素分析
+
+---
+
+## PI 生成规则
+
+| 规则 | 内容 |
+|------|------|
+| 买方地址 | 有货代填货代发货地址，无货代填收货地址 |
+| 买家信息 | 只填用户提供的内容，没给的不填 |
+| 语言 | 全英文，产品名固定翻译（婴儿布尿裤 = Baby Cloth Diaper） |
+| 报价有效期 | PI制作日期 + 1个月 |
+| Trade Terms | EXW / 7-15 days after payment |
+| 运输方式 | 用户必须提供，默认不设值 |
+
+---
+
+## P4P 数据基线
+
+| 指标 | 数值 |
+|------|------|
+| 全店产品数 | 517 |
+| P4P 推广数 | 87 |
+| 未推广数 | 395 |
+| 日预算版日预算 | ¥175/天 |
+| 智投版日预算 | ¥111/天 |
+| 日预算版单商机成本 | ¥23.4 |
+| 智投版单商机成本 | ¥40.9 |
+| 日预算版日均商机 | 7.6 |
+| 智投版日均商机 | 3.0 |
+
+---
+
+## MOQ 规则
+
+| 订单类型 | MOQ |
+|---------|------|
+| 定制（OEM/ODM） | 单款单色单码 500 件（硬性底线） |
+| 现货（RTS） | 按产品链接起订量；链接起订量 > 100 件时报 10 件 |
+
+---
+
+## 运费报价规则
+
+| 场景 | 规则 |
+|------|------|
+| 客户未给地址 | 只报产品价，不谈运费 |
+| 客户有中国货代（场景B） | 国内运输 + 15-25%。几件样品国内仓库 ≈ $2-3 |
+| 客户无中国货代（场景A） | 自己联系货代询价 + 15-25% 报给客户 |
+| 硬性原则 | 绝不跟客户说"运输自理"，所有物流由工厂端操作 |
+
+---
+
+## 工厂档案路径
+```
+D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt
+```
+涉及工厂资质、认证、产能、合作方的任何描述，必须先读此文件原文。
+
+---
+
+## OB Vault 路径
+```
+E:\道友的宝贝\道友的宝贝\对话归档\CC\
+```
+所有"保存到OB"操作存到此目录。路径使用绝对路径，不使用 workspace 内的 `07_归档`。
+
+---
+
+## Node.js 依赖（package.json）
+- `docx` — Word 报告生成
+- `exceljs`、`xlsx` — Excel 处理
+- `pdfkit` — PDF 生成
+- `pptxgenjs` — PPT 生成
+- `tesseract.js` — OCR
+- `playwright` — 浏览器自动化

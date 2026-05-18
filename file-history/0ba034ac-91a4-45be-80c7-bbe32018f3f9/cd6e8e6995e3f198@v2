@@ -1,0 +1,652 @@
+/**
+ * AI外贸顾问 — Word战报生成器
+ * 生成格式美观的 .docx 日报：概览 → P0五步分析 → P1摘要 → P2/P3策略
+ *
+ * 用法: node generate-battle-report.mjs [分类JSON路径] [深抓JSON路径]
+ * 默认读取 data/ 目录下最新文件
+ */
+
+import {
+  Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+  HeadingLevel, AlignmentType, WidthType, BorderStyle,
+  ShadingType, TableLayoutType, PageBreak, Header, Footer, PageNumber,
+} from 'docx';
+import { writeFileSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const REPORTS_DIR = join(__dirname, '..', 'reports');
+
+// ============ 颜色系统 ============
+const C = {
+  dark: '1A1A2E',
+  primary: '16213E',
+  accent: 'E94560',
+  gold: 'F5A623',
+  green: '00B894',
+  blue: '0984E3',
+  purple: '6C5CE7',
+  gray: '636E72',
+  lightGray: 'B2BEC3',
+  bg: 'F8F9FA',
+  white: 'FFFFFF',
+  red: 'D63031',
+  orange: 'E17055',
+};
+
+// ============ 工具函数 ============
+function cell(text, opts = {}) {
+  const {
+    bold = false, color = C.dark, size = 18, align = AlignmentType.LEFT,
+    bg = undefined, width = undefined, colSpan = 1,
+  } = opts;
+
+  return new TableCell({
+    children: [new Paragraph({
+      children: [new TextRun({ text: String(text), bold, color, size, font: '微软雅黑' })],
+      alignment: align,
+    })],
+    width: width ? { size: width, type: WidthType.DXA } : undefined,
+    shading: bg ? { fill: bg, type: ShadingType.CLEAR } : undefined,
+    columnSpan: colSpan,
+    verticalAlign: 'center',
+  });
+}
+
+function heading(text, level = 1) {
+  const sizes = { 1: 32, 2: 26, 3: 22 };
+  const colors = { 1: C.primary, 2: C.dark, 3: C.primary };
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: sizes[level] || 22, color: colors[level] || C.dark, font: '微软雅黑' })],
+    spacing: { before: level === 1 ? 400 : 200, after: 150 },
+    border: level === 1 ? { bottom: { style: BorderStyle.SINGLE, size: 2, color: C.accent } } : undefined,
+  });
+}
+
+function spacer(h = 100) {
+  return new Paragraph({ spacing: { before: h, after: 0 }, children: [] });
+}
+
+function divider() {
+  return new Paragraph({
+    children: [new TextRun({ text: '─'.repeat(60), size: 14, color: C.lightGray })],
+    spacing: { before: 100, after: 100 },
+  });
+}
+
+function p0Badge() {
+  return new TextRun({ text: ' P0 ', bold: true, size: 16, color: C.white, font: '微软雅黑', highlight: C.red });
+}
+
+function p1Badge() {
+  return new TextRun({ text: ' P1 ', bold: true, size: 16, color: C.white, font: '微软雅黑', highlight: C.orange });
+}
+
+function tag(text, color = C.blue) {
+  return new TextRun({ text: ` ${text} `, size: 16, color: C.white, font: '微软雅黑', highlight: color });
+}
+
+// ============ 主报告生成 ============
+export async function generateBattleReport(classifyData, deepData) {
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+  const stats = classifyData.stats || {};
+  const customers = classifyData.customers || [];
+
+  const p0Customers = customers.filter(c => c.priority === 'P0');
+  const p1Customers = customers.filter(c => c.priority === 'P1');
+  const p2Customers = customers.filter(c => c.priority === 'P2');
+  const p3Customers = customers.filter(c => c.priority === 'P3');
+
+  // 合并深抓数据
+  const deepMap = {};
+  if (deepData?.results) {
+    deepData.results.forEach(r => { deepMap[r.name] = r; });
+  }
+
+  const children = [];
+
+  // ==================== 封面 ====================
+  children.push(
+    spacer(600),
+    new Paragraph({
+      children: [new TextRun({ text: '外贸跟进战报', size: 52, bold: true, color: C.primary, font: '微软雅黑' })],
+      alignment: AlignmentType.CENTER,
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: 'DAILY BATTLE REPORT', size: 24, color: C.gray, font: '微软雅黑' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    }),
+    divider(),
+    new Paragraph({
+      children: [new TextRun({ text: `益阳市小星星服饰有限公司  |  ${dateStr}  |  小满TM全量快照`, size: 20, color: C.gray, font: '微软雅黑' })],
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 100 },
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: `总计客户: ${stats.total || customers.length}  |  P0紧急: ${stats.P0 || p0Customers.length}  |  P1高优: ${stats.P1 || p1Customers.length}`, size: 20, color: C.dark, font: '微软雅黑' })],
+      alignment: AlignmentType.CENTER,
+    }),
+    new Paragraph({ children: [new PageBreak()] }),
+  );
+
+  // ==================== 一、总览面板 ====================
+  children.push(heading('一、总览面板', 1));
+
+  // 统计卡片表
+  const overviewRows = [
+    new TableRow({
+      children: [
+        cell('🔴 P0 紧急', { bold: true, color: C.white, size: 22, align: AlignmentType.CENTER, bg: C.red, width: 2200 }),
+        cell('🟡 P1 高优', { bold: true, color: C.white, size: 22, align: AlignmentType.CENTER, bg: C.orange, width: 2200 }),
+        cell('🔵 P2 中优', { bold: true, color: C.white, size: 22, align: AlignmentType.CENTER, bg: C.blue, width: 2200 }),
+        cell('⚪ P3 休眠', { bold: true, color: C.white, size: 22, align: AlignmentType.CENTER, bg: C.gray, width: 2200 }),
+      ],
+    }),
+    new TableRow({
+      children: [
+        cell(`${p0Customers.length} 人`, { bold: true, size: 36, align: AlignmentType.CENTER }),
+        cell(`${p1Customers.length} 人`, { bold: true, size: 36, align: AlignmentType.CENTER }),
+        cell(`${p2Customers.length} 人`, { bold: true, size: 36, align: AlignmentType.CENTER }),
+        cell(`${p3Customers.length} 人`, { bold: true, size: 36, align: AlignmentType.CENTER }),
+      ],
+    }),
+  ];
+
+  children.push(
+    new Table({ rows: overviewRows, width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED }),
+    spacer(300),
+  );
+
+  // P0客户快速索引表
+  children.push(heading('P0 紧急客户快速索引', 3));
+  const p0IndexRows = [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        cell('#', { bold: true, color: C.white, bg: C.primary, width: 500, align: AlignmentType.CENTER }),
+        cell('客户名', { bold: true, color: C.white, bg: C.primary, width: 2200 }),
+        cell('国家', { bold: true, color: C.white, bg: C.primary, width: 900 }),
+        cell('天数', { bold: true, color: C.white, bg: C.primary, width: 700, align: AlignmentType.CENTER }),
+        cell('卡点', { bold: true, color: C.white, bg: C.primary, width: 1500 }),
+        cell('最新消息', { bold: true, color: C.white, bg: C.primary, width: 3800 }),
+      ],
+    }),
+  ];
+
+  p0Customers.sort((a, b) => b.lastContactTime - a.lastContactTime).forEach((c, i) => {
+    const daysAgo = Math.round((Date.now() - (c.lastContactTime || c.modifyTime || 0)) / 86400000);
+    const unreadIcon = c.isUnread ? '📩 ' : '';
+    const msg = (c.latestMessageContent || c.domLastMsg || '').substring(0, 80);
+    const blockReason = c.reasons?.join('/') || '';
+
+    p0IndexRows.push(new TableRow({
+      children: [
+        cell(String(i+1), { align: AlignmentType.CENTER, bold: true, color: C.red, size: 18 }),
+        cell(unreadIcon + c.name, { bold: true }),
+        cell(c.countryCode || '?', { align: AlignmentType.CENTER }),
+        cell(`${daysAgo}d`, { align: AlignmentType.CENTER, color: daysAgo <= 1 ? C.red : daysAgo <= 3 ? C.orange : C.gray, bold: true }),
+        cell(blockReason, { size: 16, color: C.gray }),
+        cell(msg, { size: 16 }),
+      ],
+    }));
+  });
+
+  children.push(
+    new Table({ rows: p0IndexRows, width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED }),
+    new Paragraph({ children: [new PageBreak()] }),
+  );
+
+  // ==================== 二、P0 五步深度分析 ====================
+  children.push(heading('二、P0 紧急客户 — 五步深度分析', 1));
+
+  // 预置的五步分析数据（由CC生成）
+  const analyses = getP0Analyses(p0Customers, deepMap);
+
+  for (const analysis of analyses) {
+    const isUnread = analysis.isUnread;
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: `${analysis.name}  `, size: 28, bold: true, color: C.dark, font: '微软雅黑' }),
+          new TextRun({ text: analysis.country, size: 20, color: C.gray, font: '微软雅黑' }),
+          isUnread ? new TextRun({ text: '  📩 未读', size: 18, color: C.red, font: '微软雅黑' }) : new TextRun({ text: '' }),
+        ],
+        spacing: { before: 400, after: 100 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: C.accent } },
+      }),
+    );
+
+    // 第一步：客户画像
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: '第一步：客户画像', bold: true, size: 20, color: C.primary, font: '微软雅黑' })],
+        spacing: { before: 150, after: 60 },
+      }),
+    );
+    for (const line of analysis.step1) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: `  • ${line}`, size: 18, color: C.dark, font: '微软雅黑' })],
+        spacing: { after: 30 },
+      }));
+    }
+
+    // 第二步：卡点诊断
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: '第二步：卡点诊断', bold: true, size: 20, color: C.red, font: '微软雅黑' })],
+        spacing: { before: 100, after: 60 },
+      }),
+    );
+    for (const line of analysis.step2) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: `  • ${line}`, size: 18, color: C.dark, font: '微软雅黑' })],
+        spacing: { after: 30 },
+      }));
+    }
+
+    // 第三步：策略推演
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: '第三步：策略推演', bold: true, size: 20, color: C.orange, font: '微软雅黑' })],
+        spacing: { before: 100, after: 60 },
+      }),
+    );
+
+    // 策略对比表
+    const strategyRows = [
+      new TableRow({
+        tableHeader: true,
+        children: [
+          cell('', { bold: true, color: C.white, bg: C.primary, width: 1200 }),
+          cell('方案A（常规）', { bold: true, color: C.white, bg: C.gray, width: 3400 }),
+          cell('方案B（推荐）', { bold: true, color: C.white, bg: C.green, width: 3400 }),
+        ],
+      }),
+    ];
+    for (const row of analysis.step3) {
+      strategyRows.push(new TableRow({
+        children: [
+          cell(row.label, { bold: true }),
+          cell(row.planA, { size: 17 }),
+          cell(row.planB, { size: 17 }),
+        ],
+      }));
+    }
+    children.push(
+      new Table({ rows: strategyRows, width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED }),
+    );
+
+    // 第四步：具体话术
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: '第四步：具体话术', bold: true, size: 20, color: C.green, font: '微软雅黑' })],
+        spacing: { before: 100, after: 60 },
+      }),
+    );
+    children.push(new Paragraph({
+      children: [new TextRun({ text: `  💬 ${analysis.step4 || '见下方话术框'}`, size: 18, color: C.dark, font: '微软雅黑' })],
+      spacing: { after: 30 },
+    }));
+    for (const line of (analysis.step4Lines || [])) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: `    ${line}`, size: 17, color: C.dark, font: '微软雅黑' })],
+        spacing: { after: 20 },
+      }));
+    }
+
+    // 第五步：分支预演
+    children.push(
+      new Paragraph({
+        children: [new TextRun({ text: '第五步：分支预演', bold: true, size: 20, color: C.purple, font: '微软雅黑' })],
+        spacing: { before: 100, after: 60 },
+      }),
+    );
+    for (const line of analysis.step5) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: `  ${line}`, size: 17, color: C.dark, font: '微软雅黑' })],
+        spacing: { after: 25 },
+      }));
+    }
+
+    children.push(divider());
+  }
+
+  // ==================== 三、P1 摘要表 ====================
+  children.push(new Paragraph({ children: [new PageBreak()] }));
+  children.push(heading('三、P1 高优客户摘要', 1));
+
+  const p1TableRows = [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        cell('客户', { bold: true, color: C.white, bg: C.orange, width: 2000 }),
+        cell('国家', { bold: true, color: C.white, bg: C.orange, width: 800, align: AlignmentType.CENTER }),
+        cell('天数', { bold: true, color: C.white, bg: C.orange, width: 600, align: AlignmentType.CENTER }),
+        cell('状态', { bold: true, color: C.white, bg: C.orange, width: 1200 }),
+        cell('推荐动作', { bold: true, color: C.white, bg: C.orange, width: 3400 }),
+      ],
+    }),
+  ];
+
+  p1Customers.sort((a, b) => b.lastContactTime - a.lastContactTime).slice(0, 33).forEach(c => {
+    const daysAgo = Math.round((Date.now() - (c.lastContactTime || c.modifyTime || 0)) / 86400000);
+    p1TableRows.push(new TableRow({
+      children: [
+        cell(c.name, { size: 17 }),
+        cell(c.countryCode || '?', { align: AlignmentType.CENTER, size: 17 }),
+        cell(`${daysAgo}d`, { align: AlignmentType.CENTER, size: 17, color: daysAgo <= 7 ? C.orange : C.gray }),
+        cell(c.reasons?.join('/') || '', { size: 16, color: C.gray }),
+        cell(getP1Action(c), { size: 16 }),
+      ],
+    }));
+  });
+
+  children.push(
+    new Table({ rows: p1TableRows, width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED }),
+  );
+
+  // ==================== 四、P3激活策略 ====================
+  children.push(spacer(300));
+  children.push(heading('四、P3 休眠客户批量激活', 1));
+  children.push(new Paragraph({
+    children: [new TextRun({ text: `共 ${p3Customers.length} 人超过30天未联系。按区域分群激活策略如下：`, size: 20, color: C.dark, font: '微软雅黑' })],
+    spacing: { after: 150 },
+  }));
+
+  // 区域统计
+  const regionMap = {
+    '中东': ['SA','AE','OM','QA','KW','BH','IQ','LY','EG','SY','JO','LB','YE'],
+    '非洲': ['NG','ZA','ZM','ZW','CD','CG','CM','CI','SN','ML','GH','KE','TZ','UG','MZ'],
+    '欧美': ['US','UK','DE','FR','IT','ES','NL','BE','CA','AU','NO','SE'],
+    '其他': [],
+  };
+  const regionStats = { '中东': 0, '非洲': 0, '欧美': 0, '其他': 0 };
+  p3Customers.forEach(c => {
+    let found = false;
+    for (const [region, codes] of Object.entries(regionMap)) {
+      if (region === '其他') continue;
+      if (codes.includes(c.countryCode || '')) { regionStats[region]++; found = true; break; }
+    }
+    if (!found) regionStats['其他']++;
+  });
+
+  const activateRows = [
+    new TableRow({
+      tableHeader: true,
+      children: [
+        cell('区域', { bold: true, color: C.white, bg: C.purple, width: 1500 }),
+        cell('人数', { bold: true, color: C.white, bg: C.purple, width: 800, align: AlignmentType.CENTER }),
+        cell('激活策略', { bold: true, color: C.white, bg: C.purple, width: 3000 }),
+        cell('推荐钩子', { bold: true, color: C.white, bg: C.purple, width: 2700 }),
+      ],
+    }),
+  ];
+
+  const regionStrategies = {
+    '中东': { strategy: '帮宝适奥运背书 + 海湾客户案例 + 新品推荐', hook: '帮宝适奥运联名实拍图 / 面料对比' },
+    '非洲': { strategy: '小批量试单方案(12-20件) + 运费试算 + 推荐畅销款', hook: '小批量试单方案 / 其他非洲客户装箱视频' },
+    '欧美': { strategy: 'ISO9001证书 + 产线实拍 + 免费样布 + 小批量方案', hook: 'ISO9001证书 / 产线实拍 / 免费样布' },
+    '其他': { strategy: '通用新品推荐 + 工厂实力展示 + 二选一钩子', hook: '新品实拍图 / 面料对比' },
+  };
+
+  for (const [region, count] of Object.entries(regionStats)) {
+    const s = regionStrategies[region];
+    activateRows.push(new TableRow({
+      children: [
+        cell(region, { bold: true, size: 18 }),
+        cell(String(count), { align: AlignmentType.CENTER, bold: true, size: 22, color: C.purple }),
+        cell(s.strategy, { size: 17 }),
+        cell(s.hook, { size: 16, color: C.gray }),
+      ],
+    }));
+  }
+
+  children.push(
+    new Table({ rows: activateRows, width: { size: 100, type: WidthType.PERCENTAGE }, layout: TableLayoutType.FIXED }),
+    spacer(200),
+  );
+
+  // 批量激活话术模板
+  children.push(heading('批量激活话术模板', 3));
+  const templateText = `Hi {Name}，好久不见！我们是小星星服饰——去年帮宝适奥运联名款吸汗巾的生产工厂。
+最近新出了一批婴童款式，性价比很高。我发几张新品实拍给你看看？
+—— Leo, Yiyang Xiaoxingxing Garments`;
+
+  children.push(new Paragraph({
+    children: [new TextRun({ text: templateText, size: 18, color: C.dark, font: '微软雅黑', italics: true })],
+    spacing: { before: 100, after: 50 },
+    border: { left: { style: BorderStyle.SINGLE, size: 6, color: C.green } },
+    indent: { left: 300 },
+  }));
+
+  // ==================== 页脚 ====================
+  children.push(
+    spacer(400),
+    divider(),
+    new Paragraph({
+      children: [
+        new TextRun({ text: '小星星服饰 · AI外贸顾问系统自动生成 · ', size: 16, color: C.lightGray, font: '微软雅黑' }),
+        new TextRun({ text: dateStr, size: 16, color: C.lightGray, font: '微软雅黑' }),
+      ],
+      alignment: AlignmentType.CENTER,
+    }),
+    new Paragraph({
+      children: [new TextRun({ text: '分析引擎: Claude Code / 数据源: 小满TM / 知识库: V10', size: 14, color: C.lightGray, font: '微软雅黑' })],
+      alignment: AlignmentType.CENTER,
+    }),
+  );
+
+  // ==================== 构建文档 ====================
+  const doc = new Document({
+    creator: 'AI外贸顾问系统',
+    title: `外贸跟进战报 ${dateStr}`,
+    description: `小星星服饰客户跟进日报 - ${dateStr}`,
+    styles: { default: { document: { run: { size: 20, font: '微软雅黑' } } } },
+    sections: [{
+      properties: {
+        page: {
+          margin: { top: 800, bottom: 800, left: 900, right: 900 },
+        },
+      },
+      children,
+    }],
+  });
+
+  return { doc, dateStr };
+}
+
+// ============ P0分析数据 ============
+function getP0Analyses(p0Customers, deepMap) {
+  const analyses = [];
+
+  for (const c of p0Customers) {
+    const deep = deepMap[c.name];
+    const daysAgo = Math.round((Date.now() - (c.lastContactTime || c.modifyTime || 0)) / 86400000);
+    const msg = c.latestMessageContent || c.domLastMsg || '';
+    const country = c.countryCode || '?';
+
+    const analysis = {
+      name: c.name,
+      country,
+      isUnread: c.isUnread,
+      step1: [
+        `国家/区域: ${getCountryName(country)} (${country})`,
+        `买家等级: ${c.buyerLevel || '未知'}`,
+        `最近互动: ${daysAgo}天前`,
+        `沟通语言: ${detectLanguage(msg)}`,
+      ],
+      step2: [],
+      step3: [],
+      step4: '',
+      step4Lines: [],
+      step5: [],
+    };
+
+    // 根据对话内容生成分析
+    const content = msg.toLowerCase();
+    const hasPrice = /price|cost|how much|报价|价格/i.test(content);
+    const hasShipping = /ship|delivery|shipping|dhl|fedex|海运/i.test(content);
+    const hasSample = /sample|样品/i.test(content);
+    const hasPayment = /payment|pay|deposit/i.test(content);
+    const hasComplaint = /complaint|return|refund|damage|quality issue/i.test(content);
+    const isArabic = /[؀-ۿ]/.test(msg);
+    const isFrench = /[àâçéèêëîïôûùüÿœæ]/i.test(msg);
+    const isSpanish = /[áéíóúñ¿¡]/i.test(msg);
+    const isRussian = /[А-Яа-я]/.test(msg);
+
+    if (c.isUnread && daysAgo <= 1 && hasPrice) {
+      analysis.step2 = ['客户刚询价，等待报价回复', '时间窗口紧，延迟回复可能导致客户流失'];
+      analysis.step3 = [
+        { label: '策略', planA: '发标准报价模板', planB: '报价 + 差异化价值点 + 低门槛钩子' },
+        { label: '优势', planA: '快速，省事', planB: '客户同时收到价格和品质证据，难以直接比价' },
+        { label: '风险', planA: '客户拿去比价，一场空', planB: '需要准备对应素材（面料图/证书）' },
+        { label: '适用', planA: '非核心客户', planB: '所有P0客户（推荐）' },
+      ];
+      analysis.step4 = `关于您询问的${isArabic ? 'المنتج' : '产品'}，报价如下——同时附上我们工厂的核心优势供您参考。`;
+      analysis.step4Lines = [
+        `单价预估: $X.XX/pc（最终价格老板确认）`,
+        `工厂: 帮宝适2024奥运联名款指定生产商，6000㎡自有工厂`,
+        `品质: 预洗精梳棉——你收到后洗烘两次，尺寸不变，手感不变`,
+        `[钩子] 我刚好有两片面料对比图——普通棉 vs 我们用的预洗精梳棉，10秒你就看得出差别。发你看看？`,
+      ];
+      analysis.step5 = [
+        '✅ 客户回复感兴趣 → 发面料对比图 + 确认数量和地址 → 出正式PI',
+        '⚠️ 客户说价格贵 → "这个量我可以帮您争取更优价，您预算多少？"',
+        '⏰ 客户3天不回 → 用帮宝适奥运背书钩子重新激活',
+      ];
+    } else if (c.isUnread && daysAgo > 7) {
+      analysis.step2 = [`超${daysAgo}天未读——客户可能已转向别家或在比价`, '长时间无互动，关系变冷'];
+      analysis.step3 = [
+        { label: '策略', planA: '常规追问"决定好了吗"', planB: '品质钩子重新激活 + 新品推荐' },
+        { label: '优势', planA: '简单', planB: '给客户新的关注理由，不是催单' },
+        { label: '风险', planA: '客户无视', planB: '需要新素材支撑' },
+      ];
+      analysis.step4 = `Hi ${c.name.split(' ')[0]}，好久没联系！最近我们产线新出了一批${isFrench ? 'vêtements bébé' : '婴童款式'}，性价比很高。另外我刚好整理了我们用的预洗精梳棉和市面普通棉的对比图——一眼就能看出差别。你现在还在看这个品类吗？`;
+      analysis.step4Lines = [
+        `钩子: 面料对比图 + 新品实拍（二选一邀请）`,
+      ];
+      analysis.step5 = [
+        '✅ 客户回复 → 根据回复内容定向推荐',
+        '⚠️ 客户说在做别的 → 了解新方向，看是否有切入点',
+        '⏰ 7天后仍未回 → 归入P3休眠池，等下一轮批量激活',
+      ];
+    } else if (hasComplaint) {
+      analysis.step2 = ['售后/质量问题——客户已表达不满但在沟通', '信任在崩塌边缘，处理不当会失去客户'];
+      analysis.step3 = [
+        { label: '策略', planA: '解释/推卸责任', planB: '诚实面对+快速响应+给出具体方案' },
+        { label: '优势', planA: '短期可能省成本', planB: '保住长期客户关系，B2B复购才是利润' },
+        { label: '风险', planA: '丢失客户+负面口碑', planB: '可能需要承担赔偿/重做成本' },
+      ];
+      analysis.step4 = `谢谢你愿意沟通。品质问题我们非常重视——请具体描述一下问题（最好有照片），我直接呈报给生产主管和老板。如果是我们的问题，全额退款或重做。这不会影响我们未来的合作。`;
+      analysis.step4Lines = [
+        `关键: 先认错，不推卸，给具体行动方案`,
+        `底线: 不虚构原因，不确定的事说"我先查"`,
+      ];
+      analysis.step5 = [
+        '✅ 客户接受方案 → 快速执行（退款/重做）+ 后续跟进',
+        '⚠️ 客户要求更多 → 在合理范围内满足，超出范围的诚实说明',
+        '⏰ 客户沉默 → 2天后追问一次，再沉默则暂停',
+      ];
+    } else if (daysAgo <= 3) {
+      analysis.step2 = ['近期互动中，需温和跟进', '客户可能在正常决策周期中'];
+      analysis.step3 = [
+        { label: '策略', planA: '等待客户主动回复', planB: '发一个有价值的钩子（不是催单）' },
+        { label: '优势', planA: '不打扰', planB: '保持存在感+提供价值' },
+        { label: '风险', planA: '客户可能忘了我们', planB: '频率过高可能反感' },
+      ];
+      analysis.step4 = `Hi，上次聊的${isFrench ? 'produit' : '产品'}你还在考虑吗？刚好我整理了一个对比——我们用的预洗精梳棉和市面普通棉的区别，10秒就能看出差别。不影响你决策，纯粹供参考。`;
+      analysis.step4Lines = [`钩子: 面料对比图 + 二选一邀请`];
+      analysis.step5 = [
+        '✅ 客户回复 → 根据需求推进',
+        '⏰ 3天后未回 → 用帮宝适奥运钩子激活',
+      ];
+    } else {
+      analysis.step2 = ['客户沉默中，需重新建立联系', '可能原因: 比价/预算问题/找别家/季节性波动'];
+      analysis.step3 = [
+        { label: '策略', planA: '发跟进消息', planB: '品质钩子+新品/季节款推荐' },
+      ];
+      analysis.step4 = `Hi ${c.name.split(' ')[0]}，最近出了几款新婴童款式，性价比很高。我们去年给帮宝适奥运款做吸汗巾的——品质你可以放心。需要我发几张新品实拍给你看看吗？`;
+      analysis.step5 = ['✅ 回复 → 推进', '⏰ 不回 → 归入休眠池'];
+    }
+
+    analyses.push(analysis);
+  }
+
+  return analyses;
+}
+
+function getP1Action(c) {
+  const msg = (c.latestMessageContent || '').toLowerCase();
+  if (/sample|样品/.test(msg)) return '安排寄样 + 品质背书';
+  if (/price|cost|报价|how much/.test(msg)) return '补发报价 + 差异化话术';
+  if (/ship|delivery|海运|快递/.test(msg)) return '确认物流方式 + 时效说明';
+  if (/payment|pay|deposit/.test(msg)) return '催款 + 发货时间表';
+  if (/complaint|return|refund/i.test(msg)) return '优先处理售后';
+  return '温和跟进 + 品质钩子';
+}
+
+function getCountryName(code) {
+  const map = {
+    US: '美国', UK: '英国', DE: '德国', FR: '法国', IT: '意大利', ES: '西班牙',
+    SA: '沙特', AE: '阿联酋', OM: '阿曼', QA: '卡塔尔', KW: '科威特', BH: '巴林',
+    IQ: '伊拉克', LY: '利比亚', EG: '埃及', SY: '叙利亚', JO: '约旦', LB: '黎巴嫩',
+    NG: '尼日利亚', ZA: '南非', ZM: '赞比亚', ZW: '津巴布韦', CD: '刚果(金)',
+    CG: '刚果(布)', CM: '喀麦隆', CI: '科特迪瓦', SN: '塞内加尔', ML: '马里',
+    GH: '加纳', KE: '肯尼亚', TZ: '坦桑尼亚', UG: '乌干达', MZ: '莫桑比克',
+    IN: '印度', PK: '巴基斯坦', ID: '印尼', PH: '菲律宾', MY: '马来西亚',
+    AU: '澳大利亚', CA: '加拿大', RU: '俄罗斯', BY: '白俄罗斯', UZ: '乌兹别克斯坦',
+    GE: '格鲁吉亚', MU: '毛里求斯', GA: '加蓬', TG: '多哥', CL: '智利', MX: '墨西哥',
+    NO: '挪威',
+  };
+  return map[code] || code || '未知';
+}
+
+function detectLanguage(msg) {
+  if (/[؀-ۿ]/.test(msg)) return '阿拉伯语';
+  if (/[àâçéèêëîïôûùüÿœæ]/i.test(msg)) return '法语';
+  if (/[áéíóúñ¿¡]/i.test(msg)) return '西班牙语';
+  if (/[А-Яа-я]/.test(msg)) return '俄语';
+  if (/[^\x00-\x7F]/.test(msg)) return '其他语言';
+  return '英语';
+}
+
+// ============ 主入口 ============
+async function main() {
+  // 找最新分类文件
+  const files = readdirSync(DATA_DIR).filter(f => f.includes('全量客户分类'));
+  if (files.length === 0) {
+    console.log('❌ 未找到分类数据，先运行 extract-all-v2.mjs');
+    return;
+  }
+  const classifyFile = files.sort().reverse()[0];
+  const classifyData = JSON.parse(readFileSync(join(DATA_DIR, classifyFile), 'utf8'));
+
+  // 找最新深抓文件
+  const deepFiles = readdirSync(DATA_DIR).filter(f => f.startsWith('deep_scrape_'));
+  let deepData = null;
+  if (deepFiles.length > 0) {
+    const deepFile = deepFiles.sort().reverse()[0];
+    deepData = JSON.parse(readFileSync(join(DATA_DIR, deepFile), 'utf8'));
+  }
+
+  console.log(`分类数据: ${classifyFile} (${classifyData.customers?.length || 0}人)`);
+  if (deepData) console.log(`深抓数据: ${deepFiles.sort().reverse()[0]} (${deepData.results?.length || 0}人)`);
+
+  const { doc, dateStr } = await generateBattleReport(classifyData, deepData);
+
+  const buffer = await Packer.toBuffer(doc);
+  const outputPath = join(REPORTS_DIR, `外贸跟进战报_${dateStr}.docx`);
+  writeFileSync(outputPath, buffer);
+
+  console.log(`\n✅ 战报已生成: ${outputPath}`);
+}
+
+main().catch(err => {
+  console.error('生成失败:', err.message);
+  process.exit(1);
+});

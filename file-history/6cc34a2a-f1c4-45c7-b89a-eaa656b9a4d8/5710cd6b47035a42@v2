@@ -1,0 +1,234 @@
+// Phase 1: 实际调用 SDK API 获取数据
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. 先读 __conversationListFullData__ ===
+    console.log('=== 1. __conversationListFullData__ ===\n');
+
+    const convData = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var data = window.__conversationListFullData__;
+                if (!data) return { error: 'not found', keys: Object.keys(window).filter(k => k.includes('conversation')) };
+
+                // 如果是数组，返第一个元素的 key
+                if (Array.isArray(data)) {
+                    var first = data[0];
+                    return {
+                        type: 'array',
+                        length: data.length,
+                        firstKeys: first ? Object.keys(first).slice(0, 20) : [],
+                        firstSample: first ? JSON.stringify(first).substring(0, 500) : 'null'
+                    };
+                }
+
+                return { type: typeof data, keys: Object.keys(data).slice(0, 20) };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(convData.result?.value || '(无)');
+
+    // === 2. 调用 listAllConversation ===
+    console.log('\n=== 2. listAllConversation() ===\n');
+
+    const allConv = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    try {
+                        var svc = window._imsdk.getConversationService();
+                        var result = svc.listAllConversation({});
+                        // 可能是 Promise 或直接返回
+                        if (result && result.then) {
+                            result.then(function(data) {
+                                resolve(JSON.stringify({
+                                    success: true,
+                                    type: typeof data,
+                                    length: Array.isArray(data) ? data.length : 'N/A',
+                                    firstKeys: data && data[0] ? Object.keys(data[0]).slice(0, 20) : [],
+                                    firstSample: data && data[0] ? JSON.stringify(data[0]).substring(0, 500) : 'null'
+                                }));
+                            }).catch(function(err) {
+                                resolve(JSON.stringify({ error: err.message || String(err) }));
+                            });
+                        } else {
+                            resolve(JSON.stringify({
+                                directResult: true,
+                                type: typeof result,
+                                text: JSON.stringify(result).substring(0, 1000)
+                            }));
+                        }
+                    } catch(e) {
+                        resolve(JSON.stringify({ error: e.message || String(e) }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(allConv.result?.value || '(无)');
+
+    // === 3. 看 ConversationService 自有方法签名 ===
+    console.log('\n=== 3. 检查 listAllConversation 参数 ===\n');
+
+    const checkParam = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imsdk.getConversationService();
+                // 看源码 toString
+                var methods = {};
+                var proto = Object.getPrototypeOf(svc);
+                while (proto) {
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var name = names[i];
+                        if (name.startsWith('list') && typeof proto[name] === 'function') {
+                            methods[name] = proto[name].toString().substring(0, 300);
+                        }
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return methods;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(checkParam.result?.value || '(无)');
+
+    // === 4. 看 __conversationListData__ ===
+    console.log('\n=== 4. __conversationListData__ ===\n');
+
+    const convListData = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var data = window.__conversationListData__;
+                if (!data) return { error: 'not found' };
+                return {
+                    type: typeof data,
+                    isArray: Array.isArray(data),
+                    length: Array.isArray(data) ? data.length : Object.keys(data).length,
+                    firstKeys: Array.isArray(data) && data[0] ? Object.keys(data[0]) : Object.keys(data).slice(0, 15)
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(convListData.result?.value || '(无)');
+
+    // === 5. 用 getProperties 深入看 __conversationListFullData__[0] ===
+    console.log('\n=== 5. 读取完整的第一个 conversation ===\n');
+
+    const firstConv = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var data = window.__conversationListFullData__;
+                if (!data || !data[0]) return 'no data';
+                return JSON.stringify(data[0]).substring(0, 2000);
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(firstConv.result?.value || '(无)');
+
+    // === 6. 尝试获取消息 ===
+    console.log('\n=== 6. 尝试 listMessageWithConversationCodeForHistory ===\n');
+
+    const msgResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    try {
+                        var data = window.__conversationListFullData__;
+                        if (!data || !data[0]) {
+                            resolve('no conversation data');
+                            return;
+                        }
+
+                        var firstConv = data[0];
+                        // 猜测 conversation code 字段名
+                        var code = firstConv.conversationCode || firstConv.cCode ||
+                                   firstConv.code || firstConv.id || firstConv.cid;
+
+                        var msgSvc = window._imsdk.getMessageService();
+                        var params = { conversationCode: code, pageSize: 5 };
+
+                        var result = msgSvc.listMessageWithConversationCodeForHistory(params);
+                        if (result && result.then) {
+                            result.then(function(messages) {
+                                resolve(JSON.stringify({
+                                    code: code,
+                                    codeField: Object.keys(firstConv).filter(k => k.toLowerCase().includes('code') || k.toLowerCase().includes('id')),
+                                    messageType: typeof messages,
+                                    messageCount: Array.isArray(messages) ? messages.length : 'N/A',
+                                    firstMsg: Array.isArray(messages) && messages[0] ? JSON.stringify(messages[0]).substring(0, 600) : String(messages).substring(0, 500)
+                                }));
+                            }).catch(function(err) {
+                                resolve(JSON.stringify({ error: err.message || String(err), code: code, params: JSON.stringify(params) }));
+                            });
+                        } else {
+                            resolve(JSON.stringify({ directResult: true, data: JSON.stringify(result).substring(0, 1000) }));
+                        }
+                    } catch(e) {
+                        resolve(JSON.stringify({ error: e.message || String(e) }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(msgResult.result?.value || '(无)');
+
+    // 保存
+    ws.close();
+    console.log('\n完成');
+})();

@@ -1,0 +1,30 @@
+$vaultRoot = "E:\道友的宝贝\道友的宝贝"
+$targetDir = Join-Path $vaultRoot "对话归档\CC"
+New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+
+# Check if file already exists in correct location
+$existing = Join-Path $targetDir "Claude Code接国产模型-1M上下文配置.md"
+$source = "D:\ClaudeWorkspace\对话归档\CC\Claude Code接国产模型-1M上下文配置.md"
+
+if (Test-Path $source) {
+    Copy-Item -Path $source -Destination $existing -Force
+    Write-Host "OK: Copied to $existing"
+}
+
+# Also move the misplaced file
+$misplaced = "E:\道友的宝贝\对话归档\CC\Claude Code接国产模型-1M上下文配置.md"
+if (Test-Path $misplaced) {
+    Write-Host "Found misplaced file, will be removed"
+}
+
+# Clean up the misplaced directory
+$misplacedDir = "E:\道友的宝贝\对话归档"
+if (Test-Path $misplacedDir) {
+    Remove-Item -Path $misplacedDir -Recurse -Force
+    Write-Host "Cleaned up misplaced directory"
+}
+
+# Verify final location
+if (Test-Path $existing) {
+    Write-Host "VERIFIED: File is at $existing"
+}

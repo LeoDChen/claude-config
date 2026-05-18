@@ -1,0 +1,306 @@
+/**
+ * 小满CRM — 会话分类引擎
+ *
+ * 将每个会话归类到 11 个类别之一，并分配 S/A/B/C 优先级。
+ *
+ * 使用方式：
+ *   import { classifyConversation } from './classifier.mjs';
+ *   const result = classifyConversation(conversation);
+ */
+
+// ============================================================
+// 分类定义
+// ============================================================
+
+export const CATEGORIES = [
+  { id: 'awaiting_reply',    label: '待回复',   emoji: '🔴', priority: 'P0', desc: '客户发来消息，我方未回复' },
+  { id: 'awaiting_quote',    label: '待报价',   emoji: '🟠', priority: 'P0', desc: '客户询盘，未正式报价' },
+  { id: 'negotiating',       label: '谈判中',   emoji: '💬', priority: 'P0', desc: '正讨论价格/条款/细节' },
+  { id: 'after_sales',       label: '售后处理', emoji: '⚠️', priority: 'P0', desc: '质量投诉、退换货' },
+  { id: 'sample_request',    label: '待寄样',   emoji: '📦', priority: 'P1', desc: '客户要求样品' },
+  { id: 'sample_followup',   label: '样品跟进', emoji: '🔬', priority: 'P1', desc: '样品已寄出，等反馈' },
+  { id: 'awaiting_payment',  label: '待付款',   emoji: '🟡', priority: 'P1', desc: 'PI已发，等付款' },
+  { id: 'awaiting_delivery', label: '待发货',   emoji: '🟢', priority: 'P1', desc: '已收款，未发货' },
+  { id: 'followup',          label: '待回访',   emoji: '🔵', priority: 'P2', desc: '历史有交互，超N天未联系' },
+  { id: 'keep_warm',         label: '保持粘性', emoji: '🟣', priority: 'P3', desc: '老客户/长期客户维系' },
+  { id: 'activate',          label: '待激活',   emoji: '⚪', priority: 'P3', desc: '新线索/低互动客户' },
+];
+
+// ============================================================
+// 关键词定义
+// ============================================================
+
+const KEYWORDS = {
+  // 价格/报价相关
+  price: ['price', 'quote', 'quotation', 'cost', 'how much', '收费', '价格', '报价', 'money', 'dollar', 'usd', 'pi', 'proforma', 'invoice'],
+  // 样品相关
+  sample: ['sample', '样品', '试样', 'test order', 'try', 'trial', 'small order', 'sample fee'],
+  // 付款相关
+  payment: ['payment', 'pay', 'deposit', '定金', '预付', '付款', 'tt', 'wire transfer', 'bank', '账期'],
+  // 售后相关
+  after_sales: ['complaint', 'return', 'refund', '退换', '退款', '投诉', 'quality', 'damage', 'wrong', 'defect', '破损', 'quality issue', 'not as described'],
+  // 物流相关
+  shipping: ['ship', 'delivery', 'logistics', '海运', '空运', '快递', 'dhl', 'fedex', 'ups', '海运', 'shipping cost', 'freight'],
+  // 谈判相关
+  negotiation: ['negotiate', 'discount', 'better price', 'cheaper', '最低', '优惠', '折扣', 'moq', 'minimum', '交期', 'lead time'],
+  // 合作意向
+  interest: ['interested', '合作', 'order', 'purchase', 'buy', '采购', '下单', 'confirm', '确认订单', 'catalog', 'product list'],
+  // 客户信息询问
+  inquiry: ['what is', 'tell me', 'do you have', '可以提供', '能做', '定制', 'custom', 'odm', 'oem', 'printing'],
+  // 跟进问候
+  followup_greeting: ['how are you', 'checking in', 'following up', 'just follow', 'any thought', 'any update', 'how is everything'],
+};
+
+// ============================================================
+// 辅助函数
+// ============================================================
+
+function lastMessage(messages) {
+  return messages.length > 0 ? messages[messages.length - 1] : null;
+}
+
+function firstMessage(messages) {
+  return messages.length > 0 ? messages[0] : null;
+}
+
+function hasKeywords(text, keywordList) {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  return keywordList.some(kw => lower.includes(kw.toLowerCase()));
+}
+
+function extractSentMessages(messages) {
+  return messages.filter(m => m.side === 'sent');
+}
+
+function extractReceivedMessages(messages) {
+  return messages.filter(m => m.side === 'received');
+}
+
+function countKeywordMatches(text, keywordList) {
+  if (!text) return 0;
+  const lower = text.toLowerCase();
+  return keywordList.filter(kw => lower.includes(kw.toLowerCase())).length;
+}
+
+/**
+ * 估算消息时间戳（相对当前时间）
+ */
+function estimateHoursAgo(messageIndex, totalMessages, avgHoursPerMsg = 4) {
+  // Rough estimate: each message back and forth is about 4 hours apart
+  // This is very approximate
+  return (totalMessages - messageIndex) * avgHoursPerMsg;
+}
+
+// ============================================================
+// 分类引擎
+// ============================================================
+
+/**
+ * @param {Object} conv - 会话对象 { name, status, messages: [{ side, content, isCard }] }
+ * @returns {{ categoryId: string, tier: string, confidence: number, reasons: string[] }}
+ */
+export function classifyConversation(conv) {
+  const { messages = [], status } = conv;
+  const last = lastMessage(messages);
+  const first = firstMessage(messages);
+  const sent = extractSentMessages(messages);
+  const received = extractReceivedMessages(messages);
+  const reasons = [];
+
+  if (messages.length === 0) {
+    return { categoryId: 'activate', tier: 'C', confidence: 0.5, reasons: ['无消息记录'] };
+  }
+
+  const lastContent = last ? last.content.toLowerCase() : '';
+  const allContent = messages.map(m => m.content).join(' ').toLowerCase();
+  const sentContent = sent.map(m => m.content).join(' ').toLowerCase();
+  const receivedContent = received.map(m => m.content).join(' ').toLowerCase();
+
+  // ===================================================
+  // 规则引擎（按优先级）
+  // ===================================================
+
+  // 规则 1: 售后处理 — 投诉/退换货关键词
+  if (hasKeywords(allContent, KEYWORDS.after_sales)) {
+    const matchCount = countKeywordMatches(allContent, KEYWORDS.after_sales);
+    if (matchCount >= 1) {
+      reasons.push(`含售后关键词(${matchCount}次)`);
+      const tier = matchCount >= 3 ? 'S' : 'A';
+      return { categoryId: 'after_sales', tier, confidence: 0.8, reasons };
+    }
+  }
+
+  // 规则 2: 待回复 — 最后一条消息是客户发的，我方未回复
+  if (last && last.side === 'received') {
+    const lastSent = sent.length > 0 ? sent[sent.length - 1] : null;
+    const lastReceived = received[received.length - 1];
+    if (!lastSent || messages.indexOf(lastReceived) > messages.indexOf(lastSent)) {
+      reasons.push('客户最后发言，我方未回复');
+      // Check if it's a price inquiry or just a simple message
+      const isQuoteRequest = hasKeywords(lastContent, KEYWORDS.price) || hasKeywords(lastContent, KEYWORDS.inquiry);
+      const isSimpleReply = lastContent.length < 30 && !hasKeywords(lastContent, [...KEYWORDS.price, ...KEYWORDS.interest]);
+
+      if (isQuoteRequest) {
+        reasons.push('包含询价/询盘内容');
+        return { categoryId: 'awaiting_quote', tier: 'A', confidence: 0.85, reasons };
+      }
+      if (hasKeywords(lastContent, KEYWORDS.payment)) {
+        reasons.push('客户询问付款');
+        return { categoryId: 'awaiting_payment', tier: 'S', confidence: 0.8, reasons };
+      }
+      if (hasKeywords(lastContent, KEYWORDS.sample)) {
+        reasons.push('客户提及样品');
+        return { categoryId: 'sample_request', tier: 'A', confidence: 0.75, reasons };
+      }
+      if (isSimpleReply) {
+        reasons.push('简短回复，可能是确认或跟进');
+        // Is this after we sent a quote/PI?
+        const recentSentContent = sent.slice(-3).map(m => m.content).join(' ').toLowerCase();
+        if (hasKeywords(recentSentContent, [...KEYWORDS.price, ...KEYWORDS.payment])) {
+          reasons.push('我方最近发送过报价');
+          return { categoryId: 'awaiting_reply', tier: 'A', confidence: 0.75, reasons };
+        }
+      }
+      return { categoryId: 'awaiting_reply', tier: 'B', confidence: 0.7, reasons };
+    }
+  }
+
+  // 规则 3: 谈判中 — 双方有互动，讨论价格/条款
+  if (sent.length >= 2 && received.length >= 2) {
+    const hasPrice = hasKeywords(allContent, KEYWORDS.price);
+    const hasNegotiation = hasKeywords(allContent, KEYWORDS.negotiation);
+    if (hasPrice || hasNegotiation) {
+      reasons.push('双方多轮互动');
+      if (hasPrice) reasons.push('讨论价格');
+      if (hasNegotiation) reasons.push('涉及谈判');
+      const tier = hasPrice && hasNegotiation ? 'S' : (hasPrice ? 'A' : 'B');
+      return { categoryId: 'negotiating', tier, confidence: 0.8, reasons };
+    }
+  }
+
+  // 规则 4: 待付款 — 我方发送了报价/PI，等待客户付款
+  if (hasKeywords(sentContent, KEYWORDS.payment) || hasKeywords(sentContent, KEYWORDS.price)) {
+    // Last message was from us about payment/price, customer hasn't responded or responded briefly
+    if (last && last.side === 'sent') {
+      const hasPaymentKeywords = hasKeywords(lastContent, KEYWORDS.payment) || hasKeywords(sentContent, KEYWORDS.payment);
+      if (hasPaymentKeywords) {
+        reasons.push('我方发送了付款相关信息');
+        return { categoryId: 'awaiting_payment', tier: 'A', confidence: 0.7, reasons };
+      }
+      if (hasKeywords(sentContent, KEYWORDS.price)) {
+        reasons.push('我方已发送报价');
+        // Check if customer replied
+        const recentCustomerMessages = received.slice(-2);
+        const hasCustomerInterest = recentCustomerMessages.some(m =>
+          hasKeywords(m.content, [...KEYWORDS.interest, ...KEYWORDS.negotiation])
+        );
+        if (hasCustomerInterest) {
+          return { categoryId: 'negotiating', tier: 'A', confidence: 0.75, reasons };
+        }
+        return { categoryId: 'awaiting_quote', tier: 'B', confidence: 0.65, reasons };
+      }
+    }
+  }
+
+  // 规则 5: 样品相关
+  if (hasKeywords(allContent, KEYWORDS.sample)) {
+    reasons.push('涉及样品讨论');
+    if (last && last.side === 'received') {
+      // Customer's last message was about samples
+      return { categoryId: 'sample_followup', tier: 'A', confidence: 0.7, reasons };
+    }
+    // We last spoke about samples
+    const sampleSent = sent.some(m => hasKeywords(m.content, KEYWORDS.sample));
+    if (sampleSent && last && last.side === 'sent') {
+      return { categoryId: 'sample_followup', tier: 'B', confidence: 0.65, reasons };
+    }
+    return { categoryId: 'sample_request', tier: 'B', confidence: 0.6, reasons };
+  }
+
+  // 规则 6: 消息量判断
+  const totalMsgCount = messages.length;
+
+  // 只有1-2条消息 = 新线索/待激活
+  if (totalMsgCount <= 2) {
+    reasons.push(`仅有${totalMsgCount}条消息`);
+    return { categoryId: 'activate', tier: 'C', confidence: 0.7, reasons };
+  }
+
+  // 3-5条消息 = 可能是潜在客户待跟进
+  if (totalMsgCount <= 5) {
+    if (last && last.side === 'sent') {
+      reasons.push('少量互动，我方最后发言');
+      return { categoryId: 'followup', tier: 'B', confidence: 0.6, reasons };
+    }
+    reasons.push('少量互动');
+    return { categoryId: 'activate', tier: 'C', confidence: 0.55, reasons };
+  }
+
+  // 规则 7: 我方最后发言但客户未回复 → 待回访
+  if (last && last.side === 'sent') {
+    reasons.push('我方最后发言');
+    const recentContent = messages.slice(-3).map(m => m.content).join(' ').toLowerCase();
+
+    if (hasKeywords(recentContent, [...KEYWORDS.followup_greeting, ...KEYWORDS.inquiry])) {
+      reasons.push('含跟进/问候内容');
+      return { categoryId: 'followup', tier: 'B', confidence: 0.7, reasons };
+    }
+    return { categoryId: 'followup', tier: 'C', confidence: 0.55, reasons };
+  }
+
+  // 规则 8: 默认
+  if (totalMsgCount > 10) {
+    reasons.push('历史互动较多');
+    return { categoryId: 'keep_warm', tier: 'C', confidence: 0.4, reasons };
+  }
+
+  return { categoryId: 'activate', tier: 'C', confidence: 0.3, reasons };
+}
+
+/**
+ * 批量分类
+ */
+export function classifyAll(conversations) {
+  return conversations.map(conv => ({
+    ...conv,
+    classification: classifyConversation(conv),
+  }));
+}
+
+/**
+ * 获取分类详情
+ */
+export function getCategoryInfo(categoryId) {
+  return CATEGORIES.find(c => c.id === categoryId);
+}
+
+/**
+ * 按分类统计
+ */
+export function categorizeSummary(classifiedConversations) {
+  const summary = {};
+  for (const cat of CATEGORIES) {
+    summary[cat.id] = { ...cat, conversations: [], count: 0 };
+  }
+
+  // 未匹配的归入其他
+  summary.other = { id: 'other', label: '其他', emoji: '❓', priority: 'P4', conversations: [], count: 0 };
+
+  for (const conv of classifiedConversations) {
+    const catId = conv.classification?.categoryId || 'other';
+    if (summary[catId]) {
+      summary[catId].conversations.push(conv);
+      summary[catId].count++;
+    } else {
+      summary.other.conversations.push(conv);
+      summary.other.count++;
+    }
+  }
+
+  // 按优先级排序
+  const priority = { 'P0': 0, 'P1': 1, 'P2': 2, 'P3': 3, 'P4': 4 };
+  return Object.values(summary)
+    .filter(c => c.count > 0)
+    .sort((a, b) => (priority[a.priority] || 99) - (priority[b.priority] || 99));
+}

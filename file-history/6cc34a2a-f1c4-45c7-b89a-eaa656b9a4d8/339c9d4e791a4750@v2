@@ -1,0 +1,197 @@
+// Phase 1: 用 HTTP Service API 获取消息
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+    await cmd('Network.enable');
+
+    // === 1. 用 HTTP ConversationService 获取会话列表 ===
+    console.log('=== getConversationList (HTTP) ===\n');
+
+    const convResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var baas = window._imBaaSSDK;
+                    var httpSvc = baas.getConversationServiceHttp();
+
+                    // getConversationList 源码: function(e, t) - 应该是 callback, errorCallback
+                    httpSvc.getConversationList(
+                        function(result) {
+                            var data = result && (result.data || result.userConvs || result);
+                            var convs = Array.isArray(data) ? data : (data && data.convs);
+                            resolve(JSON.stringify({
+                                success: true,
+                                type: typeof result,
+                                resultKeys: result ? Object.keys(result).slice(0, 15) : [],
+                                isArray: Array.isArray(result),
+                                length: Array.isArray(result) ? result.length : 'N/A',
+                                firstItem: Array.isArray(data) && data[0] ? JSON.stringify(data[0]).substring(0, 500) : JSON.stringify(result).substring(0, 500)
+                            }));
+                        },
+                        function(err) {
+                            resolve(JSON.stringify({ error: 'callback error', detail: err && (err.message || err.err || JSON.stringify(err)) }));
+                        }
+                    );
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(convResult.result?.value || '(无)');
+
+    // === 2. 尝试 fetchMessages (HTTP) ===
+    console.log('\n=== fetchMessages (HTTP) ===\n');
+
+    const fetchResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var baas = window._imBaaSSDK;
+                    var httpSvc = baas.getMessageServiceHttp();
+                    var conv = window.__conversationListFullData__[0];
+
+                    // fetchMessages 源码看看
+                    var src = httpSvc.fetchMessages.toString();
+                    resolve(JSON.stringify({
+                        fetchMessagesSrc: src.substring(0, 500),
+                        isLogin: window._imsdk.getAuthService().isLogin()
+                    }));
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(fetchResult.result?.value || '(无)');
+
+    // === 3. 看 mtopRequest 方法 ===
+    console.log('\n=== mtopRequest 源码 ===\n');
+
+    const mtopsrc = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                var httpSvc = window._imBaaSSDK.getMessageServiceHttp();
+                var src = httpSvc.mtopRequest.toString();
+                return src;
+            })()
+        `,
+        returnByValue: true
+    });
+    console.log(mtopsrc.result?.value || '(无)');
+
+    // === 4. 尝试先用 AuthService.init() 重新登录 ===
+    console.log('\n=== 尝试 init() 重新登录 ===\n');
+
+    const initResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var authSvc = window._imsdk.getAuthService();
+
+                    // init 是异步的
+                    try {
+                        var result = authSvc.init({});
+                        if (result && result.then) {
+                            result.then(function() {
+                                setTimeout(function() {
+                                    resolve(JSON.stringify({
+                                        afterInit: true,
+                                        isLogin: authSvc.isLogin(),
+                                        nick: authSvc.getLoginNick(),
+                                        uid: authSvc.getLoginUid()
+                                    }));
+                                }, 2000);
+                            }).catch(function(err) {
+                                resolve(JSON.stringify({ initError: err && (err.message || String(err)) }));
+                            });
+                        } else {
+                            setTimeout(function() {
+                                resolve(JSON.stringify({
+                                    directReturn: true,
+                                    isLogin: authSvc.isLogin(),
+                                    nick: authSvc.getLoginNick()
+                                }));
+                            }, 2000);
+                        }
+                    } catch(e) {
+                        resolve(JSON.stringify({ exception: e.message || String(e) }));
+                    }
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(initResult.result?.value || '(无)');
+
+    // === 5. 尝试用 getConversationContactDetailList (HTTP) ===
+    console.log('\n=== getConversationContactDetailList (HTTP) ===\n');
+
+    const detailResult = await cmd('Runtime.evaluate', {
+        expression: `
+            (function() {
+                return new Promise(function(resolve) {
+                    var baas = window._imBaaSSDK;
+                    var httpSvc = baas.getConversationServiceHttp();
+
+                    // getConversationContactDetailList 源码: function(e) - 可能是 options/callback
+                    var src = httpSvc.getConversationContactDetailList.toString();
+                    resolve(src.substring(0, 300));
+                });
+            })()
+        `,
+        awaitPromise: true,
+        returnByValue: true
+    });
+    console.log(detailResult.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

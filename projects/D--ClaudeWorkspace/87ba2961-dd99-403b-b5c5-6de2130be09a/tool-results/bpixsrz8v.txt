@@ -1,0 +1,1555 @@
+处理全部 466 个客户 (P0-P4)...
+
+── 📄 PI已发: 52人 ──
+  🟡  1d | 美国       | Aloh Voma                | A/PI已发 [A]
+    → PI已发5天，首次提醒窗口 | 提醒付款，附排产计划增加紧迫感
+    ❓ Please kindly send me the receipt from the warehouse after the delivery of the g
+    💬 敷衍回复 (0.2d) | 短期沉默(3-7d)
+  🟡  2d | 刚果民主     | Rosette Ngoy             | B/PI已发 [★]
+    → PI已发6天，催款窗口 | 确认是否继续+问是否有障碍
+    ❓ Ou 5 pièce ?
+    💬 敷衍回复 (0d) | 短期沉默(3-7d)
+  🟡  2d | 科特迪瓦     | Bamba Ami                | A/PI已发 [A ★]
+    → PI已发6天，催款窗口 | 催款+问"是否需要调整PI"
+    ❓ Bonjour,je cherche à établir un partenariat au sujet de ce produit. Quel est le 
+    💬 充分回复 (0.1d) | 短期沉默(3-7d)
+  🟡  2d | 多哥       | WELE Mounia              | A/PI已发 [A]
+    → PI已发6天，催款窗口 | 催款+问"是否需要调整PI"
+    ❓ a part sa vous Avez quoi encore ?
+    💬 简短回复 (0d) | 短期沉默(3-7d)
+  🟡  2d | 美国       | Christelle ITwite        | B/PI已发
+    → PI已发7天，催款窗口 | 确认是否继续+问是否有障碍
+  🟡  5d | 伊拉克      | amer ly                  | B/PI已发
+    → PI已发14天，催款窗口 | 确认是否继续+问是否有障碍
+  🟡  5d | 美国       | Angela O                 | B/PI已发
+    → PI已发10天，催款窗口 | 确认是否继续+问是否有障碍
+    ❓ Tienes algo mas?
+    💬 敷衍回复 (0d) | 中期沉默(7-14d)
+  🟡  8d | 美国       | Eddie Kilumba            | B/PI已发
+    → PI已发12天，催款窗口 | 确认是否继续+问是否有障碍
+  🟡  9d | 刚果民主     | Djany Konzi              | B/PI已发 [★]
+    → PI已发13天，催款窗口 | 确认是否继续+问是否有障碍
+  🟡  9d | 法国       | raymond cramotte         | A/PI已发 [A]
+    → PI已发13天，催款窗口 | 催款+问"是否需要调整PI"
+    ❓ Bonjour,j'aimerais en savoir plus sur ce produit. Quels sont les frais d’expédit
+    💬 充分回复 (0d) | 中期沉默(7-14d)
+  ⚪ 11d | 法国       | Cindy Nadal              | A/PI已发 [A]
+    → PI已发15天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+    ❓ Bonjour,je suis intéressé par cet article. Quels sont les frais d’expédition ? C
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🔴 16d | 马里       | maimouna cisse           | A/PI已发 [A]
+    → PI刚发2天，确认期 | 48h内确认客户收到PI
+    ❓ si je prends 500 unité pouvez-vous me faire une réduction ?
+    💬 充分回复 (0.2d)
+  ⚪ 17d | 科特迪瓦     | Vie Merveilleux          | B/PI已发 [★]
+    → PI已发32天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 20d | 德国       | Gabriela Bajer           | A/PI已发 [A]
+    → PI已发25天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+    ❓ Hallo,ich möchte mehr über dieses Produkt erfahren. Kann ich ein Muster erhalten
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  ⚪ 21d | 肯尼亚      | rayan shafi              | B/PI已发
+    → PI已发25天，需重新激活 | 温和问"需要我重新报吗"
+  ⚪ 23d | 科特迪瓦     | JeanRomain Ouffouet      | A/PI已发 [A ★]
+    → PI已发30天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+    ❓ possible de voir des images réelles des ensembles ?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 23d | 美国       | Chloé St-Germain         | S/PI已发 [S]
+    → PI已发29天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+    ❓ So?
+    💬 充分回复 (0.3d) | 长期沉默(14-30d)
+  ⚪ 24d | 美国       | Rocio L                  | A/PI已发 [A]
+    → PI已发29天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+    ❓ Do you do custom made patterns?
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  ⚪ 24d | 摩洛哥      | Laroussi Ilhame          | A/PI已发 [A]
+    → PI已发29天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+  ⚪ 25d | 美国       | Consolate Kasongo        | A/PI已发 [A]
+    → PI已发34天，长期未转化 | 保持1-2月/次最低触达
+    ❓ ça fera combien le coût total ?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 25d | 美国       | Josh Martinez            | A/PI已发 [A]
+    → PI已发30天，需重新激活 | 问"还在进行吗"+给替代方案/新选项
+    ❓ I have 50 so shouldn’t it be $1.10 per piece?
+    💬 充分回复 (0.3d) | 深度沉默(30-90d)
+  ⚪ 28d | 美国       | ChristianTshikomb Muland | C/PI已发
+    → PI已发32天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 31d | 刚果民主     | Christy Malemba          | A/PI已发 [A ★]
+    → PI已发35天，长期未转化 | 保持1-2月/次最低触达
+  ⚪ 32d | 美国       | Fontus Richardson        | B/PI已发
+    → PI已发36天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 33d | 塞内加尔     | Abdou Salam Kane         | A/PI已发 [A]
+    → PI已发38天，长期未转化 | 保持1-2月/次最低触达
+    ❓ i want it today but my agent forward will start the end of the month
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 33d | 刚果(金)    | Nedith Nsimba            | B/PI已发
+    → PI已发37天，长期未转化 | 降频触达，等新产品激活
+    ❓ Je peux prendre ceci 2 pièces ?
+    💬 充分回复 (0.1d) | 深度沉默(30-90d)
+  ⚪ 33d | 刚果民主     | Mamanje Jean             | A/PI已发 [A ★]
+    → PI已发37天，长期未转化 | 保持1-2月/次最低触达
+  ⚪ 39d | 法国       | Agnes Tlomak             | B/PI已发
+    → PI已发44天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 53d | 荷兰       | Leon Scott Kennedy       | B/PI已发
+    → PI已发58天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 57d | 喀麦隆      | OUSMANHANGATA HALIMA     | A/PI已发 [A]
+    → PI已发61天，长期未转化 | 保持1-2月/次最低触达
+    ❓ jusqu'à demain d'abord ?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | 刚果民主     | Grace Kanku              | B/PI已发 [★]
+    → PI已发69天，长期未转化 | 降频触达，等新产品激活
+    ❓ Votre transitaire devrait pouvoir envoyer l'adresse demain, n'est-ce pas ?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | 刚果       | Salome Ambali            | A/PI已发 [A]
+    → PI已发81天，长期未转化 | 保持1-2月/次最低触达
+    ❓ 1601690639342
+$1.20-2.39
+Custom Kids Short Sleeve Set 100 Cotton Animal Stripe C
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 59d | MR       | Fama Sow                 | A/PI已发 [A]
+    → PI已发63天，长期未转化 | 保持1-2月/次最低触达
+  ⚪ 63d | 美国       | musitekie masanga        | A/PI已发 [A]
+    → PI已发67天，长期未转化 | 保持1-2月/次最低触达
+    ❓ seulement chemise et culotte ?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 美国       | Roseline Roseline        | B/PI已发
+    → PI已发71天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 65d | PS       | Aseel Nassar             | A/PI已发 [A]
+    → PI已发168天，长期未转化 | 保持1-2月/次最低触达
+    ❓ Could you please provide me with a proforma invoice?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 79d | 刚果民主     | Mimi Kwanzay             | B/PI已发 [★]
+    → PI已发83天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 84d | 意大利      | safia bacha              | A/PI已发 [A]
+    → PI已发88天，长期未转化 | 保持1-2月/次最低触达
+    ❓ Bonjour , je suis intéressé.e par ces produits. Puis-je ajouter mon propre logo 
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 102d | 美国       | Dan Songua               | C/PI已发
+    → PI已发106天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 105d | 法国       | Fanta camara             | B/PI已发
+    → PI已发114天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 106d | 美国       | Ngọc Thu                 | A/PI已发 [A]
+    → PI已发110天，长期未转化 | 保持1-2月/次最低触达
+    ❓ Chào, tôi quan tâm đến sản phẩm này. phí ship là bao nhiêu?
+[{"quantity":"null C
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 116d | 美国       | Bianka Zizic             | C/PI已发
+    → PI已发121天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 125d | 菲律宾      | Mazuin Talib             | D/PI已发
+    → PI已发9999天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 126d | 美国       | Lea Kaja                 | A/PI已发 [A]
+    → PI已发131天，长期未转化 | 保持1-2月/次最低触达
+    ❓ Je peux choisir par articles une ou deux pièces non ??
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 133d | 多哥       | Lucky Bamoudonfao        | C/PI已发
+    → PI已发137天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 135d | 刚果民主     | Soreah Akawa             | B/PI已发 [★]
+    → PI已发148天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 135d | 贝宁       | Amirath Salassi          | A/PI已发 [A]
+    → PI已发167天，长期未转化 | 保持1-2月/次最低触达
+    ❓ Je peux voir l’échantillon ?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 委内瑞拉     | Nathaly Medrano          | B/PI已发
+    → PI已发170天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 135d | 法国       | Julie Legrand            | B/PI已发
+    → PI已发175天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 135d | 巴基斯坦     | Abdullah Khalid          | A/PI已发 [A]
+    → PI已发142天，长期未转化 | 保持1-2月/次最低触达
+    ❓ how many pcs in 1 ctn
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 179d | 科特迪瓦     | JeanClaver benie         | B/PI已发 [★]
+    → PI已发183天，长期未转化 | 降频触达，等新产品激活
+  ⚪ 184d | 喀麦隆      | MENTZEKO Mathi           | B/PI已发
+    → PI已发188天，长期未转化 | 降频触达，等新产品激活
+    ❓ quand j'analyse mon marché je ne pourrais pas m'en sortir car ici sur mon marché
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+
+── 🤝 谈判/样品: 160人 ──
+  🟡  1d | 美国       | Inderpreet kaur          | A/谈判/样品 [A]
+    → 谈判中，沉默4天 | 发新品/同行案例，换个角度推进
+    ❓ No it’s something already available with other vendor . I wanted to check if you
+    💬 充分回复 (4.6d) | 短期沉默(3-7d)
+  🔴  1d | 加纳       | jonathan aston           | B/谈判/样品
+    → 谈判中，昨日互动 | 今日跟进，保持对话节奏
+    ❓ I need a standard version of 200 piece of children clothes
+    💬 简短回复 (0.4d)
+  🟡  2d | 赞比亚      | Christabel Kanunsha      | B/谈判/样品 [★]
+    → 谈判中，沉默6天 | 发工厂动态/新品+问"还在找吗"
+    ❓ what colors are available for a 2 year old
+    💬 简短回复 (0d) | 短期沉默(3-7d)
+  🟡  2d | 巴林       | Mona almuharraqy         | A/谈判/样品 [A]
+    → 谈判中，沉默6天 | 定制激活：复盘卡点+针对性破局
+    ❓ Hello, thank you for following up 😊
+
+Unfortunately, the samples have not arrive
+    💬 充分回复 (0d) | 短期沉默(3-7d)
+  🔴  2d | 南非       | ali Amjid                | A/谈判/样品 [A]
+    → 谈判中，昨日互动 | 今日跟进，带新信息推进
+    ❓ How r u
+    💬 敷衍回复 (0d)
+  🟡  3d | 印度       | Keinjol Tata             | S/谈判/样品 [S]
+    → 谈判中，沉默2天 | 追问需求+发认证/案例增加信任
+    ❓ What position do you hold in the company, and who are you?
+    💬 简短回复 (0d)
+  🟢  4d | 赞比亚      | Christine Muwela         | A/谈判/样品 [A ★]
+    → 谈判中，沉默8天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ do u have real pictures for those cause those i need 20 s i need to see real pic
+    💬 敷衍回复 (0d) | 中期沉默(7-14d)
+  🟢  4d | 伊拉克      | Aula Alsaad              | A/谈判/样品 [A]
+    → 谈判中，沉默8天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ 1601690883451
+$1.38-2.38
+Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print O
+    💬 充分回复 (0.3d) | 中期沉默(7-14d)
+  🟢  4d | 阿曼       | Abdulrhman alal          | B/谈判/样品
+    → 谈判中，沉默12天，需激活 | 发新品类/新到货，重新建立联系
+    ❓ Can you send available designs
+    💬 简短回复 (0.2d) | 中期沉默(7-14d)
+  🟢  4d | 肯尼亚      | Brian Robert Ocholi      | A/谈判/样品 [A]
+    → 谈判中，沉默9天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ are they the same piece or variety?
+    💬 充分回复 (0d) | 中期沉默(7-14d)
+  🟢  5d | 巴基斯坦     | Asma Noor                | A/谈判/样品 [A]
+    → 谈判中，沉默11天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ Hi,I’d like to begin discussions about this item.
+[{"quantity":"null piece","id"
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  5d | 加纳       | arshavin amoah           | B/谈判/样品
+    → 谈判中，长期沉默23天 | 降频15天/次，等新产品激活
+  🟢  5d | 美国       | Gabriela Torrealba       | A/谈判/样品 [A]
+    → 谈判中，沉默9天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ Eses es su precio que tallas vienen ?
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  7d | 美国       | yoselyn Rodriguez        | A/谈判/样品 [A]
+    → 谈判中，沉默11天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ ropa de mujer venden ?
+    💬 简短回复 (0.1d) | 中期沉默(7-14d)
+  🟢  7d | 坦桑尼亚     | Mumtaz Aziz              | B/谈判/样品
+    → 谈判中，沉默12天，需激活 | 发新品类/新到货，重新建立联系
+    ❓ Can i have your catalogue?
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  8d | 美国       | Aldane Elister           | A/谈判/样品 [A]
+    → 谈判中，沉默12天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ 1601689932807
+$1.75-3.40
+Custom Boys Clothing Set Worsted Polyester Fabric Print
+    💬 充分回复 (0d) | 中期沉默(7-14d)
+  🟢  9d | 伊拉克      | zainab Babesets          | A/谈判/样品 [A]
+    → 谈判中，沉默13天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ 1601690883451
+$1.38-2.38
+Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print O
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  9d | 阿曼       | azaan ss                 | A/谈判/样品 [A]
+    → 谈判中，长期沉默16天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ How much
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 11d | 美国       | fernande Pochette        | A/谈判/样品 [A]
+    → 谈判中，长期沉默22天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ How much the shipping to USA
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 11d | 沙特       | User name                | A/谈判/样品 [A ★]
+    → 谈判中，长期沉默15天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ I need the product which cost below 2.13
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 12d | 利比亚      | Ahmed Darrat             | B/谈判/样品
+    → 谈判中，长期沉默16天 | 降频15天/次，等新产品激活
+    ❓ i want this one
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 13d | BN       | Krisgel Igros            | A/谈判/样品 [A]
+    → 谈判中，长期沉默17天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ do you have this?
+    💬 敷衍回复 (0d) | 长期沉默(14-30d)
+  🟢 15d | 阿曼       | Amal Alamhrooqi          | A/谈判/样品 [A]
+    → 谈判中，长期沉默19天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ I would like to confirm the shipping method for my order.
+Could you please ship 
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 16d | 利比亚      | Emad Jumah               | A/谈判/样品 [A]
+    → 谈判中，长期沉默20天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ Do you have it in stock ?
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 17d | 加纳       | Patience Mensah Agyeman Prempeh | A/谈判/样品 [A]
+    → 谈判中，长期沉默21天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ But can you give me the prices in RMB
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 17d | 赞比亚      | bester chandah           | B/谈判/样品 [★]
+    → 谈判中，长期沉默21天 | 降频15天/次，等新产品激活
+    ❓ yes please 
+show me the samples
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 18d | 赞比亚      | Fairness Sikani          | B/谈判/样品 [★]
+    → 谈判中，长期沉默26天 | 降频15天/次，等新产品激活
+    ❓ i want this for three years old
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 21d | 肯尼亚      | Umm Aysha                | A/谈判/样品 [A]
+    → 谈判中，长期沉默25天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ i know but i want you to take a real picture of the set and send mr
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 21d | MZ       | Sonia Monjane            | A/谈判/样品 [A]
+    → 谈判中，长期沉默25天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601699567859
+$2.70-3.20
+OEM Custom Baby Romper Bulk Wholesale Summer Infant Clo
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 22d | 埃及       | Loza Bondok              | A/谈判/样品 [A ★]
+    → 谈判中，长期沉默26天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ Hello, I would like to confirm my order, but the shipping cost is quite high. Is
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 25d | MW       | Flora Phisso             | A/谈判/样品 [A]
+    → 谈判中，长期沉默29天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ Are these available?
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  ⚪ 25d | 利比里亚     | Tamba Fayiah             | B/谈判/样品
+    → 谈判中，沉淀31天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi,can you share more details about this item?
+[{"quantity":"6.000 piece","id":1
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  🟢 26d | 德国       | Lisa Ketelsen            | A/谈判/样品 [A]
+    → 谈判中，长期沉默30天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ You mean GOTS?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  🟢 26d | MZ       | Euzito Carlos            | A/谈判/样品 [A]
+    → 谈判中，长期沉默30天 | 不催单。发工厂动态/节日/认证维存在感
+  ⚪ 26d | 沙特       | Saleh Hamad              | B/谈判/样品 [★]
+    → 谈判中，沉淀31天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 27d | 印度       | SKYHIGH COMPANY          | A/谈判/样品 [A]
+    → 谈判中，沉淀31天 | 保持1-2月最低触达
+    ❓ hope you can understand what i am saying 
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 28d | 美国       | Karl brown               | A/谈判/样品 [A]
+    → 谈判中，沉淀40天 | 保持1-2月最低触达
+    ❓ Hi,I’m considering placing an order for this product soon.Hello,
+
+I would like t
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 28d | 赞比亚      | carol chisumpa           | B/谈判/样品 [★]
+    → 谈判中，沉淀32天 | 暂停触达，等新产品/新认证再激活
+    ❓ I want two
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 29d | 科威特      | lela alamera             | B/谈判/样品
+    → 谈判中，沉淀33天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 29d | 阿联酋      | Nanthini Rss             | B/谈判/样品 [★]
+    → 谈判中，沉淀34天 | 暂停触达，等新产品/新认证再激活
+    ❓ can i get the sample first?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 30d | 津巴布韦     | Tafadzwa Rinemota        | B/谈判/样品
+    → 谈判中，沉淀98天 | 暂停触达，等新产品/新认证再激活
+    ❓ okay
+so can you create a payment link for 9 because i need exactly 1kg or else i
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 30d | 美国       | SUSAN MPUNGA             | A/谈判/样品 [A]
+    → 谈判中，沉淀34天 | 保持1-2月最低触达
+    ❓ isn't this supposed to be just 3 units?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 30d | 刚果(金)    | denewade khady           | A/谈判/样品 [A]
+    → 谈判中，沉淀35天 | 保持1-2月最低触达
+  ⚪ 31d | 加纳       | Justina Sosa             | A/谈判/样品 [A]
+    → 谈判中，沉淀35天 | 保持1-2月最低触达
+    ❓ 1601689932807
+$1.75-3.40
+Custom Boys Clothing Set Worsted Polyester Fabric Print
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 31d | 墨西哥      | Gal Frishwaser           | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 32d | 摩洛哥      | ABDELMOULA LEKRET        | A/谈判/样品 [A]
+    → 谈判中，沉淀36天 | 保持1-2月最低触达
+    ❓ whats your city i will see with freighter
+    💬 简短回复 (0.2d) | 深度沉默(30-90d)
+  ⚪ 34d | 俄罗斯      | Temur Hasanov            | A/谈判/样品 [A]
+    → 谈判中，沉淀39天 | 保持1-2月最低触达
+    ❓ 1601690639342
+$1.20-2.39
+Custom Kids Short Sleeve Set 100 Cotton Animal Stripe C
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 34d | 印尼       | wandi wandi              | B/谈判/样品
+    → 谈判中，沉淀39天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 35d | 津巴布韦     | emmanuel maguma          | A/谈判/样品 [A]
+    → 谈判中，沉淀39天 | 保持1-2月最低触达
+    ❓ What?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 36d | 印度       | SONIYA PAUL              | A/谈判/样品 [A]
+    → 谈判中，沉淀90天 | 保持1-2月最低触达
+    ❓ ok thats what i said.. i received ordered product only 5 ps .. 14 ps are another
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 36d | 阿尔及利亚    | nesrin hafri             | B/谈判/样品
+    → 谈判中，沉淀40天 | 暂停触达，等新产品/新认证再激活
+    ❓ I want to know the prices for this products
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 36d | 赞比亚      | Becky Nams               | A/谈判/样品 [A ★]
+    → 谈判中，沉淀40天 | 保持1-2月最低触达
+    ❓ from other supplies I ordered the same day as you, they have sent to the shippin
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 37d | UK       | Maria  Evans             | A/谈判/样品 [A]
+    → 谈判中，沉淀41天 | 保持1-2月最低触达
+    ❓ what does that look like for price and moq for me? 
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 38d | 法国       | Lilian John              | A/谈判/样品 [A]
+    → 谈判中，沉淀42天 | 保持1-2月最低触达
+    ❓ can you please send me samples to view
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 40d | 喀麦隆      | Mbankwene Mbankwene      | A/谈判/样品 [A]
+    → 谈判中，沉淀44天 | 保持1-2月最低触达
+    ❓ hello
+I want 5 pieces here
+3 whites
+2 black
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 41d | 澳大利亚     | Lu Julie                 | A/谈判/样品 [A]
+    → 谈判中，沉淀45天 | 保持1-2月最低触达
+    ❓ I need winter clothes please
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 41d | 沙特       | Annabel Olarte           | A/谈判/样品 [A ★]
+    → 谈判中，沉淀46天 | 保持1-2月最低触达
+    ❓ Hello,I’d like to discuss this item.
+[{"quantity":"null piece","id":100000394149
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 44d | 印度       | DEEPAK MANGLANI          | B/谈判/样品
+    → 谈判中，沉淀48天 | 暂停触达，等新产品/新认证再激活
+    ❓ okay no problem and WhatsApp
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 44d | 巴基斯坦     | Zani Sheikh              | A/谈判/样品 [A]
+    → 谈判中，沉淀48天 | 保持1-2月最低触达
+    ❓ your shipping cost?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 44d | 伊拉克      | Youssif Mohammed         | A/谈判/样品 [A]
+    → 谈判中，沉淀48天 | 保持1-2月最低触达
+    ❓ Can I order 5 ?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 45d | 南非       | Mbali Sibiya             | A/谈判/样品 [A]
+    → 谈判中，沉淀49天 | 保持1-2月最低触达
+    ❓ Hi,can you share more details about this item? What is the shipping cost? What i
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 46d | 沙特       | hsn hsan                 | B/谈判/样品 [★]
+    → 谈判中，沉淀51天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 46d | UK       | Rizwan ALi               | A/谈判/样品 [A]
+    → 谈判中，沉淀58天 | 保持1-2月最低触达
+    ❓ thank you. how much shipping
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 47d | 印度       | Ronak Patel              | A/谈判/样品 [A]
+    → 谈判中，沉淀51天 | 保持1-2月最低触达
+    ❓ i want 400 piece in mix design and size
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 49d | 刚果(金)    | Tania Manzongani         | B/谈判/样品
+    → 谈判中，沉淀53天 | 暂停触达，等新产品/新认证再激活
+    ❓ Oui pour l’âge le mètre là me complique, dit moi pour un bébé de 3moi c’est comb
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 51d | 美国       | Fatima Suarez            | A/谈判/样品 [A]
+    → 谈判中，沉淀55天 | 保持1-2月最低触达
+    ❓ Thank you for the information about your factory 🙂
+
+Since I am planning long-te
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 54d | 菲律宾      | Mariacaselyn Aninion     | A/谈判/样品 [A]
+    → 谈判中，沉淀58天 | 保持1-2月最低触达
+    ❓ For sample?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 55d | 美国       | Jo Ki                    | A/谈判/样品 [A]
+    → 谈判中，沉淀59天 | 保持1-2月最低触达
+    ❓ How about 50pcs?
+    💬 充分回复 (0.2d) | 深度沉默(30-90d)
+  ⚪ 56d | 尼日利亚     | Mbam Oluchi              | A/谈判/样品 [A]
+    → 谈判中，沉淀60天 | 保持1-2月最低触达
+  ⚪ 57d | 墨西哥      | Dania Sanchez            | B/谈判/样品
+    → 谈判中，沉淀62天 | 暂停触达，等新产品/新认证再激活
+    ❓ Cuando llegaría?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | 加蓬       | Sarah nell roly Othayi MAMALHY | A/谈判/样品 [A]
+    → 谈判中，沉淀62天 | 保持1-2月最低触达
+    ❓ Oui le total sera de combien s’il vous plaît ?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | UK       | Laura McGlade.           | A/谈判/样品 [A]
+    → 谈判中，沉淀72天 | 保持1-2月最低触达
+    ❓ Does foot fold to cover feet?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | 坦桑尼亚     | Lujayna Dida             | B/谈判/样品
+    → 谈判中，沉淀63天 | 暂停触达，等新产品/新认证再激活
+    ❓ how kg?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | 加纳       | zenabu issaka            | B/谈判/样品
+    → 谈判中，沉淀64天 | 暂停触达，等新产品/新认证再激活
+    ❓ I want 3 of this and may I no the cost
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 60d | SG       | Tiffany tay              | A/谈判/样品 [A]
+    → 谈判中，沉淀64天 | 保持1-2月最低触达
+    ❓ Do u have any existing floral design sample like this ?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 61d | 澳大利亚     | Kiana Talbot             | A/谈判/样品 [A]
+    → 谈判中，沉淀67天 | 保持1-2月最低触达
+    ❓ I would like come customisations I think! What do you offer
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 63d | 美国       | Asselya Marina           | S/谈判/样品 [S]
+    → 谈判中，沉淀67天 | 保持1-2月最低触达
+    ❓ Which products have CPC, please check and let me know
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 63d | 澳大利亚     | Taylah Wolff             | A/谈判/样品 [A]
+    → 谈判中，沉淀67天 | 保持1-2月最低触达
+    ❓ I’m still having a think about the swaddle. What is our next step on getting a s
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 64d | 俄罗斯      | Latifa Abdullaeva        | A/谈判/样品 [A]
+    → 谈判中，沉淀68天 | 保持1-2月最低触达
+    ❓ А что вы скажете насчет тканей для одежды? Мне нужен качественный товар
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 智利       | Oliver Rivera            | A/谈判/样品 [A]
+    → 谈判中，沉淀98天 | 保持1-2月最低触达
+    ❓ cuando vuelven de sus vacaciones?
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 65d | NO       | Linda Vaage              | A/谈判/样品 [A]
+    → 谈判中，沉淀102天 | 保持1-2月最低触达
+    ❓ Thank you. What is your MOQ for this?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 65d | GE       | Anabel Gevorgyan         | A/谈判/样品 [A]
+    → 谈判中，沉淀74天 | 保持1-2月最低触达
+    ❓ i mean when will you start to work?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 美国       | Yvonne Mbithe            | A/谈判/样品 [A]
+    → 谈判中，沉淀69天 | 保持1-2月最低触达
+    ❓ And do you have second hand clothes?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 赞比亚      | Peter Mungulube          | B/谈判/样品 [★]
+    → 谈判中，沉淀70天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 65d | 阿联酋      | Ananthu Anilkumar        | A/谈判/样品 [A ★]
+    → 谈判中，沉淀75天 | 保持1-2月最低触达
+    ❓ and then can you provide the label under our brand name???
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 美国       | Lukas Pabst              | B/谈判/样品
+    → 谈判中，沉淀159天 | 暂停触达，等新产品/新认证再激活
+    ❓ just to confirm: you can sew on a velcro patch to the front of the onesie, right
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 66d | 罗马尼亚     | Tina Dinu                | A/谈判/样品 [A]
+    → 谈判中，沉淀95天 | 保持1-2月最低触达
+    ❓ Do you support Trade Assurance for sample orders?
+    💬 充分回复 (0.1d) | 沉淀(90d+)
+  ⚪ 66d | 加纳       | Rashidatu Issahaku       | A/谈判/样品 [A]
+    → 谈判中，沉淀76天 | 保持1-2月最低触达
+    ❓ I will go though your products and send you the one I want to add
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 66d | 俄罗斯      | Ludmila Manevskaa        | B/谈判/样品
+    → 谈判中，沉淀75天 | 暂停触达，等新产品/新认证再激活
+    ❓ Здравствуйте! А сколько же ожидать информации?
+    💬 简短回复 (0.4d) | 深度沉默(30-90d)
+  ⚪ 66d | 德国       | Iudith Artin             | B/谈判/样品
+    → 谈判中，沉淀72天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. Can I get a sample first?
+[{"quantity":"2.00
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 66d | 伊拉克      | Zahraa Pharmacist        | A/谈判/样品 [A]
+    → 谈判中，沉淀80天 | 保持1-2月最低触达
+    ❓ Dear i need more pictures details
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 67d | 美国       | Kinana Zahraa            | A/谈判/样品 [A]
+    → 谈判中，沉淀71天 | 保持1-2月最低触达
+    ❓ Is it suitable for spring?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 68d | GM       | Amie Jaiteh              | C/谈判/样品
+    → 谈判中，沉淀72天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 73d | 印度       | surbhi jain              | A/谈判/样品 [A]
+    → 谈判中，沉淀77天 | 保持1-2月最低触达
+    ❓ ???
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 75d | 也门       | ammhmd mhmd              | A/谈判/样品 [A]
+    → 谈判中，沉淀79天 | 保持1-2月最低触达
+  ⚪ 79d | 津巴布韦     | Faith Mundondo           | B/谈判/样品
+    → 谈判中，沉淀83天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 82d | 肯尼亚      | abdurahim Omar           | B/谈判/样品
+    → 谈判中，沉淀86天 | 暂停触达，等新产品/新认证再激活
+    ❓ you have WhatsApp?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 87d | 哥伦比亚     | Kesselin Fuentes         | B/谈判/样品
+    → 谈判中，沉淀91天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 89d | 美国       | Tzivi Schreiber          | A/谈判/样品 [A]
+    → 谈判中，沉淀93天 | 保持1-2月最低触达
+    ❓ I want the design on the whole thing
+    💬 充分回复 (0.4d) | 沉淀(90d+)
+  ⚪ 94d | 法国       | Rapel Rapel              | A/谈判/样品 [A]
+    → 谈判中，沉淀98天 | 保持1-2月最低触达
+    ❓ Ok sorry I need all same
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 96d | 印度       | Catherine Shajan         | B/谈判/样品
+    → 谈判中，沉淀104天 | 暂停触达，等新产品/新认证再激活
+    ❓ What about 3rd product? Any specific order quantity?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 97d | HR       | Nina Vidacic             | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 100d | 加拿大      | Steeve Drapeau           | A/谈判/样品 [A]
+    → 谈判中，沉淀104天 | 保持1-2月最低触达
+    ❓ sorry i need this to move forward...
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 103d | 塞拉利昂     | Abibatu sidique Abibatu sidique | A/谈判/样品 [A]
+    → 谈判中，沉淀107天 | 保持1-2月最低触达
+    ❓ I need sample
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 103d | UK       | Anna Krzywicka           | A/谈判/样品 [A]
+    → 谈判中，沉淀108天 | 保持1-2月最低触达
+    ❓ But how much for 20pices?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 105d | 美国       | Persia Rodriguez         | B/谈判/样品
+    → 谈判中，沉淀110天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 106d | 美国       | Halima Tahir             | A/谈判/样品 [A]
+    → 谈判中，沉淀112天 | 保持1-2月最低触达
+    ❓ but the total iterms i selected i want to know
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 112d | UZ       | Ulduz Rahmatova          | B/谈判/样品
+    → 谈判中，沉淀116天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. What is the best price you can offer? Do you
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 112d | 塞内加尔     | Mariama Keita            | B/谈判/样品
+    → 谈判中，沉淀116天 | 暂停触达，等新产品/新认证再激活
+    ❓ Do you only sell pyjamas?
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 115d | 坦桑尼亚     | omari shabani            | A/谈判/样品 [A]
+    → 谈判中，沉淀119天 | 保持1-2月最低触达
+    ❓ thanks for the market analysis document, it is well understood, i need to just s
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 116d | 阿联酋      | kristine marquez         | B/谈判/样品 [★]
+    → 谈判中，沉淀125天 | 暂停触达，等新产品/新认证再激活
+    ❓ how can i request for samples for these?
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 118d | 俄罗斯      | Elena hartunova          | B/谈判/样品
+    → 谈判中，沉淀122天 | 暂停触达，等新产品/新认证再激活
+    ❓ а как вы считаете ?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 121d | UK       | Tom Mills                | A/谈判/样品 [A]
+    → 谈判中，沉淀126天 | 保持1-2月最低触达
+    ❓ do you own the factory?
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 124d | 香港       | SUSAN YANG               | A/谈判/样品 [A]
+    → 谈判中，沉淀128天 | 保持1-2月最低触达
+    ❓ Can u make this item?
+    💬 简短回复 (0.1d) | 沉淀(90d+)
+  ⚪ 127d | 美国       | Waleed Mustafabenheba    | B/谈判/样品
+    → 谈判中，沉淀131天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 128d | 刚果民主     | Kebba Keita              | B/谈判/样品 [★]
+    → 谈判中，沉淀132天 | 暂停触达，等新产品/新认证再激活
+    ❓ you use whatsapp?
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 129d | 土耳其      | dila cakir               | S/谈判/样品 [S]
+    → 谈判中，沉淀134天 | 保持1-2月最低触达
+    ❓ We would like to better understand the current folding method used for the singl
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 132d | 马来西亚     | Marina Zainudin          | A/谈判/样品 [A]
+    → 谈判中，沉淀136天 | 保持1-2月最低触达
+    ❓ How much shipping to malaysia
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 伊拉克      | sharaf almuslim          | A/谈判/样品 [A]
+    → 谈判中，沉淀148天 | 保持1-2月最低触达
+    ❓ 您好😊  
+
+感谢您分享产品。我想更方便地查看和选择款式，请问您能提供包含清晰图片、尺码和价格的完整PDF产品目录吗？  
+
+这样我可以更快决定我想订购的款式
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 贝宁       | Jessica Makangila        | B/谈判/样品
+    → 谈判中，沉淀146天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 印度       | sadiya sadiq             | A/谈判/样品 [A]
+    → 谈判中，沉淀155天 | 保持1-2月最低触达
+    ❓ 109$?
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 坦桑尼亚     | hajra mohamed            | B/谈判/样品
+    → 谈判中，沉淀215天 | 暂停触达，等新产品/新认证再激活
+    ❓ do you have for a 6 years??
+    💬 充分回复 (0.2d) | 沉淀(90d+)
+  ⚪ 135d | 伊拉克      | ryan alshykh             | B/谈判/样品
+    → 谈判中，沉淀192天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 埃及       | Esraa Abuziada           | B/谈判/样品 [★]
+    → 谈判中，沉淀192天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 美国       | surbhidudeja NA          | A/谈判/样品 [A]
+    → 谈判中，沉淀176天 | 保持1-2月最低触达
+    ❓ Do you have more like this
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 美国       | Allison                  | B/谈判/样品
+    → 谈判中，沉淀165天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 伊拉克      | zaed maghdid             | A/谈判/样品 [A]
+    → 谈判中，沉淀186天 | 保持1-2月最低触达
+  ⚪ 135d | 美国       | jordan silver            | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 乌干达      | Aisha Nakibuuka          | A/谈判/样品 [A]
+    → 谈判中，沉淀208天 | 保持1-2月最低触达
+    ❓ I want pajama for kids from 5yrs to 13yrs
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | AZ       | Ayisha Heyderova         | A/谈判/样品 [A]
+    → 谈判中，沉淀168天 | 保持1-2月最低触达
+  ⚪ 135d | 西班牙      | Ionela Sandru            | B/谈判/样品
+    → 谈判中，沉淀165天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 贝宁       | Bernice Toffa            | B/谈判/样品
+    → 谈判中，沉淀163天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 加纳       | Sarah Tawiah             | B/谈判/样品
+    → 谈判中，沉淀166天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | NP       | Niwa limbu               | A/谈判/样品 [A]
+    → 谈判中，沉淀162天 | 保持1-2月最低触达
+  ⚪ 135d | MU       | ishwari reedoy           | B/谈判/样品
+    → 谈判中，沉淀201天 | 暂停触达，等新产品/新认证再激活
+    ❓ may i know the price if i take on wholesale
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 加纳       | Mujeeb Rahman            | B/谈判/样品
+    → 谈判中，沉淀203天 | 暂停触达，等新产品/新认证再激活
+    ❓ if I made order how long does it take to reach
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 南非       | Tebatso Motlhamme        | B/谈判/样品
+    → 谈判中，沉淀208天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. Can I get a sample first?
+[{"quantity":"null
+    💬 充分回复 (0.3d) | 沉淀(90d+)
+  ⚪ 135d | 沙特       | zia ul haq               | B/谈判/样品 [★]
+    → 谈判中，沉淀213天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi,
+How are you ?
+i am Siya from India, 
+How much is the Price for 100k Pcs (Mix
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 喀麦隆      | Rosalie Lalhensia Ngassama | B/谈判/样品
+    → 谈判中，沉淀199天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. Can I get a sample first?
+[{"quantity":"100.
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 巴基斯坦     | Ch Maha                  | B/谈判/样品
+    → 谈判中，沉淀187天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 孟加拉      | TheCakes Creation        | B/谈判/样品
+    → 谈判中，沉淀211天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 巴西       | Patty Vega               | B/谈判/样品
+    → 谈判中，沉淀211天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 美国       | Judith Mbabu             | B/谈判/样品
+    → 谈判中，沉淀175天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | SO       | imaan abdi               | B/谈判/样品
+    → 谈判中，沉淀169天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 以色列      | Nimrod Levi              | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 美国       | mixu yeemu               | A/谈判/样品 [A]
+    → 谈判中，沉淀195天 | 保持1-2月最低触达
+  ⚪ 135d | 美国       | NITISH AGGARWAL          | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 意大利      | Sadiq Ullah              | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 以色列      | karin keren              | A/谈判/样品 [A]
+    → 谈判中，沉淀197天 | 保持1-2月最低触达
+    ❓ I want to make a sample for this 2 models attached:
+1/ bodysuit with mattching l
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | UZ       | Gulzoda Rasidovna        | B/谈判/样品
+    → 谈判中，沉淀186天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | PS       | majd majd                | B/谈判/样品
+    → 谈判中，沉淀184天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 埃及       | shw shw                  | B/谈判/样品 [★]
+    → 谈判中，沉淀139天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 俄罗斯      | Alyona Panfilova         | S/谈判/样品 [S]
+    → 谈判中，沉淀140天 | 保持1-2月最低触达
+    ❓ Good morning Leo! Yes, I looked at the product. You see we need only customizes 
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 南非       | Moabelo Mokgaetje        | B/谈判/样品
+    → 谈判中，沉淀172天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 美国       | Djenabou Yattara         | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | KZ       | bauirjan Tilekbaev       | B/谈判/样品
+    → 谈判中，沉淀166天 | 暂停触达，等新产品/新认证再激活
+    ❓ Именно какой модел  он купил?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 加拿大      | Jassy Nancy              | B/谈判/样品
+    → 谈判中，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 科威特      | fajer Aln                | A/谈判/样品 [A]
+    → 谈判中，沉淀140天 | 保持1-2月最低触达
+    ❓ I need the designs you have for the training pants
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 140d | 卡塔尔      | Najeeba Jashid           | B/谈判/样品
+    → 谈判中，沉淀166天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 155d | 荷兰       | james wilson             | C/谈判/样品
+    → 谈判中，沉淀159天 | 暂停触达，等新产品/新认证再激活
+    ❓ Sample Requirments.7z
+    💬 充分回复 (0d) | 沉淀(90d+)
+
+── 💰 报价已发: 58人 ──
+  🟡  1d | 西班牙      | diego vargas             | B/报价已发
+    → 报价后，沉默5天 | 温和提醒+问是否有新需求
+    ❓ no tienes stock de marca ?
+    💬 简短回复 (0.3d) | 短期沉默(3-7d)
+  🔴  1d | 加纳       | Ernestina Afriyie        | B/报价已发
+    → 报价后，昨日互动 | 今日跟进，保持对话节奏
+    ❓ Do you have cartoon character sleepwear
+    💬 简短回复 (0.4d)
+  🟡  2d | 赞比亚      | Esther Chola             | B/报价已发 [★]
+    → 报价后，沉默6天 | 发工厂动态/新品+问"还在找吗"
+    ❓ Hi,I’m ready to start an inquiry about this item.
+[{"quantity":"2.000 piece","id
+    💬 充分回复 (0.1d) | 短期沉默(3-7d)
+  🟡  3d | UK       | Alina Svinchuk           | B/报价已发
+    → 报价后，沉默7天 | 发工厂动态/新品+问"还在找吗"
+    ❓ I is this comes with hat?
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  5d | 沙特       | Hakim Ezat               | B/报价已发 [★]
+    → 报价后，沉默11天，需激活 | 发新品类/新到货，重新建立联系
+  ⚪  8d | 香港       | Diana Yao                | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪  9d | 阿根廷      | Dario Callini            | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  🟢 11d | 加纳       | Susuanna ParkerAdentwi   | B/报价已发
+    → 报价后，长期沉默19天 | 降频15天/次，等新产品激活
+  🟢 15d | UZ       | Sayfullaeva Shahnoza     | A/报价已发 [A]
+    → 报价后，长期沉默19天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ Hi,I’m interested in this item and would like more details
+[{"quantity":"null pi
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 16d | 沙特       | Conteza Elias            | B/报价已发 [★]
+    → 报价后，长期沉默20天 | 降频15天/次，等新产品激活
+    ❓ Hello, my name is Teza.
+
+I am thinking to start launching baby products and I am
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  ⚪ 16d | 委内瑞拉     | Deisy Hoyos              | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  🟢 16d | 赞比亚      | Ruth mutambo             | A/报价已发 [A ★]
+    → 报价后，长期沉默20天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ Hi,can you share more details about this item? What is the best price you can of
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 18d | 美国       | Kings Sikaz              | B/报价已发
+    → 报价后，长期沉默23天 | 降频15天/次，等新产品激活
+    ❓ how much
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 18d | 阿尔及利亚    | Assia Assia              | S/报价已发 [S]
+    → 报价后，长期沉默22天 | 不催单。发工厂动态/节日/认证维存在感
+  🟢 19d | 肯尼亚      | fatma delicacies         | A/报价已发 [A]
+    → 报价后，长期沉默23天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601700182554
+$2.70-3.20
+OEM Custom Girls Summer Homewear Set Bulk Wholesale Car
+    💬 敷衍回复 (0d) | 长期沉默(14-30d)
+  🟢 22d | 印尼       | Afiq Amrullah            | A/报价已发 [A]
+    → 报价后，长期沉默27天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601700231464
+$3.20-3.50
+Wholesale Soft Cotton/Polyester Baby Pajamas Set OEM Cu
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 23d | 津巴布韦     | Mercy Tambayi            | B/报价已发
+    → 报价后，长期沉默28天 | 降频15天/次，等新产品激活
+  🟢 25d | NP       | ShudeshB Thapa           | B/报价已发
+    → 报价后，长期沉默30天 | 降频15天/次，等新产品激活
+    ❓ I want to buy 100 pieces of product, can you please send me the packing dimensio
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 25d | 赞比亚      | martin wamundila         | A/报价已发 [A ★]
+    → 报价后，沉淀36天 | 保持1-2月最低触达
+    ❓ am in Zambia  how much older price
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 27d | 菲律宾      | ChaireMae DePedro        | B/报价已发
+    → 报价后，沉淀31天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 31d | 法国       | Kouada Wanda             | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 31d | 匈牙利      | Krisztina Juhasz         | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 34d | 意大利      | Gift Bello ALIU          | B/报价已发
+    → 报价后，沉淀38天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 35d | 美国       | Daimy Cucarella          | B/报价已发
+    → 报价后，沉淀39天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 36d | 菲律宾      | Sharmaine Jalgalado      | A/报价已发 [A]
+    → 报价后，沉淀40天 | 保持1-2月最低触达
+    ❓ Hello,I’d like to discuss this item. What is the best price you can offer?
+[{"qu
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 41d | 印尼       | Sittirohani Sit          | B/报价已发
+    → 报价后，沉淀46天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 48d | 利比亚      | Gr Grand                 | B/报价已发
+    → 报价后，沉淀52天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 49d | 印度       | Vivek Goel               | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 50d | 肯尼亚      | Loyal Queen              | A/报价已发 [A]
+    → 报价后，沉淀67天 | 保持1-2月最低触达
+  ⚪ 51d | 津巴布韦     | Nomagugu Nkomo           | B/报价已发
+    → 报价后，沉淀55天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. What is the best price you can offer?
+[{"qua
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 56d | 美国       | Vhyne SanAndres          | C/报价已发
+    → 报价后，沉淀61天 | 暂停触达，等新产品/新认证再激活
+    ❓ 57.05pesos with two partnered items?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 57d | NO       | Angelika Satro AandS Factory | B/报价已发
+    → 报价后，沉淀62天 | 暂停触达，等新产品/新认证再激活
+    ❓ link?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 58d | 美国       | Shirley Tyler            | C/报价已发
+    → 报价后，沉淀63天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 58d | 美国       | Valoune Etienne          | C/报价已发
+    → 报价后，沉淀62天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 64d | 美国       | norma  aguilar           | A/报价已发 [A]
+    → 报价后，沉淀68天 | 保持1-2月最低触达
+    ❓ Hi, I'm interested in this product. What is the shipping cost? What is the shipp
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 以色列      | mws bgh                  | B/报价已发
+    → 报价后，沉淀70天 | 暂停触达，等新产品/新认证再激活
+    ❓ היי, המוצרים האלה מעניינים אותי. כמה זה ייקח המשלוח למדינה שלי? האם אוכל להוסיף 
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | UZ       | Muhayyo Xasanova         | B/报价已发
+    → 报价后，沉淀97天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 67d | 美国       | Roota  Shirinyans        | C/报价已发
+    → 报价后，沉淀71天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hello,I’d like to get in touch about this item.
+[{"quantity":"2.000 piece","id":
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 71d | 西班牙      | Yusleisy Jurado          | C/报价已发
+    → 报价后，沉淀75天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 73d | 伊拉克      | zanamuhamad Zana         | B/报价已发
+    → 报价后，沉淀77天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 79d | 孟加拉      | MdImrun Hossen           | B/报价已发
+    → 报价后，沉淀83天 | 暂停触达，等新产品/新认证再激活
+    ❓ age group?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 88d | 美国       | Julna Jean               | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 92d | 美国       | Kabelwa Kabelwa          | B/报价已发
+    → 报价后，沉淀96天 | 暂停触达，等新产品/新认证再激活
+    ❓ How much for 2sets to foshan
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 95d | 日本       | Winda Palastri           | C/报价已发
+    → 报价后，沉淀99天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 96d | 美国       | Pamela Harper            | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 97d | 印尼       | Muhamadpadilah Padil     | C/报价已发
+    → 报价后，沉淀101天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 102d | 美国       | Ashley Marie             | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 103d | 罗马尼亚     | Emese Incze              | B/报价已发
+    → 报价后，沉淀107天 | 暂停触达，等新产品/新认证再激活
+    ❓ I am interested in your baby bodysuit product and want to sell it in the EU / Ro
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 108d | 印尼       | Riandi Jr                | B/报价已发
+    → 报价后，沉淀112天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hai, saya tertarik dengan produk ini. Berapa ongkos kirimnya? Berapa ongkos kiri
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 109d | 玻利维亚     | Amalia Suarezguarimo     | C/报价已发
+    → 报价后，沉淀113天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 109d | IE       | Aoife Geary              | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 112d | 加拿大      | France Caron             | C/报价已发
+    → 报价后，沉淀117天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 113d | 苏丹       | mynas mhmd               | B/报价已发 [★]
+    → 报价后，沉淀117天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 116d | 美国       | Adrienne Davis           | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 123d | 摩尔多瓦     | Viorica Railean          | C/报价已发
+    → 报价后，沉淀127天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 129d | UK       | Summer bannister         | D/报价已发
+    → 报价后，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 133d | 美国       | Emma Mumba               | D/报价已发
+    → 报价后，沉淀137天 | 暂停触达，等新产品/新认证再激活
+    ❓ how much
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 肯尼亚      | Matiiida Wakesho         | B/报价已发
+    → 报价后，沉淀158天 | 暂停触达，等新产品/新认证再激活
+
+── 📋 初询沟通: 187人 ──
+  🟡  1d | 伊拉克      | alnwd alnwd              | B/初询沟通
+    → 初询，沉默5天 | 温和提醒+问是否有新需求
+  🟡  1d | 法国       | Clara ElAssaad           | B/初询沟通
+    → 初询，沉默5天 | 温和提醒+问是否有新需求
+  🟡  2d | 科特迪瓦     | Aboulaye Rabiatou        | A/初询沟通 [A ★]
+    → 初询，沉默6天 | 定制激活：复盘卡点+针对性破局
+    ❓ 1601700231464
+$3.20-3.50
+Wholesale Soft Cotton/Polyester Baby Pajamas Set OEM Cu
+    💬 充分回复 (0.1d) | 短期沉默(3-7d)
+  🟡  2d | 美国       | Marcos Kuyu              | B/初询沟通
+    → 初询，沉默6天 | 发工厂动态/新品+问"还在找吗"
+  🟡  2d | 阿曼       | Mezna Alawfi             | B/初询沟通
+    → 初询，沉默6天 | 发工厂动态/新品+问"还在找吗"
+  🟡  2d | 美国       | adriano.1989 NA          | B/初询沟通
+    → 初询，沉默7天 | 发工厂动态/新品+问"还在找吗"
+    ❓ Qual o valor do frete econômico para a Rua Antônio Caldeira Dantas, 654, centro,
+    💬 充分回复 (0d) | 中期沉默(7-14d)
+  🟡  2d | 加拿大      | Tahar benmohamed         | A/初询沟通 [A]
+    → 初询，沉默6天 | 定制激活：复盘卡点+针对性破局
+    ❓ Hi,I’d like to learn more about this product.more models
+[{"quantity":"100.000 p
+    💬 充分回复 (0d) | 短期沉默(3-7d)
+  🟢  4d | 阿根廷      | Celeste Albarracin       | B/初询沟通
+    → 初询，沉默8天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  4d | 美国       | Begimai Akymbekova       | B/初询沟通
+    → 初询，沉默8天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  4d | 伊拉克      | sarah alnajar            | B/初询沟通
+    → 初询，沉默8天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  4d | 美国       | Amenanchristine Boua     | B/初询沟通
+    → 初询，沉默8天，需激活 | 发新品类/新到货，重新建立联系
+    ❓ What is your Minimum Order Quantity and pricing?
+    💬 充分回复 (0d) | 中期沉默(7-14d)
+  🟢  5d | 埃及       | ayh khyry                | B/初询沟通 [★]
+    → 初询，沉默9天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  6d | 赞比亚      | Aka-Mwau Esme            | B/初询沟通 [★]
+    → 初询，沉默10天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  7d | 美国       | Sifa Vano                | B/初询沟通
+    → 初询，沉默12天，需激活 | 发新品类/新到货，重新建立联系
+    ❓ I need to see other products you have.
+    💬 敷衍回复 (0d) | 中期沉默(7-14d)
+  🟢  7d | 美国       | LISKEY RIVERO            | A/初询沟通 [A]
+    → 初询，沉默12天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+  🟢  7d | 伊拉克      | Israa Fawzi              | B/初询沟通
+    → 初询，沉默11天，需激活 | 发新品类/新到货，重新建立联系
+    ❓ Hi,can we discuss this product?
+[{"quantity":"2.000 piece","id":1601600287717,"t
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  8d | 沙特       | Wigdan Gasim             | A/初询沟通 [A ★]
+    → 初询，沉默12天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+  🟢  8d | 阿根廷      | Mel Paccot               | A/初询沟通 [A]
+    → 初询，沉默12天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ https://www.alibaba.com/product-detail/Eco-Friendly-Reusable-Baby-Bibs-Set_16016
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  8d | 美国       | Claudia Mersilus         | A/初询沟通 [A]
+    → 初询，沉默12天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ Hi,I’m checking if this suits my needs. Can I get a sample first? Can I get a sa
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  9d | 南非       | Charlotte Asibey         | B/初询沟通
+    → 初询，沉默13天，需激活 | 发新品类/新到货，重新建立联系
+    ❓ If so,please send me 
++27824835833
+    💬 充分回复 (0d) | 中期沉默(7-14d)
+  🟢  9d | 美国       | Doris Akpabio            | A/初询沟通 [A]
+    → 初询，沉默13天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ 1601595270616
+$0.78-0.93
+Custom Wholesale Washable Cloth Diaper Bulk OEM Reusabl
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟢  9d | BY       | Nasta Goncaruk           | B/初询沟通
+    → 初询，沉默14天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  9d | 以色列      | Talosh talosh            | B/初询沟通
+    → 初询，沉默13天，需激活 | 发新品类/新到货，重新建立联系
+  🟢  9d | 科特迪瓦     | Katchenan Soro           | B/初询沟通 [★]
+    → 初询，沉默13天，需激活 | 发新品类/新到货，重新建立联系
+  🟢 10d | 科特迪瓦     | TheodoraAdelaide Mahe    | A/初询沟通 [A ★]
+    → 初询，沉默14天，需激活 | 发认证更新+同行案例+问"上次方向还继续吗"
+    ❓ 1601694144696
+$1.39-1.93
+Wholesale Kids Summer Clothing Set OEM Custom Cotton/Po
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 11d | 美国       | Jemima Piema             | A/初询沟通 [A]
+    → 初询，长期沉默16天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601700526377
+$3.80-4.20
+Wholesale Boy Cotton Linen Suit Custom OEM Breathable T
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 12d | 几内亚      | Assiatou Barry           | B/初询沟通
+    → 初询，长期沉默16天 | 降频15天/次，等新产品激活
+  🟢 13d | 阿联酋      | Adm Reda                 | B/初询沟通 [★]
+    → 初询，长期沉默17天 | 降频15天/次，等新产品激活
+  🟢 13d | CN       | User name                | B/初询沟通
+    → 初询，长期沉默18天 | 降频15天/次，等新产品激活
+    ❓ 您好老板，我们是做婴儿隔尿垫，抱被，夏凉被，定型枕等其他婴儿产品的源头工厂，您看有需要的可以加个联系方式吗
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟡 14d | 赞比亚      | Regina Kabanda           | B/初询沟通 [★]
+    → 初询，沉默4天 | 温和提醒+问是否有新需求
+    ❓ do you have for a 2 years baby
+    💬 充分回复 (0d) | 短期沉默(3-7d)
+  ⚪ 14d | 喀麦隆      | Lohgah Sharon            | D/初询沟通
+    → 初询，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  🟢 15d | 美国       | AnneMarie Nsomp          | A/初询沟通 [A]
+    → 初询，长期沉默19天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601700526377
+$3.80-4.20
+Wholesale Boy Cotton Linen Suit Custom OEM Breathable T
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 16d | 美国       | Melisapierina Apenaadvincula | B/初询沟通
+    → 初询，长期沉默20天 | 降频15天/次，等新产品激活
+  ⚪ 16d | 印度       | Tanaya Mallick           | D/初询沟通
+    → 初询，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  🟢 17d | CN       | User name                | B/初询沟通
+    → 初询，长期沉默21天 | 降频15天/次，等新产品激活
+    ❓ 您好老板，我们是做婴儿隔尿垫，抱被，夏凉被，定型枕等其他婴儿产品的源头工厂，您看有需要的可以加个联系方式吗
+Inquiry from Store Homepag
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 17d | CN       | d zm                     | D/初询沟通
+    → 初询，长期沉默21天 | 降频15天/次，等新产品激活
+    ❓ 老板您好，请问店铺考虑转让吗？
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 17d | 葡萄牙      | victorina Rosada         | B/初询沟通
+    → 初询，长期沉默21天 | 降频15天/次，等新产品激活
+  🟢 18d | 俄罗斯      | YULIA GOLUBTSOVA         | B/初询沟通
+    → 初询，长期沉默22天 | 降频15天/次，等新产品激活
+    ❓ Добрый день! Я вас поняла. Я хочу осуществлять доставку из Китая и продавать в Р
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 19d | 刚果民主     | Nelly Lupity             | B/初询沟通 [★]
+    → 初询，长期沉默23天 | 降频15天/次，等新产品激活
+    ❓ est ce que vous pouvez me proposer vos articles ?
+    💬 敷衍回复 (0d) | 长期沉默(14-30d)
+  🟢 19d | 津巴布韦     | Cryn Nyabadza            | A/初询沟通 [A]
+    → 初询，长期沉默24天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ Do you only have black n white ?
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 19d | 伊拉克      | nshwan altayy            | A/初询沟通 [A]
+    → 初询，长期沉默23天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601690639342
+$1.20-2.39
+Custom Kids Short Sleeve Set 100 Cotton Animal Stripe C
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 19d | 埃及       | adm hsyn                 | B/初询沟通 [★]
+    → 初询，长期沉默24天 | 降频15天/次，等新产品激活
+  🟢 20d | 美国       | (未知)                     | A/初询沟通 [A]
+    → 初询，长期沉默24天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ مرحبًا،أرغب في معرفة المزيد عن هذا المنتج.
+[{"quantity":"3.000 قطعة","id":160170
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 22d | 美国       | syf khdr                 | A/初询沟通 [A]
+    → 初询，长期沉默26天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601700182554
+$2.70-3.20
+OEM Custom Girls Summer Homewear Set Bulk Wholesale Car
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 22d | 利比亚      | BuyLi Now                | B/初询沟通
+    → 初询，长期沉默26天 | 降频15天/次，等新产品激活
+    ❓ Last name:潘Pan
+
+first name:丽雯liwen
+
+Mobile:13695213008
+
+Postcode:528241
+
+Country
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟢 23d | 伊拉克      | fatmt mtr                | B/初询沟通
+    → 初询，长期沉默29天 | 降频15天/次，等新产品激活
+  🟢 23d | 赞比亚      | Peggy Hamungala          | B/初询沟通 [★]
+    → 初询，长期沉默27天 | 降频15天/次，等新产品激活
+    ❓ Hi,I’d like to begin discussions about this item. What is the shipping cost? Wha
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 23d | 利比亚      | slwyahmd bas             | B/初询沟通
+    → 初询，长期沉默27天 | 降频15天/次，等新产品激活
+  🟢 24d | 科特迪瓦     | Amah Doumbia             | A/初询沟通 [A ★]
+    → 初询，长期沉默29天 | 不催单。发工厂动态/节日/认证维存在感
+    ❓ 1601690883451
+$1.38-2.38
+Custom Kids Set 2 Pcs 100 Cotton Canvas Cartoon Print O
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  🟢 25d | 赞比亚      | florence salima          | B/初询沟通 [★]
+    → 初询，长期沉默29天 | 降频15天/次，等新产品激活
+    ❓ I want a romper for 4 to 5 years and also 3 to 4 years
+    💬 充分回复 (0d) | 长期沉默(14-30d)
+  ⚪ 25d | MZ       | Eulalia Julio Chiau      | B/初询沟通
+    → 初询，沉淀35天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 25d | 智利       | Vanessa Arroyomejias     | A/初询沟通 [A]
+    → 初询，沉淀31天 | 保持1-2月最低触达
+  ⚪ 27d | 美国       | Vanilla Balite           | B/初询沟通
+    → 初询，沉淀31天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 28d | 喀麦隆      | Ayuk Esther Ojong        | B/初询沟通
+    → 初询，沉淀33天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product.
+[{"quantity":"null piece","id":1601598081803
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 29d | 贝宁       | Hind AHOUANTO            | C/初询沟通
+    → 初询，沉淀33天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 30d | 塞内加尔     | Boubacar DIARISSO        | B/初询沟通
+    → 初询，沉淀34天 | 暂停触达，等新产品/新认证再激活
+    ❓ Ah ok   Est ce que vous avez  une catalogue ?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 30d | 埃及       | Heba Gamal               | B/初询沟通 [★]
+    → 初询，沉淀34天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 30d | 刚果       | mavie Mbouele            | A/初询沟通 [A]
+    → 初询，沉淀34天 | 保持1-2月最低触达
+    ❓ c'est de quel âge à quel âge ?
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 30d | 印尼       | Mery Xu Xu               | B/初询沟通
+    → 初询，沉淀35天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 30d | 委内瑞拉     | Orglys Ruiz              | B/初询沟通
+    → 初询，沉淀34天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 31d | 加拿大      | Rahmani Khadija          | B/初询沟通
+    → 初询，沉淀35天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi,I’d like to begin discussions about this item.
+[{"quantity":"5.000 piece","id
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 31d | 美国       | bshry wn                 | B/初询沟通
+    → 初询，沉淀35天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 31d | 坦桑尼亚     | Mom Gianna               | B/初询沟通
+    → 初询，沉淀36天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 32d | 土耳其      | sahra gül körükçü        | B/初询沟通
+    → 初询，沉淀36天 | 暂停触达，等新产品/新认证再激活
+    ❓ Merhaba,bu ürünü tedarik ediyorum ve daha fazla bilgi edinmek istiyorum. Teklif 
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 32d | 美国       | Firmino Nunes            | A/初询沟通 [A]
+    → 初询，沉淀36天 | 保持1-2月最低触达
+    ❓ Hai, saya tertarik dengan produk ini.
+[{"quantity":"null Buah","id":160168993280
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 32d | 乌克兰      | Perizat Ernazarova       | B/初询沟通
+    → 初询，沉淀36天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 32d | 贝宁       | NONFON Ariace            | B/初询沟通
+    → 初询，沉淀36天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 33d | 科特迪瓦     | Kamadenise Konan         | B/初询沟通 [★]
+    → 初询，沉淀37天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 33d | 科特迪瓦     | NACOULMA CALEB           | A/初询沟通 [A ★]
+    → 初询，沉淀37天 | 保持1-2月最低触达
+  ⚪ 33d | 刚果(金)    | ToPray Mvuenga           | B/初询沟通
+    → 初询，沉淀38天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 34d | 阿尔及利亚    | alhajt alrby             | B/初询沟通
+    → 初询，沉淀38天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 34d | PS       | Mosab Sh                 | B/初询沟通
+    → 初询，沉淀38天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 34d | 埃及       | Hdh Gjg                  | B/初询沟通 [★]
+    → 初询，沉淀38天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 34d | 越南       | Khanh Bui Thi Ngoc       | A/初询沟通 [A]
+    → 初询，沉淀39天 | 保持1-2月最低触达
+  ⚪ 35d | 加纳       | Dorothy Bosea            | A/初询沟通 [A]
+    → 初询，沉淀39天 | 保持1-2月最低触达
+  ⚪ 35d | 埃及       | Haneen Khaled            | B/初询沟通 [★]
+    → 初询，沉淀39天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 35d | 西班牙      | leydi vargas             | B/初询沟通
+    → 初询，沉淀39天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 35d | 孟加拉      | Sumaiya Umama            | B/初询沟通
+    → 初询，沉淀39天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hello,I’m interested in your offering for this product. Do you have a new catalo
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 36d | 罗马尼亚     | Ssaa Ssaa                | B/初询沟通
+    → 初询，沉淀40天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 36d | 津巴布韦     | Chipo Kamuriwo           | A/初询沟通 [A]
+    → 初询，沉淀40天 | 保持1-2月最低触达
+    ❓ Hello,I'm looking for a reliable supplier for this item. What is the shipping co
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 36d | 西班牙      | SANTIAGOGARCIA JUSTA     | B/初询沟通
+    → 初询，沉淀40天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 36d | 美国       | Rahilu Bah               | B/初询沟通
+    → 初询，沉淀40天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 36d | 美国       | julie brown              | B/初询沟通
+    → 初询，沉淀40天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hello,I’m interested in this item.
+[{"quantity":"null piece","id":1601639195925,
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 36d | UZ       | Aziz Zaripov             | A/初询沟通 [A]
+    → 初询，沉淀40天 | 保持1-2月最低触达
+    ❓ Здравствуйте,давайте обсудим этот товар. Могу ли я получить образец?
+[{"quantity
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 36d | 加蓬       | Marcelle Ngoulou         | C/初询沟通
+    → 初询，沉淀40天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 38d | 美国       | Elisabeth Tony           | B/初询沟通
+    → 初询，沉淀42天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 39d | 印尼       | Tresia Leleany           | B/初询沟通
+    → 初询，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 39d | 美国       | so ma                    | B/初询沟通
+    → 初询，沉淀43天 | 暂停触达，等新产品/新认证再激活
+    ❓ i want this boss
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 40d | 印度       | Snehal Kachhadiya        | B/初询沟通
+    → 初询，沉淀46天 | 暂停触达，等新产品/新认证再激活
+    ❓ Minimum order quantity ?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 40d | 美国       | Yusneiry Ramirez         | B/初询沟通
+    → 初询，沉淀44天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hola,¿podemos hablar sobre este producto?
+[{"quantity":"2.000 unidad","id":10000
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 40d | 喀麦隆      | Lamare Fatim Yigam       | B/初询沟通
+    → 初询，沉淀44天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 40d | 墨西哥      | Todo BonitoparaBebe      | D/初询沟通
+    → 初询，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 41d | 刚果       | Ella Christelle SAMBA    | B/初询沟通
+    → 初询，沉淀46天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 41d | 伊拉克      | Mus tafa                 | B/初询沟通
+    → 初询，沉淀46天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 42d | 坦桑尼亚     | Christina Thomas         | B/初询沟通
+    → 初询，沉淀46天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 43d | 俄罗斯      | Ibragimova Feruza        | B/初询沟通
+    → 初询，沉淀47天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 44d | 美国       | A A                      | B/初询沟通
+    → 初询，沉淀48天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. Do you have the certifications for selling i
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 46d | 俄罗斯      | Tanya Domanina           | B/初询沟通
+    → 初询，沉淀51天 | 暂停触达，等新产品/新认证再激活
+    ❓ Здравствуйте,можно обсудить этот товар?
+[{"quantity":"null шт.","id":16016622710
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 47d | 刚果民主     | Guellor Isenge           | B/初询沟通 [★]
+    → 初询，沉淀51天 | 暂停触达，等新产品/新认证再激活
+    ❓ bonjour cher Monsieur.
+Est ce que je peux avoir votre numéro wattsapp ?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 48d | 委内瑞拉     | Yohali Herrera           | B/初询沟通
+    → 初询，沉淀52天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 48d | 塞内加尔     | RoyalShoppingSenegal Senegal | B/初询沟通
+    → 初询，沉淀53天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 50d | 美国       | Kakundika Heritier       | B/初询沟通
+    → 初询，沉淀57天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 50d | 巴西       | MarisadeFatima Souza     | B/初询沟通
+    → 初询，沉淀56天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 50d | 印尼       | Dian Novitasari          | A/初询沟通 [A]
+    → 初询，沉淀55天 | 保持1-2月最低触达
+    ❓ Hai,saya ingin mengajukan pertanyaan tentang produk ini. Bisakah saya mendapatka
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 53d | GR       | mikaella ioannidou       | B/初询沟通
+    → 初询，沉淀57天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi,I’m interested in this product. Do you have a new catalog?
+[{"quantity":"50.0
+    💬 敷衍回复 (0.2d) | 深度沉默(30-90d)
+  ⚪ 53d | 阿根廷      | Micka Gonzalez           | B/初询沟通
+    → 初询，沉淀57天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 54d | 瑞典       | Batool Makhzoum          | B/初询沟通
+    → 初询，沉淀58天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 55d | 埃及       | Aisha Nassar             | B/初询沟通 [★]
+    → 初询，沉淀59天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 55d | 加蓬       | farel nash               | C/初询沟通
+    → 初询，沉淀59天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 57d | 意大利      | Christian Ferraro        | D/初询沟通
+    → 初询，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 58d | 土耳其      | Fatma Ucar               | B/初询沟通
+    → 初询，沉淀69天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 59d | 黎巴嫩      | ROLEENGENOVA BORCELAS    | C/初询沟通
+    → 初询，沉淀64天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 59d | 刚果民主     | Keren Matadi             | B/初询沟通 [★]
+    → 初询，沉淀64天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 59d | 赞比亚      | sylvia malawa            | B/初询沟通 [★]
+    → 初询，沉淀64天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 60d | UZ       | Nilufar Isa              | B/初询沟通
+    → 初询，沉淀64天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 61d | 科特迪瓦     | djaha anik               | C/初询沟通 [★]
+    → 初询，沉淀66天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 61d | MZ       | Eunice Mucavele          | C/初询沟通
+    → 初询，沉淀65天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 61d | 美国       | Ivana Rosales            | B/初询沟通
+    → 初询，沉淀65天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 61d | 委内瑞拉     | Dayana Areinamo          | A/初询沟通 [A]
+    → 初询，沉淀66天 | 保持1-2月最低触达
+  ⚪ 62d | 美国       | Mariearcheline Deorsainvil | C/初询沟通
+    → 初询，沉淀66天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 64d | 西班牙      | Alina K                  | A/初询沟通 [A]
+    → 初询，沉淀180天 | 保持1-2月最低触达
+    ❓ También quisiera cotizar el pantalón de entrenamiento en tres tallas:
+2/3 años (
+    💬 简短回复 (0.1d) | 沉淀(90d+)
+  ⚪ 64d | 德国       | Ramona Jeutner           | B/初询沟通
+    → 初询，沉淀69天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hallo,ich interessiere mich für Ihre Liefermöglichkeiten zu diesem Artikel. Wie 
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 65d | 法国       | Gueye Khadidiatou        | B/初询沟通
+    → 初询，沉淀70天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 65d | 意大利      | camillagiusy pasto       | B/初询沟通
+    → 初询，沉淀70天 | 暂停触达，等新产品/新认证再激活
+    ❓ sono 2 modelli diversi?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 66d | 美国       | Aragsan Abdul            | C/初询沟通
+    → 初询，沉淀70天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 66d | 伊拉克      | RD RDG                   | B/初询沟通
+    → 初询，沉淀84天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 66d | 伊拉克      | rami Alseeraf            | B/初询沟通
+    → 初询，沉淀117天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 66d | 乌克兰      | Galyna Klochko           | B/初询沟通
+    → 初询，沉淀77天 | 暂停触达，等新产品/新认证再激活
+    ❓ У вас написано стоимость доставки 8 долларов 10 штук, это доставка морем около 2
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 66d | 加拿大      | Murielle Lindoyi         | B/初询沟通
+    → 初询，沉淀76天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 66d | 俄罗斯      | Alena Bucenko            | B/初询沟通
+    → 初询，沉淀76天 | 暂停触达，等新产品/新认证再激活
+    ❓ Здравствуйте,меня интересует ваше предложение этого товара. Какова стоимость дос
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 66d | 加纳       | Bel Nas                  | A/初询沟通 [A]
+    → 初询，沉淀76天 | 保持1-2月最低触达
+    ❓ I want 7 years 5 years 3years 6 yes
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 66d | 墨西哥      | Antonio Lugo             | B/初询沟通
+    → 初询，沉淀71天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 67d | 美国       | Jennifer Dominguez       | C/初询沟通
+    → 初询，沉淀71天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. Do you have a new catalog? Can I get a sampl
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 69d | 南非       | NOKUFA RADEBE            | C/初询沟通
+    → 初询，沉淀73天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi, I'm interested in this product. How long will it take to ship to my country?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 70d | NP       | Daya Josephat            | B/初询沟通
+    → 初询，沉淀74天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 73d | 吉布提      | Idil Elmi                | C/初询沟通
+    → 初询，沉淀77天 | 暂停触达，等新产品/新认证再激活
+    ❓  I would like to have a copy of your catalog
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 75d | 美国       | theresa green            | C/初询沟通
+    → 初询，沉淀79天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 75d | 美国       | Daylen Diaz              | B/初询沟通
+    → 初询，沉淀79天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 77d | 美国       | SulmyMarixa CanoRodriguez | C/初询沟通
+    → 初询，沉淀81天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hola, estoy interesado en este producto. ¿Cuál es el mejor precio que puedes ofr
+    💬 敷衍回复 (0d) | 深度沉默(30-90d)
+  ⚪ 78d | 瑞典       | Vazira Alimova           | B/初询沟通
+    → 初询，沉淀82天 | 暂停触达，等新产品/新认证再激活
+    ❓ а бесплатная  доставка до Швеции?
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 78d | 美国       | Aurelie Manitu           | A/初询沟通 [A]
+    → 初询，沉淀82天 | 保持1-2月最低触达
+  ⚪ 83d | 印尼       | Aisah Aisah              | C/初询沟通
+    → 初询，沉淀87天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hai, saya tertarik dengan produk ini. Berapa ongkos kirimnya? Berapa ongkos kiri
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  ⚪ 85d | 荷兰       | Beer Sonja               | B/初询沟通
+    → 初询，沉淀89天 | 暂停触达，等新产品/新认证再激活
+    ❓ hangi urun icin yazmistim size ?
+    💬 充分回复 (0d) | 深度沉默(30-90d)
+  ⚪ 87d | 刚果       | Harry Ikouara            | B/初询沟通
+    → 初询，沉淀91天 | 暂停触达，等新产品/新认证再激活
+    ❓ Possible de voir les images réel du produit et son emballage ? Pour essayer de b
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 89d | 卡塔尔      | Ahmed Boukaala           | B/初询沟通
+    → 初询，沉淀94天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 92d | 科特迪瓦     | Raby Kone                | C/初询沟通 [★]
+    → 初询，沉淀96天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 94d | 美国       | monzer mahgoub           | B/初询沟通
+    → 初询，沉淀98天 | 暂停触达，等新产品/新认证再激活
+    ❓ all clothes for children do you have
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 97d | 印尼       | Salsabila Anny           | A/初询沟通 [A]
+    → 初询，沉淀102天 | 保持1-2月最低触达
+  ⚪ 100d | 阿联酋      | Ryan Luke                | S/初询沟通 [S ★]
+    → 初询，沉淀106天 | 保持1-2月最低触达
+    ❓ whats the min order size?
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 103d | 布基纳法索    | Namanata Kone            | C/初询沟通
+    → 初询，沉淀108天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 106d | 印度       | Rajesh Chavan            | D/初询沟通
+    → 初询，沉淀9999天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 106d | 越南       | Van Truong               | A/初询沟通 [A]
+    → 初询，沉淀110天 | 保持1-2月最低触达
+  ⚪ 106d | 越南       | Hoang ThiUyen            | C/初询沟通
+    → 初询，沉淀112天 | 暂停触达，等新产品/新认证再激活
+    ❓ Chào, tôi quan tâm đến sản phẩm này. Số lượng đặt hàng tối thiểu (MOQ) là bao nh
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 107d | 马来西亚     | Carmen Ng                | C/初询沟通
+    → 初询，沉淀111天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 108d | 肯尼亚      | Richard mulili           | C/初询沟通
+    → 初询，沉淀113天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 108d | 西班牙      | Jennifer Jaranagarcia    | C/初询沟通
+    → 初询，沉淀113天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 110d | 美国       | Takudzwa Mpofu           | B/初询沟通
+    → 初询，沉淀114天 | 暂停触达，等新产品/新认证再激活
+    ❓ yes I'm selling in my own store...okay how can I  get it
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 112d | 美国       | Ijaz Ahmad               | A/初询沟通 [A]
+    → 初询，沉淀116天 | 保持1-2月最低触达
+    ❓ Hi, I'm interested in this product. What is the shipping cost?
+[{"quantity":"2.0
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 113d | 以色列      | sym mwsrty               | C/初询沟通
+    → 初询，沉淀117天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 116d | 香港       | Elias Onni               | C/初询沟通
+    → 初询，沉淀120天 | 暂停触达，等新产品/新认证再激活
+    ❓ I think your goods is quite good.You can took me about parameters.,;,;/\?
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 117d | 巴拿马      | Keileb Martinez          | B/初询沟通
+    → 初询，沉淀122天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 121d | 西班牙      | sara buitrago            | B/初询沟通
+    → 初询，沉淀126天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 123d | AF       | Fazela Orya              | A/初询沟通 [A]
+    → 初询，沉淀128天 | 保持1-2月最低触达
+    ❓ Thank you very much. When I create my Instagram, TikTok, and Facebook pages, cou
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 124d | 美国       | Jodi Norto               | A/初询沟通 [A]
+    → 初询，沉淀128天 | 保持1-2月最低触达
+    ❓ Can you recommend your best-selling products to me?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 125d | 美国       | Ruth Adidja              | B/初询沟通
+    → 初询，沉淀129天 | 暂停触达，等新产品/新认证再激活
+    ❓ Vous avez des manches courtes ?
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 126d | 埃及       | amal ahmd                | C/初询沟通 [★]
+    → 初询，沉淀130天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 128d | 美国       | Clint Georg              | B/初询沟通
+    → 初询，沉淀132天 | 暂停触达，等新产品/新认证再激活
+    ❓ Can you recommend your best-selling products to me?
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 130d | 英国       | Ichie Eimann             | C/初询沟通
+    → 初询，沉淀135天 | 暂停触达，等新产品/新认证再激活
+    ❓ I am looking to purchase some products recently and I am quite satisfied with wh
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 132d | 伊拉克      | Atheer Sadoon            | A/初询沟通 [A]
+    → 初询，沉淀136天 | 保持1-2月最低触达
+  ⚪ 134d | 伊拉克      | bdalrzaqyasynhsyn frhan  | B/初询沟通
+    → 初询，沉淀138天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 葡萄牙      | Belinda JoaoVaz          | B/初询沟通
+    → 初询，沉淀145天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 美国       | Ouido Koivogui           | B/初询沟通
+    → 初询，沉淀148天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 美国       | Yvonne Boateng           | B/初询沟通
+    → 初询，沉淀148天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | 韩国       | Sanjida Akter            | A/初询沟通 [A]
+    → 初询，沉淀148天 | 保持1-2月最低触达
+  ⚪ 135d | 加纳       | Opeyemi Omolara          | B/初询沟通
+    → 初询，沉淀153天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | TM       | Arslan A                 | B/初询沟通
+    → 初询，沉淀160天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | UZ       | Xusniddin Raximov        | B/初询沟通
+    → 初询，沉淀192天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | IE       | carla  lucchesi          | B/初询沟通
+    → 初询，沉淀210天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi how do I order x
+    💬 简短回复 (0.4d) | 沉淀(90d+)
+  ⚪ 135d | 美国       | yessica larios           | A/初询沟通 [A]
+    → 初询，沉淀178天 | 保持1-2月最低触达
+    ❓ Hola, estoy interesado en estos productos. ¿Cuál es el mejor precio que puedes o
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | TT       | Victoria Chen            | B/初询沟通
+    → 初询，沉淀213天 | 暂停触达，等新产品/新认证再激活
+  ⚪ 135d | KZ       | mirkul Arajlym           | A/初询沟通 [A]
+    → 初询，沉淀204天 | 保持1-2月最低触达
+  ⚪ 135d | 日本       | Marika Takaoka           | B/初询沟通
+    → 初询，沉淀139天 | 暂停触达，等新产品/新认证再激活
+    ❓ こんにちは！
+こちらはオリジナルカスタマイズで30個から製作可能ですか？
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 美国       | Akbar Rahimi             | B/初询沟通
+    → 初询，沉淀174天 | 暂停触达，等新产品/新认证再激活
+    ❓ Ok, great, please send me a request.
+    💬 简短回复 (0d) | 沉淀(90d+)
+  ⚪ 135d | 卡塔尔      | Vijila Vinod             | C/初询沟通
+    → 初询，沉淀143天 | 暂停触达，等新产品/新认证再激活
+    ❓ Do you have an Alibaba Supplier Report?
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 142d | 印度       | Deekshith Shekar         | B/初询沟通
+    → 初询，沉淀146天 | 暂停触达，等新产品/新认证再激活
+    ❓ what this
+    💬 充分回复 (0d) | 沉淀(90d+)
+  ⚪ 151d | CN       | Anne Shen                | B/初询沟通
+    → 初询，沉淀155天 | 暂停触达，等新产品/新认证再激活
+    ❓ Hi Leo, Is there anything I can do to help?
+    💬 敷衍回复 (0d) | 沉淀(90d+)
+  ⚪ 173d | 塞内加尔     | NDEYE AMI Diouf          | C/初询沟通
+    → 初询，沉淀177天 | 暂停触达，等新产品/新认证再激活
+
+── 📦 订单执行中: 7人 ──
+  🟡  6d | 坦桑尼亚     | rehema kiseyu            | A/订单执行中 [A]
+    → 订单进行中，已10天未同步 | 主动同步生产进度+发货时间
+    ❓ Hi,I’m interested in this item and would like more details
+[{"quantity":"null pi
+    💬 敷衍回复 (0d) | 中期沉默(7-14d)
+  🟡  6d | 黎巴嫩      | Sara Dibes               | A/订单执行中 [A]
+    → 订单进行中，已10天未同步 | 主动同步生产进度+发货时间
+    ❓ $29.82
+1.0000
+1601694144696
+299831119001025061
+100%
+buyer_confirmed
+express
+[{"q
+    💬 简短回复 (0d) | 中期沉默(7-14d)
+  🟡 17d | 澳大利亚     | irfan khan               | B/订单执行中
+    → 订单进行中，已22天未同步 | 主动同步生产进度+发货时间
+    ❓ I want to ask more product-related questions.
+    💬 简短回复 (0d) | 长期沉默(14-30d)
+  🟡 21d | 加纳       | Lois Anokye              | B/订单执行中
+    → 订单进行中，已25天未同步 | 主动同步生产进度+发货时间
+  🟡 41d | MU       | Soujeeta reetoo          | A/订单执行中 [A]
+    → 订单进行中，已47天未同步 | 主动同步生产进度+发货时间
+    ❓ ok thx. can you pks update yhe proforma invoice for it to be 92
+    💬 简短回复 (0d) | 深度沉默(30-90d)
+  🟡 125d | 美国       | Coulani Coulibaly        | B/订单执行中
+    → 订单进行中，已130天未同步 | 主动同步生产进度+发货时间
+    ❓ c'est du coton ?
+    💬 充分回复 (0d) | 沉淀(90d+)
+  🟡 135d | 意大利      | maurizio pierconti       | A/订单执行中 [A]
+    → 订单进行中，已139天未同步 | 主动同步生产进度+发货时间
+    ❓ Hello, I am an e-commerce retailer in Italy and would like to evaluate this prod
+    💬 充分回复 (0d) | 沉淀(90d+)
+
+── ✅ 已签收: 1人 ──
+  ⚪ 100d | 坦桑尼亚     | tahir abbas              | A/已签收 [A]
+    → 签收106天，进入复购周期 | 定期同步新品+定制方案
+    ❓ all 7 give me 1 sample
+    💬 简短回复 (0d) | 沉淀(90d+)
+
+=== 双轴汇总 ===
+质量: S=7 A=160 B=236 C=42 D=20
+需立即行动: 0人 | 提问未回: 0人
+总客户: 465 (P0:0 P1:17 P2:27 P3:66 P4:356)
+
+已保存 data/s1_enhanced.json (465条)
+看板 → D:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_2026-05-13.html
+全量数据 → data/s1_enhanced_full.json (465条)

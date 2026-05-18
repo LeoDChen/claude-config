@@ -1,0 +1,131 @@
+# CC+OB 协作系统 V3 — 配置瘦身完成记录
+
+> 完成日期：2026-05-11 | 基于审核文档 V3 执行完毕
+
+---
+
+## 一、项目目标
+
+消除 CC+OB 协作系统中的冗余配置，将"软件工程师 IDE"残留清理干净，使系统专精于 B2B 母婴纺织品外贸运营。
+
+核心原则：**项目归项目、全局归全局**。业务技能归属项目级 `.claude/`，通用工具归属全局。
+
+---
+
+## 二、执行结果对比
+
+| 维度 | V3 前 | V3 后 | 削减 |
+|------|-------|-------|------|
+| 全局 rules | 9 目录（含 cpp/csharp/java 等） | 0 | -100% |
+| 全局 skills | 160+ (含 35 .agents/skills/) | 5 | -97% |
+| 全局 commands | 15（含 9 业务命令重复） | 6 | -60% |
+| 全局 agents | 50（含 42 语言/行业） | 7 | -86% |
+| 全局 CLAUDE.md | 188 行 | 30 行 | -84% |
+| 项目 rules | 90 文件 | 1（operations-rules.md） | -99% |
+| `.agents/skills/` | 70 目录（全局 34+项目 34） | 0 | -100% |
+| AGENTS.md | 8KB | 已删除 | -100% |
+| 记忆文件 | 30 | 22 | -27% |
+
+---
+
+## 三、最终分布
+
+### 全局 `C:\Users\Administrator\.claude\`
+
+**skills (5)**:
+- deep-research — 多源深度调研
+- knowledge-ops — 知识库管理
+- prompt-optimizer — 指令优化
+- search-first — 先搜再动手
+- token-budget-advisor — 上下文预算评估
+
+**commands (6)**:
+- /checkpoint — 对话快照
+- /context-budget — 上下文预算
+- /plan — 规划模式
+- /prompt-optimize — 指令优化入口
+- /resume-session — 恢复对话
+- /save-session — 保存对话
+
+**agents (7)**:
+- code-explorer — 代码搜索
+- code-reviewer — 代码审查
+- doc-updater — 文档更新
+- docs-lookup — 文档查询
+- planner — 任务规划
+- security-reviewer — 安全检查
+- silent-failure-hunter — 静默失败排查
+
+### 项目 `d:\ClaudeWorkspace\.claude\`
+
+**skills (21)** — 9 业务核心 + 7 手动层工具 + 3 通用辅助 + 2 OKKI 驱动
+**commands (15)** — 全部保留
+**agents (7)** — 与全局相同
+
+---
+
+## 四、执行步骤时间线
+
+| 步骤 | 内容 | 日期 |
+|------|------|------|
+| 1 | 全局 rules 清空 | 05-10 |
+| 4 | Agents 50→7 | 05-10 |
+| 5 | 全局 CLAUDE.md 188→30 行 | 05-10 |
+| 6 | 项目 rules→1 | 05-10 |
+| 8 | OKKI CLAUDE.md 指针化 + 上下文瘦身 | 05-11 |
+| 2 | `.agents/skills/` 双清 + 备份 | 05-11 |
+| 3 | Commands 去重 | 05-11 |
+| 7 | Skills/agents 全局项目同步 | 05-11 |
+
+---
+
+## 五、ECC 技术笔记
+
+`.agents/skills/` 由 ECC `agents-core` 模块管理（`install-state.json` 逐文件追踪，`ownership: "managed"`）。
+
+- **删除方式**: 逐个 `rm -r`（非 `ecc uninstall`，避免波及 hooks/scripts 等运行时基础设施）
+- **当前状态**: `ecc doctor` 报 480 文件 missing（预期内）
+- **恢复风险**: 只有显式运行 `ecc repair` 才会恢复，hooks.json 无自动 repair 钩子
+- **备份**: `C:\Users\Administrator\.claude\backups\20260511\.agents-{global,project}/`
+
+### 避免误操作
+
+- 不要运行 `ecc repair`（会恢复全部被删文件）
+- 不要运行 `ecc install --profile full`（会重装全部 20 模块）
+- 如需 ECC 更新，用 `ecc install --profile core`（仅 6 模块）
+
+---
+
+## 六、决策框架（后续维护用）
+
+### 新增 skill 判断
+1. 只用于 B2B 项目？→ 放项目 skills/
+2. 跨项目通用？→ 放全局 skills/
+3. 软件/编程相关？→ 不放，用户不是程序员
+
+### 删除 skill 判断
+1. 过去 30 天用过吗？→ 否 → 可删
+2. 与母婴纺织品/B2B/外贸相关吗？→ 否 → 可删
+3. 是 ECC 托管的软件技能吗？→ 是 → 可删，注意备份
+
+### 同步机制
+- 全局和项目同名 skill → 以项目版本为准，全局删除
+- 全局和项目同名 agent → 保留双份（agents 不污染上下文）
+- 全局和项目同名 command → 业务归项目，通用归全局
+
+---
+
+## 七、相关文件
+
+- 审核文档：`D:\ClaudeWorkspace\99_系统文件\CC+OB协作系统_配置瘦身审核文档_V3.md`
+- 执行进度：`E:\道友的宝贝\道友的宝贝\对话归档\CC\项目-CC+OB协作系统_V3执行进度.md`
+- 备份目录：`C:\Users\Administrator\.claude\backups\20260511\`
+- 项目 CLAUDE.md：`D:\ClaudeWorkspace\.claude\CLAUDE.md`
+- 全局 CLAUDE.md：`C:\Users\Administrator\.claude\CLAUDE.md`
+
+---
+
+## 八、未决事项
+
+- [ ] 长期方案：用 `ecc install --profile core` 重装替换当前 full profile 残留的 install-state.json
+- [ ] 定期审查：每季度检查一次 skills/agents 使用频率，清理未使用的

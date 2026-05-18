@@ -1,0 +1,186 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const pages = browser.contexts()[0].pages();
+  const page = pages[0];
+  const client = await page.context().newCDPSession(page);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  // Step 1: Check current state + get conversation list
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+      // Also catch console messages for debugging
+      if (response.method === 'Runtime.consoleAPICalled') {
+        const args = response.params.args || [];
+        const text = args.map(a => a.value || '').join(' ');
+        if (text) console.log('  [PAGE]', text.substring(0, 200));
+      }
+    } catch (e) {}
+  });
+
+  // Enable console
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 99, method: 'Runtime.enable', params: {} })
+  });
+
+  // Check SDK state first
+  const checkExpr = `
+    (function() {
+      var auth = window._imBaaSSDK.getAuthService();
+      var convs = window.__conversationListFullData__ || [];
+      return JSON.stringify({
+        isLogin: auth.isLogin(),
+        connectionStatus: auth.connectionStatus,
+        loginUid: auth.getLoginUid(),
+        convCount: convs.length,
+        sampleCid: convs.length > 0 ? convs[0].cid : null
+      });
+    })()
+  `;
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 1, method: 'Runtime.evaluate', params: { expression: checkExpr } })
+  });
+  await new Promise(r => setTimeout(r, 2000));
+  console.log('Current state:', results[0]?.val);
+
+  // Step 2: Enable Network monitoring in the onetalk iframe to find WebSocket
+  console.log('\nEnabling Network monitoring...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 0, method: 'Network.enable', params: {} })
+  });
+
+  // Step 3: Now trigger the SDK to send a message by calling listMessageWithConversationCodeForHistory
+  // This should trigger a WebSocket request we can capture
+  const convs = JSON.parse(results[0].val);
+  const sampleCid = convs.sampleCid;
+
+  if (!sampleCid) {
+    console.log('No conversations found!');
+    process.exit(1);
+  }
+
+  console.log('Triggering message load for cid:', sampleCid);
+
+  const triggerExpr = `
+    (async function() {
+      var msgSvc = window._imsdk.getMessageService();
+      try {
+        // Try the known method first (should trigger network)
+        var result = await msgSvc.listMessageWithConversationCodeForHistory("${sampleCid}", 20, 9007199254740991);
+        return JSON.stringify({ method: 'listMessageWithConversationCodeForHistory', result: result ? result.length : 0 });
+      } catch(e) {
+        return JSON.stringify({ method: 'listMessageWithConversationCodeForHistory', error: e.message });
+      }
+    })()
+  `;
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 2, method: 'Runtime.evaluate', params: { expression: triggerExpr, awaitPromise: true } })
+  });
+
+  await new Promise(r => setTimeout(r, 5000));
+  console.log('Trigger result:', results.find(r => r.id === 2)?.val);
+
+  // Step 4: Also try to find WebSocket by monitoring the main page
+  // The WebSocket might be in the main frame, not the iframe
+  console.log('\nChecking main page for WebSocket connections...');
+
+  // Let's also look at the browser-level targets for service workers or other contexts
+  console.log('\nAll targets:');
+  targets.targetInfos.forEach(t => {
+    console.log('  [' + t.type + ']', t.title || t.url.substring(0, 100));
+  });
+
+  // Check for any existing WebSocket connections via CDP
+  // The browser target might have WebSocket info
+  try {
+    const browserClient = await browser.contexts()[0].newCDPSession(
+      browser.contexts()[0].pages()[0]
+    );
+    // Actually we need to check at the page level, not iframe level
+  } catch(e) {}
+
+  console.log('\n---');
+  console.log('Now let me try sending LWP directly through the SDK...');
+
+  // Step 5: Try to find a way to send raw LWP through the SDK
+  // The SDK might wrap LWP in a send method
+  const lwpExpr = `
+    (async function() {
+      var r = {};
+
+      // Try sending through imsdk directly
+      var imsdk = window._imsdk;
+      var channel = imsdk.getChannel();
+
+      // Let's check what happens when we call send through the SDK
+      // The SDK might have internal methods we can exploit
+
+      // Check if there's a raw send method
+      var baaS = window._imBaaSSDK;
+      var msgSvcHttp = baaS.getMessageServiceHttp();
+      if (msgSvcHttp) {
+        r.hasHttpMsgSvc = true;
+        var httpMethods = [];
+        for (var k in msgSvcHttp) {
+          if (typeof msgSvcHttp[k] === 'function') httpMethods.push(k);
+        }
+        r.httpMsgSvcMethods = httpMethods.slice(0, 20);
+      }
+
+      // Try the ConversationServiceHttp
+      var convSvcHttp = baaS.getConversationServiceHttp();
+      if (convSvcHttp) {
+        r.hasHttpConvSvc = true;
+        var httpConvMethods = [];
+        for (var k in convSvcHttp) {
+          if (typeof convSvcHttp[k] === 'function') httpConvMethods.push(k);
+        }
+        r.httpConvSvcMethods = httpConvMethods.slice(0, 20);
+      }
+
+      // Look for any LWP-related code
+      var lwpKeys = Object.keys(window).filter(function(k) {
+        return k.toLowerCase().indexOf('lwp') >= 0;
+      });
+      r.lwpWindowKeys = lwpKeys;
+
+      // Search all window props for anything with 'send' related to sockets
+      var sendKeys = Object.keys(window).filter(function(k) {
+        return k.toLowerCase().indexOf('send') >= 0 || k.toLowerCase().indexOf('request') >= 0;
+      }).slice(0, 20);
+      r.sendRelatedKeys = sendKeys;
+
+      return JSON.stringify(r, null, 2);
+    })()
+  `;
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId,
+    message: JSON.stringify({ id: 3, method: 'Runtime.evaluate', params: { expression: lwpExpr, awaitPromise: true } })
+  });
+
+  await new Promise(r => setTimeout(r, 3000));
+  console.log('LWP exploration:', results.find(r => r.id === 3)?.val);
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

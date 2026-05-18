@@ -1,0 +1,91 @@
+Write-Host "=== Restoring ALL folder paths to Windows defaults ==="
+
+$userProfile = $env:USERPROFILE
+Write-Host "User profile: $userProfile"
+
+# 1. Restore Desktop
+$desktopDefault = "$userProfile\Desktop"
+Write-Host "`n1. Desktop -> $desktopDefault"
+New-Item -Path $desktopDefault -ItemType Directory -Force | Out-Null
+
+# Update both registry keys
+$userKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders'
+$shellKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+
+Set-ItemProperty -Path $userKey -Name 'Desktop' -Value $desktopDefault -Force
+Set-ItemProperty -Path $shellKey -Name 'Desktop' -Value $desktopDefault -Force
+Write-Host "  Desktop restored."
+
+# 2. Restore Downloads
+$downloadsDefault = "$userProfile\Downloads"
+Write-Host "`n2. Downloads -> $downloadsDefault"
+New-Item -Path $downloadsDefault -ItemType Directory -Force | Out-Null
+
+$guidDownloads = '{374DE290-123F-4565-9164-39C4925E467B}'
+$guidLocalDownloads = '{7D83EE9B-2244-4E70-B1F5-5393042AF1E4}'
+
+Set-ItemProperty -Path $userKey -Name $guidDownloads -Value $downloadsDefault -Force
+Set-ItemProperty -Path $shellKey -Name $guidDownloads -Value $downloadsDefault -Force
+Set-ItemProperty -Path $userKey -Name $guidLocalDownloads -Value $downloadsDefault -Force
+Write-Host "  Downloads restored."
+
+# 3. Restore Documents
+$docsDefault = "$userProfile\Documents"
+Write-Host "`n3. Documents -> $docsDefault"
+New-Item -Path $docsDefault -ItemType Directory -Force | Out-Null
+
+Set-ItemProperty -Path $userKey -Name 'Personal' -Value $docsDefault -Force
+Set-ItemProperty -Path $shellKey -Name 'Personal' -Value $docsDefault -Force
+
+$guidDocs = '{F42EE2D3-909F-4907-8871-4C22FC0BF756}'
+Set-ItemProperty -Path $userKey -Name $guidDocs -Value $docsDefault -Force
+Write-Host "  Documents restored."
+
+# 4. Remove ThisPCDesktopFolder GUID mapping (not needed for default setup)
+$guidDesktopPC = '{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}'
+Remove-ItemProperty -Path $userKey -Name $guidDesktopPC -Force -ErrorAction SilentlyContinue
+Write-Host "  Cleaned up extra GUID mappings."
+
+# 5. Reset image file associations
+Write-Host "`n4. Resetting image file associations to default..."
+$imageExts = @('.png', '.jpg', '.jpeg', '.bmp', '.gif')
+foreach ($ext in $imageExts) {
+    $extPath = "HKCU:\Software\Classes\$ext"
+    Remove-Item -Path $extPath -Recurse -Force -ErrorAction SilentlyContinue
+
+    # Remove UserChoice if exists
+    $choicePath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$ext\UserChoice"
+    Remove-Item -Path $choicePath -Recurse -Force -ErrorAction SilentlyContinue
+
+    Write-Host "  Reset $ext"
+}
+
+# Remove our custom ProgIDs
+foreach ($ext in $imageExts) {
+    $progId = "PhotoViewer.FileAssoc$ext"
+    $progIdPath = "HKCU:\Software\Classes\$progId"
+    Remove-Item -Path $progIdPath -Recurse -Force -ErrorAction SilentlyContinue
+}
+Write-Host "  Custom ProgIDs removed."
+
+# 6. Clear caches
+Write-Host "`n5. Clearing caches..."
+$iconCache = "$env:LOCALAPPDATA\IconCache.db"
+if (Test-Path $iconCache) { Remove-Item $iconCache -Force }
+$thumbCache = "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*.db"
+Remove-Item $thumbCache -Force -ErrorAction SilentlyContinue
+
+Write-Host ""
+Write-Host "========================================="
+Write-Host "ALL RESTORED TO DEFAULTS:"
+Write-Host "  Desktop:   $desktopDefault"
+Write-Host "  Downloads: $downloadsDefault"
+Write-Host "  Documents: $docsDefault"
+Write-Host "  Images:    Default Windows handler"
+Write-Host "========================================="
+Write-Host ""
+Write-Host "Restarting Explorer..."
+Stop-Process -Name explorer -Force
+Start-Sleep -Seconds 2
+Start-Process explorer.exe
+Write-Host "Done. Please REBOOT your computer for best results."

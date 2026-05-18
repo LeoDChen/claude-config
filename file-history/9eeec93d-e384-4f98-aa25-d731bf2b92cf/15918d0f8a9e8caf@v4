@@ -1,0 +1,169 @@
+# /okki Skill 实施方案（修订版）
+
+## 关键决策
+
+| 决策点 | 结论 | 理由 |
+|--------|------|------|
+| Skill vs 修 CLAUDE.md | **Skill** | CLAUDE.md 是多功能文件会变化，Skill 独立隔离，行为永久一致 |
+| 单一 Skill vs 多 Skill 组合 | **单一 /okki** | 四步线性依赖，拆多 Skill 增加用户记忆负担 |
+| 质量等级谁做 | **脚本初判 + AI 修正** | 脚本做机械匹配（S/A/B/C/D），AI 基于语义做生命周期+优先级+等级修正 |
+| 上下文管理 | **硬性分批，每批 50-80 人** | s2 615KB≈20万tokens，分批处理确保不溢出 |
+
+---
+
+## 一、Skill 结构
+
+```
+.claude/skills/okki/
+├── SKILL.md                    ← Skill 定义 + 四步流程
+└── knowledge/                  ← 从 Okki 目录移入（非复制）
+    ├── classification-rules.md ← 双轴分类规则（9阶段+5等级）
+    ├── business-rules.md       ← 业务判断规则
+    ├── system-prompt.md        ← AI 五步分析框架
+    └── factory.md              ← 工厂信息速查
+```
+
+---
+
+## 二、SKILL.md 核心流程
+
+### 触发
+用户输入 `/okki`
+
+### Step 1 — 同步（脚本）
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js
+```
+- 任一步失败即停止，不继续
+- sync_okki.js 已含 LWP 失败硬退出机制
+- 输出统计：总会话数、新增会话数、增量消息数
+
+### Step 2 — AI 分类判定（分批）
+**谁做什么：**
+- 脚本已完成：质量等级初判（`determineQuality()`, S/A/B/C/D）、对话片段提取（最近N条消息原文）
+- AI 完成：生命周期阶段（9+2终态）、优先级（now/soon/idle）、质量等级修正
+
+**分批规则（硬约束）：**
+- 每批 50-80 人，绝不超 80
+- 每批判定完立即增量写入 `data/s3_ai_judgments.json`
+- 当前上下文消耗接近 70% 时主动暂停，提示用户"打 /okki 继续下一批"
+- s3 中每人字段：`name, cid, country, stage, priority, grade, gradeOverride, confidence, reason, actionHint`
+
+**完成后自检：**
+- 阶段分布 ≥ 6 种？（少于 → 判定太粗糙，重判）
+- 搁置占比 > 60%？（超过 → 很多活跃客户被误判，重判）
+- 任一不通过 → 删除 s3 重新判定
+
+**新客户检测：**
+- 对比 `tm_conversations_latest.json` 与 `tm_conversations_full.json`
+- 标记首次出现的会话 ID → 在最终报告中单独列出
+
+### Step 3 — 生成看板（脚本）
+```bash
+node scripts/enhanced_classify.js --dashboard-only
+```
+输出 `output/dashboard_YYYY-MM-DD.html`
+
+### Step 4 — 行动清单（AI）
+从 s3 提取 urgent + soon 客户，按沉默天数排序，输出 `output/actions_YYYY-MM-DD.md`：
+```
+## 🚨 今天必须行动（X人）
+| 客户 | 国家 | 等级 | 阶段 | 沉默 | 行动方向 |
+## ⏳ 48h内跟进（X人）
+## 📅 本周关注（X人）
+## 🆕 新客户（首次出现）（X人）
+```
+
+更新 `STATE.md` 的同步指标。
+
+### 完成后报告
+```
+/okki 执行完成
+├── 同步：XXX 会话 | +X 新增 | +XXX 消息
+├── 分类：S:X A:X B:X C:X D:X | 阶段分布 X 种 | 紧急 X 人
+├── 看板：output/dashboard_2026-05-XX.html
+└── 行动清单：output/actions_2026-05-XX.md
+```
+
+---
+
+## 三、清理 `08_客户跟进/Okki/` 目录
+
+### 删除（17 个文件）
+```
+CLAUDE.md               ← Skill 替代
+NEXT_START.md           ← 过时工作流
+NEXT_BATCH.md           ← 5月9日数据
+DESIGN.md               ← 旧设计
+RUNBOOK.md              ← 旧操作手册
+PHASE1_执行指令.md       ← 过期
+P0_第三批_分析结果.md     ← 过期
+accio_work_客户开发指令.md ← 不属于 OKKI
+_launch_chrome.bat / 启动CDP_Chrome.bat  ← 脚本已内置
+generate_p0_report.js / generate_today_report.js / p0_analysis_data.json ← 过期
+数据_2026-04-29T11-49-16.json / 看板报告_2026-04-29T11-49-16.docx ← 过期
+客户开发信_BlissfulDiary_Trucare_Kerma.md / 客户开发清单_小星星服饰.pdf ← 不属于 OKKI
+新对话启动_抓取今日数据.txt ← 过期
+d:ClaudeWorkspace08_客户跟进Okkidata_needAI_analysis_input.json ← 命名异常
+```
+
+### 移入 Skill（4 个文件）
+`knowledge/` 下 4 个核心文件剪切到 `.claude/skills/okki/knowledge/`：
+- `classification-rules.md` / `business-rules.md` / `system-prompt.md` / `factory.md`
+
+### 删除（2 个文件）
+- `knowledge/security.md` — 过时
+- `knowledge/analysis-framework.md` — 已整合到 system-prompt.md
+
+### 归档（61 个脚本）
+`scripts/` 下除 5 个外全部移入 `scripts/_archive/`：
+- 保留：`sync_okki.js` / `sync_orders.js` / `enhanced_classify.js` / `gen_tracker_v2.js` / `gen_mobile_report.js`
+
+### 精简 STATE.md
+只保留数据：同步指标、质量分布、紧急跟进列表、待深度分析列表。删除所有指令性内容。
+
+### 保持不变
+`config/` `data/` `output/` `reports/` `.claude/`
+
+---
+
+## 四、更新项目级 CLAUDE.md
+
+`d:\ClaudeWorkspace\.claude\CLAUDE.md` 两处改动：
+1. 场景路由：`| OKKI 客户分析 | /okki |`
+2. 业务命令新增：`/okki`
+
+---
+
+## 五、清理后 Okki 目录结构
+
+```
+08_客户跟进/Okki/
+├── STATE.md              ← 纯数据，不给指令
+├── scripts/
+│   ├── sync_okki.js
+│   ├── sync_orders.js
+│   ├── enhanced_classify.js
+│   ├── gen_tracker_v2.js
+│   ├── gen_mobile_report.js
+│   └── _archive/         ← 61 个历史脚本
+├── config/               ← 不变
+├── data/                 ← 不变
+├── output/               ← 不变
+├── reports/              ← 不变
+├── package.json
+└── package-lock.json
+```
+
+**新对话 AI 进来：** 读项目 CLAUDE.md → 看到 OKKI = /okki → 用户打 /okki → Skill 接管 → 唯一路径。
+
+---
+
+## 六、验证
+
+1. 删除 `data/s3_ai_judgments.json`
+2. 新对话打 `/okki`
+3. 确认：AI 只读 SKILL.md + Skill knowledge，不碰 STATE.md 指令
+4. 确认：s3 阶段分布 ≥ 6 种，搁置 < 60%
+5. 确认：看板和行动清单正常生成
+6. 再开新对话再打 `/okki`，阶段分布差异 < 10%

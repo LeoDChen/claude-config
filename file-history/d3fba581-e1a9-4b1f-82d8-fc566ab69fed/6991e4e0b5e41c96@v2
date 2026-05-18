@@ -1,0 +1,106 @@
+// Stop hook: Auto-update STATE.md with real metrics from data files
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = 'd:/ClaudeWorkspace/08_客户跟进/Okki/data';
+const STATE_FILE = 'd:/ClaudeWorkspace/08_客户跟进/Okki/STATE.md';
+const TM_FILE = path.join(DATA_DIR, 'tm_conversations_latest.json');
+const CHAT_DIR = path.join(DATA_DIR, 'chat_history');
+const CUSTOMERS_DIR = path.join(DATA_DIR, 'customers');
+const CACHE_FILE = path.join(DATA_DIR, '.state_cache.json');
+
+try {
+  // 1. Read current STATE.md
+  if (!fs.existsSync(STATE_FILE)) { console.log('[update-state] STATE.md not found'); process.exit(0); }
+  let stateContent = fs.readFileSync(STATE_FILE, 'utf8');
+
+  // 2. Read latest data
+  const tmData = fs.existsSync(TM_FILE) ? JSON.parse(fs.readFileSync(TM_FILE, 'utf8')) : null;
+  const chatFiles = fs.existsSync(CHAT_DIR) ? fs.readdirSync(CHAT_DIR).filter(f => f.endsWith('.json')) : [];
+  const customerFiles = fs.existsSync(CUSTOMERS_DIR) ? fs.readdirSync(CUSTOMERS_DIR).filter(f => f.endsWith('.json')) : [];
+  const prevCache = fs.existsSync(CACHE_FILE) ? JSON.parse(fs.readFileSync(CACHE_FILE, 'utf8')) : {};
+
+  if (!tmData || !tmData.conversations) { console.log('[update-state] No conversation data'); process.exit(0); }
+
+  // 3. Extract metrics from data
+  const now = new Date();
+  const nowTs = now.getTime();
+  const nowStr = now.toISOString().slice(0, 16).replace('T', ' ');
+
+  const totalConvs = tmData.total || tmData.conversations.length;
+  const exportedStr = tmData.exportedAt ? new Date(tmData.exportedAt).toISOString().slice(0, 16).replace('T', ' ') : 'unknown';
+
+  // Conversation-level stats
+  let active24h = 0, active7d = 0, sentCount = 0, receivedCount = 0;
+
+  for (const conv of tmData.conversations) {
+    const lct = conv.lastContactTime;
+    if (lct) {
+      const age = nowTs - lct;
+      if (age < 24 * 3600 * 1000) active24h++;
+      if (age < 7 * 24 * 3600 * 1000) active7d++;
+    }
+    if (conv.latestMessage) {
+      if (conv.latestMessage.messageType === 'send') sentCount++;
+      else if (conv.latestMessage.messageType === 'received') receivedCount++;
+    }
+  }
+
+  // Per-conversation stats from chat_history files (light: only read file count, not content)
+  const chatCount = chatFiles.length;
+  const customerCount = customerFiles.length;
+
+  // 4. Compare with previous cache
+  let deltaStr = '';
+  if (prevCache.totalConvs !== undefined) {
+    const convDelta = totalConvs - prevCache.totalConvs;
+    const chatDelta = chatCount - prevCache.chatCount;
+    const custDelta = customerCount - prevCache.customerCount;
+    const parts = [];
+    if (convDelta !== 0) parts.push(`总会话 ${convDelta > 0 ? '+' + convDelta : convDelta}`);
+    if (chatDelta !== 0) parts.push(`聊天记录 ${chatDelta > 0 ? '+' + chatDelta : chatDelta}`);
+    if (custDelta !== 0) parts.push(`客户 ${custDelta > 0 ? '+' + custDelta : custDelta}`);
+    deltaStr = parts.length > 0 ? ' (变动: ' + parts.join(', ') + ')' : ' (无变动)';
+  }
+
+  // 5. Save current values to cache
+  fs.writeFileSync(CACHE_FILE, JSON.stringify({
+    totalConvs, chatCount, customerCount, active24h, active7d,
+    lastUpdate: now.toISOString(),
+    exportedAt: tmData.exportedAt
+  }, null, 2));
+
+  // 6. Build updated STATE.md sections
+  // Update timestamp
+  stateContent = stateContent.replace(/最后更新.*/, `最后更新：${nowStr} (hook自动)`);
+
+  // Build new metrics table
+  const newTable = `| 指标 | 数值 |
+|------|------|
+| 数据同步时间 | ${exportedStr} |
+| Hook更新时间 | ${nowStr} 北京时间 |
+| 总会话 | **${totalConvs}**${deltaStr} |
+| 聊天历史文件 | **${chatCount}** |
+| 客户文件 | **${customerCount}** |
+| 24h内活跃 | **${active24h}** 个会话 |
+| 7d内活跃 | **${active7d}** 个会话 |
+| 最新消息-我方 | ${sentCount} 个会话 |
+| 最新消息-客户方 | ${receivedCount} 个会话（⚠️ latestMessage不=客户回复数,真值需遍历全部消息） |`;
+
+  // Replace the old metrics table: everything from "| 指标 | 数值 |" to (and including) the blank line before next "## "
+  const tableSection = /^\| 指标 \| 数值 \|[\s\S]*?\n(?=## )/m;
+  if (tableSection.test(stateContent)) {
+    stateContent = stateContent.replace(tableSection, newTable + '\n\n');
+  } else {
+    // Fallback: insert after "## 最新同步结果"
+    stateContent = stateContent.replace(/(## 最新同步结果\n)/, `$1\n${newTable}\n\n`);
+  }
+
+  // 7. Write back
+  fs.writeFileSync(STATE_FILE, stateContent);
+  console.log(`[update-state] STATE.md updated at ${nowStr} | ${totalConvs} convs | ${chatCount} chats | ${customerCount} customers | 24h:${active24h} 7d:${active7d}`);
+
+} catch (err) {
+  console.error('[update-state] Error:', err.message);
+  process.exit(0); // Never block session exit
+}

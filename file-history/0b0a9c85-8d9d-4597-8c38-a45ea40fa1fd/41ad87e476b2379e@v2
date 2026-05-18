@@ -1,0 +1,111 @@
+# OKKI 客户分类准确度重构 — 实施计划
+
+## Context
+
+`enhanced_classify.js` 的 `determineLifecycle()` 和 `getAction()` 基于关键词正则匹配 + 计时器做阶段/紧急度判定，无法区分"讨论过PI"和"PI已发"等语义差异。用户已不信任脚本判断模式，需要重构为：脚本只提取数据，AI 做判断。
+
+## 核心设计决策
+
+| 决策 | 结论 |
+|------|------|
+| 分工 | 脚本：提取+分桶+生成HTML / AI：生命周期+紧急度+grade修正 |
+| 生命周期 | 9阶段 (需求探索→报价已发→谈判中→待付款→待发货→已发货/在途→已签收→售后→待返单) |
+| 终态 | 搁置（自然中断）/ 未成交（明确拒绝），独立池展示 |
+| 紧急度 | 3级 now/soon/idle，球在谁+时效压力+关系温度三维判定 |
+| 质量等级 | 脚本继续算，AI 可覆盖修正 |
+| 分桶 | 60天沉默阈值，桶2(AI正常读) / 桶1(AI扫一眼) |
+| 片段提取 | 统一取最近12条真实消息，AI自适应使用(先看3-5条，够就停) |
+| 不确定标记 | AI不确定的客户标⚠️，附具体问题 |
+
+## 实施步骤
+
+### 第一步：改脚本 `enhanced_classify.js`
+
+**砍掉：**
+- `determineLifecycle()` — 整个函数
+- `getAction()` — 整个函数
+- 所有信号标记字段 (hasPI/hasPrice/hasSample/hasQuantity/hasAddress)
+- `generateDashboard()` 中的核心市场管道密度
+
+**新增：**
+- `extractConversationSnippet(cid, N=12)` — 提取最近12条真实消息，跳过系统消息，截断每条200字符
+- `matchOrder(name, ordersData)` — 用客户名匹配 orders_latest.json，返回订单状态
+- `bucketFilter(client)` — 分桶逻辑 (60天+无客户消息 + C/D级 + 消息少 + 无订单 → 桶1，其余→桶2)
+
+**修改：**
+- `determineQuality()` 保留不变
+- 方向判定保留 (to_us/to_them，脚本算这个很稳)
+- 输出新增 `data/s2_ai_input.json`（含桶标记）
+- `generateDashboard()` 改为读 `data/s3_ai_judgments.json`（等AI工作流跑完后）
+
+**s2_ai_input.json 每人字段：**
+```json
+{
+  "name": "...",
+  "country": "...",
+  "cid": "...",
+  "grade": "B",
+  "totalMsgs": 24,
+  "customerMsgs": 8,
+  "ourMsgs": 16,
+  "lastCustomerMsgDays": 2,
+  "direction": "to_them",
+  "bucket": 2,
+  "order": { "matched": true, "status": "待发货", "paidAt": "..." } | null,
+  "snippet": ["[我方] 2026-05-13 | ...", "[客户] 2026-05-12 | ...", "最多12条"]
+}
+```
+
+### 第二步：AI 工作流（新对话）
+
+1. 跑完脚本后，在新对话中读 `data/s2_ai_input.json`
+2. 桶2：逐人自适应读片段(3-5→6-10→全12)，判断阶段+紧急度+grade修正
+3. 桶1：快速扫描，确认无漏网
+4. 输出 `data/s3_ai_judgments.json`
+
+**s3_ai_judgments.json 每人字段：**
+```json
+{
+  "name": "...",
+  "cid": "...",
+  "stage": "待付款",
+  "direction": "to_them",
+  "priority": "soon",
+  "grade": "B",
+  "gradeOverride": false,
+  "confidence": "certain" | "uncertain",
+  "reason": "客户5/12回复ok确认收到PI，未付款",
+  "actionHint": "温和提醒PI到期时间"
+}
+```
+
+**AI 判定原则：**
+- 不依赖硬编码规则，通过理解对话语义判断
+- 不确定就标 confidence: "uncertain"，reason 写清楚哪里不确定
+- grade 有误就覆盖并标 gradeOverride: true
+- 待付款必须从原文找到客户确认信号
+
+### 第三步：改 HTML 看板生成
+
+修改 `generateDashboard()`：
+- 双轴矩阵：9列阶段 × 5行等级 (S/A/B/C/D)
+- 终态池：矩阵下方搁置/未成交两个独立区块，标注←从哪个阶段掉出
+- 删掉核心市场管道密度
+- 数据源从 s3_ai_judgments.json 读
+
+## 文件变更清单
+
+| 文件 | 动作 |
+|------|------|
+| `08_客户跟进/Okki/scripts/enhanced_classify.js` | 修改：砍判断逻辑，加提取+分桶+订单匹配+新输出 |
+| `08_客户跟进/Okki/data/s2_ai_input.json` | 新增：脚本产出，AI读取 |
+| `08_客户跟进/Okki/data/s3_ai_judgments.json` | 新增：AI产出，脚本读来生成HTML |
+| `08_客户跟进/Okki/knowledge/classification-rules.md` | 更新：新生命周期定义+判定标准 |
+| `08_客户跟进/Okki/STATE.md` | 更新：新工作流步骤 |
+
+## 验证
+
+1. 跑同步脚本 + enhanced_classify → 检查 s2_ai_input.json 格式
+2. 开新对话跑 AI 判定 → 检查 s3_ai_judgments.json 格式
+3. 跑 generateDashboard → 检查 HTML 矩阵(9列+终态池) + 确认市场管道密度已删
+4. 对比 Jonathan/Earnestina 新旧判定差异（旧urgent → 新应为idle/watch）

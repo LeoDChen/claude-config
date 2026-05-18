@@ -1,0 +1,37 @@
+# OKKI 手机端行动清单生成
+
+## 背景
+桌面端看板 HTML（465人全量、双轴矩阵、弹窗交互）不适合手机微信查看。用户需要：**仅今天该跟进的客户 + 状态 + 行动方向**，在手机微信上随时可看。
+
+## 方案：长图 PNG（微信最友好格式）
+
+生成移动端宽度（375px）的简洁 HTML → Puppeteer 全页截图 → PNG 发送到微信文件传输助手直接查看。
+
+### 筛选逻辑
+从 `data/s1_enhanced.json` 提取 `actionPriority` 为 `urgent` 或 `soon` 的客户（即上次分类输出中 🔴🟡 标记的客户）。按优先级排序：urgent > soon，同优先级按静默天数升序。
+
+### 输出内容
+- 头部：日期 + 汇总（urgent X人 / soon X人）
+- 每客户一行卡片：优先级图标 | 客户名(等级标签) | 国家·静默N天 | 阶段 | 行动方向
+- S/A 级客户加粗/高亮
+
+### 新增脚本
+`scripts/gen_mobile_report.js`：
+1. 读取 `data/s1_enhanced.json`
+2. 筛选 actionPriority ∈ {urgent, soon}
+3. 生成移动端 HTML（内联样式，375px宽，系统字体）
+4. Puppeteer 全页截图 → `output/mobile_action_2026-05-13.png`
+5. 同时输出文本版到控制台（备选）
+
+### 后续可选
+- 加入 enhanced_classify.js 管线末尾自动生成
+- 支持直接发送到微信（需要额外配置）
+
+## 需修改/新建的文件
+- **新建**: `scripts/gen_mobile_report.js` — 行动清单长图生成脚本
+- 不修改现有文件
+
+## 验证
+- 运行 `node scripts/gen_mobile_report.js`
+- 检查 `output/mobile_action_2026-05-13.png` 是否生成
+- 图片宽度 375px，内容清晰可读

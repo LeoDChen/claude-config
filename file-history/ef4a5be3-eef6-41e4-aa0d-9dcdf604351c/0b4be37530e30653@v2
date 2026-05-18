@@ -1,0 +1,13 @@
+$drives = @("C:", "D:", "E:")
+foreach ($drive in $drives) {
+    Get-ChildItem -Path "$drive\" -Directory -Depth 3 -ErrorAction SilentlyContinue | ForEach-Object {
+        $obsDir = Join-Path $_.FullName ".obsidian"
+        if (Test-Path $obsDir) {
+            # Check if it contains the vault ID
+            $appJson = Join-Path $obsDir "app.json"
+            if (Test-Path $appJson) {
+                Write-Host "VAULT: $($_.FullName)"
+            }
+        }
+    }
+}

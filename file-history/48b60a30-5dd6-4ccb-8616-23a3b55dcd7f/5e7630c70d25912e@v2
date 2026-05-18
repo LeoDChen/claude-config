@@ -1,0 +1,351 @@
+/**
+ * 深抓 v4 — API 直调方案
+ * 绕过 DOM 虚拟滚动，直接调用 onetalk API 获取完整对话
+ */
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+
+function timestamp() {
+  return new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+}
+
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, page, talkFrame };
+}
+
+async function main() {
+  console.log('[deep-scrape-api] 连接小满...');
+  const { page, talkFrame } = await connect();
+
+  // =========================================================
+  // Phase 1: 发现 API 参数格式
+  // =========================================================
+  console.log('\n── Phase 1: 发现 API 参数 ──');
+
+  // 1a: dump 一个客户的完整原始数据，找出加密 ID 字段
+  console.log('dump 原始数据字段...');
+  const sampleRaw = await talkFrame.evaluate(() => {
+    const data = window.__conversationListFullData__;
+    if (!data || !Array.isArray(data) || data.length === 0) return null;
+    // 找第一个有名字的真人客户
+    const real = data.find(item => {
+      const name = item.contact?.name || '';
+      return name && !/Assistant\s*Eva/i.test(name) && !/系统通知/.test(name) && name.length > 1;
+    });
+    if (!real) return null;
+    // dump 所有 key
+    const topKeys = Object.keys(real);
+    const contact = real.contact || {};
+    const contactKeys = Object.keys(contact);
+    return {
+      topKeys,
+      contactKeys,
+      cid: real.cid,
+      accountId: real.accountId,
+      contact_accountId: contact.accountId,
+      contact_loginId: contact.loginId,
+      // 可能的加密 ID 候选
+      allStringFields: topKeys.reduce((acc, k) => {
+        if (typeof real[k] === 'string') acc[k] = real[k].substring(0, 200);
+        else if (typeof real[k] === 'number') acc[k] = real[k];
+        return acc;
+      }, {}),
+      allContactStringFields: contactKeys.reduce((acc, k) => {
+        const v = contact[k];
+        if (typeof v === 'string') acc[k] = v.substring(0, 200);
+        else if (typeof v === 'number') acc[k] = v;
+        return acc;
+      }, {}),
+    };
+  });
+
+  if (sampleRaw) {
+    console.log('  顶层 keys:', sampleRaw.topKeys.join(', '));
+    console.log('  contact keys:', sampleRaw.contactKeys.join(', '));
+    console.log('  cid:', sampleRaw.cid);
+    console.log('  accountId:', sampleRaw.accountId);
+  }
+
+  // 1b: 拦截 getChatMessageListExtra 请求，捕获完整参数
+  console.log('\n设置 API 拦截，点击第一个可见对话...');
+  let capturedRequest = null;
+
+  await page.route('**/getChatMessageListExtra**', async (route) => {
+    const req = route.request();
+    const url = req.url();
+    const postData = req.postData();
+    capturedRequest = {
+      url,
+      method: req.method(),
+      postData,
+      headers: req.headers(),
+    };
+    console.log('  拦截到 API 请求!');
+    console.log('  URL:', url.substring(0, 200));
+    console.log('  POST body:', postData);
+    await route.continue();
+  });
+
+  // 点击第一个可见客户
+  const clickResult = await talkFrame.evaluate(() => {
+    const items = document.querySelectorAll('.contact-item-container');
+    if (items[0]) {
+      items[0].click();
+      return { clicked: true, text: items[0].textContent?.substring(0, 100) };
+    }
+    return { clicked: false };
+  });
+  console.log('  点击结果:', clickResult);
+
+  // 等 API 响应
+  await new Promise(r => setTimeout(r, 3000));
+
+  if (capturedRequest) {
+    console.log('\n  ✅ 成功捕获 API 请求格式');
+    // 解析 URL 参数
+    const urlObj = new URL(capturedRequest.url);
+    console.log('  URL params:', [...urlObj.searchParams.entries()].map(([k,v]) => `${k}=${v?.substring(0,100)}`).join(', '));
+  } else {
+    console.log('  ⚠️ 未捕获到 API 请求（可能需要刷新页面或重新进入）');
+  }
+
+  // 1c: 也尝试从 performance API 获取历史请求
+  console.log('\n从 performance API 搜索历史请求...');
+  const perfEntries = await talkFrame.evaluate(() => {
+    const entries = performance.getEntriesByType('resource');
+    return entries
+      .filter(e => e.name.includes('getChatMessageListExtra'))
+      .map(e => ({ url: e.name.substring(0, 300) }))
+      .slice(0, 5);
+  });
+  if (perfEntries.length > 0) {
+    console.log('  历史请求 URL:');
+    perfEntries.forEach(e => console.log('   ', e.url));
+  }
+
+  // 1d: 尝试用已知 cid 构造 API 调用
+  console.log('\n尝试用 cid 构造 API 调用...');
+  const allCustomersRaw = await talkFrame.evaluate(() => {
+    const data = window.__conversationListFullData__;
+    if (!data || !Array.isArray(data)) return [];
+    return data
+      .filter(item => {
+        const name = item.contact?.name || '';
+        return name && !/Assistant\s*Eva/i.test(name) && !/系统通知/.test(name) && name.length > 1;
+      })
+      .map(item => ({
+        name: item.contact?.name || '',
+        cid: item.cid || '',
+        accountId: item.accountId || item.contact?.accountId || '',
+        loginId: item.contact?.loginId || '',
+        // 保留所有未知 string 字段
+        _extra: Object.keys(item).filter(k =>
+          typeof item[k] === 'string' && !['cid', 'name'].includes(k) && item[k].length < 500
+        ).reduce((acc, k) => { acc[k] = item[k]; return acc; }, {}),
+      }))
+      .slice(0, 5);
+  });
+
+  console.log('  前5个客户的 ID 字段:');
+  allCustomersRaw.forEach(c => {
+    console.log(`    ${c.name}: cid=${c.cid?.substring(0,80)}, accountId=${c.accountId}, loginId=${c.loginId}`);
+    const extraKeys = Object.keys(c._extra);
+    if (extraKeys.length > 0) console.log(`      extra keys: ${extraKeys.join(', ')}`);
+  });
+
+  // 尝试 fetch 调用
+  console.log('\n尝试 fetch API 调用（3 种参数格式）...');
+  const testCid = allCustomersRaw[0]?.cid;
+  const testAccountId = allCustomersRaw[0]?.accountId;
+
+  const fetchResults = await talkFrame.evaluate(async ({ cid, accountId }) => {
+    const results = [];
+    const baseUrl = 'https://onetalk.alibaba.com/message/getChatMessageListExtra.htm';
+
+    // 格式1: cid 直接作为参数
+    try {
+      const formData = new URLSearchParams();
+      formData.append('cid', cid);
+      const r = await fetch(baseUrl, { method: 'POST', body: formData });
+      const text = await r.text();
+      results.push({ format: 'cid', status: r.status, len: text.length, preview: text.substring(0, 200) });
+    } catch(e) {
+      results.push({ format: 'cid', error: e.message });
+    }
+
+    // 格式2: contactAccountIdEncrypt
+    try {
+      const formData = new URLSearchParams();
+      formData.append('contactAccountIdEncrypt', cid);
+      const r = await fetch(baseUrl, { method: 'POST', body: formData });
+      const text = await r.text();
+      results.push({ format: 'contactAccountIdEncrypt=cid', status: r.status, len: text.length, preview: text.substring(0, 200) });
+    } catch(e) {
+      results.push({ format: 'contactAccountIdEncrypt=cid', error: e.message });
+    }
+
+    // 格式3: accountId
+    try {
+      const formData = new URLSearchParams();
+      formData.append('contactAccountId', String(accountId));
+      const r = await fetch(baseUrl, { method: 'POST', body: formData });
+      const text = await r.text();
+      results.push({ format: 'contactAccountId', status: r.status, len: text.length, preview: text.substring(0, 200) });
+    } catch(e) {
+      results.push({ format: 'contactAccountId', error: e.message });
+    }
+
+    return results;
+  }, { cid: testCid, accountId: testAccountId });
+
+  fetchResults.forEach(r => {
+    console.log(`  ${r.format}: ${r.error || `HTTP ${r.status}, ${r.len} bytes`}`);
+    if (r.preview) console.log(`    preview: ${r.preview}`);
+  });
+
+  // =========================================================
+  // Phase 2: 用正确的参数格式批量获取
+  // =========================================================
+  // 先判断哪种格式有效
+  const workingFormat = fetchResults.find(r => r.status === 200 && r.len > 100);
+  if (!workingFormat) {
+    console.log('\n⚠️ 所有 fetch 格式都未成功。检查 intercepted request 是否有额外参数。');
+    // 保存诊断结果
+    const diagFile = `deep_scrape_api_diag_${timestamp()}.json`;
+    writeFileSync(join(DATA_DIR, diagFile), JSON.stringify({
+      sampleRaw,
+      capturedRequest,
+      perfEntries,
+      allCustomersRaw: allCustomersRaw.slice(0, 5),
+      fetchResults,
+    }, null, 2));
+    console.log(`诊断结果已保存: ${diagFile}`);
+    console.log('请检查诊断文件，手动确认 API 参数格式后再运行。');
+    return;
+  }
+
+  console.log(`\n✅ 有效格式: ${workingFormat.format}`);
+  console.log('\n── Phase 2: 批量获取 P0 对话 ──');
+
+  // 读取最新分类数据获取 P0 列表
+  const dataFiles = (await import('fs')).readdirSync(DATA_DIR).filter(f => f.includes('全量客户分类'));
+  dataFiles.sort().reverse();
+  const latestClassified = dataFiles[0];
+  if (!latestClassified) {
+    console.log('未找到分类数据，请先运行 extract-all-v2.mjs');
+    return;
+  }
+
+  const classified = JSON.parse(readFileSync(join(DATA_DIR, latestClassified), 'utf-8'));
+  const p0Customers = classified.customers.filter(c => c.priority === 'P0');
+  console.log(`P0 客户: ${p0Customers.length}人`);
+
+  // 获取全量原始数据（含完整字段）
+  const allRaw = await talkFrame.evaluate(() => {
+    const data = window.__conversationListFullData__;
+    if (!data || !Array.isArray(data)) return [];
+    return data.map(item => ({
+      name: item.contact?.name || '',
+      cid: item.cid || '',
+      accountId: item.accountId || item.contact?.accountId || '',
+    }));
+  });
+
+  // 构建 name→cid 映射
+  const nameToRaw = {};
+  allRaw.forEach(r => { if (r.name) nameToRaw[r.name] = r; });
+
+  const results = [];
+  let successCount = 0;
+
+  for (const c of p0Customers) {
+    const raw = nameToRaw[c.name];
+    if (!raw || !raw.cid) {
+      results.push({ name: c.name, error: '未找到 cid', messages: [] });
+      continue;
+    }
+
+    console.log(`  获取: ${c.name}...`);
+
+    try {
+      const messages = await talkFrame.evaluate(async ({ cid, format }) => {
+        const baseUrl = 'https://onetalk.alibaba.com/message/getChatMessageListExtra.htm';
+        const formData = new URLSearchParams();
+
+        if (format === 'cid') {
+          formData.append('cid', cid);
+        } else if (format === 'contactAccountIdEncrypt=cid') {
+          formData.append('contactAccountIdEncrypt', cid);
+        } else if (format === 'contactAccountId') {
+          formData.append('contactAccountId', cid);
+        }
+
+        try {
+          const r = await fetch(baseUrl, { method: 'POST', body: formData });
+          const data = await r.json();
+          return { success: true, data };
+        } catch(e) {
+          return { success: false, error: e.message };
+        }
+      }, { cid: raw.cid, format: workingFormat.format });
+
+      if (messages.success) {
+        // 解析消息列表
+        const msgList = messages.data?.data?.messageList ||
+                        messages.data?.messageList ||
+                        messages.data?.data?.list ||
+                        messages.data?.list || [];
+        results.push({
+          name: c.name,
+          cid: raw.cid,
+          messageCount: Array.isArray(msgList) ? msgList.length : 0,
+          messages: Array.isArray(msgList) ? msgList : [],
+          raw: messages.data,
+        });
+        successCount++;
+        console.log(`    ✅ ${Array.isArray(msgList) ? msgList.length : 0} 条消息`);
+      } else {
+        results.push({ name: c.name, cid: raw.cid, error: messages.error, messages: [] });
+        console.log(`    ❌ ${messages.error}`);
+      }
+    } catch(e) {
+      results.push({ name: c.name, error: e.message, messages: [] });
+      console.log(`    ❌ ${e.message}`);
+    }
+
+    // 限速：每次请求间隔 1s
+    await new Promise(r => setTimeout(r, 1000));
+  }
+
+  const output = {
+    scrapedAt: new Date().toISOString(),
+    method: 'api-fetch',
+    formatUsed: workingFormat.format,
+    totalTargeted: p0Customers.length,
+    successCount,
+    results,
+  };
+
+  const outFile = `deep_scrape_api_${timestamp()}.json`;
+  writeFileSync(join(DATA_DIR, outFile), JSON.stringify(output, null, 2));
+  console.log(`\n✅ 已保存: ${outFile} (${successCount}/${p0Customers.length} 成功)`);
+}
+
+main().catch(err => {
+  console.error('[deep-scrape-api] 错误:', err.message);
+  process.exit(1);
+});

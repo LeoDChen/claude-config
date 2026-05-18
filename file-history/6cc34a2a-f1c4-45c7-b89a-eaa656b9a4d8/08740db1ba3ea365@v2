@@ -1,0 +1,208 @@
+// Phase 1: 分析 SDK 源码找底层 HTTP API
+
+const fs = require('fs');
+
+function httpGet(url) {
+    return new Promise((resolve, reject) => {
+        const http = require(url.startsWith('https') ? 'https' : 'http');
+        http.get(url, (res) => {
+            let data = '';
+            res.on('data', c => data += c);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
+    });
+}
+
+(async () => {
+    const targetsJson = await httpGet('http://localhost:9222/json');
+    const targets = JSON.parse(targetsJson);
+
+    const onetalk = targets.find(t =>
+        t.type === 'iframe' && t.url && t.url.includes('onetalk.alibaba.com')
+    );
+    if (!onetalk) { console.log('找不到 onetalk'); process.exit(1); }
+
+    const ws = new WebSocket(onetalk.webSocketDebuggerUrl);
+    const pending = new Map();
+    let msgId = 0;
+
+    ws.addEventListener('message', (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id)(msg.result);
+            pending.delete(msg.id);
+        }
+    });
+
+    function cmd(method, params = {}) {
+        return new Promise((resolve) => {
+            const id = ++msgId;
+            pending.set(id, resolve);
+            ws.send(JSON.stringify({ id, method, params }));
+        });
+    }
+
+    await new Promise((resolve, reject) => {
+        ws.addEventListener('open', resolve);
+        ws.addEventListener('error', reject);
+    });
+
+    await cmd('Runtime.enable');
+
+    // === 1. getConversationServiceHttp 方法源码 ===
+    console.log('=== HTTP ConversationService 方法源码 ===\n');
+
+    const httpConvSrc = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imBaaSSDK.getConversationServiceHttp();
+                var protos = [];
+                var proto = Object.getPrototypeOf(svc);
+                while (proto && proto !== Object.prototype) {
+                    var methods = {};
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var n = names[i];
+                        if (typeof proto[n] === 'function' && n !== 'constructor') {
+                            methods[n] = proto[n].toString().substring(0, 600);
+                        }
+                    }
+                    protos.push(methods);
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return protos;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(httpConvSrc.result?.value || '(无)');
+
+    // === 2. getMessageServiceHttp 关键方法源码 ===
+    console.log('\n=== HTTP MessageService 关键方法源码 ===\n');
+
+    const httpMsgSrc = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var svc = window._imBaaSSDK.getMessageServiceHttp();
+                var methods = {};
+                var proto = Object.getPrototypeOf(svc);
+                while (proto) {
+                    var names = Object.getOwnPropertyNames(proto);
+                    for (var i = 0; i < names.length; i++) {
+                        var n = names[i];
+                        if ((n === 'fetchMessages' || n === 'mtopRequest' || n === 'httpRequest') && typeof proto[n] === 'function') {
+                            methods[n] = proto[n].toString().substring(0, 800);
+                        }
+                    }
+                    proto = Object.getPrototypeOf(proto);
+                }
+                return methods;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(httpMsgSrc.result?.value || '(无)');
+
+    // === 3. 找底层 getMsgService (BaaSSDK 底层) ===
+    console.log('\n=== BaaSSDK 底层 getMsgService ===\n');
+
+    const lowMsgApi = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var baas = window._imBaaSSDK;
+                // getMsgService 和 getConvService
+                var msgSvc = baas.getMsgService ? baas.getMsgService() : null;
+                var convSvc = baas.getConvService ? baas.getConvService() : null;
+
+                // 收集方法名
+                var msgMethods = [];
+                if (msgSvc) {
+                    for (var key in msgSvc) {
+                        if (typeof msgSvc[key] === 'function') {
+                            msgMethods.push(key);
+                        }
+                    }
+                }
+
+                var convMethods = [];
+                if (convSvc) {
+                    for (var key in convSvc) {
+                        if (typeof convSvc[key] === 'function') {
+                            convMethods.push(key);
+                        }
+                    }
+                }
+
+                // 同时看看 baas 上还有什么 API
+                var baasProps = [];
+                for (var key in baas) {
+                    if (typeof baas[key] === 'function') {
+                        baasProps.push(key);
+                    }
+                }
+
+                return {
+                    msgMethods: msgMethods,
+                    convMethods: convMethods,
+                    baasFuncs: baasProps
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(lowMsgApi.result?.value || '(无)');
+
+    // === 4. 如果有 listPrevMsgs 等底层方法，看它的源码 ===
+    console.log('\n=== 底层 listPrevMsgs 源码 ===\n');
+
+    const lowSource = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                var baas = window._imBaaSSDK;
+                var msgSvc = baas.getMsgService ? baas.getMsgService() : null;
+                if (!msgSvc) return { error: 'no msg svc' };
+
+                var srcs = {};
+                for (var key in msgSvc) {
+                    if (typeof msgSvc[key] === 'function' && (key.includes('list') || key.includes('get') || key.includes('fetch'))) {
+                        srcs[key] = msgSvc[key].toString().substring(0, 600);
+                    }
+                }
+                return srcs;
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(lowSource.result?.value || '(无)');
+
+    // === 5. 找 WebSocket channel 的 HTTP 请求模板 ===
+    console.log('\n=== 全局数据里的 API domain ===\n');
+
+    const apiInfo = await cmd('Runtime.evaluate', {
+        expression: `
+            JSON.stringify((function() {
+                // 从已捕获的网络请求看 pattern
+                // 找 window 里可能的配置
+                var config = {};
+                var keys = ['_imConfig', '_imOptions', 'imConfig', 'IM_CONFIG', '__IM_CONFIG__'];
+                for (var i = 0; i < keys.length; i++) {
+                    if (window[keys[i]]) {
+                        config[keys[i]] = JSON.stringify(window[keys[i]]).substring(0, 500);
+                    }
+                }
+
+                // 检查 onetalk 域名下有哪些 API 可用
+                return {
+                    configs: config,
+                    onetalkPath: location.pathname,
+                    host: location.host
+                };
+            })())
+        `,
+        returnByValue: true
+    });
+    console.log(apiInfo.result?.value || '(无)');
+
+    ws.close();
+    console.log('\n完成');
+})();

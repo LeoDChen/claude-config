@@ -1,0 +1,26 @@
+# OKKI 旧脚本归档（2026-05-14 删除）
+
+> 归档原因：2026-05-14 重构，生命周期判定从脚本规则改为 AI 全权判定。
+> 旧脚本使用关键词正则+计时器做阶段/紧急度判定，已被替代。
+> 保留此文档以便需要时回顾旧方案逻辑。
+
+## 删除清单
+
+| 文件 | 用途 | 问题 |
+|------|------|------|
+| `scripts/s1_classify.js` | P0-P4 紧急度元数据分类 | 当新脚本冲突 |
+| `scripts/s2_deep.js` | 深度分析+阶段判定 | 含独立生命周期逻辑 |
+| `scripts/s3_report.js` | Word 报告生成 | 含硬编码 P0/P1 客户列表 |
+| `scripts/generate_dashboard.js` | 独立看板生成器 | 含独立 deriveLifecycle() 函数 |
+
+## 旧方案概要
+
+旧架构是 5 步流水线，脚本在每步用正则匹配做阶段判定：
+- lifecycle: hasPI → PI已发, hasPrice → 报价已发, hasSample → 谈判/样品
+- urgency: 纯基于 silenceDays + grade 的计时器分桶
+- 核心缺陷: 无法区分"讨论过 PI"和"PI 真的发了"
+
+## 新方案（2026-05-14）
+
+两步：脚本只提取数据 → AI 全权判定生命周期和紧急程度
+详见: `D:\ClaudeWorkspace\08_客户跟进\Okki\CLAUDE.md`

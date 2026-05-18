@@ -1,0 +1,114 @@
+<h2>生命周期分类 — 三套方案对比</h2>
+<p class="subtitle">选择你觉得最贴近实际业务的那套，可以混搭</p>
+
+<div class="section">
+  <h3>方案 A：按动作分（5 阶段）— 最简洁</h3>
+  <p style="color:#6b7280;">适合：快速扫一眼就知道"下一步该干嘛"</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;">
+    <div style="background:#dbeafe;border-left:4px solid #3b82f6;padding:10px 14px;border-radius:4px;flex:1;min-width:120px;"><strong>1. 新客初询</strong><br><small>第一次接触，问价/要目录</small></div>
+    <div style="background:#dbeafe;border-left:4px solid #3b82f6;padding:10px 14px;border-radius:4px;flex:1;min-width:120px;"><strong>2. 需求沟通</strong><br><small>讨论规格/数量/定制/样品</small></div>
+    <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:10px 14px;border-radius:4px;flex:1;min-width:120px;"><strong>3. 报价/PI</strong><br><small>价格已发，等确认</small></div>
+    <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:10px 14px;border-radius:4px;flex:1;min-width:120px;"><strong>4. 订单执行</strong><br><small>付款→生产→发货→签收</small></div>
+    <div style="background:#fee2e2;border-left:4px solid #ef4444;padding:10px 14px;border-radius:4px;flex:1;min-width:120px;"><strong>5. 中断/流失</strong><br><small>任何阶段沉默了</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>方案 B：按成交状态分（8 阶段）— 中等粒度</h3>
+  <p style="color:#6b7280;">适合：清楚区分"没买过的"和"买过的"，策略不同</p>
+
+  <div style="margin:12px 0;">
+    <p><strong>未成交客户：</strong></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="background:#e0e7ff;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>1. 待回复</strong><br><small>客户发了消息我没回</small></div>
+      <div style="background:#e0e7ff;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>2. 初询沟通</strong><br><small>互相了解需求</small></div>
+      <div style="background:#e0e7ff;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>3. 报价已发</strong><br><small>等客户反应</small></div>
+      <div style="background:#e0e7ff;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>4. 谈判/样品</strong><br><small>细节博弈中</small></div>
+      <div style="background:#e0e7ff;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>5. PI 已发</strong><br><small>等付款</small></div>
+    </div>
+  </div>
+  <div style="margin:12px 0;">
+    <p><strong>已成交客户：</strong></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="background:#d1fae5;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>6. 订单执行中</strong><br><small>付款后→生产→发货</small></div>
+      <div style="background:#d1fae5;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>7. 已签收</strong><br><small>等待反馈/复购</small></div>
+      <div style="background:#fef3c7;padding:8px 14px;border-radius:4px;flex:1;min-width:100px;"><strong>8. 售后</strong><br><small>质量问题/投诉</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>方案 C：按客户意愿分（4 阶段 + 子状态）— 最贴近心理</h3>
+  <p style="color:#6b7280;">适合：从客户心理角度判断"他到底在想什么"</p>
+  <div style="margin:12px 0;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#3b82f6;color:#fff;padding:8px 14px;font-weight:bold;">🔍 探索期</div>
+        <div style="padding:10px 14px;font-size:14px;">
+          刚到、在收集信息<br>
+          · 刚发询盘<br>
+          · 要目录/价格表<br>
+          · 问MOQ/物流
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#f59e0b;color:#fff;padding:8px 14px;font-weight:bold;">🤔 评估期</div>
+        <div style="padding:10px 14px;font-size:14px;">
+          在比较、在犹豫<br>
+          · 报价已发等回应<br>
+          · 要样品/等样品反馈<br>
+          · 在比价/商量合伙人
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#22c55e;color:#fff;padding:8px 14px;font-weight:bold;">✅ 决策期</div>
+        <div style="padding:10px 14px;font-size:14px;">
+          准备下单了<br>
+          · 确认数量/地址<br>
+          · PI已发等付款<br>
+          · 付款中
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#8b5cf6;color:#fff;padding:8px 14px;font-weight:bold;">🔄 交付/复购</div>
+        <div style="padding:10px 14px;font-size:14px;">
+          已成交客户<br>
+          · 生产中/运输中<br>
+          · 已签收<br>
+          · 复购/售后
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>方案 A — 5 阶段动作型</h3>
+      <p>最简洁。每天打开看板，一眼知道每人的下一步动作。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>方案 B — 8 阶段状态型</h3>
+      <p>区分未成交/已成交，老客户和新客策略分开。当前系统最接近这个。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>方案 C — 4 阶段心理型</h3>
+      <p>按客户决策心理分，话术策略跟心理阶段对齐。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="mix" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>混搭</h3>
+      <p>三套里各取一部分，组合成新的。下一屏细聊。</p>
+    </div>
+  </div>
+</div>

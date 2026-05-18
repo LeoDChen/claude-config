@@ -1,0 +1,249 @@
+#!/usr/bin/env node
+
+/**
+ * 小满CRM — 全流程自动化
+ *
+ * 用法: node run-scrape.mjs
+ * 前置条件:
+ *   1. Chrome 已在端口 9222 开启 (node launch_okki2.js)
+ *   2. 小满已登录并在 TM 消息页面
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { classifyAll, getCategoryInfo } from './classifier.mjs';
+import { generateReportDocx } from './reporter.mjs';
+import { saveCustomerImages } from './image-utils.mjs';
+import { Packer } from 'docx';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+// ============================================================
+// 连接小满
+// ============================================================
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  const page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  if (!page) throw new Error('未找到小满页面');
+  const talkFrame = page.frames()[1];
+  if (!talkFrame) throw new Error('未找到聊天 iframe');
+  return { browser, ctx, page, talkFrame };
+}
+
+// ============================================================
+// 提取会话列表
+// ============================================================
+async function getConversationList(frame) {
+  return frame.evaluate(() => {
+    return Array.from(document.querySelectorAll('.contact-item-container')).map(el => {
+      const text = el.textContent || '';
+      const nameEl = el.querySelector('.contact-right');
+      const nameText = nameEl ? (nameEl.textContent || '').trim() : '';
+      const nameMatch = nameText.match(/^(.+?)(?:\d{2,4}[-:\/])/);
+      const name = nameMatch ? nameMatch[1].trim() : nameText.substring(0, 30).trim() || 'unknown';
+      return {
+        name,
+        isUnread: text.includes('[未读]'),
+        isSelected: el.classList.contains('selected'),
+      };
+    });
+  });
+}
+
+// ============================================================
+// 提取当前会话消息
+// ============================================================
+async function getCurrentMessages(frame) {
+  return frame.evaluate(() => {
+    const messages = [];
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(wrapper => {
+      const isLeft = wrapper.classList.contains('item-left');
+      const isRight = wrapper.classList.contains('item-right');
+      const textEl = wrapper.querySelector('.session-rich-content.text');
+      const cardEl = wrapper.querySelector('.session-rich-content.card');
+      const securityEl = wrapper.querySelector('.session-security');
+
+      if (!textEl && !cardEl) return;
+      if (securityEl) return;
+
+      const content = (textEl || cardEl).textContent.trim()
+        .replace(/翻译中…反馈$/, '').replace(/由阿里翻译提供反馈$/, '')
+        .replace(/阿里国际Marco大模型翻译反馈$/, '').replace(/由阿里翻译提供$/, '').trim();
+
+      messages.push({
+        side: isLeft ? 'received' : isRight ? 'sent' : 'system',
+        content,
+        isCard: !!cardEl,
+      });
+    });
+    return messages;
+  });
+}
+
+// ============================================================
+// 点击会话
+// ============================================================
+async function clickConversation(frame, index) {
+  const result = await frame.evaluate((idx) => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    const target = containers[idx];
+    if (!target) return null;
+    target.scrollIntoView({ block: 'center' });
+    target.click();
+    return (target.textContent || '').trim().substring(0, 150);
+  }, index);
+  await new Promise(r => setTimeout(r, 2000));
+  return result;
+}
+
+// ============================================================
+// 提取单个会话详细消息（含重试）
+// ============================================================
+async function extractConversation(frame, conv, index) {
+  const clicked = await clickConversation(frame, index);
+  if (!clicked) return null;
+
+  // Wait for messages to load
+  for (let i = 0; i < 15; i++) {
+    const hasContent = await frame.evaluate(() =>
+      document.querySelectorAll('.session-rich-content.text, .session-rich-content.card').length > 0
+    );
+    if (hasContent) break;
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  const messages = await getCurrentMessages(frame);
+  return {
+    name: conv.name,
+    status: conv.isUnread ? 'unread' : 'read',
+    messages,
+    messageCount: messages.length,
+  };
+}
+
+// ============================================================
+// 滚动会话列表
+// ============================================================
+async function scrollToBottom(frame) {
+  await frame.evaluate(() => {
+    const container = document.querySelector('.seller-conversation-list') ||
+      document.querySelector('.conversation-list-content');
+    if (container) container.scrollTop = container.scrollHeight;
+  });
+  await new Promise(r => setTimeout(r, 500));
+}
+
+// ============================================================
+// 主流程
+// ============================================================
+async function main() {
+  console.log('╔══════════════════════════════════════╗');
+  console.log('║   小满CRM 客户跟进管理系统            ║');
+  console.log('║   数据抓取 → 分类 → 报告              ║');
+  console.log('╚══════════════════════════════════════╝\n');
+
+  // Step 1: 连接
+  console.log('📡 连接小满...');
+  const { browser, ctx, talkFrame } = await connect();
+  console.log('✅ 连接成功\n');
+
+  try {
+    // Step 2: 获取会话列表
+    console.log('📋 获取会话列表...');
+    await scrollToBottom(talkFrame);
+    await scrollToBottom(talkFrame);
+    const conversations = await getConversationList(talkFrame);
+    console.log(`   共 ${conversations.length} 个会话\n`);
+
+    // Step 3: 提取详细消息（遍历前25个）
+    const maxConv = conversations.length;
+    const detailedConvs = [];
+    const imageDedup = new Set();
+    const startTime = Date.now();
+
+    for (let i = 0; i < maxConv; i++) {
+      const conv = conversations[i];
+      if (conv.name === 'Assistant Eva官方') continue;
+
+      process.stdout.write(`   [${i + 1}/${maxConv}] ${conv.name}...`);
+
+      const detail = await extractConversation(talkFrame, conv, i);
+      if (detail) {
+        // 保存该客户的图片
+        const savedImages = await saveCustomerImages(ctx, talkFrame, conv.name, imageDedup);
+        if (savedImages.length > 0) {
+          detail.images = savedImages;
+          process.stdout.write(`📷${savedImages.length} `);
+        }
+        detailedConvs.push(detail);
+        process.stdout.write(` ${detail.messages.length} 条消息 ✅\n`);
+      } else {
+        process.stdout.write(' ⚠️ 跳过\n');
+      }
+    }
+
+    const totalMsg = detailedConvs.reduce((sum, c) => sum + c.messages.length, 0);
+    const totalImg = detailedConvs.reduce((sum, c) => sum + (c.images?.length || 0), 0);
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+    console.log(`\n   抓取完成: ${detailedConvs.length} 个会话，${totalMsg} 条消息，${totalImg} 张图片，耗时 ${elapsed}s\n`);
+
+    // Step 4: 分类
+    console.log('🏷️  分类...');
+    const classified = classifyAll(detailedConvs);
+
+    // 统计各分类
+    const stats = {};
+    for (const conv of classified) {
+      const catId = conv.classification?.categoryId || 'other';
+      stats[catId] = (stats[catId] || 0) + 1;
+    }
+    for (const [catId, count] of Object.entries(stats).sort()) {
+      const info = getCategoryInfo(catId);
+      if (info) {
+        console.log(`   ${info.emoji} ${info.label}: ${count} 个`);
+      }
+    }
+    console.log('');
+
+    // Step 5: 生成 Word 报告
+    console.log('📝 生成 Word 看板报告...');
+    const doc = await generateReportDocx(classified, { generatedAt: new Date() });
+    const timestamp = new Date().toISOString().replace(/[:]/g, '-').substring(0, 19);
+    const reportPath = join(DATA_DIR, `看板报告_${timestamp}.docx`);
+    const buffer = await Packer.toBuffer(doc);
+    writeFileSync(reportPath, buffer);
+    console.log(`   已保存: ${reportPath}`);
+
+    // Step 6: 保存 JSON 原始数据
+    const dataPath = join(DATA_DIR, `数据_${timestamp}.json`);
+    writeFileSync(dataPath, JSON.stringify(classified, null, 2), 'utf-8');
+    console.log(`   数据: ${dataPath}`);
+
+    // Step 7: 输出摘要
+    const p0Count = classified.filter(c => {
+      const info = getCategoryInfo(c.classification?.categoryId);
+      return info && info.priority === 'P0';
+    }).length;
+
+    console.log(`\n📊 摘要`);
+    console.log(`   ${'─'.repeat(30)}`);
+    console.log(`   总会话: ${classified.length}`);
+    console.log(`   🔴 P0 紧急: ${p0Count} 个`);
+    console.log(`   看板报告: 已生成`);
+    console.log(`\n✅ 完成！`);
+
+    return classified;
+  } finally {
+    await browser.close();
+  }
+}
+
+main().catch(err => {
+  console.error(`\n❌ 错误: ${err.message}`);
+  process.exit(1);
+});

@@ -1,0 +1,233 @@
+#!/usr/bin/env node
+/**
+ * batch_classify_heat.js — 批量初筛 NOW/SOON/COLD
+ *
+ * 读取所有聊天文件，根据最后几条消息自动判定热度：
+ *   NOW  — 客户最后发消息，等待我方回复
+ *   SOON — 我方最后发消息，等待客户回复
+ *   COLD — 超过 90 天无互动
+ *
+ * 输出: 分类结果 JSON + 摘要统计
+ */
+
+const fs = require("fs");
+const path = require("path");
+
+const DATA_DIR = path.resolve(__dirname, "..", "data");
+const CHAT_DIR = path.join(DATA_DIR, "chat_history");
+const LATEST_PATH = path.join(DATA_DIR, "tm_conversations_latest.json");
+const OUT_PATH = path.join(DATA_DIR, "heat_classification.json");
+
+const NOW_WINDOW_DAYS = 90; // 90天内活跃才考虑 NOW/SOON
+const CHECK_MSG_COUNT = 10; // 读取最后 N 条消息判断
+const OUR_UID_MARKER = "2500000853693";
+
+// ── 读取会话索引 ──────────────────────────────────────────
+const latest = JSON.parse(fs.readFileSync(LATEST_PATH, "utf-8"));
+const conversations = latest.conversations || [];
+
+function isSystemMessage(msg) {
+  try {
+    const ext = msg.message?.extension;
+    if (ext?.systemMessage === true) return true;
+    const bmi = ext?.basicMessageInfo;
+    if (typeof bmi === "string" && bmi.includes('"systemMessage":true')) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function getMsgText(msg) {
+  try { return msg.message?.content?.text?.content || ""; } catch { return ""; }
+}
+
+function getMsgTime(msg) {
+  try { return msg.message?.createAt || 0; } catch { return 0; }
+}
+
+function getSenderIsUs(msg) {
+  try { return (msg.message?.sender?.uid || "").includes(OUR_UID_MARKER); } catch { return false; }
+}
+
+function cidToFilename(cidStr) {
+  const match = cidStr.match(/^(.+)#(\d+)@(\w+)$/);
+  if (!match) return null;
+  const [, left, channel, platform] = match;
+  return `${left}_${channel}_${platform}.json`;
+}
+
+// ── 主逻辑 ──────────────────────────────────────────────────
+const now = Date.now();
+const results = [];
+let skipped = 0;
+
+for (const conv of conversations) {
+  const daysSinceLastContact = Math.round((now - conv.lastContactTime) / 86400000);
+
+  // COLD: >90 days
+  if (daysSinceLastContact > NOW_WINDOW_DAYS) {
+    results.push({
+      cid: conv.cid,
+      name: conv.name,
+      country: conv.complianceCountryCode || "?",
+      daysSinceLastContact,
+      heat: "COLD",
+      stage: "未知",
+      lastSender: null,
+      reason: `超过${NOW_WINDOW_DAYS}天无互动`,
+    });
+    continue;
+  }
+
+  // 需要聊天文件判断
+  const filename = cidToFilename(conv.cid);
+  if (!filename) { skipped++; continue; }
+  const filepath = path.join(CHAT_DIR, filename);
+  if (!fs.existsSync(filepath)) { skipped++; continue; }
+
+  let raw;
+  try {
+    raw = JSON.parse(fs.readFileSync(filepath, "utf-8"));
+  } catch {
+    skipped++;
+    continue;
+  }
+
+  const messages = raw.messages || [];
+  const realMsgs = messages.filter((m) => !isSystemMessage(m));
+
+  if (realMsgs.length === 0) {
+    results.push({
+      cid: conv.cid,
+      name: conv.name,
+      country: conv.complianceCountryCode || "?",
+      daysSinceLastContact,
+      heat: "COLD",
+      stage: "未知",
+      lastSender: null,
+      reason: "无真实消息",
+    });
+    continue;
+  }
+
+  // 消息按时间倒序（最新在前），取前 CHECK_MSG_COUNT 条
+  const recentMsgs = realMsgs.slice(0, CHECK_MSG_COUNT);
+
+  // 找最后一条真实消息的发送方
+  const lastMsg = recentMsgs[0];
+  const lastSenderIsUs = getSenderIsUs(lastMsg);
+  const lastMsgText = getMsgText(lastMsg).substring(0, 150);
+  const lastMsgTime = getMsgTime(lastMsg);
+
+  // 判定阶段
+  let stage = "需求探索";
+  const allText = recentMsgs.map((m) => getMsgText(m).toLowerCase()).join(" ");
+
+  if (allText.includes("payment") || allText.includes("付款") || allText.includes("deposit") || allText.includes("定金")) {
+    stage = "待付款";
+  } else if (allText.includes("shipping") || allText.includes("发货") || allText.includes("tracking") || allText.includes("物流") || allText.includes("提单")) {
+    stage = "待发货";
+  } else if (allText.includes("quotation") || allText.includes("报价") || allText.includes("price") || allText.includes("单价") || allText.includes("usd") || allText.includes("$/")) {
+    stage = "报价已发";
+  } else if (allText.includes("sample") || allText.includes("样品") || allText.includes("打样")) {
+    stage = "样品阶段";
+  } else if (allText.includes("negotiate") || allText.includes("谈判") || allText.includes("discount") || allText.includes("折扣")) {
+    stage = "谈判中";
+  }
+
+  // 判定热度
+  let heat;
+  let reason;
+
+  // 检查最后 N 条消息中是否有来有回（客+我交替）
+  const recentSenders = recentMsgs.map((m) => (getSenderIsUs(m) ? "我" : "客"));
+  const hasCustomerInRecent = recentSenders.includes("客");
+  const hasUsInRecent = recentSenders.includes("我");
+
+  // 计算活跃度：最近 N 条消息的时间跨度
+  const recentTimeSpan = recentMsgs.length >= 2
+    ? (getMsgTime(recentMsgs[0]) - getMsgTime(recentMsgs[recentMsgs.length - 1])) / 86400000
+    : 999;
+
+  if (lastSenderIsUs) {
+    // 我方最后发言
+    if (hasCustomerInRecent && recentTimeSpan < 7 && daysSinceLastContact <= 14) {
+      // 近期有来有回且对话活跃 → 可能需要我方继续推进
+      heat = "NOW";
+      reason = `活跃对话中，我方最后发言${Math.round(daysSinceLastContact)}天前，需继续推进`;
+    } else if (daysSinceLastContact > 30) {
+      heat = "SOON";
+      reason = `我方最后回复${Math.round(daysSinceLastContact)}天前，客户长期未回`;
+    } else {
+      heat = "SOON";
+      reason = "等待客户回复";
+    }
+  } else {
+    // 客户最后发言 → 等待我方行动
+    heat = "NOW";
+    reason = `客户最后发言${Math.round(daysSinceLastContact)}天前，等待我方回复`;
+    if (daysSinceLastContact > 7) {
+      reason += " [超期]";
+    }
+  }
+
+  results.push({
+    cid: conv.cid,
+    name: conv.name,
+    country: conv.complianceCountryCode || "?",
+    daysSinceLastContact,
+    heat,
+    stage,
+    lastSender: lastSenderIsUs ? "我" : "客",
+    lastMsgPreview: lastMsgText,
+    lastMsgTime: new Date(lastMsgTime).toISOString().slice(0, 10),
+    reason,
+  });
+}
+
+// ── 按热度排序 ──────────────────────────────────────────────
+results.sort((a, b) => {
+  const heatOrder = { NOW: 0, SOON: 1, COLD: 2 };
+  const ha = heatOrder[a.heat] ?? 9;
+  const hb = heatOrder[b.heat] ?? 9;
+  if (ha !== hb) return ha - hb;
+  return a.daysSinceLastContact - b.daysSinceLastContact;
+});
+
+// ── 输出 ──────────────────────────────────────────────────
+const summary = {
+  total: results.length,
+  now: results.filter((r) => r.heat === "NOW").length,
+  soon: results.filter((r) => r.heat === "SOON").length,
+  cold: results.filter((r) => r.heat === "COLD").length,
+  skipped,
+  exportedAt: new Date().toISOString(),
+};
+
+// 写 JSON
+fs.writeFileSync(OUT_PATH, JSON.stringify({ summary, results }, null, 2), "utf-8");
+
+// 打印摘要
+console.log("═══════════════════════════════════════");
+console.log("  热度初筛完成");
+console.log("═══════════════════════════════════════");
+console.log(`NOW: ${summary.now}人 (等待我方行动)`);
+console.log(`SOON: ${summary.soon}人 (等待客户行动)`);
+console.log(`COLD: ${summary.cold}人 (超过90天无互动)`);
+console.log(`跳过: ${summary.skipped}人 (无聊天文件)`);
+console.log("");
+console.log("完整结果: data/heat_classification.json");
+
+// 打印 NOW 列表
+console.log("\n── NOW 客户列表 ──");
+const nowList = results.filter((r) => r.heat === "NOW");
+for (const r of nowList) {
+  console.log(`${r.name.padEnd(25)} | ${r.country.padEnd(4)} | ${String(r.daysSinceLastContact).padStart(3)}天前 | ${r.stage.padEnd(8)} | ${r.lastMsgPreview.substring(0, 80)}`);
+}
+
+console.log("\n── SOON 前20 ──");
+const soonList = results.filter((r) => r.heat === "SOON").slice(0, 20);
+for (const r of soonList) {
+  console.log(`${r.name.padEnd(25)} | ${r.country.padEnd(4)} | ${String(r.daysSinceLastContact).padStart(3)}天前 | ${r.stage.padEnd(8)} | ${r.lastMsgPreview.substring(0, 80)}`);
+}

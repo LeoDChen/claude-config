@@ -1,0 +1,24 @@
+# 记忆索引
+
+- [用户信息](user_profile.md) — 用户角色、偏好、知识背景
+- [项目背景](project_context.md) — 当前工作项目的背景信息
+- [使用反馈](usage_feedback.md) — 用户对AI助手的使用反馈和偏好
+- [工具权限](tool_permissions.md) — 常用工具权限配置记录
+- [工作流程](workflow_patterns.md) — 常用工作流程和模式
+
+- [P4P优化技能手册](p4p_optimization_skill.md) — 阿里巴巴国际站 P4P 两计划优化方法论（产品分层/地域调整/标题B2B/操作清单）
+- [定制ECC技能系统] — 9大技能+9命令+规则，覆盖P4P/询盘/客户展示/视觉/文案/产品/订单/物流/办公
+- [GrsAI MCP + 主图合成](grsai_mcp_image_compositing.md) — GrsAI MCP 配置 / 产品特征坐标 / 合成脚本参数
+- [Claude Code 两个界面区分](cc_interface_distinction.md) — 终端面板（左/CLI）与 Chat 面板（右/扩展）的能力差异
+
+- [PI 生成规则](pi_generation_rules.md) — 地址填写/全英文/有效期计算/仅填用户提供信息
+- [看板报告格式](report_format.md) — 必须输出为格式美观的Word文档(.docx)，而非Markdown
+
+- [询盘回复格式](inquiry_reply_format.md) — 默认只输出中文可复制版，除非要求英文或双语
+- [问题解决思维](problem_solving_approach.md) — 执行任务前穷举所有可行路径，不因工具限制直接说不行
+- [OKKI平台消息区分](okki_platform_notes.md) — OKKI系统提示≠客户消息，分类时须过滤平台自动推送
+- [项目OB自动保存](project_ob_autosave.md) — 创建新项目时自动保存重启提示词到OB，无需等待用户指令
+
+- [回复语言要求](feedback_chinese_response.md) — 用户要求以后所有回复必须使用中文
+
+*记忆文件存储在 memory/ 目录中，此文件仅为索引*

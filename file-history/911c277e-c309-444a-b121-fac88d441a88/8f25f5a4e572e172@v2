@@ -1,0 +1,155 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const CDP_URL = 'http://127.0.0.1:9222';
+
+(async () => {
+  let browser;
+  try {
+    browser = await chromium.connectOverCDP(CDP_URL);
+    console.log('✅ CDP已连接');
+  } catch (e) {
+    console.log('❌ CDP连接失败:', e.message);
+    console.log('请确认Chrome已用 --remote-debugging-port=9222 启动');
+    process.exit(1);
+  }
+
+  const context = browser.contexts()[0];
+  const pages = context.pages();
+  console.log(`当前 ${pages.length} 个页面:`);
+  pages.forEach((p, i) => console.log(`  [${i}] ${p.url().substring(0, 120)}`));
+
+  // Find or create a page for OKKI CRM
+  let crmPage = pages.find(p => p.url().includes('xiaoman.cn') && !p.url().includes('onetalk'));
+  if (!crmPage) {
+    console.log('\n创建新页面访问CRM...');
+    crmPage = await context.newPage();
+  }
+
+  // Collect ALL API responses from xiaoman.cn
+  const captured = [];
+  crmPage.on('response', async (response) => {
+    try {
+      const url = response.url();
+      const ct = response.headers()['content-type'] || '';
+      if (!ct.includes('json')) return;
+      if (!url.includes('xiaoman.cn')) return;
+
+      const body = await response.json();
+      captured.push({
+        url: url.substring(0, 250),
+        status: response.status(),
+        bodyKeys: Object.keys(body || {}),
+        sampleData: JSON.stringify(body).substring(0, 300),
+      });
+    } catch (e) {}
+  });
+
+  // Step 1: Navigate to CRM home
+  console.log('\n--- 导航到CRM首页 ---');
+  await crmPage.goto('https://crm.xiaoman.cn/', { waitUntil: 'networkidle', timeout: 15000 }).catch(() => {});
+  await crmPage.waitForTimeout(2000);
+
+  // Step 2: Navigate to customer management page (客户列表)
+  console.log('--- 导航到客户管理页面 ---');
+  const customerRoutes = [
+    'https://crm.xiaoman.cn/client',
+    'https://crm.xiaoman.cn/client/list',
+    'https://crm.xiaoman.cn/clientManage',
+    'https://crm.xiaoman.cn/customer',
+    'https://crm.xiaoman.cn/customer/list',
+  ];
+  for (const route of customerRoutes) {
+    try {
+      await crmPage.goto(route, { waitUntil: 'networkidle', timeout: 10000 });
+      await crmPage.waitForTimeout(1500);
+      console.log(`  ${route} → ${crmPage.url().substring(0, 100)}`);
+    } catch (e) {}
+  }
+
+  // Step 3: Try clicking nav items
+  console.log('\n--- 查找导航入口 ---');
+  const navResult = await crmPage.evaluate(() => {
+    const result = { title: document.title, url: location.href };
+    const items = [];
+    document.querySelectorAll('a, li, [class*="nav"], [class*="menu"], [class*="tab"], [class*="sidebar"] span, [class*="sidebar"] div').forEach(el => {
+      const text = (el.textContent || '').trim();
+      if (text && text.length >= 1 && text.length <= 20 && !text.includes('\n')) {
+        items.push(text);
+      }
+    });
+    result.navItems = [...new Set(items)].slice(0, 40);
+    return result;
+  });
+  console.log('页面标题:', navResult.title);
+  console.log('导航项:', navResult.navItems);
+
+  // Click "客户" or "Client" if found
+  const clickTargets = ['客户', 'Client', '客户管理', 'Client Management', '全部客户', 'All Clients'];
+  for (const target of clickTargets) {
+    try {
+      const clicked = await crmPage.evaluate((t) => {
+        const els = document.querySelectorAll('div, span, a, li, button');
+        for (const el of els) {
+          if ((el.textContent || '').trim() === t) {
+            el.click();
+            return `clicked: ${t}`;
+          }
+        }
+        // Try partial match
+        for (const el of els) {
+          if ((el.textContent || '').trim().includes(t)) {
+            el.click();
+            return `partial: ${t}`;
+          }
+        }
+        return null;
+      }, target);
+      if (clicked) {
+        console.log(`  ${clicked}`);
+        await crmPage.waitForTimeout(3000);
+        break;
+      }
+    } catch (e) {}
+  }
+
+  // Step 4: Check the current page for any iframes with customer data
+  const frames = crmPage.frames();
+  console.log(`\n当前页面 ${frames.length} 个frames:`);
+  frames.forEach((f, i) => {
+    try {
+      console.log(`  [${i}] ${f.url().substring(0, 120)}`);
+    } catch (e) {}
+  });
+
+  // Step 5: Check all captured API responses for customer data
+  console.log(`\n--- 捕获了 ${captured.length} 个API响应 ---`);
+  for (const cap of captured) {
+    console.log(`\nURL: ${cap.url}`);
+    console.log(`  Status: ${cap.status}`);
+    console.log(`  Keys: ${cap.bodyKeys.join(', ')}`);
+    console.log(`  Sample: ${cap.sampleData.substring(0, 200)}`);
+  }
+
+  // Save results
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const output = {
+    capturedAt: new Date().toISOString(),
+    crmUrl: crmPage.url(),
+    navResult,
+    capturedApis: captured,
+    totalCaptured: captured.length,
+  };
+  const filepath = path.join(DATA_DIR, `diagnose_${ts}.json`);
+  fs.writeFileSync(filepath, JSON.stringify(output, null, 2));
+  console.log(`\n诊断结果已保存: ${filepath}`);
+
+  await crmPage.close().catch(() => {});
+  await browser.close().catch(() => {});
+  console.log('诊断完成，浏览器连接已断开。');
+})().catch(err => {
+  console.error('脚本错误:', err.message);
+  process.exit(1);
+});

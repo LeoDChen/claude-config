@@ -1,0 +1,225 @@
+# CC+OB 协作系统 — 配置瘦身审核文档
+
+> 生成日期：2026-05-10
+> 状态：待用户确认
+> 确认后逐 Phase 执行，每 Phase 完成后暂停验证
+
+---
+
+## 决策总览
+
+| 决策 | 结论 |
+|------|------|
+| 全局 rules | **全删**，不保留任何规则 |
+| 手动层技能 | **6 个全保留** |
+| 业务 ECC 技能 | **9 个全保留** |
+| 编程语言 rules/skills/commands/agents | **全删** |
+| 全局 vs 项目分工 | 全局只留交互原则；项目留业务规则+技能 |
+
+---
+
+## 一、全局 Rules（当前 15 个，目标 0）
+
+### 待删除清单
+
+| 目录/文件 | 行数 | 与用户相关性 |
+|-----------|------|-------------|
+| `common/` (8 文件) | ~800 行 | **无关** 编程通用规范（coding-style/testing/security/git 等） |
+| `zh/` (10 文件) | ~800 行 | **无关** 上述内容的中文翻译 |
+| `typescript/` (5 文件) | ~300 行 | **无关** TS/JS 编码规范 |
+| `python/` (5 文件) | ~300 行 | **无关** Python 编码规范 |
+| `golang/` (5 文件) | ~300 行 | **无关** Go 编码规范 |
+| `swift/` (5 文件) | ~300 行 | **无关** Swift 编码规范 |
+| `php/` (4 文件) | ~250 行 | **无关** PHP 编码规范 |
+| `web/` (6 文件) | ~400 行 | **无关** 前端 Web 规范 |
+| `cpp/` (4 文件) | ~250 行 | **无关** C++ 规范 |
+| `csharp/` (4 文件) | ~250 行 | **无关** C# 规范 |
+| `dart/` (4 文件) | ~250 行 | **无关** Dart/Flutter 规范 |
+| `java/` (4 文件) | ~250 行 | **无关** Java 规范 |
+| `kotlin/` (4 文件) | ~250 行 | **无关** Kotlin 规范 |
+| `perl/` (3 文件) | ~200 行 | **无关** Perl 规范 |
+| `rust/` (4 文件) | ~250 行 | **无关** Rust 规范 |
+| `operations-rules.md` | ~90 行 | **已确认** 但移到项目级 |
+
+✅ 已备份到 `C:/Users/Administrator/.claude/backups/20260510/rules/`（359K）
+
+### ⚠️ 请确认
+
+- 全局 rules 全删，包括 `operations-rules.md`（项目级保留一份即可），同意吗？
+- 如果将来有新项目需要 rules，届时再在项目级建立
+
+---
+
+## 二、项目 Rules（当前 90 文件 → 目标 1 文件）
+
+### 保留
+
+| 文件 | 理由 |
+|------|------|
+| `operations-rules.md` | 阿里巴巴国际站运营规则，唯一业务规则 |
+
+### 删除
+
+与全局一致：全部 `common/`、`zh/`、`typescript/`、`python/`、`golang/`、`swift/`、`php/`、`web/`、`cpp/`、`csharp/`、`dart/`、`java/`、`kotlin/`、`perl/`、`rust/` 目录。
+
+### ⚠️ 请确认
+
+- 用户提到"可能还有通用型工作需求"，如果将来写 Python/Node 脚本时，是否需要保留 `common/` 中的极简规则（如 security.md 防密钥泄漏、coding-style.md 命名约定）？还是届时需要时再加？
+
+---
+
+## 三、Skills（全局+项目，各 ~160 目录 → 目标 ~16 目录）
+
+### 保留清单
+
+**ECC 业务技能（9 个）**：
+
+| 技能目录 | 对应命令 | 用途 |
+|----------|---------|------|
+| `p4p-optimization` | `/p4p` | P4P 两计划优化 |
+| `inquiry-analysis` | `/inquiry` | 询盘分析回复 |
+| `customer-pitch` | `/pitch` | 客户展示方案 |
+| `b2b-visual-design` | `/design` | B2B 视觉设计 |
+| `copywriting` | `/copy` | 文案框架 |
+| `product-listing` | `/product` | 产品上架优化 |
+| `order-followup` | `/order` | 订单跟进 |
+| `logistics` | `/logistics` | 物流查询 |
+| `office-tools` | `/docs` | PPT/PDF 办公 |
+
+**手动层工具（6 个）**：
+
+| 技能目录 | 触发方式 | 用途 |
+|----------|---------|------|
+| `brainstorming` | 说"先 brainstorm" | 复杂任务先设计再执行 |
+| `grill-me` | 说"grill me" | 模糊需求反向追问澄清 |
+| `writing-plans` | 说"写个执行计划" | 大任务精确拆解 |
+| `to-prd` | 说"输出成 PRD" | 讨论结果结构化输出 |
+| `writing-skills` | 说"改进 XX 技能" | 升级/新建自定义技能 |
+| `systematic-debugging` | 出错时自动 | 根因分析调试 |
+
+**基础支撑（1 个）**：
+
+| 技能目录 | 用途 |
+|----------|------|
+| `using-superpowers` | 技能调度中心，决定何时调用哪个技能 |
+
+**合计保留：16 个 skills**
+
+### 删除
+
+其余 ~144 个编程语言技能目录（如 `golang-patterns`、`rust-testing`、`kotlin-coroutines-flows`、`springboot-tdd` 等）全部删除。
+
+### ⚠️ 请确认
+
+- 上述 16 个保留清单是否有遗漏？特别是 `using-superpowers`— 它负责调度整个技能系统，删掉后其他技能可能无法自动触发
+- 是否有其他你需要但我不确定的功能？比如 `claude-mem`（跨会话记忆，你的 OB 笔记提到过）、`claude-api`（API 调试）、`claude-code-guide`（Claude Code 帮助）
+
+---
+
+## 四、Commands（全局+项目，各 ~86 文件 → 目标 ~18 文件）
+
+### 保留
+
+与 Skills 对应，每个保留的 Skill 对应一个 command（`/` 命令入口）。
+
+9 个业务命令 + 6 个手动层命令 + 用到的系统命令：
+
+| 命令 | 对应 |
+|------|------|
+| `p4p.md` | P4P 优化 |
+| `inquiry.md` | 询盘分析 |
+| `pitch.md` | 客户展示 |
+| `design.md` | 视觉设计 |
+| `copy.md` | 文案 |
+| `product.md` | 产品上架 |
+| `order.md` | 订单跟进 |
+| `logistics.md` | 物流查询 |
+| `docs.md` | 办公工具 |
+| `brainstorming.md` | 头脑风暴 |
+| `grill-me.md` | 追问澄清 |
+| `writing-plans.md` | 执行计划 |
+| `to-prd.md` | 结构输出 |
+| `writing-skills.md` | 改进技能 |
+| `systematic-debugging.md` | 调试 |
+
+### ⚠️ 请确认
+
+- 还有一些系统命令如 `/plan`（规划模式）、`/checkpoint`（检查点）、`/cleanup`（清理），这些是否保留？
+- 你是否用过 `/save-session`、`/resume-session`、`/projects` 等功能？
+
+---
+
+## 五、Agents（全局+项目，各 ~50 文件 → 目标 ~6 文件）
+
+### 保留（通用型，6 个）
+
+| Agent | 用途 | 理由 |
+|-------|------|------|
+| `code-explorer` | 搜索代码/文件 | 查找配置文件、搜索知识库文件时用 |
+| `general-purpose` | 通用任务执行 | 兜底 agent，处理非编程类复杂任务 |
+| `planner` | 实现规划 | 复杂功能规划（不只编程，也可规划运营方案） |
+| `code-reviewer` | 代码审查 | 写 Python/Node 脚本后审查 |
+| `security-reviewer` | 安全检查 | 处理敏感数据、写涉及文件操作的脚本时用 |
+| `doc-updater` | 文档更新 | 更新 OB 笔记、生成文档时用 |
+
+### 删除（语言专用型，44 个）
+
+所有语言专用 agent 全部删除：`cpp-reviewer`、`rust-reviewer`、`go-reviewer`、`python-reviewer`、`typescript-reviewer`、`java-reviewer`、`kotlin-reviewer`、`csharp-reviewer`、`flutter-reviewer`、`dart-build-resolver`、`go-build-resolver`、`java-build-resolver`、`kotlin-build-resolver`、`rust-build-resolver`、`cpp-build-resolver`、`pytorch-build-resolver`、`a11y-architect`、`chief-of-staff`、`code-architect`、`code-simplifier`、`comment-analyzer`、`conversation-analyzer`、`database-reviewer`、`docs-lookup`、`e2e-runner`、`gan-evaluator`、`gan-generator`、`gan-planner`、`harness-optimizer`、`healthcare-reviewer`、`loop-operator`、`opensource-forker`、`opensource-packager`、`opensource-sanitizer`、`performance-optimizer`、`pr-test-analyzer`、`refactor-cleaner`、`seo-specialist`、`silent-failure-hunter`、`tdd-guide`、`type-design-analyzer` 等。
+
+### ⚠️ 请确认
+
+- `tdd-guide` — 如果你写脚本用到 TDD 我会手动引导，不需要专用 agent。同意删？
+- `e2e-runner` — 你的工作不涉及前端 E2E 测试。同意删？
+- `database-reviewer` — 你不做数据库相关。同意删？
+- 有没有我误判的？比如 `docs-lookup`（查库/API 文档）在写脚本时可能用到
+
+---
+
+## 六、全局 CLAUDE.md 精简
+
+### 当前（~150 行）
+
+内嵌了：交互原则、持久化指令、技能索引、场景规则加载指示、文件清理规则。
+
+### 精简后（~15 行）
+
+```markdown
+# 交互原则
+
+1. **不废话，直接干** — 能直接操作的不要问，除非明确要求先问再动
+2. **有立场，不迎合** — 方案有问题就说，判断有漏洞就指出
+3. **我的时间比算力值钱** — 执行层面的事交给你，减少我的操作步骤
+4. **不多做，不越界** — 问什么答什么，不扩展成整套方案
+5. **复杂任务先出框架** — 先给简要方向/可选方案，确认后再深入
+6. **不确定绝不猜测** — 不确定的事停下来问，或先搜索再判断
+
+# 输出语言
+
+默认中文。英文/双语仅在用户明确要求时输出。
+
+# 项目目录
+
+工作产出 → `D:\ClaudeWorkspace\` 对应子目录。
+项目规则和技能由各项目的 `.claude/` 目录管理。
+```
+
+### ⚠️ 请确认
+
+- 技能索引表、场景规则加载指示移到项目 CLAUDE.md，全局只保留跨项目通用的交互原则。同意吗？
+
+---
+
+## 七、执行计划确认后
+
+如果以上全部确认，执行顺序：
+
+1. 全局 rules 剩余 7 个目录 + `operations-rules.md` → 删除（已备份）
+2. 全局 skills → 只留 16 个，其余删
+3. 全局 commands → 只留 ~18 个
+4. 全局 agents → 只留 6 个
+5. 全局 CLAUDE.md → 精简为 15 行
+6. 项目 rules/skills/commands/agents → 同步清理
+7. 项目 CLAUDE.md → 指针化改造
+8. 输出 OB 笔记记录修改
+
+每步完成后暂停，等你验证。

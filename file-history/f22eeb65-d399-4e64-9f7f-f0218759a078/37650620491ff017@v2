@@ -1,0 +1,41 @@
+const fs = require('fs');
+const path = require('path');
+
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+
+// Priority candidates to check
+const candidates = [
+  'Mona almuharraqy', 'ali Amjid', 'diego vargas', 'Christabel Kanunsha',
+  'jonathan aston', 'Aloh Voma', 'Mezna Alawfi', 'Clara ElAssaad',
+  'Inderpreet kaur', 'WELE Mounia', 'Rosette Ngoy', 'Aboulaye Rabiatou',
+  'Esther Chola', 'Bamba Ami', 'Hakim Ezat', 'Abdulrhman alal',
+  'Aula Alsaad', 'amer ly', 'Sara Dibes', 'Christine Muwela',
+  'ayh khyry', 'Ernestina Afriyie', 'Marcos Kuyu', 'adriano.1989 NA',
+  'Christelle ITwite', 'Alina Svinchuk', 'Keinjol Tata', 'Begimai Akymbekova',
+  'Celeste Albarracin', 'Brian Robert Ocholi'
+];
+
+function countMessages(cid) {
+  const filePath = path.join(chatDir, cid + '.json');
+  if (!fs.existsSync(filePath)) return { count: 0, exists: false };
+  try {
+    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const list = data.conversations || data.messages || data.list || data;
+    const arr = Array.isArray(list) ? list : (list.list || list.messages || []);
+    return { count: arr.length, exists: true };
+  } catch(e) {
+    return { count: -1, exists: true, error: e.message };
+  }
+}
+
+// Read metadata to get cid for each name
+const metaPath = path.join(__dirname, '..', 'data', 'tm_conversations_latest.json');
+const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+
+for (const name of candidates) {
+  const conv = meta.conversations.find(c => c.name === name);
+  if (!conv) { console.log(`${name}: NOT FOUND`); continue; }
+  const msgInfo = countMessages(conv.cid);
+  const latestContent = (conv.latestMessage?.content || '').substring(0, 70);
+  console.log(`${name} | ${conv.complianceCountryCode} | ${msgInfo.count}msgs | ${conv.latestMessage?.messageType} | ${latestContent}`);
+}

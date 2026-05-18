@@ -1,0 +1,188 @@
+const fs = require('fs');
+const path = require('path');
+
+const s1 = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 's1_classification.json'), 'utf8'));
+const chatDir = path.join(__dirname, '..', 'data', 'chat_history');
+const NOW = Date.now();
+const DAY = 86400000;
+const OUR_UID = '2500000853693@icbu';
+
+const SYS_PATTERNS = [
+  '自动接待将不再触发', 'Since you have read the conversation',
+  'Marco大模型翻译', '阿里国际Marco大模型翻译',
+  '买家有流失风险', 'Buyer has churn risk',
+  '一旦离开平台发生纠纷或欺诈', '由于您介入该会话', 'Due to your intervention',
+  '反馈', 'AI给您生成了一条回复建议',
+  'You have a visitor', 'This buyer has been pre-screened',
+  '当前买家首次给您发消息',
+];
+
+function isSys(content) {
+  const text = content && content.text && content.text.content || '';
+  if (!text.trim()) return true;
+  for (const p of SYS_PATTERNS) if (text.includes(p)) return true;
+  return false;
+}
+
+function getText(content) {
+  return content && content.text && content.text.content || '';
+}
+
+// Process all P1+P2 candidates
+const candidates = [...(s1.results[1]||[]), ...(s1.results[2]||[])];
+console.log('Processing ' + candidates.length + ' P1+P2 candidates...');
+console.log('');
+
+const enhanced = [];
+
+for (const c of candidates) {
+  const cid = c.cid;
+  const filename = cid ? cid.replace(/#/g, '_').replace(/@/g, '_') + '.json' : '';
+  const filePath = path.join(chatDir, filename);
+
+  let msgCount = 0, customerMsgs = 0, ourMsgs = 0, sysMsgs = 0;
+  let hasPI = false, hasAddress = false, hasOrderSignal = false, hasPrice = false;
+  let hasSample = false, hasFreight = false, hasMOQ = false, hasQuantity = false;
+  let latestOurMsg = '', latestOurDate = '';
+  let latestCustMsg = '', latestCustDate = '';
+  let lastCustomerMsgDays = 9999;
+
+  if (fs.existsSync(filePath)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const msgs = data.messages || [];
+      msgCount = msgs.length;
+
+      for (const m of msgs) {
+        const msg = m.message || m;
+        const uid = msg.sender && msg.sender.uid || '';
+        const content = msg.content;
+        const text = getText(content);
+        const date = msg.createAt || '';
+
+        if (isSys(content)) {
+          sysMsgs++;
+          continue;
+        }
+
+        if (uid === OUR_UID) {
+          ourMsgs++;
+          if (date > latestOurDate) { latestOurDate = date; latestOurMsg = text; }
+        } else if (uid) {
+          customerMsgs++;
+          if (date > latestCustDate) { latestCustDate = date; latestCustMsg = text; }
+          if (date) {
+            const d = Math.floor((NOW - new Date(date).getTime()) / DAY);
+            lastCustomerMsgDays = Math.min(lastCustomerMsgDays, d);
+          }
+        }
+
+        const lc = text.toLowerCase();
+        if (/pi|proforma\s*invoice|invoice\s*sent/.test(lc)) hasPI = true;
+        if (/(付款|deposit|定金)/.test(text)) hasPI = true;
+        if (/(tt\s|wire\s*transfer|bank\s*transfer)/.test(lc)) hasPI = true;
+        if (/(address|地址|city|country|delivery\s*address|where.*ship|send.*to|destination)/.test(lc)) hasAddress = true;
+        if (/(place.*order|make.*order|confirm.*order|下单|order.*confirmed|want.*to.*order|proceed.*order|ready.*order)/.test(lc)) hasOrderSignal = true;
+        if (/(price|price|quotation|quote|报价|unit.*price|each.*cost)/.test(lc)) hasPrice = true;
+        if (/(sample|样品)/.test(lc)) hasSample = true;
+        if (/(freight|shipping|运费|物流|delivery|transport|courier|dhl|fedex)/.test(lc)) hasFreight = true;
+        if (/(moq|minimum.*order|最低.*数量|500.*piece|最小.*订单)/.test(lc)) hasMOQ = true;
+        if (/(quantity|数量|how.*many|pieces|pcs|units)/.test(lc)) hasQuantity = true;
+      }
+    } catch(e) {
+      // skip corrupted files
+    }
+  }
+
+  const realMsgs = customerMsgs + ourMsgs;
+  const daysAgo = c.daysAgo;
+  const country = c.country || '';
+  const coreMarkets = ['SD','EG','CD','ZM','CI','SA','AE'];
+  const isCore = coreMarkets.includes(country);
+  const cRatio = realMsgs > 0 ? Math.round(customerMsgs / realMsgs * 100) : 0;
+
+  let tier = c.priority;
+  const tierReason = [];
+
+  // P0 upgrade triggers
+  if (hasPI && hasAddress && daysAgo < 14 && realMsgs > 5) { tier = 0; tierReason.push('PI+地址已确认'); }
+  if (hasOrderSignal && daysAgo < 7 && realMsgs > 5) { tier = 0; tierReason.push('下单信号'); }
+  if (customerMsgs >= 3 && lastCustomerMsgDays <= 1 && ourMsgs === 0) { tier = 0; tierReason.push('客户多条新消息未回'); }
+  if (hasPrice && hasAddress && hasQuantity && daysAgo < 7) { tier = 0; tierReason.push('报价+地址+数量(近成交)'); }
+  if (customerMsgs >= 100 && daysAgo < 3) { tier = 0; tierReason.push('大量客户消息近期活跃'); }
+  if (realMsgs > 50 && daysAgo < 3 && customerMsgs > 20 && lastCustomerMsgDays <= 2) { tier = 0; tierReason.push('高频互动客户活跃'); }
+
+  // P1 triggers
+  if (hasPI && daysAgo < 14) { tier = Math.min(tier, 1); tierReason.push('PI相关'); }
+  if (isCore && realMsgs > 10 && daysAgo < 5) { tier = Math.min(tier, 1); tierReason.push('核心市场活跃对话'); }
+  if (realMsgs > 20 && daysAgo < 5 && customerMsgs > 5) { tier = Math.min(tier, 1); tierReason.push('近期深度对话'); }
+  if (hasAddress && realMsgs > 5 && daysAgo < 7) { tier = Math.min(tier, 1); tierReason.push('地址已给'); }
+
+  // Downgrade
+  if (realMsgs <= 2 && daysAgo > 7) { tier = Math.max(tier, c.priority + 1); tierReason.push('几乎无有效对话'); }
+
+  enhanced.push({
+    name: c.name,
+    country, isCore, daysAgo, tier,
+    tierName: 'P' + tier,
+    tierReason: tierReason.length > 0 ? tierReason.join(', ') : '元数据',
+    msgCount, customerMsgs, ourMsgs, sysMsgs, realMsgs, cRatio,
+    lastCustomerMsgDays: lastCustomerMsgDays === 9999 ? '-' : lastCustomerMsgDays,
+    latestOurMsg: latestOurMsg.substring(0, 100),
+    latestCustMsg: latestCustMsg.substring(0, 100),
+    hasPI, hasAddress, hasOrderSignal, hasPrice, hasSample, hasFreight, hasMOQ, hasQuantity,
+    cid: c.cid, filename,
+  });
+}
+
+// Sort
+enhanced.sort((a, b) => a.tier - b.tier || a.daysAgo - b.daysAgo);
+
+// Output
+const tiers = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+for (const e of enhanced) tiers[e.tier].push(e);
+
+for (let t = 0; t <= 4; t++) {
+  const items = tiers[t];
+  if (items.length === 0) continue;
+  console.log('=== P' + t + ': ' + items.length + ' people ===');
+  for (const e of items) {
+    const core = e.isCore ? '*' : ' ';
+    const sig = [];
+    if (e.hasPI) sig.push('PI');
+    if (e.hasAddress) sig.push('ADDR');
+    if (e.hasOrderSignal) sig.push('ORDER');
+    if (e.hasPrice) sig.push('PRICE');
+    if (e.hasSample) sig.push('SAMPLE');
+    if (e.hasQuantity) sig.push('QTY');
+    const sigStr = sig.length > 0 ? ' [' + sig.join(',') + ']' : '';
+    const info = [
+      String(e.daysAgo).padStart(2) + 'd',
+      (e.country || '??').padEnd(2),
+      core,
+      e.name.padEnd(30),
+      't:' + String(e.msgCount).padStart(4),
+      'c:' + String(e.customerMsgs).padStart(4) + '/' + String(e.cRatio).padStart(2) + '%',
+      e.tierReason.substring(0, 40).padEnd(40),
+    ];
+    console.log('  ' + info.join(' | ') + sigStr);
+    if (e.latestCustMsg) {
+      console.log('    cust last: ' + String(e.lastCustomerMsgDays) + 'd ago > ' + e.latestCustMsg.substring(0, 80));
+    }
+  }
+  console.log('');
+}
+
+// Summary
+const tc = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+for (const e of enhanced) tc[e.tier]++;
+console.log('=== SUMMARY ===');
+console.log('P0:' + tc[0] + ' P1:' + tc[1] + ' P2:' + tc[2] + ' Total:' + enhanced.length);
+console.log('(from ' + (s1.results[1] || []).length + ' P1 + ' + (s1.results[2] || []).length + ' P2 metadata)');
+
+fs.writeFileSync(
+  path.join(__dirname, '..', 'data', 's1_enhanced.json'),
+  JSON.stringify(enhanced, null, 2)
+);
+console.log('');
+console.log('Saved to data/s1_enhanced.json');

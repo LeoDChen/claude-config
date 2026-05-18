@@ -1,0 +1,58 @@
+# 工作区文件清理系统
+
+## Context
+
+工作区经常产生过程文件（调试脚本、中间数据转储、迭代变体），任务完成后没人记得删。上次 291 个 CDP 抓包文件堆了 116GB 三个月才被发现。需要一套轻量机制，让 Claude 在任务中主动识别和报告垃圾文件。
+
+## 方案：行为规则 + 命令，不用自动化钩子
+
+不用 PostToolUse hook（每次写文件都触发，误报太多），不用定时任务（用户不确定哪些能删）。用两个东西：
+
+1. **CLAUDE.md 行为规则**：每次任务产生文件后，我主动盘点并告知
+2. **`/cleanup` 命令**：用户随时可调用的全量分析
+
+## 实施步骤
+
+### Step 1: 立即清理当前垃圾文件
+
+| 文件 | 大小 | 说明 |
+|------|------|------|
+| `.claude/telemetry/` 下 `1p_failed_events.*.json` | 7MB | 失败的遥测上传缓存，自 4/28 起没成功发送过，删了不影响功能 |
+| `08_客户跟进/Okki/data/` 下带时间戳的中间 JSON | ~59MB | `okki_full_*`, `extracted_*`, `deep_scrape_*` 等中间版本，最终数据已在 `chat_history/` 和 `customers/` |
+| `08_客户跟进/Okki/scripts/` 下一次性调试脚本 | ~1MB | `debug_*`, `diagnose_*`, `explore_*`, `phase1_*`, `test_*`, `deep-scrape-*` 等多版本迭代 |
+
+**需用户确认**：
+| 文件 | 大小 | 说明 |
+|------|------|------|
+| `.claude历史归档/` | 181MB | 旧版 Claude 会话存档备份。删了不影响当前功能，只是无法查阅很早以前的旧对话 |
+
+### Step 2: 在 CLAUDE.md 添加清理规则
+
+在 `d:/ClaudeWorkspace/.claude/CLAUDE.md` 末尾添加：
+
+```markdown
+# 文件清理
+
+任务产生新文件后，结束前盘点：
+1. 列出本次任务产生的文件
+2. 标记 100% 确定的垃圾文件 → 直接删除
+3. 标记不确定的文件 → 告知是什么任务产生的、删了有什么影响，等确认
+```
+
+### Step 3: 创建 `/cleanup` 命令
+
+文件：`d:/ClaudeWorkspace/.claude/commands/cleanup.md`
+
+定义全量扫描流程：Okki/scripts/ → Okki/data/ → .claude 缓存 → 输出"确定可删"/"需确认"两张表。
+
+## 关键文件
+
+- [CLAUDE.md](d:/ClaudeWorkspace/.claude/CLAUDE.md) — 添加清理规则
+- [cleanup.md](d:/ClaudeWorkspace/.claude/commands/cleanup.md) — 新建命令文件
+- [Okki/CLAUDE.md](d:/ClaudeWorkspace/08_客户跟进/Okki/CLAUDE.md) — Okki 特定的清理触发条件
+
+## 验证
+
+1. 完成当前清理后，`du -sh /d/ClaudeWorkspace/` 应显著减小
+2. 下次任务产生文件后，检查 Claude 是否主动盘点
+3. 调用 `/cleanup` 验证命令是否正常工作

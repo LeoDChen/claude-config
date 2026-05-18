@@ -1,0 +1,70 @@
+# 方案：阶段标签交叉验证 + S5a 因子描述修正
+
+## 问题
+
+`factor_baselines.json` 中 55 人标为"待发货"，但 `orders_latest.json` 中只有 1 人(Aloh Voma)有真实订单且状态为"待发货"。阶段标签来自 `batch_classify_heat.js` 的聊天关键词匹配（出现"shipping/发货/tracking"就标待发货），从未交叉验证过 OKKI 订单数据。导致 S5a 因子描述错误地假设"客户已付款"。
+
+## 修改范围
+
+### 1. `init_factor_baselines.js` — 订单状态交叉验证
+
+**位置**: `08_客户跟进/Okki/scripts/init_factor_baselines.js`
+
+在 stage 映射完成后、写入 factor_baselines.json 之前，增加验证步骤：
+
+```
+读取 orders_latest.json → 按客户名匹配
+对 stage="待发货" 的客户：
+  - 订单状态="待收款" → 修正 stage 为 "待付款"
+  - 订单状态="已发货" → 修正 stage 为 "已发货/在途"  
+  - 订单状态="交易取消" → 修正 stage 为 "未成交"
+  - 无匹配订单 → stage 保持"待发货"，但 meta 标记 _payment_confirmed: false
+  - 订单状态="待发货" → meta 标记 _payment_confirmed: true
+对 stage="待付款" 的客户：
+  - 订单状态="交易成功"/"已发货" → 修正 stage 为对应的后续阶段
+  - 反向同理
+```
+
+### 2. `gen_dashboard.js` — S5a 驱动因子描述区分已付/未付
+
+**位置**: `buildRichDrivers()` 函数中 S5a case
+
+当前文本假设已付款：
+> "该更新进度——付款后${days}天没给客户更新" / "客户已付款。每${interval}天应同步..."
+
+修改为根据 `_payment_confirmed` 区分：
+
+```
+已确认付款：
+  "该更新进度——付款后${days}天没给客户更新"
+  "客户已付款，每7天应同步备货/生产进度。该拍照或视频发给客户。"
+
+未确认付款：
+  "该确认状态——标记为待发货${days}天"
+  "阶段标签来自聊天关键词匹配，无法确认是否已付款。请核实订单支付状态后再跟进发货进度。"
+```
+
+### 3. `gen_dashboard.js` — S5a 徽章文案修正
+
+badge 文本从"进度Xd"改为：
+- 已付："进度Xd"
+- 未付："待核实"
+
+### 4. `init_factor_baselines.js` — meta 结构更新
+
+在 meta 中新增字段：
+```json
+"_payment_confirmed": true/false,
+"_order_status": "待发货" | "待收款" | null
+```
+
+## 不改的
+
+- `batch_classify_heat.js` — 关键词匹配逻辑不动（改动影响面大，且 chat 关键词本身是有价值的信号，只是需要订单数据做最终裁决）
+- `gen_dashboard.js` 的整体架构 — 只修 S5a 相关文案
+
+## 验证方法
+
+1. 运行 `init_factor_baselines.js`，检查 stage_corrections.json 中的新修正记录
+2. 运行 `gen_dashboard.js`，抽查一个确认付款和一个未确认付款的 S5a 客户弹窗
+3. 确认 `_payment_confirmed: false` 的客户不再出现"客户已付款"文案

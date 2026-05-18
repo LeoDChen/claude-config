@@ -1,0 +1,110 @@
+# OKKI Dashboard V2 修复计划
+
+## 背景
+
+用户（XiaoXingXing）预览了第一版 dashboard HTML 后，提出 7 个问题需要修复。核心诉求：**看板数据准确、交互便捷、行动指引能直接指导下一步操作**。
+
+## 7 项修复清单
+
+### 修复 1：过滤系统/非买家账号
+
+**问题**：Assistant Eva（companyName="Alibaba", country="CN"）及其他 4 个 CN 国内账号被当作客户统计。
+
+**方案**：在 `generate_dashboard.js` 加载数据后增加过滤逻辑：
+- 排除 `country === 'CN'` 且 `companyName === 'Alibaba'` 的账号
+- 排除 `serviceType === 'cnfm'`（国内贸易，非国际站）
+- 排除 `name === 'Assistant Eva'` 作为兜底
+
+### 修复 2：矩阵表头去掉重复 S
+
+**问题**：表头显示 "S S / S A / S B / S C / S D"，多了前缀 "S "。
+
+**方案**：修改 line 565，`${QUALITY_ORDER.map(q => `<th>S ${q}</th>`)}` → `${QUALITY_ORDER.map(q => `<th>${q}</th>`)}`
+
+### 修复 3：弹窗改为居中模态框
+
+**问题**：当前弹窗是 `position:absolute; left:100%` 放在 `<td>` 内部，右侧列会被截断，需要滚动。
+
+**方案**：
+- 改为页面级居中模态框（fixed overlay）
+- 点击数字 → 模态框从页面中心弹出
+- 内容区最大高度 70vh，内部可滚动
+- 点击遮罩层或 X 按钮关闭
+- 支持 ESC 键关闭
+
+### 修复 4：已签收（Delivered）检测
+
+**问题**：`deriveLifecycle()` 函数完全没有返回"已签收"的代码路径，导致矩阵"已签收"行为空。
+
+**用户提供的数据源**：
+1. OKKI 右侧订单面板 → 订单状态"已完成" → 需要探索能否导出/同步
+2. 线下客户 → 用户直接告知
+
+**方案**：
+- 创建 `data/delivered_customers.json`，手工维护已签收客户列表（cid + name）
+- `generate_dashboard.js` 读取此文件，匹配到的客户 lifecycle → "已签收"
+- 后续可考虑从 OKKI 订单同步，但本期先用手工维护
+
+### 修复 5：静默风险排序反转 + 完整客户名
+
+**问题**：
+- 排序：当前是"深度静默 → 近期活跃"，用户要求"近期活跃在上，深度静默在下"
+- 客户名：展开后只显示少量客户，且名字可能截断
+
+**方案**：
+- 渲染顺序改为：hot → active → short → mid → long → deep
+- 展开后显示完整客户列表（全部，不截断），每行显示完整姓名 + 国家 + 精确静默天数
+- 每组内仍按静默天数降序（最长的排在该组最下面）
+
+### 修复 6：行动目标具体化（方案 C）
+
+**问题**：点击矩阵格子后只能看到通用标准动作，无法知道每个客户的具体情况。
+
+**方案 C — 双层信息**：
+
+**Layer 1：信号级别的行动提示（dashboard 直接展示）**
+- 在 `enhanced_classify.js` 中新增提取字段：
+  - `lastCustQuestion`: 客户最后一条实质性问题/诉求
+  - `ourResponseQuality`: "已回复"/"未回复"/"敷衍回复"
+  - `responseGapDays`: 距离客户最后一次诉求已过多少天
+  - `custReadStatus`: 客户是否已读我们最后一条消息
+- Dashboard 每个客户显示：最后诉求摘要 + 我是否已响应 + 已过天数 + 建议动作
+
+**Layer 2：深度分析入口**
+- 每个客户旁保留「深度分析」链接
+- 提示：新开对话 `/okki 深度分析 [客户名]`
+
+### 修复 7：国家代码转中文名
+
+**问题**：弹窗中显示国家代码（如 CI, SD, EG），用户要求显示中文名。
+
+**方案**：在 `generate_dashboard.js` 中内置国家代码 → 中文名映射表：
+```
+SD→苏丹, EG→埃及, CD→刚果民主, ZM→赞比亚, CI→科特迪瓦, SA→沙特, AE→阿联酋, NG→尼日利亚, GH→加纳, TZ→坦桑尼亚, US→美国, FR→法国, MA→摩洛哥, ...
+```
+所有显示国家的地方（矩阵弹窗、静默列表、市场表）统一使用中文名。
+
+## 改动文件
+
+| 文件 | 改动类型 | 说明 |
+|------|---------|------|
+| `scripts/generate_dashboard.js` | **修改** | 7 项修复全部在此 |
+| `scripts/enhanced_classify.js` | **修改** | 增加 Layer 1 字段提取（lastCustQuestion 等） |
+| `data/delivered_customers.json` | **新建** | 手工维护已签收客户列表 |
+| `output/dashboard_2026-05-12.html` | **重新生成** | 跑脚本输出新版本 |
+
+## 验证方式
+
+1. 检查 Assistant Eva 是否不在看板中
+2. 检查表头：S / A / B / C / D（无多余前缀）
+3. 点击任意格子数字 → 模态框居中弹出，可滚动查看全部客户
+4. 检查已签收行是否有客户（从 delivered_customers.json 读取）
+5. 静默风险：hot 在最上，deep 在最下；展开后全部客户可见
+6. 弹窗中国家显示中文名
+7. 行动指引包含客户具体诉求摘要 + 响应状态
+
+## 上下文风险评估
+
+修复 6（行动目标具体化）需要修改 `enhanced_classify.js` 并重新跑分类，这会读取所有 chat_history 文件。如果单次对话上下文不够：
+- 分步执行：先修复 1-5, 7 → 生成新 HTML → 用户确认
+- 修复 6 单独执行：改 enhanced_classify.js → 重新分类 → 重新生成 dashboard

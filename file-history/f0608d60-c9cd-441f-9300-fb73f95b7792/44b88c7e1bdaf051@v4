@@ -1,0 +1,175 @@
+# factor_baselines 初始化二轮修正方案（审2修订版）
+
+> 日期：2026-05-18  
+> 输入：两份独立审查交叉对比 + 审2 对修正方案的评审  
+> 对象：`scripts/init_factor_baselines.js` + 4 个输出文件
+
+---
+
+## 一、最终修点清单（9 项）
+
+### P0 — 5 项必须修
+
+| # | Bug | 代码位置 | 审2意见 |
+|---|-----|---------|:--:|
+| A | S-tier 排除在高价值外 | 257行 `A\|\|B` 漏 S | ✅ 直接修 |
+| B | 冷层条件顺序颠倒 + 缺 deepFrozen 桶 | 254-263行 | ✅ 直接修 |
+| C | 非洲国家列表不全 | 112行 | ✅ 直接修 |
+| D | 节奏终点未定义 | computeFactors 整体 | ⚠️ 改方案（见下） |
+| E | S5b has_address 假阳性 | 156行+418行 | ⚠️ 改方案（见下） |
+
+### P1 — 3 项一起修
+
+| # | 问题 | 代码位置 | 审2意见 |
+|---|------|---------|:--:|
+| F | stage_updated 语义错误 | 166行 | ✅ 直接修 |
+| G | S5a guard 显式化 | 410行 | ✅ 直接修 |
+| H | _tier_source 未落地 | getTier()+meta | ⚠️ 补实现 |
+
+### 新增
+
+| # | 问题 | 代码位置 | 审2意见 |
+|---|------|---------|:--:|
+| I | S4 observer 双路径共存 | 394-398行 | 修 D 时合并 |
+
+---
+
+## 二、审2 反对的 3 项修正方案
+
+### Fix-D: 节奏终点 → 不用回调，直接展开
+
+**审2 判断**：`getFactorHit() + endBehavior` 回调是过早抽象。9 个因子行为不同，回调让调用栈变深但逻辑还是散落。不如在每个 switch case 里直接写终点逻辑。
+
+**同意。** 修订方案——去掉 `getFactorHit()` 抽象，在 `computeFactors()` 各 case 内直接处理：
+
+```
+switch (stage) {
+  case '需求探索': {
+    const days = daysSinceBaseline(bl.S1);
+    if (days < 1) break;
+    const hitIdx = rhythmHit(days, RHYTHM.S1);
+    if (hitIdx >= 0) { /* 正常命中 */ }
+    else if (days <= 45) {
+      // Day 45 兜底（从基线算，不是从 maxDay 算）
+      // 45 天窗口来源：V5 方案 4.1 总表 S1 行 "Day 45 兜底后不再标记"
+      const lastInterval = RHYTHM.S1[RHYTHM.S1.length - 1]; // 30
+      if ((days - RHYTHM.S1_MAX) % lastInterval === 0) {
+        factors.push({ factor: 'S1 该深挖需求了(兜底)', days });
+      }
+    }
+    // else days > 45 → 静默，不触发
+    break;
+  }
+  case '待付款': {
+    const days = daysSinceBaseline(bl.S4);
+    if (days < 1) break;
+    // 第一段：精确节奏 [1,3,5,7] 累计=16
+    const hitIdx = rhythmHit(days, RHYTHM.S4);
+    if (hitIdx >= 0) {
+      factors.push({ factor: 'S4 该催款了', days, rhythmDay: cumulative });
+    }
+    // 第二段：Day 16 后每 7 天观察（合并原有 observer 路径）
+    if (days > 16 && (days - 16) % 7 === 0) {
+      factors.push({ factor: 'S4 该催款了(观察)', days, observeMode: true });
+    }
+    break;
+  }
+  // ... 其余 case 类似展开
+}
+```
+
+需要加常量 `RHYTHM.S1_MAX = 72` 等（或直接 `reduce` 算）。
+
+### Fix-E: has_address null → 三态 + 30 天 fallback
+
+**审2 判断**：null 化方向对，但 S5b 从 55→0 意味着 AI 填写前所有地址催要全部停摆。需要弱 fallback。
+
+**同意。** 修订方案：
+
+```
+// meta 初始化
+meta.has_address = null;  // null=未知, false=确认无地址, true=已确认有地址
+
+// S5b 触发逻辑（computeFactors 待发货 case 内）
+if (meta.has_address === false && bl.S5b) {
+  // 确认无地址 → 正式催要
+  const days = daysBetween(parseDate(bl.S5b), t);
+  if (days >= 1) factors.push({ factor: 'S5b 该要地址了', days, priority: 'normal' });
+} else if (meta.has_address === null && bl.S5b) {
+  // 未知状态 → >30天才弱提醒
+  const days = daysBetween(parseDate(bl.S5b), t);
+  if (days > 30) {
+    factors.push({ factor: 'S5b 该确认地址状态了', days, priority: 'low', note: '未知是否有地址，请人工确认' });
+  }
+}
+// has_address === true → 跳过
+```
+
+### Fix-H: _tier_source 实现落地
+
+**审2 判断**：方案提了 `_tier_source` 但没写在哪里写入。
+
+**同意。** 修订实现：
+
+```
+// getTier() 改为返回 { tier, source }
+function getTierWithSource(name, country) {
+  const map = loadTierMap();
+  const key = (name || '').toLowerCase().trim() + '|' + (country || '').toUpperCase().trim();
+  const matched = map.get(key);
+  if (matched) return { tier: matched, source: 'dashboard_snapshot' };
+  return { tier: 'C', source: 'default_C' };
+}
+
+// init meta 处
+const tierInfo = getTierWithSource(c.name, c.country);
+meta.customer_tier = tierInfo.tier;
+meta._tier_source = tierInfo.source;
+```
+
+---
+
+## 三、不修（审1 误判，数据已推翻）
+
+- "S级全部降级为C" — 实际 S=21 全命中
+- "tier匹配大量丢失" — 实际 99.6%
+- "冷层tier全部失败" — 实际 S=3/A=51/B=69/C=20
+
+---
+
+## 四、涉及文件
+
+| 文件 | 改动 |
+|------|------|
+| `scripts/init_factor_baselines.js` | 9 处修改 |
+| `output/factor_baselines.json` | 重新生成 |
+| `output/soon_layer_cards.json` | 重新生成 |
+| `output/cold_layer_stratification.json` | 重新生成（+deepFrozen） |
+| `output/init_report_2026-05-18.md` | 重新生成 |
+
+---
+
+## 五、预期变化
+
+| 指标 | 修复前 | 修复后 |
+|------|:---:|:---:|
+| SOON 层总人数 | 90 | ~35-40 |
+| S5b 正式催要 | 55 | 0（等 AI 确认 has_address=false） |
+| S5b 弱提醒 | 无 | 0（30天窗口未到，首日不触发） |
+| S4 观察提醒 | 0（丢失） | 5 人恢复 |
+| 冷层 highValue | 120（含 C 级>180天） | ~123（纯 S+A+B） |
+| 冷层 deepFrozen | 不存在 | C 级 >180 天独立桶 |
+| has_address | false=466 | null=466 |
+| \_tier_source | 不存在 | dashboard_snapshot / default_C |
+
+---
+
+## 六、验证步骤
+
+1. S5b 正式触发 = 0，30 天内不出现弱提醒
+2. 9 个待付款客户中 >16 天的 5 人全部有 S4(观察) 标记，且无人重复触发
+3. 冷层 S 级 3 人在 highValueDormant
+4. 冷层 C 级 >180 天在 deepFrozen
+5. tier 匹配覆盖率输出 ≈99%，_tier_source 字段存在
+6. isAfricaOrMiddleEast 含 CG/GA/MR/SO
+7. stage_updated 全量为 null

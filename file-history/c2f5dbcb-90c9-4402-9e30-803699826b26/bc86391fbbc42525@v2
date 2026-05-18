@@ -1,0 +1,89 @@
+/**
+ * 探查：TM聊天中的文件和附件类型
+ */
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const ctx = browser.contexts()[0];
+  let page = ctx.pages().find(p => p.url().includes('xiaoman'));
+
+  // 确保在沟通/TM页面
+  if (!page.url().includes('talk')) {
+    await page.evaluate(() => {
+      const items = document.querySelectorAll('.fixed-menu-item, a');
+      for (const el of items) {
+        if (el.textContent?.trim() === '沟通') { el.click(); return; }
+      }
+    });
+    await new Promise(r => setTimeout(r, 4000));
+    // Re-acquire page reference
+    page = ctx.pages().find(p => p.url().includes('xiaoman'));
+  }
+
+  const tf = page.frames()[1];
+  if (!tf) { console.log('no talk frame'); return; }
+
+  // 点击第一个有真实消息的会话
+  await tf.evaluate(() => {
+    const containers = document.querySelectorAll('.contact-item-container');
+    for (const c of containers) {
+      const text = c.textContent || '';
+      if (!text.includes('Assistant') && !text.includes('自动接待') && !text.includes('Eva')) {
+        c.click();
+        return;
+      }
+    }
+  });
+  await new Promise(r => setTimeout(r, 2500));
+
+  // 分析消息结构
+  const structure = await tf.evaluate(() => {
+    const msgTypes = {};
+    document.querySelectorAll('.message-item-wrapper.messenger').forEach(w => {
+      // Top-level class
+      const topCls = typeof w.className === 'string' ? w.className : '';
+      msgTypes[topCls] = (msgTypes[topCls] || 0) + 1;
+
+      // Direct children class names
+      w.querySelectorAll(':scope > *').forEach(c => {
+        const cls = typeof c.className === 'string' ? c.className : '';
+        const key = `CHILD: ${cls.substring(0, 80)}`;
+        msgTypes[key] = (msgTypes[key] || 0) + 1;
+
+        // Check for special elements
+        c.querySelectorAll('img, a, video, audio, iframe, embed, object').forEach(el => {
+          const tag = el.tagName.toLowerCase();
+          const extras = [];
+          if (el.src) extras.push(`src=${el.src.substring(0, 80)}`);
+          if (el.href) extras.push(`href=${el.href.substring(0, 80)}`);
+          const key2 = `${tag}: ${extras.join(' ')}`;
+          msgTypes[key2] = (msgTypes[key2] || 0) + 1;
+        });
+      });
+    });
+    return msgTypes;
+  });
+
+  console.log('=== 消息结构和文件类型 ===');
+  Object.entries(structure).sort((a, b) => b[1] - a[1]).forEach(([k, v]) => {
+    console.log(`  ${v}x ${k.substring(0, 150)}`);
+  });
+
+  // 检查云盘文件
+  const cloudFiles = await tf.evaluate(() => {
+    const items = [];
+    document.querySelectorAll('a[href*="clouddisk"], a[href*="file"], a[href*="download"], a[href*="aliyun"], [class*="file"], [class*="attach"], [class*="down"]').forEach(el => {
+      items.push({
+        text: (el.textContent || '').trim().substring(0, 60),
+        href: (el.href || '').substring(0, 150),
+        class: (typeof el.className === 'string' ? el.className : '').substring(0, 50),
+      });
+    });
+    return items;
+  });
+  console.log(`\n=== 云盘/文件链接: ${cloudFiles.length} 个 ===`);
+  cloudFiles.forEach(f => console.log(`  "${f.text}" ${f.href} [${f.class}]`));
+
+  await browser.close();
+})().catch(err => { console.error(err.message); });

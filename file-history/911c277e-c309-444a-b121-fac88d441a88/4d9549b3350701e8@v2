@@ -1,0 +1,16 @@
+@echo off
+echo 正在关闭Chrome...
+taskkill /F /IM chrome.exe >nul 2>&1
+timeout /t 2 /nobreak >nul
+
+echo 清理锁文件...
+del /F /Q "%LOCALAPPDATA%\Google\Chrome\User Data\SingletonLock" >nul 2>&1
+del /F /Q "%LOCALAPPDATA%\Google\Chrome\User Data\SingletonSocket" >nul 2>&1
+del /F /Q "%LOCALAPPDATA%\Google\Chrome\User Data\SingletonCookie" >nul 2>&1
+
+echo 启动Chrome with CDP...
+start "" "%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 https://crm.xiaoman.cn
+
+echo.
+echo Chrome已启动，请确认OKKI已登录后告诉我"好了"
+pause

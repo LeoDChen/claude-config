@@ -1,0 +1,12 @@
+// PostToolUse: Warn on .env file writes
+const fs = require('fs');
+let data = '';
+process.stdin.on('data', c => data += c);
+process.stdin.on('end', () => {
+  const input = JSON.parse(data);
+  const filePath = input.tool_input?.file_path || '';
+  if (/\.env$/i.test(filePath) && !/\.example$/i.test(filePath)) {
+    process.stderr.write('[HOOK WARN] 写入 .env 文件: ' + filePath);
+  }
+  process.stdout.write(data);
+});

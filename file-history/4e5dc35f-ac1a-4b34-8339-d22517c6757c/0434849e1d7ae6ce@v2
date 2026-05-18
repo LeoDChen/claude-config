@@ -1,0 +1,143 @@
+/**
+ * 探测 OKKI 销售订单页的 DOM 结构
+ * 找到表格/列表的实际渲染方式
+ */
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+const PROFILE = 'C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 4';
+const DATA_DIR = path.join(__dirname, '..', 'data');
+
+function log(msg) { console.log(`[${new Date().toLocaleTimeString()}] ${msg}`); }
+
+async function main() {
+  log('启动 Chrome...');
+  const browser = await chromium.launchPersistentContext(PROFILE, {
+    channel: 'chrome', headless: false,
+    viewport: { width: 1440, height: 900 },
+    args: ['--remote-debugging-port=9222'],
+  });
+  const page = await browser.newPage();
+
+  log('导航到销售订单页...');
+  await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+
+  // 等登录
+  if (page.url().includes('login')) {
+    log('请登录 OKKI...');
+    while (page.url().includes('login')) await new Promise(r => setTimeout(r, 2000));
+    log('已登录，重新导航...');
+    await page.goto('https://crm.xiaoman.cn/order', { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+  }
+
+  await new Promise(r => setTimeout(r, 5000));
+  log('当前 URL: ' + page.url());
+
+  // 截图
+  await page.screenshot({ path: path.join(DATA_DIR, 'order_page_screenshot.png'), fullPage: false });
+  log('截图已保存');
+
+  // 探测 DOM：找所有可能的表格/列表容器
+  const domInfo = await page.evaluate(() => {
+    const result = {};
+
+    // 1. 找所有 table 元素
+    const tables = document.querySelectorAll('table');
+    result.tableCount = tables.length;
+    result.tables = [];
+    tables.forEach((t, i) => {
+      const ths = Array.from(t.querySelectorAll('th')).map(th => th.textContent?.trim());
+      const firstRow = t.querySelector('tbody tr');
+      const tds = firstRow ? Array.from(firstRow.querySelectorAll('td')).map(td => td.textContent?.trim().substring(0, 60)) : [];
+      const rowCount = t.querySelectorAll('tbody tr').length;
+      if (ths.length > 0 || tds.length > 0) {
+        result.tables.push({ index: i, headers: ths, firstRow: tds, rowCount });
+      }
+    });
+
+    // 2. 找 class 名包含 table/list/row/cell 的元素
+    const classHints = [];
+    const allEls = document.querySelectorAll('[class]');
+    const seen = new Set();
+    allEls.forEach(el => {
+      const cls = el.className;
+      if (typeof cls === 'string' && (cls.includes('table') || cls.includes('list') || cls.includes('row') || cls.includes('cell') || cls.includes('grid'))) {
+        const tag = el.tagName.toLowerCase();
+        const key = tag + '.' + cls.split(' ').slice(0, 3).join('.');
+        if (!seen.has(key)) {
+          seen.add(key);
+          classHints.push({ tag, classes: cls, childCount: el.children.length });
+        }
+      }
+    });
+    result.classHints = classHints.slice(0, 30);
+
+    // 3. 找 el-table (Element UI) 相关
+    const elTable = document.querySelector('.el-table, .el-table__body, [class*=el-table]');
+    result.hasElTable = !!elTable;
+    if (elTable) {
+      result.elTableClass = elTable.className;
+      result.elTableTag = elTable.tagName;
+    }
+
+    // 4. body 文本片段
+    result.bodyText = document.body.innerText?.substring(0, 2000);
+
+    // 5. 找可能包含订单数据的 div
+    const divsWithData = [];
+    document.querySelectorAll('div, li, tr').forEach(el => {
+      const text = el.textContent?.trim() || '';
+      // 找包含订单号的元素（长数字）
+      if (/^\d{10,}/.test(text) && text.length < 200) {
+        divsWithData.push({
+          tag: el.tagName,
+          class: el.className?.substring(0, 80),
+          text: text.substring(0, 150),
+        });
+      }
+    });
+    result.divsWithOrderNumber = divsWithData.slice(0, 10);
+
+    // 6. Vue 组件数据
+    const vueApps = document.querySelectorAll('[data-v-]');
+    result.vueComponentCount = vueApps.length;
+
+    return result;
+  });
+
+  // 保存
+  const outPath = path.join(DATA_DIR, 'order_dom_probe.json');
+  fs.writeFileSync(outPath, JSON.stringify(domInfo, null, 2));
+  log(`DOM 信息已保存: ${outPath}`);
+
+  // 打印关键发现
+  log(`Tables: ${domInfo.tableCount}`);
+  log(`Has el-table: ${domInfo.hasElTable}`);
+  log(`Vue components: ${domInfo.vueComponentCount}`);
+  log(`Class hints: ${domInfo.classHints.length}`);
+  log(`Divs with order number: ${domInfo.divsWithOrderNumber.length}`);
+
+  if (domInfo.tables.length > 0) {
+    log('表格详情:');
+    for (const t of domInfo.tables) {
+      log(`  Table ${t.index}: headers=${JSON.stringify(t.headers)}, firstRow=${JSON.stringify(t.firstRow)}, rows=${t.rowCount}`);
+    }
+  }
+
+  if (domInfo.divsWithOrderNumber.length > 0) {
+    log('含订单号的元素:');
+    for (const d of domInfo.divsWithOrderNumber) {
+      log(`  ${d.tag}.${d.class} => ${d.text}`);
+    }
+  }
+
+  // 打印 body 文本前 1000 字符
+  log('\n--- body 文本片段 ---');
+  console.log((domInfo.bodyText || '').substring(0, 1000));
+
+  await browser.close();
+  log('完成');
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

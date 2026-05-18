@@ -1,0 +1,148 @@
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, HeadingLevel, WidthType, AlignmentType } from 'docx';
+import { writeFileSync } from 'fs';
+
+function cell(text, opts = {}) {
+  return new TableCell({
+    width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+    children: [new Paragraph({
+      children: opts.bold ? [new TextRun({ text, bold: true, size: 21 })] : [new TextRun({ text, size: 21 })],
+      spacing: { before: 30, after: 30 }
+    })]
+  });
+}
+
+function h1(text) {
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_1, spacing: { after: 200 } });
+}
+function h2(text) {
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } });
+}
+function p(text, opts = {}) {
+  return new Paragraph({
+    children: [new TextRun({ text, size: 21, ...opts })],
+    spacing: { after: opts.after || 80 }
+  });
+}
+function boldP(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 22 })],
+    spacing: { after: 100 }
+  });
+}
+function table2Col(rows) {
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: rows.map(([k, v]) => new TableRow({ children: [cell(k, { width: 25, bold: true }), cell(v, { width: 75 })] })),
+    spacing: { after: 200 }
+  });
+}
+
+const doc = new Document({
+  sections: [{
+    children: [
+      h1('P0客户深度分析：Peggy Hamungala'),
+      p('分析日期：2026-04-29 | 分析引擎：五步分析法 V2 | System Prompt 更新版', { color: '888888', after: 150 }),
+
+      // Data caveat
+      p('⚠️ 数据源说明：', { bold: true, color: 'CC0000', after: 50 }),
+      p('本分析基于 deep_scrape_merged_v2 数据，仅单一数据源。deep scrape 存在 DOM 串位风险，以下对话已排除用户确认不属于该客户的\"shipping to Ghana\"消息。如有其他消息归属存疑，请核实后修正。', { color: 'CC0000', after: 200 }),
+
+      // Step 1
+      h2('第一步：客户画像'),
+      table2Col([
+        ['国家/区域', '赞比亚'],
+        ['角色判断', '个体店主 / 小批发商（5件试单，非品牌商）'],
+        ['核心意图', '试单询价——5件童装，先测运费和总成本'],
+        ['采购阶段', '已报价（USD + RMB 双币种）→ 客户沉默8天'],
+        ['沟通语言', '英语'],
+        ['关键信号', '客户4月3日第一次接触后消失17天，4月20日主动回来——有意向，不是随便问问'],
+        ['数据可靠性', '⚠️ 单一来源，未经交叉验证'],
+      ]),
+
+      // Step 2
+      h2('第二步：卡点诊断'),
+      boldP('核心卡点：运费碾压产品价值。'),
+      p('逐条对话还原（排除已确认不属于该客户的消息后）：'),
+      p('1. 客户问"If I buy 5 pieces how much will each cost" → 我们报 $4.20/pc，5件共$21'),
+      p('2. 客户紧接着问"how much is the shipping cost" → 我们询问送货地址 → 我们报 $66 DAP'),
+      boldP('3. $21 的货 + $66 的运费 → 运费是货值的3倍，运费占总成本76%'),
+      p('4. 客户追问"can you give me the prices in RMB" → 28.5元/件 + 449元运费（约591.5元总计）'),
+      p('5. 我们追了一条模板化工厂介绍（Disney+Pampers）→ 客户已读未回，已8天'),
+      boldP('卡点不是品质，不是信任，就是运费。5件试单运费占总成本76%，对赞比亚小批发商来说这单算不过来账。'),
+      p('次要卡点：我们最后一条消息是模板化工厂介绍，没有回应她的RMB询价这个具体动作。客户问RMB → 我们给了RMB → 然后开始讲Disney/Pampers → 客户可能觉得我们没有在认真听她的需求。'),
+      p('诊断结论：价格/运费结构问题。客户已经主动回来过一次（间隔17天），说明产品有兴趣，但运费不解决她不会下单。'),
+
+      // Step 3
+      h2('第三步：策略推演'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({ children: [cell(''), cell('方案A（常规：等）', { bold: true }), cell('方案B（推荐：帮客户降运费）', { bold: true })] }),
+          new TableRow({ children: [cell('策略', { bold: true }), cell('等客户自己做决定'), cell('主动提供两个降运费方案')] }),
+          new TableRow({ children: [cell('优势', { bold: true }), cell('省事'), cell('精准击中沉默原因，展示你在帮她省钱')] }),
+          new TableRow({ children: [cell('风险', { bold: true }), cell('客户已找其他供应商'), cell('运费绝对值降不了太多，只能靠换运输方式或加量摊薄')] }),
+        ]
+      }),
+      boldP('推荐方案B。'),
+      p('原因：非洲市场价格敏感。客户问RMB说明她可能在和中国货代对接——鼓励FOB方向。market-psychology.md 非洲策略：非洲客户常通过自己的中国货代出货，FOB比DAP更划算。'),
+
+      // Step 4
+      h2('第四步：具体话术'),
+      boldP('钩子检查：'),
+      p('• 客户卡点：运费过高 → 最佳钩子为"降低成本的方案"'),
+      p('• hooks-library.md 中无直接匹配的"降运费"钩子'),
+      p('• ❌ 面料对比图/视频均未制备，不推荐——与当前卡点也无关'),
+      p('• ⚠️ 改用算账型钩子——帮客户对比不同运输方式的总成本'),
+      p('———————————————————'),
+      p('（发时翻译成英语）', { italics: true, color: '888888', after: 150 }),
+      p('Hi Peggy，我重新看了下你的订单——5件产品 $21，但快递运费要 $66，我自己算了一下也觉得不划算。', { after: 200 }),
+      p('给你两个更省钱的办法：', { after: 150 }),
+      p('1. 如果你在中国有合作的货代——我可以用FOB价格发货到你的货代仓库，你用他家的海运/空运渠道走，通常运费能降一半以上。', { after: 150 }),
+      p('2. 如果你想凑到更多件数——比如加到20件，总货值$84，运费占比就从76%降到了44%，单件到手成本会合理很多。', { after: 200 }),
+      p('你觉得哪个方向更适合你？我帮你算具体的账。', { after: 150 }),
+      p('———————————————————'),
+      boldP('话术思路：'),
+      p('• 第一句"算了一下也觉得不划算"——和客户站同一侧'),
+      p('• 未推荐❌状态钩子（面料对比图未制备，也与运费卡点无关）'),
+      p('• 两个方案二选一，低门槛'),
+      p('• FOB + 客户货代 → 非洲市场标准操作'),
+
+      // Step 5
+      h2('第五步：分支预演'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({ children: [cell('客户回应', { bold: true }), cell('下一步动作', { bold: true })] }),
+          new TableRow({ children: [cell('"我有货代，给FOB价格"'), cell('确认FOB价格 + 包装尺寸/毛重 → 提醒"$21<$1000需100%预付"')] }),
+          new TableRow({ children: [cell('"加到20件，重算总价"'), cell('报FOB总价$84 + 帮估算运费 → 标注"以出货日货代报价为准"')] }),
+          new TableRow({ children: [cell('继续8天不回'), cell('不再追单。这单运费结构确实不划算，强行追损害关系。等新品类或降价再激活')] }),
+        ]
+      }),
+
+      // Correction note
+      h2('V1→V2 修正记录'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({ children: [cell('修正项', { bold: true }), cell('V1（已作废）', { bold: true }), cell('V2（本版）', { bold: true })] }),
+          new TableRow({ children: [cell('国家'), cell('赞比亚（要求发货到加纳）'), cell('赞比亚')] }),
+          new TableRow({ children: [cell('错误推断'), cell('"可能在两地都有业务"'), cell('已删除——该推断基于用户确认不存在的消息')] }),
+          new TableRow({ children: [cell('对话数据'), cell('直接采信 deep scrape'), cell('标注"单一数据源，未经交叉验证"')] }),
+          new TableRow({ children: [cell('根因'), cell('未做数据源交叉验证'), cell('System Prompt已更新P0第0条规则')] }),
+        ]
+      }),
+
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 500 },
+        children: [new TextRun({ text: '本报告由 AI外贸顾问系统 V2 生成 | System Prompt 更新版 | 2026-04-29', size: 18, color: '888888' })]
+      })
+    ]
+  }]
+});
+
+Packer.toBuffer(doc).then(buf => {
+  const out = 'C:/Users/Administrator/Desktop/Peggy_Hamungala_深度分析_2026-04-29.docx';
+  writeFileSync(out, buf);
+  console.log('Done: ' + out + ' (' + (buf.length / 1024).toFixed(0) + ' KB)');
+});

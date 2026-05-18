@@ -1,0 +1,44 @@
+Write-Host "=== Context menu handlers for .png ==="
+
+# Check all context menu registration paths for png
+$paths = @(
+    'HKCU:\Software\Classes\.png\shellex\ContextMenuHandlers',
+    'HKCR:\.png\shellex\ContextMenuHandlers',
+    'HKCU:\Software\Classes\PhotoViewer.FileAssoc.png\shellex\ContextMenuHandlers',
+    'HKCR:\SystemFileAssociations\image\shellex\ContextMenuHandlers',
+    'HKCR:\SystemFileAssociations\.png\shellex\ContextMenuHandlers'
+)
+
+foreach ($p in $paths) {
+    Write-Host "`n--- $p ---"
+    if (Test-Path $p) {
+        Get-ChildItem $p -ErrorAction SilentlyContinue | ForEach-Object {
+            $val = (Get-ItemProperty $_.PSPath -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+            Write-Host "  $($_.PSChildName) = $val"
+        }
+    } else {
+        Write-Host "  (not found)"
+    }
+}
+
+Write-Host "`n=== Static verbs for .png ProgID ==="
+$progPath = 'HKCU:\Software\Classes\PhotoViewer.FileAssoc.png\shell'
+if (Test-Path $progPath) {
+    Get-ChildItem $progPath -ErrorAction SilentlyContinue | ForEach-Object {
+        Write-Host "  $($_.PSChildName)"
+    }
+}
+
+Write-Host "`n=== DropTarget handlers (often cause right-click hangs) ==="
+$dropPaths = @(
+    'HKCU:\Software\Classes\.png\shellex\DropHandler',
+    'HKCR:\.png\Shellex\DropHandler'
+)
+foreach ($p in $dropPaths) {
+    if (Test-Path $p) {
+        $val = (Get-ItemProperty $p -Name '(default)' -ErrorAction SilentlyContinue).'(default)'
+        Write-Host "$p = $val"
+    } else {
+        Write-Host "$p = (not found)"
+    }
+}

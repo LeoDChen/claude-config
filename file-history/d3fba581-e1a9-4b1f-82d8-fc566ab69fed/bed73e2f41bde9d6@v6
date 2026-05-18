@@ -1,0 +1,94 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-08 17:13 (hook自动)
+
+## 最新同步结果
+
+| 指标 | 数值 |
+|------|------|
+| 数据同步时间 | 2026-05-08 10:47 |
+| Hook更新时间 | 2026-05-08 17:13 北京时间 |
+| 总会话 | **466** (无变动) |
+| 聊天历史文件 | **467** |
+| 客户文件 | **346** |
+| 24h内活跃 | **6** 个会话 |
+| 7d内活跃 | **43** 个会话 |
+| 最新消息-我方 | 458 个会话 |
+| 最新消息-客户方 | 0 个会话 |
+
+## 关键发现
+
+5/5晚之后 14 个客户有回复（118条），最活跃：Mona almuharraqy(30条)、ali Amjid(21条)、diego vargas(19条)、Christabel Kanunsha(11条)。所有消息内容在 `message.content.text.content`，sender 在 `message.sender.uid`，完全可读。
+
+## 数据文件
+
+| 文件 | 说明 |
+|------|------|
+| `data/tm_conversations_latest.json` | **最新** 466会话元数据 (2026-05-08) |
+| `data/tm_conversations_full.json` | 上次 453会话元数据 (2026-05-05) |
+| `data/chat_history/*.json` | 466个会话聊天历史 (21个已更新) |
+| `data/customers/*.json` | 346 客户邮件+详情 |
+
+## 一键同步脚本
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && node scripts/sync_okki.js
+```
+
+自动处理：启动Chrome → 检测登录 → 导航TM → 提取元数据 → diff → 增量拉消息。
+**下次有新消息直接跑这个，1-2分钟完成。**
+
+## 下次分析启动指令
+
+> 继续OKKI分析。全量两遍法分类，P0P1深度分析。跑tracker更新Excel，更新STATE.md。
+
+**AI执行清单**（读到上面那条指令后自动展开）：
+
+### 分批规则（硬性）
+- 每批分析 ≤6 人，P0优先、P1其次
+- 复杂客户单独一批——判断标准（满足任一即单独）：
+  - 过滤系统消息后真实消息 >80 条
+  - 跨多个阶段（如选款→报价→PI→付款→物流）
+  - 涉及多产品线或多轮价格谈判
+- 极端复杂客户（如 Mona almuharraqy：846条/429条客户消息）→ 独立对话，先出摘要再分析
+- 每批结束后更新 Excel 对应行，再开下一批
+- 本对话装不下时主动告知"剩余X人建议新对话继续"
+
+### 执行步骤
+0. **数据新鲜度检查**：对比 STATE.md 最后更新时间 vs `tm_conversations_latest.json` 导出时间。超过 24h 未同步 → 先提示用户运行 `node scripts/sync_okki.js`（需关闭Chrome），同步完成后再分析
+1. 读 `data/tm_conversations_latest.json` + `knowledge/` 全部文件
+2. 第一遍：元数据粗筛 → 466人初版梯队
+3. 统计 P0/P1 总数，输出分批计划（每批6人，标注哪些需独立处理）
+4. 第二遍：按批次逐个读 `chat_history/` 原文，过滤系统消息
+5. 每批完成后跑 `node scripts/generate-crm-tracker.js` 更新 Excel
+6. 每批 P0/P1 填：阶段、卡点、下一步行动、话术
+7. 全部完成后更新本文件梯队统计 + 关键发现
+
+## 最新分析结果 (2026-05-08)
+
+| 梯队 | 人数 | 说明 |
+|------|:---:|------|
+| **P0** 立即行动 | **9** | diego vargas(失联风险), jonathan aston, Aloh Voma, ali Amjid, Christabel Kanunsha, Mona almuharraqy, WELE Mounia, Mezna Alawfi, Rosette Ngoy |
+| **P1** 本周跟进 | **14** | Clara ElAssaad, Inderpreet kaur, Keinjol Tata, Begimai Akymbekova等 |
+| P2 观察 | 26 | 7天内互动，未进入实质阶段 |
+| P3 低活跃 | 67 | 8-30天前互动 |
+| P4 沉默 | 355 | 超30天/仅系统消息 |
+
+### 关键发现
+1. diego vargas: 19条客户消息仅1条回复 — **最严重跟进失误**
+2. Mona almuharraqy: 846条消息/429条客户消息 — 关系好但未转化
+3. 多笔PI待付款: Christabel($43.96), WELE Mounia, Mezna($75试单), amer ly
+4. 非洲核心市场活跃但运费是核心障碍
+5. Inderpreet kaur问16 CFR认证 — 需确认工厂是否有此报告
+
+### 报告文件
+`reports/客户五梯队分析_2026-05-08.docx`
+
+## 已完成事项
+
+| 事项 | 状态 |
+|------|:---:|
+| 全量聊天历史抓取 (453会话/14961消息) | ✅ 2026-05-05 |
+| 增量同步 (466会话/+1788消息) | ✅ 2026-05-08 |
+| 一键同步脚本 `sync_okki.js` | ✅ |
+| 客户五梯队分析 | ✅ 2026-05-08 |

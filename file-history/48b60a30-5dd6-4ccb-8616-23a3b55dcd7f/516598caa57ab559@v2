@@ -1,0 +1,153 @@
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, HeadingLevel, WidthType, AlignmentType } from 'docx';
+import { writeFileSync } from 'fs';
+
+function cell(text, opts = {}) {
+  return new TableCell({
+    width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+    children: [new Paragraph({
+      children: opts.bold ? [new TextRun({ text, bold: true, size: 21 })] : [new TextRun({ text, size: 21 })],
+      spacing: { before: 30, after: 30 }
+    })]
+  });
+}
+
+function h1(text) {
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_1, spacing: { after: 200 } });
+}
+
+function h2(text) {
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 100 } });
+}
+
+function p(text, opts = {}) {
+  return new Paragraph({
+    children: [new TextRun({ text, size: 21, ...opts })],
+    spacing: { after: opts.after || 80 }
+  });
+}
+
+function boldP(text) {
+  return new Paragraph({
+    children: [new TextRun({ text, bold: true, size: 22 })],
+    spacing: { after: 100 }
+  });
+}
+
+function make2ColTable(rows) {
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: rows.map(([k, v]) => new TableRow({
+      children: [
+        cell(k, { width: 25, bold: true }),
+        cell(v, { width: 75 })
+      ]
+    })),
+    spacing: { after: 200 }
+  });
+}
+
+const doc = new Document({
+  sections: [{
+    children: [
+      h1('P0客户深度分析：Peggy Hamungala'),
+      p('分析日期：2026-04-29 | 分析引擎：五步分析法 V2 | System Prompt 更新版', { color: '888888', after: 300 }),
+
+      // Step 1
+      h2('第一步：客户画像'),
+      make2ColTable([
+        ['国家/区域', '赞比亚（要求发货到加纳，可能在两地都有业务）'],
+        ['角色判断', '个体店主 / 小批发商（5件试单，非品牌商）'],
+        ['核心意图', '试单询价——5件童装，先测运费和总成本'],
+        ['采购阶段', '已报价（USD + RMB 双币种）→ 客户沉默8天'],
+        ['沟通语言', '英语'],
+        ['关键信号', '客户4月3日第一次接触后消失17天，4月20日主动回来——有意向，不是随便问问'],
+      ]),
+
+      // Step 2
+      h2('第二步：卡点诊断'),
+      boldP('核心卡点：运费碾压产品价值，客户无法接受。'),
+      p('逐条对话还原：'),
+      p('1. 客户问"If I buy 5 pieces how much will each cost" → 我们报 $4.20/pc，5件共$21'),
+      p('2. 客户紧接着问"how much is the shipping cost" → 我们报 $66 DAP to Ghana'),
+      boldP('3. $21 的货 + $66 的运费 = $87 总价 → 运费是货值的3倍'),
+      p('4. 客户追问"can you give me the prices in RMB" → 28.5元/件 + 449元运费'),
+      p('5. 我们追了一条工厂介绍（Disney+Pampers）→ 客户已读未回，已8天'),
+      boldP('卡点不是品质，不是信任，就是运费。5件试单的运费占到了总成本的76%。对非洲小批发商来说，这个运费结构根本没法算账。'),
+      p('次要卡点：我们最后一条消息是模板化的工厂介绍（"You have found the right factory...Disney and Pampers"），没有回应她的RMB询价这个具体动作。客户问RMB → 我们给了RMB → 然后又开始讲Disney/Pampers → 客户可能觉得我们没有在认真听她的需求。'),
+      p('诊断结论：这是价格/运费结构问题（非我方失误），但我们的跟进方式（模板化工厂介绍）没有对症下药。'),
+
+      // Step 3
+      h2('第三步：策略推演'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({ children: [cell(''), cell('方案A（常规：等客户回复）', { bold: true }), cell('方案B（推荐：主动破解运费困局）', { bold: true })] }),
+          new TableRow({ children: [cell('策略', { bold: true }), cell('等客户自己做决定'), cell('主动提供两个降运费方案：FOB给货代 or 加件摊薄运费')] }),
+          new TableRow({ children: [cell('优势', { bold: true }), cell('省事'), cell('精准击中客户沉默的真实原因，展示你在帮她省钱')] }),
+          new TableRow({ children: [cell('风险', { bold: true }), cell('客户可能已找其他供应商'), cell('如果客户坚持要DDP全包价，我们没有更好的运费方案')] }),
+        ]
+      }),
+      boldP('推荐方案B。'),
+      p('原因：非洲市场（赞比亚/加纳）价格敏感。她问RMB说明她可能在和中国货代对接——我们应该鼓励这个方向。market-psychology.md 非洲策略明确提到：非洲客户常通过自己的中国货代出货。如果她有货代，FOB比DAP对她更划算。'),
+
+      // Step 4
+      h2('第四步：具体话术'),
+      boldP('钩子检查结果：'),
+      p('• 客户卡点：运费太高 → 最佳钩子应为"降低成本的方案"，面料对比图/产线实拍均不适用'),
+      p('• hooks-library.md 匹配：无直接匹配的"降运费"钩子'),
+      p('• ✅ hook_sample_fabric 可用——但等运费问题解决后才能用'),
+      p('• ⚠️ 本次不使用实物钩子，改用"算账型钩子"——帮客户对比不同运输方式的总成本'),
+      p('———————————————————'),
+      p('（发时翻译成英语）', { italics: true, color: '888888', after: 150 }),
+      p('Hi Peggy，我重新看了下你的订单——5件产品 $21，但DHL快递运费要 $66，我自己算了一下也觉得不划算。', { after: 200 }),
+      p('给你两个更省钱的办法：', { after: 150 }),
+      p('1. 如果你在中国有合作的货代——我可以用FOB价格发货到你的货代仓库，你用他家的海运/空运渠道走，通常运费能降一半以上。', { after: 150 }),
+      p('2. 如果你想凑到更多件数——比如加到20件，总货值$84，运费占比就从76%降到了44%，单件到手成本会合理很多。', { after: 200 }),
+      p('你觉得哪个方向更适合你？我帮你算具体的账。', { after: 150 }),
+      p('———————————————————'),
+      boldP('话术思路说明：'),
+      p('• 第一句"我自己算了一下也觉得不划算"——先和客户站在同一侧，不是推销'),
+      p('• 没有推"面料对比"钩子（和当前卡点无关，且M06视频尚在制备中）'),
+      p('• 两个方案都是二选一，低门槛，客户只需选方向'),
+      p('• FOB + 客户自有货代 → 非洲市场标准操作'),
+      p('• 未使用任何 ❌ 状态钩子素材'),
+
+      // Step 5
+      h2('第五步：分支预演'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({ children: [cell('客户回应', { bold: true }), cell('下一步动作', { bold: true })] }),
+          new TableRow({ children: [cell('"我有货代，给我FOB价格"'), cell('确认FOB价格（$4.20/pc已确认）+ 包装尺寸/毛重 → 提醒"5件总价$21<$1000需100%预付"')] }),
+          new TableRow({ children: [cell('"加到20件，重新算总价"'), cell('报FOB总价$84 + 帮估算海运到加纳 → 标注"运费以出货日货代报价为准" → 发PI')] }),
+          new TableRow({ children: [cell('继续8天不回'), cell('不再追单，改为发新品推荐（轻量激活）。这单运费结构确实不划算，强行追反而损害关系')] }),
+        ]
+      }),
+
+      // Comparison
+      h2('对比：批量报告 vs 新规则分析'),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({ children: [cell('维度', { bold: true }), cell('批量报告（旧）', { bold: true }), cell('本次分析（新System Prompt）', { bold: true })] }),
+          new TableRow({ children: [cell('卡点诊断'), cell('"决策周期长，非洲买家需时间确认"——通用模板'), cell('具体到数字：$21货值+$66运费，运费占比76%')] }),
+          new TableRow({ children: [cell('策略'), cell('"温和跟进+小批量试单"——没有针对性'), cell('主动降运费：FOB给货代 or 加件摊薄，两个具体方案')] }),
+          new TableRow({ children: [cell('钩子'), cell('未指定具体钩子'), cell('钩子检查后不推荐实物钩子（与卡点无关），改用算账型二选一')] }),
+          new TableRow({ children: [cell('话术'), cell('"需要我帮您算一下试单的总费用吗"——闭环提问'), cell('"你觉得哪个方向更适合你？我帮你算具体的账"——二选一+承诺行动')] }),
+        ]
+      }),
+
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 500 },
+        children: [new TextRun({ text: '本报告由 AI外贸顾问系统 V2 生成 | System Prompt 更新版 | 2026-04-29', size: 18, color: '888888' })]
+      })
+    ]
+  }]
+});
+
+Packer.toBuffer(doc).then(buf => {
+  const out = 'C:/Users/Administrator/Desktop/Peggy_Hamungala_深度分析_2026-04-29.docx';
+  writeFileSync(out, buf);
+  console.log('Done: ' + out + ' (' + (buf.length / 1024).toFixed(0) + ' KB)');
+});

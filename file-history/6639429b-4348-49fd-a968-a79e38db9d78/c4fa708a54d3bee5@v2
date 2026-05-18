@@ -1,0 +1,128 @@
+/**
+ * OKKI 数据抓取 — CDP 连接到已有的 Chrome（不新开浏览器）
+ *
+ * 使用前：
+ * 1. 先启动带 CDP 的 Chrome：
+ *    chrome.exe --remote-debugging-port=9222 --user-data-dir="C:\tmp\cdp_session_v3"
+ * 2. 在 Chrome 中打开 https://crm.xiaoman.cn/ 并登录
+ * 3. 运行：node scripts/scrape_cdp.js
+ *
+ * 原理：Playwright connectOverCDP 连接到已有 Chrome → 拦截 API 响应
+ */
+
+const { chromium } = require('playwright');
+const path = require('path');
+const fs = require('fs');
+
+const CDP_URL = 'http://localhost:9222';
+const OUTPUT_DIR = path.join(__dirname, '..', 'data');
+
+if (!fs.existsSync(OUTPUT_DIR)) {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+}
+
+const captured = {
+  apiResponses: [],
+  customers: [],
+};
+
+function isOKKI(url) {
+  return url.includes('xiaoman') || url.includes('okki');
+}
+
+function saveData() {
+  if (captured.apiResponses.length === 0) return;
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+  const fp = path.join(OUTPUT_DIR, `okki_cdp_${ts}.json`);
+  const seen = new Set();
+  const unique = captured.apiResponses.filter(e => {
+    const key = e.url + JSON.stringify(e.data).substring(0, 200);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  fs.writeFileSync(fp, JSON.stringify({
+    capturedAt: ts,
+    customerCount: captured.customers.length,
+    apiCount: unique.length,
+    customers: captured.customers,
+    apiResponses: unique,
+  }, null, 2));
+  console.log(`[Save] ${unique.length} API + ${captured.customers.length} 客户 → ${fp}`);
+}
+
+async function main() {
+  console.log('[CDP Scraper] 连接到已有 Chrome ...');
+
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const pages = browser.contexts()[0]?.pages() || [];
+
+  // 找 OKKI 页面
+  let page = pages.find(p => p.url().includes('xiaoman') || p.url().includes('okki'));
+  if (!page) {
+    console.log('[CDP Scraper] 未找到 OKKI 页面，打开新标签...');
+    page = await browser.contexts()[0].newPage();
+    await page.goto('https://crm.xiaoman.cn/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  }
+
+  console.log(`[CDP Scraper] 当前页面: ${page.url()}`);
+
+  // 拦截 API 响应
+  page.on('response', async (response) => {
+    const url = response.url();
+    if (!isOKKI(url)) return;
+    try {
+      const ct = response.headers()['content-type'] || '';
+      if (!ct.includes('json')) return;
+      const body = await response.json().catch(() => null);
+      if (!body) return;
+
+      const entry = {
+        time: new Date().toISOString(),
+        url: url.split('?')[0],
+        fullUrl: url,
+        status: response.status(),
+        data: body,
+      };
+      captured.apiResponses.push(entry);
+      console.log(`  [API] ${response.status()} ${entry.url}`);
+
+      // 提取客户列表
+      const list = body.data?.list || body.data?.records || body.list || body.records;
+      if (Array.isArray(list)) {
+        for (const c of list) {
+          const name = c.name || c.companyName || c.company_name || c.customerName || 'unknown';
+          if (!captured.customers.find(x => x.name === name)) {
+            captured.customers.push({ name, raw: c });
+          }
+        }
+        console.log(`  → ${list.length} 个客户`);
+      }
+    } catch (_) {}
+  });
+
+  console.log('');
+  console.log('========================================');
+  console.log('[CDP Scraper] 抓取中 — 正常浏览 OKKI 即可');
+  console.log('[CDP Scraper] 按 Ctrl+C 停止并保存');
+  console.log('========================================');
+
+  const saveInterval = setInterval(saveData, 30000);
+
+  process.on('SIGINT', async () => {
+    clearInterval(saveInterval);
+    console.log('\n[CDP Scraper] 保存中...');
+    saveData();
+    await browser.close();
+    console.log('[CDP Scraper] 完成（Chrome 未关闭，可继续使用）');
+    process.exit(0);
+  });
+
+  await new Promise(() => {});
+}
+
+main().catch(err => {
+  console.error('[CDP Scraper] 错误:', err.message);
+  console.error('[CDP Scraper] 请确认 Chrome 已通过 --remote-debugging-port=9222 启动');
+  process.exit(1);
+});

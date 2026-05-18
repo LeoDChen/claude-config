@@ -1,0 +1,67 @@
+/**
+ * 探查：小满邮件模块 — 邮件和附件
+ */
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+  const ctx = browser.contexts()[0];
+  let page = ctx.pages().find(p => p.url().includes('xiaoman'));
+
+  // 点击"邮件"导航
+  await page.evaluate(() => {
+    const items = document.querySelectorAll('.fixed-menu-item, a, li');
+    for (const el of items) {
+      if (el.textContent?.trim() === '邮件') {
+        el.click();
+        return;
+      }
+    }
+  });
+  await new Promise(r => setTimeout(r, 4000));
+
+  console.log('=== 邮件模块URL ===');
+  console.log(page.url().substring(0, 300));
+
+  // 看页面内容
+  const content = await page.evaluate(() => {
+    return document.body?.innerText?.substring(0, 3000) || 'no content';
+  });
+  console.log('\n=== 邮件页面内容 ===');
+  console.log(content);
+
+  // 检查frames
+  const frames = page.frames();
+  console.log(`\n=== Frames: ${frames.length} ===`);
+  frames.forEach((f, i) => console.log(`[${i}] ${f.url().substring(0, 200)}`));
+
+  // 如果有邮件列表，检查结构
+  const mailStructure = await page.evaluate(() => {
+    // Look for mail list
+    const items = [];
+    // Try different selectors
+    document.querySelectorAll('[class*="mail"], [class*="email"], [class*="inbox"], [class*="letter"], table tr, [class*="list-item"], [class*="message-item"], [class*="thread"]').forEach(el => {
+      const text = (el.textContent || '').trim().substring(0, 100);
+      const cls = typeof el.className === 'string' ? el.className.substring(0, 60) : '';
+      if (text && el.getBoundingClientRect().width > 100) {
+        items.push({ tag: el.tagName, class: cls, text });
+      }
+    });
+    return items.slice(0, 30);
+  });
+  console.log('\n=== 邮件列表元素 ===');
+  mailStructure.forEach((m, i) => console.log(`[${i}] <${m.tag}> ${m.class} "${m.text}"`));
+
+  // 查找附件链接/按钮
+  const hasAttachments = await page.evaluate(() => {
+    return {
+      attachLinks: document.querySelectorAll('a[href*="attach"], a[href*="file"], [class*="attach"], [class*="file"], i[class*="attach"]').length,
+      downloadLinks: document.querySelectorAll('a[href*="download"], [class*="download"]').length,
+      imgCount: document.querySelectorAll('img[src*="alicdn"], img[src*="aliyun"]').length,
+    };
+  });
+  console.log('\n=== 附件统计 ===');
+  console.log(JSON.stringify(hasAttachments));
+
+  await browser.close();
+})().catch(err => { console.error(err.message); });

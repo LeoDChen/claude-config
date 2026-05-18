@@ -1,0 +1,57 @@
+---
+name: OKKI CRM 客户分析系统
+description: OKKI CRM 432客户五阶段分析流水线，当前进度、数据链路根因、下次会话启动指令
+type: project
+originSessionId: 91bd1080-1989-4b9a-ba69-5190cad1a713
+---
+项目位于 d:\ClaudeWorkspace\08_客户跟进\Okki\
+
+**Why:** 从OKKI CRM 432个客户中精准分类、深度分析高优客户、输出每日跟进战报。
+
+## 当前进度（2026-05-04）
+
+**阶段0-1-2已完成。待跑阶段2（全量432人版）。**
+
+- scripts/preprocess_cdp.js ✅
+- scripts/classify_rules.js ✅
+- scripts/classify_ai.js ✅（已修复字段映射bug，5/4运行通过）
+- scripts/generate_report.js ✅
+- 阶段2运行结果：`data/classified_ai_2026-05-04T08-18-45-528Z.json`（21人，P0:7/P1:8/P2:6，差异9，低置信度6）
+
+## 核心发现（5/4新增）
+
+### 数据链路根因
+
+两条独立数据线，从未统一：
+
+| | CDP侧边栏 | 全量API截获 |
+|---|---|---|
+| 脚本 | extract_cdp.js | safe_extract.js |
+| 数据量 | **21人**（侧边栏可见） | **432人**（全量） |
+| 原理 | 读onetalk DOM textContent | Playwright拦截OKKI API |
+| 安全性 | 安全（复用本地Chrome） | 有风险（新登录→SSO→可能挤同事） |
+| 字段 | name/timeStr/message(截断预览) | countryCode/buyerLevel/unreadCount等完整元数据 |
+
+**当前流水线吃的是CDP侧边栏数据，只能覆盖20-40人。** 432人全量文件 `2026-05-03T01-19-12_全量客户分类.json` 来自safe_extract.js，之后再未更新。
+
+### 三个根因（按严重程度）
+A. onetalk侧边栏只渲染近期对话联系人，400+沉默客户不会出现
+B. DOM textContent正则解析脆弱（首字符重复、消息截断、无对话历史）
+C. 安全方案（CDP）和全量方案（Playwright API）从未统一
+
+### 置信度分层缺失
+- ★★★确定没问题：0人
+- ★★☆大概率没问题：15人
+- ★☆☆不确定：6人
+原因：CDP数据本身残缺（所有`_messageDirection.total=1`），不是分类逻辑的问题。
+
+## 下次会话启动指令
+
+> 继续OKKI CRM客户分析。先读STATE.md和knowledge/下四个文件。已跑完阶段0-1-2（仅21人CDP数据）。这次用全量432人文件 `data/2026-05-03T01-19-12_全量客户分类.json` 跑阶段2 AI分类。注意：classify_ai.js需适配全量文件的字段名（latestMessageType/lastContactTime/unreadCount/countryCode，而非CDP的_timeStr等），改完再跑。
+
+## 关键文件
+
+- 设计文档：DESIGN.md
+- 全量432人：`data/2026-05-03T01-19-12_全量客户分类.json`
+- AI分类脚本：`scripts/classify_ai.js`（已修复字段映射，但需适配全量文件字段）
+- AI输出（21人版）：`data/classified_ai_2026-05-04T08-18-45-528Z.json`

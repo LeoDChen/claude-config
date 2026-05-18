@@ -1,0 +1,105 @@
+const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let results = [];
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const response = JSON.parse(msg.message);
+      if (response.id && response.result) {
+        const val = response.result.result ? response.result.result.value : null;
+        if (val) results.push({ id: response.id, val: JSON.parse(val) });
+      }
+    } catch (e) {}
+  });
+
+  // Save all conversation data
+  const expr = `
+    (function() {
+      var convs = window.__conversationListFullData__;
+
+      // Extract minimal but useful data from each conversation
+      var data = convs.map(function(c) {
+        var lm = c.latestMessage;
+        return {
+          cid: c.cid,
+          name: c.name,
+          loginId: c.loginId,
+          aliId: c.aliId,
+          accountId: c.accountId,
+          companyName: c.companyName,
+          country: c.ext ? c.ext.country : null,
+          level: c.userNewLevel,
+          serviceType: c.serviceType,
+          conversationType: c.conversationType,
+          unreadCount: c.unreadCount,
+          stayTop: c.stayTop,
+          lastContactTime: c.lastContactTime,
+          lastContactTimeLong: c.lastContactTimeLong,
+          createAt: c.createAt,
+          tagInfo: c.tagInfo,
+          available: c.available,
+          complianceCountryCode: c.complianceCountryCode,
+          latestMessage: lm ? {
+            content: lm.content,
+            messageType: lm.messageType,
+            messageId: lm.messageId,
+            gmtChat: lm.gmtChat,
+            contactRead: lm.contactRead
+          } : null
+        };
+      });
+
+      return JSON.stringify({
+        total: data.length,
+        exportedAt: new Date().toISOString(),
+        conversations: data
+      });
+    })()
+  `;
+
+  console.log('Extracting all 453 conversation data...');
+  await client.send('Target.sendMessageToTarget', {
+    sessionId: sessionId,
+    message: JSON.stringify({
+      id: 1,
+      method: 'Runtime.evaluate',
+      params: { expression: expr }
+    })
+  });
+
+  await new Promise(r => setTimeout(r, 5000));
+
+  if (results.length > 0 && results[0].val) {
+    const outputPath = path.join(__dirname, '..', 'data', 'tm_conversations_full.json');
+    fs.writeFileSync(outputPath, JSON.stringify(results[0].val, null, 2));
+    console.log('Saved: ' + outputPath);
+
+    const c = results[0].val;
+    const withMsg = c.conversations.filter(function(x) { return x.latestMessage && x.latestMessage.content; });
+    console.log('Total: ' + c.total + ' conversations');
+    console.log('With latestMessage content: ' + withMsg.length);
+
+    // Count countries
+    var countries = {};
+    c.conversations.forEach(function(x) {
+      var cc = x.complianceCountryCode || x.country || 'unknown';
+      countries[cc] = (countries[cc] || 0) + 1;
+    });
+    console.log('Top countries: ' + JSON.stringify(countries));
+  } else {
+    console.log('No data received');
+  }
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });

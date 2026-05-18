@@ -1,0 +1,310 @@
+#!/usr/bin/env node
+
+/**
+ * 小满CRM — 邮件抓取（完整版）
+ *
+ * 抓取 leod.chen@yiyangxiaoxingxing.com 邮箱全部邮件
+ * 匹配 TM 客户名 → 提取正文 + 图片 + 附件
+ *
+ * 用法: node mail-scraper.mjs
+ */
+
+import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync, existsSync, readFileSync, readdirSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..');
+const MAIL_IMG_DIR = join(DATA_DIR, 'images', '__mail__');
+const CDP_URL = 'http://127.0.0.1:9222';
+const MAIL_ID = '48725145';
+
+if (!existsSync(MAIL_IMG_DIR)) mkdirSync(MAIL_IMG_DIR, { recursive: true });
+
+// 加载 TM 客户名
+function loadCustomerNames() {
+  const files = readdirSync(DATA_DIR).filter(f => f.startsWith('数据_') && f.endsWith('.json')).sort();
+  if (!files.length) return [];
+  const data = JSON.parse(readFileSync(join(DATA_DIR, files[files.length - 1]), 'utf-8'));
+  return [...new Set(data.map(c => c.name).filter(Boolean))];
+}
+
+// ============================================================
+// 连接
+// ============================================================
+async function connect() {
+  const browser = await chromium.connectOverCDP(CDP_URL);
+  const ctx = browser.contexts()[0];
+  let page = ctx.pages().find(p => p.url().includes('xiaoman'));
+
+  if (!page.url().includes('/mail/')) {
+    await page.evaluate(() => {
+      for (const el of document.querySelectorAll('.fixed-menu-item')) {
+        if (el.textContent?.trim() === '邮件') { el.click(); return; }
+      }
+    });
+    await new Promise(r => setTimeout(r, 5000));
+  }
+  if (!page.url().includes(`user_mail_id=${MAIL_ID}`)) {
+    await page.evaluate(() => {
+      for (const el of document.querySelectorAll('.mail-sidebar-menu-item')) {
+        if ((el.textContent || '').includes('leod.chen')) { el.click(); return; }
+      }
+    });
+    await new Promise(r => setTimeout(r, 3000));
+  }
+  return { browser, ctx, page };
+}
+
+// ============================================================
+// 解析当前页邮件列表
+// ============================================================
+async function parseMailList(page) {
+  return page.evaluate(() => {
+    const items = document.querySelectorAll('.plain-list-item');
+    return Array.from(items).map((item, idx) => {
+      const walker = document.createTreeWalker(item, NodeFilter.SHOW_TEXT, null);
+      const nodes = [];
+      while (walker.nextNode()) {
+        const t = walker.currentNode.textContent.trim();
+        if (!t) continue;
+        const p = walker.currentNode.parentElement;
+        const cls = p ? (typeof p.className === 'string' ? p.className : '') : '';
+        nodes.push({ t, cls });
+      }
+      return {
+        idx,
+        senderName: nodes[0]?.t || '',
+        senderEmail: nodes[1]?.t || '',
+        subject: nodes.find(n => n.cls.includes('subject'))?.t || '',
+        preview: nodes.filter(n => n.cls === 'ellipsis').map(n => n.t).join(' ') || '',
+        time: nodes.find(n => n.cls.includes('time'))?.t || '',
+      };
+    });
+  });
+}
+
+// ============================================================
+// 翻页
+// ============================================================
+async function nextPage(page) {
+  const ok = await page.evaluate(() => {
+    const btn = document.querySelector('.mail-paging-btn.right-btn');
+    return btn && !btn.classList.contains('disabled') ? (btn.click(), true) : false;
+  });
+  if (ok) await new Promise(r => setTimeout(r, 2500));
+  return ok;
+}
+
+// ============================================================
+// 翻到指定页
+// ============================================================
+async function goToPage(page, targetPage) {
+  // 先重置到首页
+  const input = await page.$('.mail-paging-input');
+  if (!input) return false;
+  await input.click({ clickCount: 3 });
+  await input.fill(String(targetPage));
+  await input.press('Enter');
+  await new Promise(r => setTimeout(r, 3000));
+  return true;
+}
+
+// ============================================================
+// 点击邮件
+// ============================================================
+async function clickMail(page, index) {
+  const ok = await page.evaluate((idx) => {
+    const items = document.querySelectorAll('.plain-list-item');
+    const t = items[idx];
+    if (!t) return false;
+    const w = t.querySelector('.mail-item-container');
+    if (!w) return false;
+    w.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    return true;
+  }, index);
+  if (ok) await new Promise(r => setTimeout(r, 2500));
+  return ok;
+}
+
+// ============================================================
+// 提取邮件详情（正文 + 图片 + 附件）
+// ============================================================
+async function getMailDetail(page, ctx) {
+  return page.evaluate(() => {
+    const iframe = document.querySelector('.mm-split-pane__right iframe');
+    if (!iframe) return { bodyText: '', images: [], attachments: [] };
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      if (!doc || !doc.body) return { bodyText: '', images: [], attachments: [] };
+      const bodyText = doc.body.innerText || '';
+      const images = Array.from(doc.querySelectorAll('img'))
+        .filter(img => img.src && img.src.startsWith('http'))
+        .map(img => ({ src: img.src, alt: img.alt || '' }));
+      const attachments = Array.from(doc.querySelectorAll('a[href]'))
+        .filter(a => /download|attach|aliyundoc/i.test(a.href))
+        .map(a => ({ url: a.href, name: a.textContent.trim() }));
+      return { bodyText, images, attachments };
+    } catch {
+      return { bodyText: '', images: [], attachments: [] };
+    }
+  });
+}
+
+// ============================================================
+// 保存邮件内图片
+// ============================================================
+async function saveMailImages(ctx, images) {
+  const saved = [];
+  for (const img of images) {
+    if (img._saved) continue;
+    img._saved = true;
+    try {
+      const ext = img.src.match(/\.(jpe?g|png|gif|webp)(?:[?#]|$)/i)?.[1] || 'jpg';
+      const hash = createHash('md5').update(img.src).digest('hex').substring(0, 10);
+      const filename = `${Date.now()}_${hash}.${ext}`;
+      const filePath = join(MAIL_IMG_DIR, filename);
+      const p = await ctx.newPage();
+      try {
+        const r = await p.goto(img.src, { waitUntil: 'load', timeout: 15000 });
+        if (r && r.ok()) {
+          const buf = await r.body();
+          writeFileSync(filePath, buf);
+          saved.push({ url: img.src, filePath, size: buf.length });
+        }
+      } finally {
+        await p.close();
+      }
+    } catch {}
+  }
+  return saved;
+}
+
+// ============================================================
+// 判断邮件是否与客户相关
+// ============================================================
+function isCustomerRelated(email, customerNames) {
+  const text = (email.subject + ' ' + email.senderName + ' ' + email.preview).toLowerCase();
+  return customerNames.some(name => {
+    if (!name || name === 'User name') return false;
+    const parts = name.toLowerCase().split(/\s+/).filter(Boolean);
+    return parts.some(p => p.length > 2 && text.includes(p));
+  });
+}
+
+// ============================================================
+// 从邮件主题中提取客户名
+// ============================================================
+function extractCustomerName(email, customerNames) {
+  const text = email.subject + ' ' + email.preview;
+  for (const name of customerNames) {
+    if (!name || name === 'User name') continue;
+    if (text.toLowerCase().includes(name.toLowerCase())) return name;
+  }
+  return null;
+}
+
+// ============================================================
+// 主流程
+// ============================================================
+async function main() {
+  console.log('╔══════════════════════════════════════╗');
+  console.log('║   小满CRM 邮件抓取                    ║');
+  console.log('║   leod.chen@yiyangxiaoxingxing.com    ║');
+  console.log('╚══════════════════════════════════════╝\n');
+
+  const customerNames = loadCustomerNames();
+  console.log(`📋 TM 客户: ${customerNames.length} 个\n`);
+
+  const { browser, ctx, page } = await connect();
+  console.log('✅ 已进入邮箱\n');
+
+  try {
+    // Phase 1: 扫描全部页面提取元数据
+    console.log('🔍 扫描全部邮件元数据...');
+    const allEmails = [];
+    let pageNum = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      process.stdout.write(`   第 ${pageNum} 页...`);
+      const emails = await parseMailList(page);
+      const pageInfo = emails.map(e => ({ ...e, page: pageNum }));
+      allEmails.push(...pageInfo);
+      process.stdout.write(` ${emails.length} 封\n`);
+
+      hasMore = await nextPage(page);
+      pageNum++;
+    }
+    console.log(`\n   共扫描 ${pageNum-1} 页，${allEmails.length} 封邮件\n`);
+
+    // Phase 2: 匹配客户相关邮件
+    console.log('🔗 匹配客户相关邮件...');
+    const matched = allEmails.filter(e => isCustomerRelated(e, customerNames));
+    console.log(`   匹配到 ${matched.length} 封相关邮件\n`);
+
+    if (matched.length === 0) {
+      console.log('⚠️ 未找到与 TM 客户匹配的邮件');
+      return;
+    }
+
+    // Phase 3: 提取详情（按页分组）
+    console.log('📥 提取邮件详情...');
+    const byPage = {};
+    for (const m of matched) {
+      if (!byPage[m.page]) byPage[m.page] = [];
+      byPage[m.page].push(m);
+    }
+
+    const detailedMails = [];
+    for (const [pg, mails] of Object.entries(byPage)) {
+      console.log(`   第 ${pg} 页: ${mails.length} 封`);
+      await goToPage(page, Number(pg));
+      await new Promise(r => setTimeout(r, 2000));
+
+      for (const mail of mails) {
+        process.stdout.write(`     "${mail.subject.substring(0, 40)}..." `);
+        const ok = await clickMail(page, mail.idx);
+        if (!ok) { process.stdout.write('❌ 无法点击\n'); continue; }
+
+        const detail = await getMailDetail(page);
+        const savedImages = await saveMailImages(ctx, detail.images);
+
+        const customerName = extractCustomerName(mail, customerNames);
+        detailedMails.push({
+          ...mail,
+          customerName,
+          bodyText: detail.bodyText.substring(0, 5000),
+          images: savedImages,
+          attachmentCount: detail.attachments.length,
+        });
+        process.stdout.write(`✅ (${savedImages.length}图, ${detail.attachments.length}附件)\n`);
+      }
+    }
+
+    // Phase 4: 保存
+    const timestamp = new Date().toISOString().replace(/[:]/g, '-').substring(0, 19);
+    const outputPath = join(DATA_DIR, `邮件数据_${timestamp}.json`);
+    writeFileSync(outputPath, JSON.stringify(detailedMails, null, 2), 'utf-8');
+
+    const totalImg = detailedMails.reduce((s, m) => s + m.images.length, 0);
+    const totalAtt = detailedMails.reduce((s, m) => s + m.attachmentCount, 0);
+    console.log(`\n✅ 邮件抓取完成`);
+    console.log(`   扫描: ${allEmails.length} 封`);
+    console.log(`   匹配: ${matched.length} 封`);
+    console.log(`   提取: ${detailedMails.length} 封`);
+    console.log(`   图片: ${totalImg} 张`);
+    console.log(`   附件: ${totalAtt} 个`);
+    console.log(`   已保存: ${outputPath}`);
+
+  } finally {
+    await browser.close();
+  }
+}
+
+main().catch(err => {
+  console.error(`\n❌ 错误: ${err.message}`);
+  process.exit(1);
+});

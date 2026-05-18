@@ -1,0 +1,75 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-05 19:30
+> 用途：跨会话持久化项目状态
+
+## 当前阶段
+
+**数据抓取方案已确定：Playwright 复用 Profile 4（方案③），脚本已就绪待首次运行。**
+
+## 方案演进（本次会话关键发现）
+
+旧的 CDP `--remote-debugging-port=9222` 方案已废弃。新方案用 Playwright `launchPersistentContext` 直接读 Chrome Profile 4，不需要 CDP 端口。
+
+```
+旧：chrome.exe --remote-debugging-port=9222 → 端口不监听 → ❌
+新：Playwright launchPersistentContext(Profile 4) → 复用cookie → ✅
+```
+
+## 当前方案：Playwright + Profile 4
+
+**原理**：Playwright 用 `chromium.launchPersistentContext` 直接读 Chrome Profile 4 目录，OKKI 登录 cookie 已在其中，打开就是已登录状态。脚本拦截所有 OKKI API 响应，完整数据落盘。
+
+**安全性**：不经过 SSO 认证层，不触发新登录，同事账号不受影响。
+
+**脚本**：`scripts/scrape_okki.js`
+
+**使用方式**：
+1. 关闭 Chrome（Profile 不能同时被两个进程占用）
+2. `node scripts/scrape_okki.js`
+3. 浏览器自动打开，正常浏览客户页面，API 数据自动抓取
+4. Ctrl+C 停止，数据保存到 `data/okki_capture_*.json`
+
+**也支持指定客户**：`node scripts/scrape_okki.js "客户名字"`
+
+## 新增/修改文件
+
+- `scripts/scrape_okki.js` — Playwright 复用 Profile 4 抓取脚本（新建）
+- `scripts/extract_single_customer.js` — Console 注入备用方案（新建）
+- `~/.claude/.mcp.json` — 新增 `chrome-devtools` MCP 配置
+- `scripts/extract_cdp.js` — 旧 CDP 方案，已废弃
+
+## 待办优先级
+
+1. **🔥 首次运行 scrape_okki.js** — 关闭 Chrome → 运行脚本 → 验证 OKKI 登录态自动恢复 → 浏览几个客户测试数据抓取
+2. **确认数据质量** — 检查 `data/okki_capture_*.json` 中的 API 响应是否包含客户列表/聊天/邮件等完整数据
+3. **全量抓取** — 确认可用后，跑全量 432 人
+4. **阶段2全量版** — 全量 AI 分类
+
+## 已完成
+
+- `scripts/preprocess_cdp.js` — 阶段0 ✅
+- `scripts/classify_rules.js` — 阶段1 ✅
+- `scripts/classify_ai.js` — 阶段2 ✅（21人版）
+- `scripts/generate_report.js` — 阶段5 ✅
+- 方案选型 ✅
+
+## Profile 信息
+
+- `Profile 4` = **云超数码**（OKKI登录用）
+- Profile 路径: `C:\Users\Administrator\AppData\Local\Google\Chrome\User Data\Profile 4`
+
+## 下次启动指令
+
+> 继续OKKI CRM数据抓取。先读STATE.md和knowledge/下文件。
+> 方案③已确定：Playwright launchPersistentContext 复用 Profile 4。
+> 脚本 scripts/scrape_okki.js 已就绪，首次运行前需关闭 Chrome。
+> 运行后验证数据质量，确认 OKKI 登录态是否自动恢复。
+
+## 关键数据文件
+
+- 设计文档：`DESIGN.md`
+- 全量432人（5/3快照）：`data/2026-05-03T01-19-12_全量客户分类.json`
+- 新抓取脚本：`scripts/scrape_okki.js`
+- Console备用方案：`scripts/extract_single_customer.js`
+- 已废弃：`scripts/diagnose_api.js`、`scripts/extract_cdp.js`

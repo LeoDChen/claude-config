@@ -1,0 +1,77 @@
+# 小满 OKKI CRM 项目评估与改进方案
+
+## 项目现状诊断
+
+### 已有的东西（扎实）
+
+| 组件 | 文件 | 评价 |
+|------|------|------|
+| 全量快照 | `extract-all-v2.mjs` | 60秒拿432人状态，window变量+DOM合并，稳定 |
+| 深抓对话 | `deep-scrape-dom.mjs` | 侧边栏点击零风险，50人完整对话 |
+| 每日巡检 | `daily-smart.mjs` | 增量对比+diff，思路正确 |
+| SOP知识库 | `reports/外贸B2B跟进SOP参考.md` | 催款/样品/报价跟进的系统方法 |
+| 工厂档案 | `p0_analysis_data.json` | 含工厂背景的逐客户分析 |
+| Word输出 | `gen-report-final.mjs`, `gen-status-report.mjs` | docx生成，输出桌面 |
+
+### 三个核心问题
+
+**问题1：系统消息污染分类**
+
+`extract-all-v2.mjs` 的 `latestMessageContent` 来自 `window.__conversationListFullData__`，这个字段混杂系统消息。当系统消息是"Since you have read the conversation, the automatic reception will no longer..."时，`classify()` 拿它做关键词匹配，就会出现：
+
+- 系统消息 → 被判定为客户消息 → 标记 P0
+- 实际客户已沉默 → 但系统自动发了消息 → 显示"1天前互动"
+
+刚才的数据证实了这一点：16 个 P0 里至少 5 个的 `latestMessageContent` 是系统消息。你的 P0 列表是脏的。
+
+**问题2：没有知识库文件**
+
+你提到的 `knowledge/system-prompt.md`、`knowledge/factory.md`、`knowledge/business-rules.md` 未创建。但工厂信息实际上散落各处——`p0_analysis_data.json` 里的客户分析有工厂背景，SOP参考有跟进方法。只是没有结构化。
+
+**问题3：分析-执行链路断裂**
+
+你说得对——"先让 CC 清楚所有客户实际情况，提醒我需要做什么，我再针对性让你分析"。当前项目企图一步到位自动分析所有客户，但：
+- 分析 432 人质量和速度都不可接受
+- Claude 一次性处理太多客户会"变懒"
+- `daily-smart.mjs` 引用了禁用的 `deep-scrape-api.mjs`
+
+## 我的改进方案
+
+核心思路转变：**不做自动全量分析，做"CC可读的状态清单"**。
+
+### 第一步：修数据质量（必须）
+
+在 `extract-all-v2.mjs` 的分类逻辑前，对 `latestMessageContent` 做系统消息过滤。把你知道的系统消息模式（"自动接待将不再触发"、"Marco大模型翻译"、"买家有流失风险"、"一旦离开平台发生纠纷或欺诈"、"由于您介入该会话"、"反馈"）全部命中后回退——如果最新一条是系统消息，找上一条真正的客户/我方消息来判断状态。
+
+**效果：P0 从 16 个降到真实的 8-10 个，不再被系统消息骗。**
+
+### 第二步：建知识库（必须）
+
+在 `D:\ClaudeWorkspace\08_客户跟进\Okki\knowledge\` 下创建三个文件：
+
+1. **`factory.md`** — 从全息档案提取核心信息：品类+产能、认证、工艺亮点（5A/7A光子抗菌舱）、商务红线（MOQ 500/预付40%/报价3-7天有效）、目标市场、大牌背书（帮宝适/迪士尼）
+2. **`business-rules.md`** — 判断规则：什么阶段该报价/该推产品/该催款/该激活、不同国家客户沟通节奏、沉默多少天算危险
+3. **`system-prompt.md`** — 给 Claude 用的分析框架，融合工厂信息+判断规则+输出格式
+
+### 第三步：CC 直接读数据给状态（核心新流程）
+
+不写自动分析脚本。流程改为：
+
+1. 运行 `extract-all-v2.mjs`（修好后）→ 出全量分类
+2. 如有需要，运行 `deep-scrape-dom.mjs` → 出 P0/P1 对话
+3. **CC 直接读 JSON**，基于对话内容+工厂背景，输出客户状态清单
+
+这样做的优势：
+- CC 不会"变懒"——每次只处理用户挑的客户
+- 分析质量有保证——针对单一客户深度思考
+- 工厂背景已经在 knowledge 里，CC 读一遍就记住
+
+### 第四步：修 daily-smart.mjs 的禁用引用
+
+第 173 行把 `deep-scrape-api.mjs` 替换为 `deep-scrape-dom.mjs`。
+
+## 你需要确认的事
+
+1. 我是否现在就开始？顺序：修系统消息过滤 → 建知识库 → 跑数据 → 给你出第一份客户状态清单
+2. 知识库的工厂信息，是直接从 `D:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt` 提取，还是你希望精简哪些内容？
+3. 第一份状态清单你希望覆盖多少客户？建议先 P0+P1（50 人），深抓对话已有，可以立刻出有质量的状态判断

@@ -1,0 +1,55 @@
+const { chromium } = require('playwright');
+
+(async () => {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const client = await browser.contexts()[0].pages()[0].context().newCDPSession(browser.contexts()[0].pages()[0]);
+
+  const targets = await client.send('Target.getTargets');
+  const ot = targets.targetInfos.find(t => t.url.includes('onetalk') && t.type === 'iframe');
+  if (!ot) { console.log('onettalk iframe not found'); process.exit(1); }
+  const { sessionId } = await client.send('Target.attachToTarget', { targetId: ot.targetId, flatten: false });
+
+  let wsFrames = [];
+  let httpReqs = [];
+
+  client.on('Target.receivedMessageFromTarget', (msg) => {
+    if (msg.sessionId !== sessionId) return;
+    try {
+      const m = JSON.parse(msg.message);
+
+      if (m.method === 'Network.webSocketFrameSent') {
+        wsFrames.push({ dir: 'SENT', data: m.params.response.payloadData.substring(0, 500) });
+      }
+      if (m.method === 'Network.webSocketFrameReceived') {
+        wsFrames.push({ dir: 'RECV', data: m.params.response.payloadData.substring(0, 500) });
+      }
+      if (m.method === 'Network.requestWillBeSent') {
+        const url = m.params.request.url;
+        if (!url.includes('aplus.alibaba.com')) {
+          httpReqs.push({ type: 'REQ', method: m.params.request.method, url: url.substring(0, 200) });
+        }
+      }
+      if (m.method === 'Network.responseReceived') {
+        const url = m.params.response.url;
+        if (!url.includes('aplus.alibaba.com') && !url.includes('sc.ma.im')) {
+          httpReqs.push({ type: 'RESP', status: m.params.response.status, url: url.substring(0, 200) });
+        }
+      }
+    } catch (e) {}
+  });
+
+  await client.send('Target.sendMessageToTarget', {
+    sessionId, message: JSON.stringify({ id: 0, method: 'Network.enable', params: {} })
+  });
+
+  console.log('>>> 现在请在TM页面点击一个联系人！等10秒...');
+  await new Promise(r => setTimeout(r, 10000));
+
+  console.log('\n=== WS Frames (' + wsFrames.length + ') ===');
+  wsFrames.forEach(f => console.log(f.dir + ': ' + f.data));
+
+  console.log('\n=== HTTP (' + httpReqs.length + ') ===');
+  httpReqs.forEach(r => console.log(JSON.stringify(r)));
+
+  process.exit(0);
+})().catch(e => { console.error(e.message); process.exit(1); });
