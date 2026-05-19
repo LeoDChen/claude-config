@@ -1,0 +1,90 @@
+// 提取所有 JSONL 对话文件的元数据
+const fs = require('fs');
+const path = require('path');
+const readline = require('readline');
+
+const PROJECTS_DIR = 'C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace';
+const OUTPUT = 'C:/Users/Administrator/.claude/projects/D--ClaudeWorkspace/_all_sessions_meta.json';
+
+async function extractMeta(jsonlPath) {
+    const fileStream = fs.createReadStream(jsonlPath);
+    const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+
+    let title = '';
+    let firstUserMsg = '';
+    let firstTimestamp = '';
+    let lastTimestamp = '';
+    let sessionId = '';
+    let lineCount = 0;
+
+    for await (const line of rl) {
+        if (!line.trim()) continue;
+        try {
+            const entry = JSON.parse(line);
+            lineCount++;
+
+            if (entry.sessionId && !sessionId) sessionId = entry.sessionId;
+            if (entry.timestamp && !firstTimestamp) firstTimestamp = entry.timestamp;
+            if (entry.timestamp) lastTimestamp = entry.timestamp;
+
+            if (entry.type === 'custom-title' && entry.customTitle) {
+                title = entry.customTitle;
+            }
+            if (!title && entry.type === 'ai-title' && entry.aiTitle) {
+                title = entry.aiTitle;
+            }
+
+            if (!firstUserMsg && entry.type === 'user' && entry.message?.role === 'user') {
+                const text = entry.message.content?.find(c => c.type === 'text');
+                if (text) {
+                    firstUserMsg = text.text.substring(0, 500);
+                }
+            }
+        } catch(e) {}
+    }
+
+    const stats = fs.statSync(jsonlPath);
+
+    return {
+        file: path.basename(jsonlPath),
+        sessionId,
+        title,
+        date: firstTimestamp ? firstTimestamp.substring(0, 10) : '',
+        firstTimestamp,
+        lastTimestamp,
+        firstUserMsg,
+        lineCount,
+        sizeKB: Math.round(stats.size / 1024)
+    };
+}
+
+async function main() {
+    const files = fs.readdirSync(PROJECTS_DIR)
+        .filter(f => f.endsWith('.jsonl') && !f.startsWith('_'))
+        .sort();
+
+    console.log(`Found ${files.length} JSONL files`);
+
+    const results = [];
+    for (const file of files) {
+        const meta = await extractMeta(path.join(PROJECTS_DIR, file));
+        results.push(meta);
+        if (results.length % 20 === 0) console.log(`  ${results.length}/${files.length}...`);
+    }
+
+    // Sort by date
+    results.sort((a, b) => (a.firstTimestamp || '').localeCompare(b.firstTimestamp || ''));
+
+    fs.writeFileSync(OUTPUT, JSON.stringify(results, null, 2), 'utf8');
+    console.log(`Done. ${results.length} sessions written to ${OUTPUT}`);
+
+    // Summary stats
+    const withTitle = results.filter(r => r.title).length;
+    const withMsg = results.filter(r => r.firstUserMsg).length;
+    const dates = [...new Set(results.map(r => r.date))].filter(Boolean).sort();
+    console.log(`With title: ${withTitle}/${results.length}`);
+    console.log(`With message: ${withMsg}/${results.length}`);
+    console.log(`Date range: ${dates[0]} to ${dates[dates.length-1]}`);
+}
+
+main().catch(console.error);
