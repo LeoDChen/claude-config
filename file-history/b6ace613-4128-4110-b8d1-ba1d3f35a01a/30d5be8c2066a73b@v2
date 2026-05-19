@@ -1,0 +1,148 @@
+/**
+ * 抓取单个客户的聊天记录
+ * 用法: node scripts/fetch_one_chat.js "Sek Sopha"
+ */
+const { chromium } = require('playwright');
+
+async function main() {
+  const targetName = process.argv[2];
+  if (!targetName) { console.log('Usage: node scripts/fetch_one_chat.js "Customer Name"'); process.exit(1); }
+
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const page = await browser.contexts()[0].newPage();
+  console.log('Opening onetalk PWA...');
+  await page.goto('https://onetalk.alibaba.com/message/weblitePWA.htm?relevanceAccountId=285526143&from=xiaoman', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 6000));
+
+  // 1. Get customer metadata
+  const meta = await page.evaluate((name) => {
+    const d = window.__conversationListFullData__ || [];
+    const c = d.find(c => c.name === name);
+    if (!c) return { err: 'Customer not found: ' + name };
+    return {
+      name: c.name, cid: c.cid, country: c.country,
+      companyName: c.companyName, level: c.level,
+      serviceType: c.serviceType, unreadCount: c.unreadCount,
+      lastContactTime: c.lastContactTime ? new Date(c.lastContactTime).toISOString() : null,
+      latestMessage: c.latestMessage?.content,
+    };
+  }, targetName);
+
+  if (meta.err) { console.log(meta.err); process.exit(1); }
+  console.log('Customer:', meta.name);
+  console.log('Country:', meta.country);
+  console.log('CID:', meta.cid);
+  console.log('Last contact:', meta.lastContactTime);
+
+  // 2. Install LWP interceptor
+  await page.evaluate(() => {
+    const _send = WebSocket.prototype.send;
+    const _ae = WebSocket.prototype.addEventListener;
+    window.__lwpPending = {};
+    window.__lwpSeq = 0;
+    WebSocket.prototype.send = function(data) {
+      if (!window.__lwpWs && this.readyState === 1) {
+        window.__lwpWs = this;
+        _ae.call(this, 'message', function(event) {
+          try {
+            const raw = typeof event.data === 'string' ? event.data : '';
+            if (raw.indexOf('"code"') < 0) return;
+            const parsed = JSON.parse(raw);
+            const mid = parsed.headers?.mid;
+            if (mid && window.__lwpPending[mid]) {
+              const p = window.__lwpPending[mid];
+              delete window.__lwpPending[mid];
+              p.resolve(parsed);
+            }
+          } catch(e) {}
+        });
+      }
+      return _send.call(this, data);
+    };
+    window.__lwpRequest = function(lwpPath, body) {
+      return new Promise(function(resolve, reject) {
+        const ws = window.__lwpWs;
+        if (!ws || ws.readyState !== 1) { reject(new Error('WS not ready')); return; }
+        const mid = Date.now() + ' ' + (++window.__lwpSeq);
+        window.__lwpPending[mid] = { resolve, reject };
+        ws.send(JSON.stringify({ lwp: lwpPath, headers: { mid }, body }));
+        setTimeout(() => {
+          if (window.__lwpPending[mid]) { delete window.__lwpPending[mid]; reject(new Error('timeout')); }
+        }, 30000);
+      });
+    };
+    return 'ok';
+  });
+
+  // Also click the customer in the list to trigger conversation load + WS
+  await page.evaluate((name) => {
+    const all = document.querySelectorAll('*');
+    for (const el of all) {
+      if (el.textContent === name && el.children.length === 0) {
+        el.click();
+        return 'clicked';
+      }
+    }
+    return 'not found in DOM';
+  }, targetName);
+  console.log('Clicked customer in list');
+
+  // Wait for page to establish WS (triggers on first data fetch)
+  for (let i = 0; i < 15; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    const wsUrl = await page.evaluate(() => window.__lwpWs?.url || null);
+    if (wsUrl) { console.log('LWP WS captured after ' + ((i+1)*2) + 's:', wsUrl.slice(0,80)); break; }
+    if (i % 3 === 2) console.log('  Still waiting for WS... (' + ((i+1)*2) + 's)');
+  }
+  const wsUrl = await page.evaluate(() => window.__lwpWs?.url || 'not ready');
+  console.log('LWP WS:', wsUrl);
+
+  // 3. Fetch messages
+  const cid = meta.cid;
+  console.log('Fetching messages...');
+  const allMessages = [];
+  let cursor = 9007199254740991;
+
+  for (let p = 0; p < 10; p++) {
+    const raw = await page.evaluate(async (args) => {
+      try {
+        const result = await window.__lwpRequest('/r/MessageManager/listUserMessages',
+          [args.cid, false, args.cursor, 50, false]);
+        return JSON.stringify(result);
+      } catch(e) { return JSON.stringify({ __error: e.message }); }
+    }, { cid, cursor });
+
+    await new Promise(r => setTimeout(r, 1500));
+    const response = JSON.parse(raw);
+    if (response.__error || response.code !== 200) {
+      console.log('  Stop:', response.__error || 'code=' + response.code);
+      break;
+    }
+    const body = response.body;
+    if (!body?.userMessageModels?.length) break;
+
+    allMessages.push(...body.userMessageModels);
+    console.log('  Page ' + (p+1) + ': +' + body.userMessageModels.length + ' (total: ' + allMessages.length + ')');
+
+    if (body.userMessageModels.length < 50 || !body.nextCursor) break;
+    cursor = body.nextCursor;
+  }
+
+  // 4. Print formatted
+  console.log('');
+  console.log('='.repeat(60));
+  console.log('Chat History: ' + meta.name + ' (' + allMessages.length + ' msgs)');
+  console.log('='.repeat(60));
+
+  for (const msg of allMessages) {
+    const isMe = msg.message?.sender?.uid === '2500000853693@icbu';
+    const sender = isMe ? '我' : '客';
+    const time = new Date(msg.message?.createAt || 0).toISOString().slice(0, 19).replace('T', ' ');
+    const content = msg.message?.content?.text?.content || '';
+    const msgType = msg.message?.content?.type;
+    if (msgType && msgType !== 1) console.log('  [' + time + '] ' + sender + ': [' + msgType + ']');
+    if (content) console.log('  [' + time + '] ' + sender + ': ' + content);
+  }
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

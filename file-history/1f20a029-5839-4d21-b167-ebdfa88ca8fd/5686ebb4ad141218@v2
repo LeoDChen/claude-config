@@ -1,0 +1,305 @@
+/** 从原版 dashboard HTML 提取数据，生成 Pico CSS + ECharts 升级版 */
+const fs = require("fs");
+const path = require("path");
+
+const SRC = path.join(__dirname, "dashboard_2026-05-19.html");
+const DST = path.join(__dirname, "dashboard_2026-05-19_v2.html");
+const html = fs.readFileSync(SRC, "utf8");
+
+// 提取 KPI 数字
+const kpiMatch = html.match(/<div class="num">(\d+)<\/div>/g);
+const kpiNums = kpiMatch ? kpiMatch.map(m => m.match(/\d+/)[0]) : [];
+const [total, active3d, silent90, ballOurs, needConfirm, needAction] = kpiNums;
+
+// 提取 MATRIX JSON
+const matrixMatch = html.match(/window\.MATRIX\s*=\s*(\{.*?\});\s*(?:window\.KPI_DATA|function)/s);
+if (!matrixMatch) { console.error("MATRIX not found"); process.exit(1); }
+const matrix = JSON.parse(matrixMatch[1]);
+
+// 提取 KPI_DATA JSON
+const kpiDataMatch = html.match(/window\.KPI_DATA\s*=\s*(\{.*?\});\s*function/s);
+let kpiData = {};
+if (kpiDataMatch) {
+  try { kpiData = JSON.parse(kpiDataMatch[1]); } catch(e) {}
+}
+
+const stages = ["需求探索","报价已发","谈判中","待付款","待发货","已发货/在途","已签收","售后","待返单"];
+const grades = ["S","A","B","C","D"];
+
+// 算矩阵汇总
+const matrixCounts = {};
+for (const stage of stages) {
+  matrixCounts[stage] = {};
+  for (const g of grades) {
+    matrixCounts[stage][g] = (matrix[stage] && matrix[stage][g]) ? matrix[stage][g].length : 0;
+  }
+}
+
+// 热力图数据
+const heatmapData = [];
+for (let si = 0; si < stages.length; si++) {
+  for (let gi = 0; gi < grades.length; gi++) {
+    const cnt = matrixCounts[stages[si]][grades[gi]];
+    if (cnt > 0) heatmapData.push([gi, si, cnt]);
+  }
+}
+
+const maxHeat = Math.max(1, ...Object.values(matrixCounts).flatMap(r => Object.values(r)));
+
+// 构建矩阵表格行
+const matrixRows = stages.map(stage => {
+  const cells = grades.map(g => {
+    const cnt = matrixCounts[stage][g];
+    if (cnt === 0) return `<td class="empty">0</td>`;
+    const opacity = Math.min(cnt * 0.03 + 0.08, 0.55).toFixed(3);
+    return `<td class="cell" style="background:rgba(255,159,10,${opacity});" onclick="openMatrixModal('${stage}','${g}')">${cnt}</td>`;
+  }).join("");
+  return `<tr><th class="row-hd">${stage}</th>${cells}</tr>`;
+}).join("\n");
+
+const stagesJSON = JSON.stringify(stages);
+const gradesJSON = JSON.stringify(grades);
+const heatmapJSON = JSON.stringify(heatmapData);
+const barDataJSON = JSON.stringify(stages.map(s => grades.reduce((sum, g) => sum + matrixCounts[s][g], 0)));
+
+// 生成颜色渐变条数据...
+
+const output = `<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户管道看板 — 2026-05-19</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"><\/script>
+<style>
+  :root {
+    --pico-font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --pico-border-radius: 8px;
+  }
+  body { padding: 24px; max-width: 1520px; margin: 0 auto; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .header h1 { margin-bottom: 2px; font-size: 1.35rem; }
+  .header .sub { color: var(--pico-muted-color); font-size: 0.82rem; }
+  .header .time-badge { font-size: 0.75rem; color: var(--pico-muted-color); background: var(--pico-card-background-color); border: 1px solid var(--pico-card-border-color); padding: 4px 12px; border-radius: 20px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 18px; }
+  .kpi-card { text-align: center; padding: 16px 10px; border-radius: 10px; cursor: pointer; transition: transform .15s, box-shadow .15s; color: #fff; }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+  .kpi-card .num { font-size: 2rem; font-weight: 800; line-height: 1.2; }
+  .kpi-card .lbl { font-size: 0.75rem; opacity: 0.85; margin-top: 2px; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  .chart-box { background: var(--pico-card-background-color); border: 1px solid var(--pico-card-border-color); border-radius: 10px; padding: 12px; }
+  .chart-box h3 { font-size: 0.9rem; margin-bottom: 4px; }
+
+  .matrix-card { background: var(--pico-card-background-color); border: 1px solid var(--pico-card-border-color); border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+  .matrix-card h3 { padding: 12px 16px; margin: 0; font-size: 0.92rem; border-bottom: 1px solid var(--pico-card-border-color); }
+  .matrix-card h3 span { font-weight: 400; font-size: 0.78rem; color: var(--pico-muted-color); }
+  .matrix-wrap { overflow-x: auto; padding: 8px 12px 14px; }
+  .matrix-tbl { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .matrix-tbl th { padding: 7px 8px; text-align: center; font-weight: 600; background: var(--pico-card-sectioning-background-color); border-bottom: 2px solid var(--pico-card-border-color); }
+  .matrix-tbl th.row-hd { text-align: right; width: 90px; }
+  .matrix-tbl td { text-align: center; padding: 8px 10px; border: 1px solid var(--pico-card-border-color); }
+  .matrix-tbl td.cell { cursor: pointer; font-weight: 700; transition: background .15s; }
+  .matrix-tbl td.cell:hover { filter: brightness(0.92); }
+  .matrix-tbl td.empty { color: var(--pico-muted-color); }
+
+  .pools { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 999; justify-content: center; align-items: center; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: var(--pico-card-background-color); border-radius: 12px; width: 800px; max-width: 94vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .modal-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--pico-card-border-color); position: sticky; top: 0; background: var(--pico-card-background-color); z-index: 2; border-radius: 12px 12px 0 0; }
+  .modal-hd h2 { margin: 0; font-size: 1rem; }
+  .modal-close { cursor: pointer; font-size: 1.4rem; color: var(--pico-muted-color); border: none; background: none; padding: 4px 8px; border-radius: 6px; }
+  .modal-close:hover { background: var(--pico-card-sectioning-background-color); }
+  .modal-body { padding: 14px 20px; }
+  .modal-body table { width: 100%; font-size: 0.82rem; }
+  .modal-body th { padding: 6px 8px; text-align: left; font-weight: 600; border-bottom: 2px solid var(--pico-card-border-color); }
+  .modal-body td { padding: 6px 8px; border-bottom: 1px solid var(--pico-card-border-color); vertical-align: top; }
+
+  .grade-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-right: 4px; }
+  .grade-S { background: #ff9f0a; color: #1d1d1f; }
+  .grade-A { background: #0a84ff; color: #fff; }
+  .grade-B { background: #636366; color: #fff; }
+  .grade-C { background: #aeaeb2; color: #fff; }
+  .grade-D { background: #48484a; color: #fff; }
+
+  .footer { text-align: center; padding: 16px; font-size: 0.75rem; color: var(--pico-muted-color); border-top: 1px solid var(--pico-card-border-color); margin-top: 8px; }
+
+  @media (max-width: 768px) {
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .pools { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 OKKI 客户管道看板</h1>
+    <div class="sub">AI 判定结果 · 数据源: s3_ai_judgments.json · 全覆盖 ${total} 客户</div>
+  </div>
+  <div class="time-badge">生成: 2026-05-19 14:24</div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card" style="background: linear-gradient(135deg, #1a5276, #1f6f8b);" onclick="openKpiModal('总客户')">
+    <div class="num">${total}</div><div class="lbl">总客户</div>
+  </div>
+  <div class="kpi-card" style="background: linear-gradient(135deg, #27ae60, #2ecc71);" onclick="openKpiModal('3天活跃')">
+    <div class="num">${active3d}</div><div class="lbl">3天活跃</div>
+  </div>
+  <div class="kpi-card" style="background: linear-gradient(135deg, #c0392b, #e74c3c);" onclick="openKpiModal('超90天无互动')">
+    <div class="num">${silent90}</div><div class="lbl">超90天无互动</div>
+  </div>
+  <div class="kpi-card" style="background: linear-gradient(135deg, #e67e22, #f39c12);" onclick="openKpiModal('球在我方')">
+    <div class="num">${ballOurs}</div><div class="lbl">球在我方</div>
+  </div>
+  <div class="kpi-card" style="background: linear-gradient(135deg, #8e44ad, #9b59b6);" onclick="openKpiModal('需确认')">
+    <div class="num">${needConfirm}</div><div class="lbl">需确认</div>
+  </div>
+  <div class="kpi-card" style="background: linear-gradient(135deg, #2c3e50, #34495e);" onclick="openKpiModal('需行动')">
+    <div class="num">${needAction}</div><div class="lbl">需行动</div>
+  </div>
+</div>
+
+<div class="charts-row">
+  <div class="chart-box">
+    <h3>📈 各阶段客户分布</h3>
+    <div id="chart-stage" style="height: 280px;"></div>
+  </div>
+  <div class="chart-box">
+    <h3>🔥 阶段 × 等级 热力图</h3>
+    <div id="chart-heatmap" style="height: 280px;"></div>
+  </div>
+</div>
+
+<div class="matrix-card">
+  <h3>客户双轴矩阵 <span>（8阶段活跃管线 × 质量等级）— 点击数字弹出客户名单</span></h3>
+  <div class="matrix-wrap">
+    <table class="matrix-tbl">
+      <tr><th class="row-hd">阶段 \\ 等级</th>${grades.map(g => `<th>${g}</th>`).join("")}</tr>
+      ${matrixRows}
+    </table>
+    <div style="font-size:0.72rem; color:var(--pico-muted-color); margin-top:6px;">颜色越深 = 该格客户越多 | 点击数字弹出详情（AI判定结果 + 行动方向）</div>
+  </div>
+</div>
+
+<div class="pools">
+  <article>
+    <h3>⏸ 搁置 — 346 人</h3>
+    <p style="font-size:0.8rem; color:var(--pico-muted-color);">从活跃阶段掉出的沉默客户，不出现在上方矩阵</p>
+    <details><summary>展开查看详情</summary>
+    <p style="font-size:0.78rem; color:var(--pico-muted-color);">346 位客户处于搁置状态（详情数据结构与终态池一致，点击原版看板查看完整列表）</p>
+    </details>
+    <small>💡 回访策略：直接跟进，"上次那个案子还在推进吗？"</small>
+  </article>
+  <article>
+    <h3>❌ 未成交 — 8 人</h3>
+    <p style="font-size:0.8rem; color:var(--pico-muted-color);">明确拒绝或订单已取消</p>
+    <details><summary>展开查看详情</summary>
+    <p style="font-size:0.78rem; color:var(--pico-muted-color);">8 位客户未成交（详情数据结构与原版一致，点击原版看板查看完整列表）</p>
+    </details>
+    <small>💡 回访策略：换产品/新切入点/等认证更新后重新激活</small>
+  </article>
+</div>
+
+<footer class="footer">
+  OKKI 客户管道看板 · Powered by Claude Code · Pico CSS + ECharts 升级版
+</footer>
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h2 id="modal-title"></h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+var MATRIX = ${JSON.stringify(matrix)};
+var KPI_DATA = ${JSON.stringify(kpiData)};
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function gradeBadge(g) {
+  return '<span class="grade-badge grade-'+g+'">'+esc(g)+'</span>';
+}
+
+function openMatrixModal(stage, grade) {
+  var data = (MATRIX[stage] && MATRIX[stage][grade]) ? MATRIX[stage][grade] : [];
+  document.getElementById("modal-title").innerHTML = esc(stage) + ' × ' + esc(grade) + '级 — ' + data.length + '人';
+  var rows = '';
+  for (var i=0; i<data.length; i++) {
+    var c = data[i];
+    var confIcon = c.cf === 'uncertain' ? ' ⚠️' : '';
+    var reasonStr = c.rs ? '<br><small style="color:var(--pico-muted-color);">📋 '+esc(c.rs)+'</small>' : '';
+    rows += '<tr><td style="white-space:nowrap;">'+gradeBadge(c.g)+'<strong>'+esc(c.n)+confIcon+'</strong></td><td style="text-align:center;white-space:nowrap;">'+esc(c.c)+' · '+c.d+'d</td><td>'+esc(c.st)+reasonStr+'</td><td><strong>'+esc(c.ac)+'</strong></td></tr>';
+  }
+  document.getElementById("modal-body").innerHTML =
+    '<table><tr><th style="width:140px;">客户</th><th style="text-align:center;width:100px;">国家 · 静默</th><th>阶段 / 依据</th><th>行动方向</th></tr>'+rows+'</table>'+
+    '<p style="margin-top:8px;font-size:0.72rem;color:var(--pico-muted-color);">⚠️=AI不确定 | ESC/点击遮罩关闭</p>';
+  document.getElementById("modal-overlay").classList.add("show");
+}
+
+function openKpiModal(key) {
+  var data = KPI_DATA[key] || [];
+  document.getElementById("modal-title").innerHTML = esc(key) + ' — ' + data.length + '人';
+  var rows = '';
+  for (var i=0; i<data.length; i++) {
+    var c = data[i];
+    var confIcon = c.cf === 'uncertain' ? ' ⚠️' : '';
+    rows += '<tr><td>'+gradeBadge(c.g)+'<strong>'+esc(c.n)+confIcon+'</strong></td><td style="text-align:center;">'+esc(c.c)+' · '+(c.d===999?'?':c.d+'d')+'</td><td>'+esc(c.st)+'</td><td><strong>'+esc(c.ac)+'</strong></td></tr>';
+  }
+  document.getElementById("modal-body").innerHTML =
+    '<table><tr><th style="width:140px;">客户</th><th style="text-align:center;width:100px;">国家 · 静默</th><th>阶段</th><th>行动方向</th></tr>'+rows+'</table>'+
+    '<p style="margin-top:8px;font-size:0.72rem;color:var(--pico-muted-color);">ESC/点击遮罩关闭</p>';
+  document.getElementById("modal-overlay").classList.add("show");
+}
+
+function closeModal() { document.getElementById("modal-overlay").classList.remove("show"); }
+document.addEventListener("keydown", function(e) { if (e.key === "Escape") closeModal(); });
+
+// ---- ECharts ----
+(function() {
+  // 阶段分布柱状图
+  var stageChart = echarts.init(document.getElementById("chart-stage"));
+  stageChart.setOption({
+    tooltip: { trigger: "axis" },
+    grid: { left: 100, right: 30, top: 10, bottom: 30 },
+    xAxis: { type: "value" },
+    yAxis: { type: "category", data: ${stagesJSON}, axisLabel: { fontSize: 11 } },
+    series: [{
+      type: "bar",
+      data: ${barDataJSON},
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:"#1a5276"},{offset:1,color:"#2980b9"}]) },
+      label: { show: true, position: "right", fontSize: 11 }
+    }]
+  });
+
+  // 热力图
+  var heatChart = echarts.init(document.getElementById("chart-heatmap"));
+  heatChart.setOption({
+    tooltip: { formatter: function(p) { return ${gradesJSON}[p.value[0]] + "级 × " + ${stagesJSON}[p.value[1]] + "<br/>" + p.value[2] + "人"; } },
+    grid: { left: 25, right: 20, top: 25, bottom: 60 },
+    xAxis: { type: "category", data: ${gradesJSON}, position: "top", axisLabel: { fontSize: 11 } },
+    yAxis: { type: "category", data: ${stagesJSON}, axisLabel: { fontSize: 11 } },
+    visualMap: { min: 0, max: ${maxHeat}, calculable: false, orient: "horizontal", left: "center", bottom: 5, inRange: { color: ["#f5f5f7","#ffe0b2","#ff9800","#e65100"] } },
+    series: [{ type: "heatmap", data: ${heatmapJSON}, label: { show: true, fontSize: 10 }, emphasis: { itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,.3)" } } }]
+  });
+
+  window.addEventListener("resize", function() { stageChart.resize(); heatChart.resize(); });
+})();
+<\/script>
+
+</body>
+</html>`;
+
+fs.writeFileSync(DST, output, "utf8");
+const sizeKB = (fs.statSync(DST).size / 1024).toFixed(1);
+console.log(`OK -> dashboard_2026-05-19_v2.html (${sizeKB} KB)`);
+console.log(`KPI: total=${total}, 3d=${active3d}, >90d=${silent90}, ball=${ballOurs}, confirm=${needConfirm}, action=${needAction}`);

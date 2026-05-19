@@ -1,0 +1,46 @@
+# OKKI 全流程执行计划
+
+## 背景
+用户要求启动完整 OKKI 工作流：同步最新数据 → 扫描状态 → 展示看板 → 深度分析 Sek Sopha。
+
+## 执行步骤
+
+### Step 1：完成同步（进行中）
+- `sync_okki.js` 当前卡在登录页，等用户登录后继续
+- 同步完成后生成 `tm_conversations_master.json` 和 `tm_conversations_latest.json`
+
+### Step 2：状态扫描
+```bash
+node scripts/scan_updates.js
+```
+- 检查所有状态卡 vs 最新聊天时间
+- 报告：X 个 NOW / Y 个 SOON / Z 张卡过期
+
+### Step 3：生成看板
+```bash
+node scripts/gen_dashboard.js
+```
+- 生成矩阵看板 HTML → 浏览器打开
+- 展示 NOW 中最紧急的 3-5 个客户
+
+### Step 4：定位 Sek Sopha
+- 在 briefs 目录搜索 Sek Sopha 的状态卡
+- 如无状态卡，从 master.json 提取聊天数据，用 `chat_retrieve.js` 拉取聊天记录
+- 运行深度分析三阶段：
+  - 阶段 1：读状态卡 + 聊天记录 + 工厂档案
+  - 阶段 2：输出核查清单，等待用户确认
+  - 阶段 3：用户确认后产出回复话术 + 深度档案
+
+### Step 5：完成后报告
+```
+/okki 执行完成
+├── 同步：+X 新消息
+├── 扫描：NOW:X SOON:Y COLD:Z
+├── 处理：Sek Sopha 深度分析完成
+└── 看板：output/dashboard.html 已更新
+```
+
+## 关键文件
+- `d:\ClaudeWorkspace\08_客户跟进\Okki\data\` — 所有数据文件
+- `d:\ClaudeWorkspace\08_客户跟进\Okki\scripts\` — 辅助脚本
+- `d:\ClaudeWorkspace\06_知识库\小星星工厂全息背景档案_V10.txt` — 工厂档案（深度分析时读取）

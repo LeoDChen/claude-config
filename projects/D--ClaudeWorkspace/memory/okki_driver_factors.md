@@ -66,6 +66,8 @@ metadata:
 ## 施工状态
 
 - 脚本链路（chat_retrieve/scan_updates/validate_output/gen_dashboard）已完成
-- 38张草稿状态卡已生成（阶段字段~75%错误率，需AI修正）
+- 38张草稿状态卡已生成 → 已完成阶段修正（2026-05-19，19份修正，修正率50%）
+- factor_baselines.json 已初始化（2026-05-19，40个客户，含修正后阶段+基线日期+meta）
 - SKILL.md已更新为新/okki流程
-- 驱动因子模型仅完成brainstorming讨论，未写入方案文件和代码
+- 驱动因子模型已完成brainstorming + 因子终点×阶段流转阈值对齐（2026-05-19）
+- SOON因子自动化设计V4定稿，因子节奏终点汇总表已按子类型分层

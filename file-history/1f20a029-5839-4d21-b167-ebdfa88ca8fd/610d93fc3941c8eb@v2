@@ -1,0 +1,590 @@
+/** 基于 dashboard.html 设计升级：暗色模式 + ECharts 总览 + 模态框增强 + 排版优化 */
+const fs = require("fs");
+const path = require("path");
+
+const SRC = path.join(__dirname, "dashboard.html");
+const DST = path.join(__dirname, "dashboard_v3.html");
+const srcHtml = fs.readFileSync(SRC, "utf8");
+
+// 提取 CARDS 数据
+const cardsMatch = srcHtml.match(/var CARDS\s*=\s*(\[[\s\S]*?\]);/);
+if (!cardsMatch) { console.error("CARDS not found"); process.exit(1); }
+const CARDS = JSON.parse(cardsMatch[1]);
+console.log(`Loaded ${CARDS.length} customer cards`);
+
+// 统计
+const urgencyCounts = { red: 0, yellow: 0, grey: 0, frozen: 0 };
+const stageCounts = {};
+const stageUrgency = {}; // stage -> {red, yellow, grey}
+const stages = ["需求探索","报价已发","谈判中","待付款","待发货","在途","已签收","售后/返单"];
+stages.forEach(s => { stageCounts[s] = 0; stageUrgency[s] = {red:0,yellow:0,grey:0}; });
+
+CARDS.forEach(c => {
+  const u = c.urgencyKey || "grey";
+  urgencyCounts[u] = (urgencyCounts[u] || 0) + 1;
+
+  // map stage to short form
+  let stage = c.stage || "";
+  if (stage === "已发货/在途") stage = "在途";
+  if (!stages.includes(stage)) stage = "需求探索";
+  stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+  if (stageUrgency[stage]) {
+    stageUrgency[stage][u] = (stageUrgency[stage][u] || 0) + 1;
+  }
+});
+
+// 构建矩阵：stage -> urgency -> [chips html]
+const matrixHTML = {};
+stages.forEach(s => { matrixHTML[s] = { red: [], yellow: [], grey: [] }; });
+
+CARDS.forEach(c => {
+  let stage = c.stage || "";
+  if (stage === "已发货/在途") stage = "在途";
+  if (!stages.includes(stage)) stage = "需求探索";
+
+  const u = c.urgencyKey || "grey";
+  if (u === "frozen") return; // frozen handled separately
+
+  const tierBadge = c.tier === "S" ? '<span class="chip-tier-s">S</span>' :
+                    c.tier === "A" ? '<span class="chip-tier-a">A</span>' : "";
+  const statusBadge = c.statusBadge ? `<span class="chip-badge">${escHTML(c.statusBadge)}</span>` : "";
+  const name = c.name || "?";
+
+  const chipClass = u === "red" ? "chip-red" : u === "yellow" ? "chip-yellow" : "chip-grey";
+  const dotClass = u === "red" ? "chip-dot-red" : u === "yellow" ? "chip-dot-yellow" : "chip-dot-grey";
+
+  const chip = `<span class="customer-chip ${chipClass}" onclick="openModal('${c.cid}')"><span class="chip-dot ${dotClass}"></span>${escHTML(name)}${tierBadge}${statusBadge}</span>`;
+  matrixHTML[stage][u].push(chip);
+});
+
+function escHTML(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// 构建矩阵grid
+const matrixGridHTML = stages.map((stage, si) => {
+  const redChips = matrixHTML[stage].red.join("");
+  const yellowChips = matrixHTML[stage].yellow.join("");
+  const greyChips = matrixHTML[stage].grey.join("");
+  return `<div class="cell">${redChips + yellowChips + greyChips}</div>`;
+}).join("\n");
+
+// 构建 frozen chips
+const frozenClients = CARDS.filter(c => (c.urgencyKey || "grey") === "frozen");
+const frozenChipsHTML = frozenClients.map(c => {
+  const name = c.name || "?";
+  return `<span class="customer-chip chip-grey frozen-chip">${escHTML(name)}</span>`;
+}).join("\n");
+
+// ECharts 数据
+const barData = stages.map(s => stageCounts[s] || 0);
+const heatmapData = [];
+stages.forEach((s, si) => {
+  ["red","yellow","grey"].forEach((u, ui) => {
+    const cnt = stageUrgency[s] ? (stageUrgency[s][u] || 0) : 0;
+    if (cnt > 0) heatmapData.push([ui, si, cnt]);
+  });
+});
+
+const CARDS_JSON = JSON.stringify(CARDS);
+
+const output = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户状态看板 — 2026-05-19</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"><\/script>
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --surface: #fff;
+    --surface-hover: #fafafa;
+    --border: #eee;
+    --text: #333;
+    --text-secondary: #999;
+    --text-tertiary: #bbb;
+    --shadow: 0 2px 8px rgba(0,0,0,.04);
+    --overlay: rgba(0,0,0,.4);
+    --chip-grey-bg: #f5f5f5;
+    --chip-grey-border: #eee;
+    --chip-grey-text: #888;
+    --modal-shadow: 0 8px 48px rgba(0,0,0,.2);
+    --grid-bg: #e0e0e0;
+    --cell-bg: #fff;
+    --header-bg: #fafafa;
+    --header-text: #666;
+    --fm-bg: #fafafa;
+    --fm-label: #999;
+    --chat-bg: #fafafa;
+    --chat-time: #bbb;
+    --key-num-bg: #f5f5f5;
+    --info-note-bg: #fff9c4;
+    --info-note-text: #666;
+    --btn-border: #ddd;
+    --btn-hover: #f5f5f5;
+    --modal-border: #f0f0f0;
+    --dot-grey: #bbb;
+  }
+  [data-theme="dark"] {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --surface-hover: #1a2744;
+    --border: #2a2a4a;
+    --text: #e0e0e0;
+    --text-secondary: #888;
+    --text-tertiary: #666;
+    --shadow: 0 2px 8px rgba(0,0,0,.3);
+    --overlay: rgba(0,0,0,.7);
+    --chip-grey-bg: #1e2d44;
+    --chip-grey-border: #2a3a54;
+    --chip-grey-text: #999;
+    --modal-shadow: 0 8px 48px rgba(0,0,0,.5);
+    --grid-bg: #0f0f23;
+    --cell-bg: #16213e;
+    --header-bg: #0f1a2e;
+    --header-text: #999;
+    --fm-bg: #0f1a2e;
+    --fm-label: #888;
+    --chat-bg: #0f1a2e;
+    --chat-time: #666;
+    --key-num-bg: #0f1a2e;
+    --info-note-bg: #2a2a0a;
+    --info-note-text: #ccc;
+    --btn-border: #333;
+    --btn-hover: #1a2744;
+    --modal-border: #2a2a4a;
+    --dot-grey: #666;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg); color: var(--text); padding: 20px;
+    transition: background .3s, color .3s;
+  }
+
+  /* Header */
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
+  }
+  h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.2px; }
+  .subtitle { color: var(--text-secondary); font-size: 0.75rem; margin-top: 2px; }
+  .theme-toggle {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary);
+    padding: 5px 12px; border-radius: 16px; font-size: 0.75rem; cursor: pointer;
+    transition: background .2s;
+  }
+  .theme-toggle:hover { background: var(--surface-hover); }
+
+  /* Overview charts */
+  .overview-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .overview-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .overview-card h3 { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+
+  /* Summary bar */
+  .summary-bar {
+    display: flex; gap: 14px; margin-bottom: 14px; font-size: 0.8rem; align-items: center; flex-wrap: wrap;
+  }
+  .summary-bar span {
+    padding: 5px 14px; border-radius: 16px; background: var(--surface);
+    border: 1px solid var(--border); font-weight: 500;
+  }
+  .summary-bar strong { font-size: 1.15rem; margin-right: 2px; }
+
+  /* Matrix */
+  .matrix-wrap { overflow-x: auto; margin-bottom: 14px; }
+  .matrix {
+    display: grid; gap: 1px; background: var(--grid-bg);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: var(--shadow); min-width: 960px;
+  }
+  .cell {
+    background: var(--cell-bg); padding: 8px 10px; min-height: 50px;
+    display: flex; flex-wrap: wrap; gap: 4px; align-content: start; align-items: start;
+  }
+  .cell-header {
+    background: var(--header-bg); padding: 8px 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 0.73rem; color: var(--header-text); text-align: center;
+  }
+  .row-label {
+    background: var(--header-bg); padding: 8px 10px;
+    display: flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Chips */
+  .customer-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 13px; font-size: 0.71rem;
+    cursor: pointer; border: 1px solid transparent; white-space: nowrap;
+    transition: all .12s; user-select: none;
+  }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .chip-red { background: #ffebee; border-color: #ffcdd2; color: #b71c1c; }
+  .chip-yellow { background: #fff8e1; border-color: #ffecb3; color: #e65100; }
+  .chip-grey { background: var(--chip-grey-bg); border-color: var(--chip-grey-border); color: var(--chip-grey-text); }
+  .chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: #d32f2f; }
+  .chip-dot-yellow { background: #f57c00; }
+  .chip-dot-grey { background: var(--dot-grey); }
+  .chip-badge { font-size: 0.65rem; padding: 1px 5px; border-radius: 6px; background: rgba(0,0,0,.06); }
+  .chip-tier-s { background: #ffd700; color: #5d4037; font-size: 0.58rem; padding: 0 3px; border-radius: 4px; margin-left: 1px; }
+  .chip-tier-a { background: #c8e6c9; color: #2e7d32; font-size: 0.58rem; padding: 0 3px; border-radius: 4px; margin-left: 1px; }
+
+  /* Frozen */
+  .frozen-row {
+    background: var(--header-bg); padding: 8px 14px;
+    font-size: 0.72rem; color: var(--text-secondary);
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+  }
+  .frozen-chip { cursor: default; opacity: 0.5; }
+  .frozen-chip:hover { transform: none; box-shadow: none; }
+
+  /* Legend */
+  .legend { font-size: 0.73rem; color: var(--text-secondary); margin-bottom: 14px; display: flex; gap: 18px; flex-wrap: wrap; }
+
+  /* Modal */
+  .overlay { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 1000; justify-content: center; align-items: center; }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 14px;
+    box-shadow: var(--modal-shadow); width: 720px; max-width: 94vw; max-height: 85vh;
+    display: flex; flex-direction: column; overflow: hidden;
+    animation: modalIn .18s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-header {
+    padding: 16px 22px; border-bottom: 1px solid var(--modal-border);
+    display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+  }
+  .modal-header h2 { font-size: 1.05rem; font-weight: 700; }
+  .modal-close {
+    background: none; border: none; font-size: 1.3rem; cursor: pointer;
+    color: var(--text-secondary); padding: 6px 10px; border-radius: 6px; line-height: 1;
+  }
+  .modal-close:hover { background: var(--btn-hover); }
+  .modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; font-size: 0.85rem; line-height: 1.6; }
+  .modal-footer {
+    padding: 12px 22px; border-top: 1px solid var(--modal-border);
+    display: flex; gap: 8px; flex-shrink: 0;
+  }
+
+  .fm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .fm-item { background: var(--fm-bg); border-radius: 8px; padding: 10px 14px; }
+  .fm-label { color: var(--fm-label); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.4px; }
+  .fm-value { font-weight: 600; font-size: 0.92rem; margin-top: 2px; }
+
+  .section { margin-bottom: 14px; }
+  .section-title {
+    font-weight: 600; font-size: 0.76rem; color: var(--text-secondary);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 5px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .driver-list { display: flex; flex-direction: column; gap: 6px; }
+  .driver-item {
+    display: flex; gap: 10px; padding: 10px 14px; border-radius: 8px;
+    font-size: 0.88rem; align-items: flex-start;
+  }
+  .driver-item-red { background: #fff5f5; border: 1px solid #ffcdd2; }
+  .driver-item-yellow { background: #fffdf5; border: 1px solid #ffecb3; }
+  .driver-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .chat-snippet { background: var(--chat-bg); border-radius: 8px; padding: 10px 14px; font-size: 0.84rem; }
+  .chat-line { padding: 3px 0; display: flex; gap: 10px; align-items: baseline; }
+  .chat-who { font-weight: 600; flex-shrink: 0; min-width: 20px; }
+  .chat-who-me { color: #1976d2; }
+  .chat-who-cust { color: #d32f2f; }
+  .chat-time { color: var(--chat-time); font-size: 0.76rem; flex-shrink: 0; min-width: 44px; }
+
+  .key-num { background: var(--key-num-bg); border-radius: 6px; padding: 7px 12px; margin-bottom: 4px; font-size: 0.83rem; }
+  .info-note { background: var(--info-note-bg); border-radius: 6px; padding: 8px 12px; font-size: 0.8rem; color: var(--info-note-text); }
+
+  .btn {
+    padding: 7px 16px; border-radius: 6px; border: 1px solid var(--btn-border);
+    font-size: 0.82rem; cursor: pointer; background: var(--surface);
+    color: var(--text); transition: .12s;
+  }
+  .btn:hover { background: var(--btn-hover); }
+  .btn-primary { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .btn-primary:hover { background: #1565c0; }
+
+  @media (max-width: 768px) {
+    .overview-row { grid-template-columns: 1fr; }
+    .fm-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div class="top-bar">
+  <div>
+    <h1>OKKI 客户状态看板</h1>
+    <p class="subtitle">横轴：生命周期阶段 → ｜ 纵轴：紧急度 ｜ 点击客户卡片查看详情 ｜ 2026-05-19</p>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 暗色模式</button>
+</div>
+
+<!-- ECharts 总览 -->
+<div class="overview-row">
+  <div class="overview-card">
+    <h3>📊 各阶段客户分布</h3>
+    <div id="chart-bar" style="height:180px;"></div>
+  </div>
+  <div class="overview-card">
+    <h3>🔥 紧急度 × 阶段 交叉</h3>
+    <div id="chart-heat" style="height:180px;"></div>
+  </div>
+</div>
+
+<div class="summary-bar">
+  <span>🔴 需立即处理 <strong>${urgencyCounts.red}</strong></span>
+  <span>🟡 需定时关注 <strong>${urgencyCounts.yellow}</strong></span>
+  <span>⚪ 正常流转 <strong>${urgencyCounts.grey}</strong></span>
+  <span>❄️ 冷冻 <strong>${urgencyCounts.frozen}</strong></span>
+</div>
+
+<div class="matrix-wrap">
+<div class="matrix" style="grid-template-columns: 80px repeat(8, 1fr);">
+  <div class="cell-header"></div>
+  <div class="cell-header">🔍 需求探索</div>
+  <div class="cell-header">💰 报价已发</div>
+  <div class="cell-header">🤝 谈判中</div>
+  <div class="cell-header">💳 待付款</div>
+  <div class="cell-header">📦 待发货</div>
+  <div class="cell-header">🚢 在途</div>
+  <div class="cell-header">✅ 已签收</div>
+  <div class="cell-header">🔄 售后/返单</div>
+
+  <div class="row-label"><span class="chip-dot chip-dot-red"></span>🔴 需立即处理</div>
+  ${stages.map(s => `<div class="cell">${matrixHTML[s].red.join("")}</div>`).join("\n")}
+
+  <div class="row-label"><span class="chip-dot chip-dot-yellow"></span>🟡 需定时关注</div>
+  ${stages.map(s => `<div class="cell">${matrixHTML[s].yellow.join("")}</div>`).join("\n")}
+
+  <div class="row-label"><span class="chip-dot chip-dot-grey"></span>⚪ 正常流转</div>
+  ${stages.map(s => `<div class="cell">${matrixHTML[s].grey.join("")}</div>`).join("\n")}
+
+  <div class="row-label" style="opacity:0.45"><span class="chip-dot chip-dot-grey"></span>❄️ 冷冻</div>
+  <div class="frozen-row" style="grid-column: span 8;">
+    ${frozenChipsHTML}
+    <span class="customer-chip chip-grey frozen-chip" style="font-weight:600;">+${urgencyCounts.frozen}人</span>
+  </div>
+</div>
+</div>
+
+<div class="legend">
+  <span>🔴 需立即处理 = 我不动它就死</span>
+  <span>🟡 需定时关注 = 业务推进但需提醒</span>
+  <span>⚪ 正常流转 = 暂无行动信号</span>
+  <span>❄️ 冷冻 = >90天无互动</span>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modal"></div>
+</div>
+
+<script>
+var CARDS = ${CARDS_JSON};
+
+function toggleTheme() {
+  var body = document.body;
+  var btn = document.getElementById("theme-btn");
+  if (body.getAttribute("data-theme") === "dark") {
+    body.setAttribute("data-theme", "light");
+    btn.textContent = "🌙 暗色模式";
+  } else {
+    body.setAttribute("data-theme", "dark");
+    btn.textContent = "☀️ 亮色模式";
+  }
+}
+
+function esc(s) {
+  if (typeof s !== 'string') return String(s);
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function deriveNextStep(c) {
+  var steps = [];
+  if (c.richDrivers && c.richDrivers.length) {
+    for (var i=0; i<c.richDrivers.length; i++) {
+      var dr = c.richDrivers[i];
+      if (dr.level === 'red') steps.push('⚡ ' + dr.title + ' → 优先处理');
+      else steps.push('📌 ' + dr.title);
+    }
+  }
+  if (steps.length === 0) {
+    switch (c.stage) {
+      case '需求探索': steps.push('了解客户采购规模和目标市场，推送热卖款'); break;
+      case '报价已发': steps.push('温和跟进报价反馈，确认是否有其他尺寸/面料需求'); break;
+      case '谈判中': steps.push('推动下一步决策，确认打样/付款时间线'); break;
+      case '待付款': steps.push('确认付款方式，发送PI'); break;
+      case '待发货': steps.push('同步生产进度，拍照或视频给客户'); break;
+      case '已发货/在途': steps.push('跟踪物流状态，到港前提醒清关'); break;
+      case '已签收': steps.push('回访产品满意度，试探复购意向'); break;
+      case '待返单': steps.push('同步新品/热卖款，争取返单'); break;
+    }
+  }
+  if (c.daysSince !== null && c.daysSince > 30) {
+    steps.push('⚠️ 已沉默' + c.daysSince + '天，考虑WhatsApp/电话触达');
+  }
+  return steps.join('\\n');
+}
+
+function openModal(cid) {
+  var c = CARDS.find(function(x){ return x.cid === cid; });
+  if (!c) return;
+  var h = '';
+  h += '<div class="modal-header"><h2>' + esc(c.name) + '</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  h += '<div class="modal-body">';
+
+  // Frontmatter
+  h += '<div class="fm-grid">';
+  var fields = [
+    ['国家', c.countryCN || c.country],
+    ['阶段', c.stage],
+    ['等级', c.tier + '级'],
+    ['最后联系', c.daysSince !== null ? c.daysSince + '天前' : '?']
+  ];
+  for (var i=0; i<fields.length; i++) {
+    h += '<div class="fm-item"><div class="fm-label">' + fields[i][0] + '</div><div class="fm-value">' + esc(String(fields[i][1])) + '</div></div>';
+  }
+  if (c.firstContact) {
+    h += '<div class="fm-item"><div class="fm-label">首次联系</div><div class="fm-value">' + c.firstContact + '</div></div>';
+  }
+  h += '</div>';
+
+  // Driver factors
+  if (c.richDrivers && c.richDrivers.length) {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="driver-list">';
+    for (var j=0; j<c.richDrivers.length; j++) {
+      var dr = c.richDrivers[j];
+      var cls = dr.level === 'red' ? 'driver-item-red' : 'driver-item-yellow';
+      var icon = dr.level === 'red' ? '🔴' : '🟡';
+      h += '<div class="driver-item ' + cls + '"><span class="driver-icon">' + icon + '</span><div><strong>' + esc(dr.title) + '</strong><div style="color:var(--text-secondary);font-size:0.83em;margin-top:2px;">' + esc(dr.detail) + '</div></div></div>';
+    }
+    h += '</div></div>';
+  } else if (c.urgencyKey === 'red') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">⚠️ 该客户标记为需立即处理，但未命中因子节奏天。请检查状态卡确认紧急原因。</div></div>';
+  } else if (c.urgencyKey === 'yellow') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">📌 该客户标记为需关注，但未命中因子节奏天。可能是刚联系过或等待客户行动中。</div></div>';
+  } else if (c.urgencyKey !== 'frozen') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">无活跃因子。该客户在正常流转中，暂无行动信号。</div></div>';
+  }
+
+  // Chat lines
+  if (c.chatLinesCN && c.chatLinesCN.length) {
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var k=0; k<c.chatLinesCN.length; k++) {
+      var cl = c.chatLinesCN[k];
+      var whoClass = cl.who === '我方' ? 'chat-who-me' : 'chat-who-cust';
+      h += '<div class="chat-line"><span class="chat-who ' + whoClass + '">' + esc(cl.who) + '</span><span class="chat-time">' + esc(cl.time) + '</span>' + esc(cl.action) + '</div>';
+    }
+    h += '</div></div>';
+  } else if (c.chatLines && c.chatLines.length) {
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var kk=0; kk<c.chatLines.length; kk++) {
+      var cl2 = c.chatLines[kk];
+      var whoClass2 = cl2.who === 'me' ? 'chat-who-me' : 'chat-who-cust';
+      h += '<div class="chat-line"><span class="chat-who ' + whoClass2 + '">' + (cl2.who === 'me' ? '我' : '客') + '</span><span class="chat-time">' + cl2.time + '</span>' + esc(cl2.text) + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  // Key numbers
+  if (c.keyNums && c.keyNums.length) {
+    h += '<div class="section"><div class="section-title">🔢 关键数字</div>';
+    for (var m=0; m<c.keyNums.length; m++) {
+      h += '<div class="key-num">' + esc(c.keyNums[m]) + '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Next step
+  if (c.nextStep) {
+    h += '<div class="section"><div class="section-title">→ 下一步</div><div style="font-size:0.9em;line-height:1.7;white-space:pre-line">' + esc(c.nextStep) + '</div></div>';
+  }
+
+  // Derived step for non-brief clients
+  if (!c.hasBrief && c.urgencyKey !== 'frozen') {
+    var derivedStep = deriveNextStep(c);
+    if (derivedStep) {
+      h += '<div class="section"><div class="section-title">→ 建议动作</div><div style="font-size:0.9em;line-height:1.7;white-space:pre-line">' + derivedStep + '</div></div>';
+    }
+    h += '<div class="info-note" style="margin-top:12px;">📝 暂无深度状态卡。运行 /okki 深度分析获取完整聊天摘要和关键数字。</div>';
+  }
+
+  h += '</div>';
+  h += '<div class="modal-footer"><button class="btn btn-primary">✏️ 起草回复</button><button class="btn">🔍 深度分析</button><button class="btn">✅ 标记已处理</button></div>';
+
+  document.getElementById('modal').innerHTML = h;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('show');
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+// ---- ECharts ----
+(function() {
+  var barChart = echarts.init(document.getElementById('chart-bar'));
+  barChart.setOption({
+    tooltip: { trigger: 'axis' },
+    grid: { left: 90, right: 30, top: 8, bottom: 20 },
+    xAxis: { type: 'value', axisLabel: { fontSize: 10 } },
+    yAxis: { type: 'category', data: ${JSON.stringify(stages)}, axisLabel: { fontSize: 10 } },
+    series: [{
+      type: 'bar',
+      data: ${JSON.stringify(barData)},
+      itemStyle: {
+        borderRadius: [0, 4, 4, 0],
+        color: new echarts.graphic.LinearGradient(0,0,1,0,[
+          {offset:0,color:'#1976d2'},{offset:1,color:'#42a5f5'}
+        ])
+      },
+      label: { show: true, position: 'right', fontSize: 10 }
+    }]
+  });
+
+  var heatChart = echarts.init(document.getElementById('chart-heat'));
+  heatChart.setOption({
+    tooltip: {
+      formatter: function(p) {
+        var urgencies = ['需立即处理','需定时关注','正常流转'];
+        return urgencies[p.value[0]] + ' × ' + ${JSON.stringify(stages)}[p.value[1]] + '<br/>' + p.value[2] + '人';
+      }
+    },
+    grid: { left: 8, right: 20, top: 20, bottom: 45 },
+    xAxis: { type: 'category', data: ['🔴紧急','🟡关注','⚪正常'], position: 'top', axisLabel: { fontSize: 10 } },
+    yAxis: { type: 'category', data: ${JSON.stringify(stages)}, axisLabel: { fontSize: 10 } },
+    visualMap: {
+      min: 0, max: ${Math.max(1, ...Object.values(stageUrgency).flatMap(o => Object.values(o)))},
+      calculable: false, orient: 'horizontal', left: 'center', bottom: 2,
+      inRange: { color: ['#f5f5f7','#ffe0b2','#ff9800','#d84315'] }
+    },
+    series: [{
+      type: 'heatmap', data: ${JSON.stringify(heatmapData)},
+      label: { show: true, fontSize: 9 },
+      emphasis: { itemStyle: { shadowBlur: 10, shadowColor: 'rgba(0,0,0,.3)' } }
+    }]
+  });
+
+  window.addEventListener('resize', function() { barChart.resize(); heatChart.resize(); });
+})();
+<\/script>
+
+</body>
+</html>`;
+
+fs.writeFileSync(DST, output, "utf8");
+console.log(`OK -> dashboard_v3.html (${(fs.statSync(DST).size/1024).toFixed(1)} KB)`);
+console.log(`Urgency: red=${urgencyCounts.red} yellow=${urgencyCounts.yellow} grey=${urgencyCounts.grey} frozen=${urgencyCounts.frozen}`);

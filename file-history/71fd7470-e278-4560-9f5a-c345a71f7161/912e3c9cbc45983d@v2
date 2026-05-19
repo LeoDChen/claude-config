@@ -1,0 +1,44 @@
+---
+date: 2026-05-19
+session_id: current
+customers: [Mukul Gautam]
+topics: [询盘分析, RFQ报价, 图片识别, vision-reader MCP]
+---
+
+# RFQ报价：Mukul Gautam 女婴套装
+
+**日期**: 2026-05-19
+**客户**: Mukul Gautam（印度）
+
+## 关键经验
+
+### 1. 图片识别问题的完整诊断链
+- **现象**：Read 工具读桌面 PNG → `[Unsupported Image]`
+- **根因**：DeepSeek-v4-pro[1m] 不支持原生多模态识别（通过 CC-Switch 代理时 Claude Code 的 Read 工具调用的是底层模型的视觉能力，DeepSeek 没有）
+- **解决方案**：`vision-reader` MCP（`D:\ClaudeWorkspace\.claude\mcp.json`），用阿里云 DashScope `qwen-vl-plus` 模型读图
+- **但**：vision-reader MCP 在当前会话中未自动出现在可用工具列表内，导致 MCP 工具不显示
+- **最终绕过**：Bash 中 `node -e` 直接调 DashScope API，成功读图
+- **API 配置**：
+  - VISION_API_KEY = `sk-c1f402a6d89744b6b4c46c01fae1dae2`（35位）
+  - 端点：`https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions`
+  - 模型：`qwen-vl-plus`
+
+### 2. 国际站 RFQ 报价表单完整结构（20+字段）
+从桌面截图 `0788af2ca825d3ae25689ccbe2f4170b.png` 读取：
+
+**产品及价格区域**：产品名称*、产品编号、产品细节*（8000字符）、产品图片/文件（≤5附件）、装运条款*（FOB）、港口*（Guangzhou）、报价有效期*、货币单位*（USD）、数量单位*、付款方式*（T/T）、订购数量*、产品单价*、区间价格（≤2组）、更多产品（≤9组）
+
+**报价补充信息**：提供样品（是/否）、免费样品（是/否）、样品运费支付方（买家/卖家/协商）、预计寄样日期（确认后__天）、给买家的消息*（2000字符）、文件上传（≤6附件）
+
+**增值服务**：报价置顶服务（复选框）
+
+### 3. RFQ 分析框架
+买家质量评估 → 需求逐字拆解 → 竞争态势（已报数/剩余席位）→ 工厂匹配度（面料/工艺/认证）→ 差异化切入点 → 表单填充 → 文件上传建议
+
+### 4. 本次待确认项
+- 产品编号（留空 or 自编）
+- 样品费策略（收费退还 or 免费+买家付运费）
+- 打样周期（考虑面料采购时间后延至15-20天）
+
+### 5. 工厂面料短板
+工厂没有现成的粉色涤纶面料适合0-3月夏季女婴，但有供应商可以找。面料供应商资源未系统整理。

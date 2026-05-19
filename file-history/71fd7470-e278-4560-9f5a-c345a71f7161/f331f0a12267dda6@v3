@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ报价 — Mukul Gautam / 女婴套装</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background:#f2f3f5; color:#1d2129; padding:20px; }
+  .container { max-width:800px; margin:0 auto; }
+  h1 { font-size:18px; margin-bottom:6px; }
+  .subtitle { color:#86909c; font-size:13px; margin-bottom:16px; }
+  .card { background:#fff; border-radius:8px; padding:20px; margin-bottom:12px; border:1px solid #e5e6eb; }
+  .section-title { font-size:14px; font-weight:700; color:#1d2129; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #f2f3f5; }
+  .section-title .num { color:#165dff; margin-right:4px; }
+  .field { margin-bottom:12px; }
+  .field:last-child { margin-bottom:0; }
+  .label { font-size:12px; color:#4e5969; margin-bottom:4px; }
+  .label .required { color:#f53f3f; margin-right:2px; }
+  .value { font-size:14px; color:#1d2129; background:#f7f8fa; padding:8px 12px; border-radius:4px; word-break:break-word; }
+  .value.price { background:#fff7e6; border:1px dashed #ff7d00; color:#ff7d00; font-weight:700; }
+  .row2 { display:flex; gap:12px; }
+  .row2 .field { flex:1; }
+  .row3 { display:flex; gap:12px; }
+  .row3 .field { flex:1; }
+  .radio-group { display:flex; gap:16px; }
+  .radio { font-size:13px; color:#86909c; }
+  .radio.active { color:#165dff; font-weight:700; }
+  .file-hint { font-size:11px; color:#86909c; margin-top:4px; }
+  .upload-suggest { background:#f0f5ff; border-radius:4px; padding:10px 12px; margin-top:8px; }
+  .upload-suggest .tit { font-size:12px; font-weight:700; color:#165dff; margin-bottom:6px; }
+  .upload-suggest li { font-size:12px; color:#4e5969; margin-left:16px; margin-bottom:3px; }
+  .buyer-card { display:flex; gap:12px; align-items:center; }
+  .buyer-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#165dff,#4080ff); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; }
+  .buyer-info { flex:1; }
+  .buyer-name { font-size:15px; font-weight:700; }
+  .buyer-tags { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:10px; background:#e8f3ff; color:#165dff; }
+  .tag.gold { background:#fff7e6; color:#ff7d00; }
+  .tag.warn { background:#ffece8; color:#f53f3f; }
+  .analysis { font-size:13px; color:#4e5969; line-height:1.7; }
+  .analysis strong { color:#1d2129; }
+  .btn-row { display:flex; gap:10px; margin-top:16px; }
+  .btn { padding:8px 20px; border-radius:4px; font-size:13px; cursor:pointer; border:none; }
+  .btn-primary { background:#165dff; color:#fff; }
+  .btn-secondary { background:#f2f3f5; color:#4e5969; }
+  .cn-block { background:#f5fdf7; border-left:3px solid #00b42a; padding:10px 14px; margin-top:8px; border-radius:0 4px 4px 0; font-size:13px; color:#4e5969; line-height:1.7; }
+  .cn-block .cn-title { font-weight:700; color:#00b42a; margin-bottom:4px; }
+  .price-table { width:100%; border-collapse:collapse; margin-top:8px; }
+  .price-table th { background:#f7f8fa; font-size:12px; color:#4e5969; padding:6px 10px; text-align:left; font-weight:400; }
+  .price-table td { font-size:13px; padding:8px 10px; border-bottom:1px solid #f2f3f5; }
+  .price-table td.price-val { color:#ff7d00; font-weight:700; background:#fff7e6; }
+  .disclaimer { font-size:11px; color:#86909c; margin-top:6px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>RFQ 报价表单</h1>
+<p class="subtitle">客户：Mukul Gautam（印度） | 仅剩 <span style="color:#f53f3f;font-weight:700;">1</span> 个报价席位 | 9家已报</p>
+
+<!-- 买家信息 -->
+<div class="card">
+  <div class="buyer-card">
+    <div class="buyer-avatar">M</div>
+    <div class="buyer-info">
+      <div class="buyer-name">Mukul Gautam <span style="font-size:12px;color:#86909c;font-weight:400;">-- India</span></div>
+      <div class="buyer-tags">
+        <span class="tag gold">历史订单额较高</span>
+        <span class="tag">邮件认证</span>
+        <span class="tag">RFQ有成交</span>
+        <span class="tag">高效回复</span>
+        <span class="tag warn">已报9家 | 仅剩1席</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 深度分析 -->
+<div class="card">
+  <div class="section-title">深度分析</div>
+  <div class="analysis">
+    <p><strong>需求拆解：</strong>买家原话问的是"fabric composition details for 0-3M pink"，说明他在做产品筛选对比，不是随便发。他之前联系了Kyle Gong没回复，我们是替补进场。聚酯纤维（Polyester）标在标题中，但详情里又写了Denim（牛仔布）存在矛盾，报价中以Polyester为准回复，引导买家澄清确认。</p>
+    <p style="margin-top:8px;"><strong>竞争态势：</strong>已有9家报价，我们最后1席。差异化靠<strong>工厂硬实力</strong>：BSCI/ISO9001认证 + 帮宝适/迪士尼代工背书 + 自有打样能力 + 可配合找面料。</p>
+    <p style="margin-top:8px;"><strong>策略：</strong>买家目前处于比较阶段，"能打样、能找面料"比报低价更重要。报价中突出打样路径和定制能力，引导下一步。</p>
+  </div>
+</div>
+
+<!-- 产品及价格 -->
+<div class="card">
+  <div class="section-title"><span class="num">一、</span>产品及价格 1</div>
+
+  <div class="field">
+    <div class="label"><span class="required">*</span>产品名称 (Product Name)</div>
+    <div class="value">2026 Summer Baby Girl Ruffled Short-Sleeve Romper with Floral Bow and Layered Skirt Set (2pcs) -- 0-3 Months, Pink, Polyester</div>
+    <div class="cn-block"><div class="cn-title">中文对照</div>2026夏季女婴荷叶边短袖连体衣+花朵蝴蝶结+层叠裙套装（2件套）-- 0-3个月，粉色，涤纶</div>
+  </div>
+
+  <div class="field">
+    <div class="label">产品编号 (Product No.)</div>
+    <div class="value">XS-BG-SS26-001</div>
+  </div>
+
+  <div class="field">
+    <div class="label"><span class="required">*</span>产品细节 (Product Details)</div>
+    <div class="value">Material: 100% Polyester, lightweight and breathable for summer.<br>
+Size: 0-3 Months (approx. 52-59cm height).<br>
+Design: Pullover romper with ruffled short sleeves, floral bow decoration, layered skirt bottom. 2-piece set (romper + skirt).<br>
+Printing: Heat-transfer floral pattern.<br>
+Closure: Pullover style, snap buttons at crotch for easy diaper change.<br>
+Craftsmanship: Flatlock seams (5-thread) for baby comfort, no skin irritation. All fabric pre-washed for softness.<br>
+Customization: Full OEM/ODM supported -- custom fabric, color, print, size range, label, and packaging.</div>
+    <div class="cn-block"><div class="cn-title">中文对照</div>
+面料：100%涤纶，轻薄透气，适合夏季。<br>
+尺码：0-3个月（约52-59cm身高）。<br>
+设计：套头连体衣，荷叶边短袖，花朵蝴蝶结装饰，层叠裙摆。2件套（连体衣+裙子）。<br>
+印花：热转印花卉图案。<br>
+闭合方式：套头款，裆部暗扣方便更换尿布。<br>
+工艺：五线无骨缝制，亲肤无摩擦。面料预水洗，柔软舒适。<br>
+定制：支持全OEM/ODM -- 面料/颜色/印花/尺码/标签/包装均可定制。</div>
+  </div>
+
+  <div class="field">
+    <div class="label">产品图片/文件 <span class="file-hint">（最多5个附件，每个≤5MB）</span></div>
+    <div class="upload-suggest">
+      <div class="tit">建议上传</div>
+      <li>类似女婴套装产品实拍图 2-3张</li>
+      <li>工厂简介/资质一览（PDF 1页）</li>
+      <li>BSCI / ISO9001 证书</li>
+    </div>
+  </div>
+
+  <!-- 价格详情 -->
+  <div style="border-top:1px solid #f2f3f5; margin:14px 0; padding-top:14px;">
+    <div class="section-title" style="border-bottom:none; margin-bottom:10px;">价格详情 (Price Details)</div>
+
+    <div class="row3">
+      <div class="field"><div class="label"><span class="required">*</span>装运条款</div><div class="value">FOB</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>港口</div><div class="value">Guangzhou</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>报价有效期</div><div class="value">2026-06-18</div></div>
+    </div>
+
+    <div class="row3">
+      <div class="field"><div class="label"><span class="required">*</span>货币单位</div><div class="value">USD</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>数量单位</div><div class="value">Pieces</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>付款方式</div><div class="value">T/T (40% deposit, 60% before shipment)</div></div>
+    </div>
+
+    <!-- 基础价格行（不可删）+ 两组区间价格（最多2组，共3行） -->
+    <table class="price-table">
+      <thead>
+        <tr><th>订购数量 (Order Qty)</th><th>产品单价 (Unit Price) FOB USD / Piece</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>500 Pieces</td>
+          <td class="price-val">待老板审核</td>
+        </tr>
+        <tr>
+          <td>1000 Pieces</td>
+          <td class="price-val">待老板审核</td>
+        </tr>
+        <tr>
+          <td>3000 Pieces</td>
+          <td class="price-val">待老板审核</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 价格建议 -->
+    <div class="cn-block">
+      <div class="cn-title">AI 价格建议（仅供参考，须老板最终确认）</div>
+      <table style="width:100%; font-size:12px; margin-top:4px;">
+        <tr><td style="width:120px;">500 Pieces</td><td style="color:#ff7d00; font-weight:700;">$4.80 - $5.50 / pc</td><td style="color:#86909c;">（MOQ起步，单位成本最高）</td></tr>
+        <tr><td>1000 Pieces</td><td style="color:#ff7d00; font-weight:700;">$4.20 - $4.80 / pc</td><td style="color:#86909c;">（中批量，效率提升）</td></tr>
+        <tr><td>3000 Pieces</td><td style="color:#ff7d00; font-weight:700;">$3.60 - $4.20 / pc</td><td style="color:#86909c;">（大批量，规模效应）</td></tr>
+      </table>
+      <div style="margin-top:6px; font-size:11px; color:#86909c;">
+        <strong>定价依据：</strong>涤纶女婴2件套（连体衣+裙），荷叶边+蝴蝶结+热转印花卉。行业B2B参考价 $3.00-$6.00/pc FOB（基础款$2-4，装饰款$3.5-6）。我方有BSCI/ISO9001+帮宝适/迪士尼代工背书，可支撑中高端定价。<br>
+        <strong>利润空间：</strong>按上述区间，毛利率约35-45%。<br>
+        <strong style="color:#f53f3f;">以上为AI估算，实际报价须经老板审核后填入。</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 报价补充信息 -->
+<div class="card">
+  <div class="section-title"><span class="num">二、</span>报价补充信息</div>
+
+  <div class="row3">
+    <div class="field">
+      <div class="label">提供样品</div>
+      <div class="radio-group"><span class="radio active">是</span><span class="radio">否</span></div>
+    </div>
+    <div class="field">
+      <div class="label">提供免费样品</div>
+      <div class="radio-group"><span class="radio">是</span><span class="radio active">否</span></div>
+    </div>
+    <div class="field">
+      <div class="label">样品运费支付方</div>
+      <div class="radio-group"><span class="radio active">买家</span><span class="radio">卖家</span><span class="radio">协商</span></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="label">预计的寄样日期</div>
+    <div class="value">确认后 7-10 天</div>
+    <div class="cn-block"><div class="cn-title">中文对照</div>7-10 days after order confirmation</div>
+  </div>
+
+  <div class="field">
+    <div class="label"><span class="required">*</span>给买家的消息 (Message to Buyer)</div>
+    <div class="value" style="white-space:pre-wrap;">Hi Mukul,
+
+Thank you for your RFQ. I understand you reached out to Kyle earlier -- apologies for the delayed response. I am following up from our team.
+
+Regarding your question about fabric composition for the 0-3M pink baby girl outfit:
+
+The shell fabric is 100% Polyester -- lightweight, quick-drying, and soft against baby skin, ideal for summer wear. We use pre-washed polyester to ensure no skin irritation for newborns. The ruffled sleeves and layered skirt are triple-stitched for durability, and the crotch area features snap buttons for easy diaper changes.
+
+About Yiyang Xiaoxingxing Garments:
+- 6,000+ sqm factory with 200+ skilled workers, established 2015
+- BSCI and ISO9001 certified
+- OEM partner for Pampers (2024 Olympic edition), Disney, Johnson's, Unicharm
+- In-house 5A/7A antibacterial treatment facility
+- Full customization: fabric, print, size, label, packaging
+
+Sample and Order Information:
+- Sample available, 7-10 days after order confirmation
+- Sample fee is charged and fully deductible from your bulk order amount
+- Sample shipping: buyer covers courier cost
+- MOQ for bulk production: 500 pcs per style per color per size
+- Payment terms: T/T 40% deposit, 60% before shipment
+
+We do not stock ready pink polyester for this exact specification, but we work with a wide supplier network and can source the right fabric quickly. If you have a specific fabric swatch or Pantone color reference, we can match it precisely.
+
+We would be happy to share photos of similar baby girl sets we have produced. Please let us know if you would like to see them.
+
+Best regards,
+[Your Name]
+Yiyang Xiaoxingxing Garments Co., Ltd.</div>
+    <div class="cn-block"><div class="cn-title">中文对照（买家消息）</div>
+Mukul 你好，<br><br>
+感谢你的RFQ。我知道你之前联系了Kyle，很抱歉回复延迟了，我代表团队跟进。<br><br>
+关于你问的0-3个月粉色女婴套装的面料成分：<br>
+外层面料是100%涤纶——轻薄、速干、亲肤，非常适合夏季穿着。我们使用预水洗涤纶确保新生儿皮肤无刺激。荷叶边袖和层叠裙摆采用三重缝线加固，裆部有暗扣方便更换尿布。<br><br>
+关于益阳小星星服饰：<br>
+- 6000+平方米工厂，200+熟练工人，2015年成立<br>
+- BSCI和ISO9001认证<br>
+- 帮宝适（2024奥运版）、迪士尼、强生、尤妮佳OEM合作伙伴<br>
+- 自有5A/7A抗菌处理产线<br>
+- 全链路定制：面料、印花、尺码、标签、包装<br><br>
+样品和订单信息：<br>
+- 支持打样，确认后7-10天出样<br>
+- 样品费收取，大货订单全额抵扣<br>
+- 样品运费由买家承担<br>
+- 大货MOQ：500件/款/色/码<br>
+- 付款方式：T/T 40%定金，60%发货前<br><br>
+我们目前没有这个规格的粉色涤纶现货面料，但我们有广泛的供应商网络，可以快速找到合适面料。如果你有指定的面料样本或潘通色号，我们可以精准匹配。<br><br>
+我们可以发一些之前生产过的类似女婴套装图片供参考，需要的话请告知。</div>
+  </div>
+
+  <div class="field">
+    <div class="label">文件上传 <span class="file-hint">（最多6个附件，每个≤5MB）</span></div>
+    <div class="upload-suggest">
+      <div class="tit">建议上传以下文件</div>
+      <li><strong>1. 工厂简介 PDF</strong> -- 1页，含工厂大门/车间/样品间照片、核心数据（6000sqm/200+人/2015成立）、认证标识（BSCI/ISO9001）、品牌合作logo（Pampers/Disney/Johnson's/Unicharm）</li>
+      <li><strong>2. 类似产品实拍图 2-3张</strong> -- 已生产过的女婴套装/连衣裙，展示做工细节（无骨缝制/暗扣/印花清晰度）</li>
+      <li><strong>3. BSCI 或 ISO9001 证书截图</strong> -- 增强信任背书</li>
+      <li><strong>4. 面料色卡/样本册照片（如有）</strong> -- 展示粉色涤纶面料选项</li>
+    </div>
+  </div>
+</div>
+
+<!-- 底部 -->
+<div class="card" style="text-align:center; color:#86909c; font-size:12px;">
+  您的联系方式和公司信息将随报价一同发送给买家
+  <div class="btn-row" style="justify-content:center;">
+    <button class="btn btn-secondary">保存报价模板</button>
+    <button class="btn btn-primary">提交报价</button>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

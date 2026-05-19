@@ -1,0 +1,241 @@
+<h2>OKKI 客户运营看板 Mockup（可交互）</h2>
+<p class="subtitle">现在点击可以展开/折叠。确认布局后我们再做色彩微调</p>
+
+<!-- 顶部指标卡 -->
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0;">
+  <div style="background:#1a5276;color:#fff;padding:14px 10px;border-radius:6px;text-align:center;">
+    <div style="font-size:28px;font-weight:bold;">477</div>
+    <div style="font-size:12px;opacity:0.9;">总会话</div>
+  </div>
+  <div style="background:#1a5276;color:#fff;padding:14px 10px;border-radius:6px;text-align:center;">
+    <div style="font-size:28px;font-weight:bold;">23</div>
+    <div style="font-size:12px;opacity:0.9;">3天活跃</div>
+  </div>
+  <div style="background:#c0392b;color:#fff;padding:14px 10px;border-radius:6px;text-align:center;">
+    <div style="font-size:28px;font-weight:bold;">267</div>
+    <div style="font-size:12px;opacity:0.9;">超90天无互动</div>
+  </div>
+  <div style="background:#e67e22;color:#fff;padding:14px 10px;border-radius:6px;text-align:center;">
+    <div style="font-size:28px;font-weight:bold;">47</div>
+    <div style="font-size:12px;opacity:0.9;">未读</div>
+  </div>
+  <div style="background:#27ae60;color:#fff;padding:14px 10px;border-radius:6px;text-align:center;">
+    <div style="font-size:28px;font-weight:bold;">17</div>
+    <div style="font-size:12px;opacity:0.9;">本期变动</div>
+  </div>
+  <div style="background:#8e44ad;color:#fff;padding:14px 10px;border-radius:6px;text-align:center;">
+    <div style="font-size:28px;font-weight:bold;">12</div>
+    <div style="font-size:12px;opacity:0.9;">今天行动</div>
+  </div>
+</div>
+
+<!-- 双轴矩阵 + 静默风险 -->
+<div style="display:flex;gap:16px;margin:16px 0;">
+
+  <div style="flex:1;border:1px solid #d0d0d0;border-radius:6px;overflow:hidden;">
+    <div style="background:#e8e8e8;padding:10px 14px;font-weight:bold;border-bottom:1px solid #d0d0d0;font-size:14px;">
+      客户双轴矩阵 <span style="font-weight:normal;font-size:11px;color:#666;">（生命周期 × 质量）</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr style="background:#f0f0f0;">
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;text-align:left;"></th>
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;">S 级</th>
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;">A 级</th>
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;">B 级</th>
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;">C 级</th>
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;">D 级</th>
+        <th style="padding:6px 8px;border:1px solid #d0d0d0;color:#c0392b;">变动</th>
+      </tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">待回复</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;background:#fff3cd;cursor:pointer;" onclick="alert('展开 S级×待回复 名单:\n\n1. Maimouna Cisse (CI) - 报价已发5天未回，比价中\n判断依据: 客户明确询价且接受MOQ，身份为品牌采购经理')">1</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">2</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">3</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">5</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">3</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;color:#27ae60;">+1</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">初询沟通</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">2</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">4</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">6</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">2</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;color:#e74c3c;">-2</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">报价已发</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;background:#fff3cd;cursor:pointer;" onclick="alert('S级×报价已发 名单:\n\n1. Maimouna Cisse (CI) - 静默5天\n2. Ahmed (SD) - 静默2天\n\nA级×报价已发:\n1. John (EG) - 静默3天\n2. Fatima (SA) - 静默1天\n3. Kwame (GH) - 静默4天')">2</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;background:#fff3cd;cursor:pointer;" onclick="alert('A级×报价已发 名单:\n\n1. John (EG) - 静默3天, 比价\n2. Fatima (SA) - 静默1天, 决策中\n3. Kwame (GH) - 静默4天, MOQ协商')">3</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">5</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">4</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">1</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">谈判/样品</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;background:#d5f5e3;cursor:pointer;" onclick="alert('S级×谈判/样品:\n\n1. Keinjol Tata (CD) - 样板确认中')">1</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;background:#d5f5e3;cursor:pointer;" onclick="alert('A级×谈判/样品:\n\n1. Musa (NG) - 样板寄送中\n2. Amina (TZ) - 价格谈判中')">2</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">1</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;color:#27ae60;">+3</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">PI已发</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;background:#d5f5e3;cursor:pointer;" onclick="alert('S级×PI已发:\n\n1. Samia Guenad (SD) - 待付款4天')">1</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">订单执行</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">1</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">已签收</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td></tr>
+      <tr><td style="padding:6px 8px;border:1px solid #d0d0d0;font-weight:bold;">售后</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td><td style="text-align:center;padding:6px 8px;border:1px solid #d0d0d0;">0</td></tr>
+    </table>
+    <div style="padding:6px 14px;font-size:11px;color:#555;background:#fafafa;">
+      🟡 黄色 = 需要关注 &nbsp;|&nbsp; 🟢 绿色 = 有进展 &nbsp;|&nbsp; <b>点击数字</b>展开该格客户名单
+    </div>
+  </div>
+
+  <!-- 静默风险 -->
+  <div style="flex:0 0 320px;border:1px solid #d0d0d0;border-radius:6px;overflow:hidden;">
+    <div style="background:#e8e8e8;padding:10px 14px;font-weight:bold;border-bottom:1px solid #d0d0d0;font-size:14px;">
+      静默风险分级
+    </div>
+    <div style="padding:4px 0;">
+      <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e0e0e0;cursor:pointer;align-items:center;">
+        <span><span style="color:#c0392b;font-size:16px;">●</span> <strong>深度静默 90天+</strong></span> <strong style="font-size:16px;color:#c0392b;">267</strong>
+      </div>
+      <div style="display:none;padding:8px 14px;background:#fdf2f2;font-size:11px;border-bottom:1px solid #e0e0e0;">
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>1. Sara Ali</span><span>SD · 352天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>2. Mohamed B.</span><span>EG · 298天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>3. Grace K.</span><span>GH · 275天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>4. Ibrahim D.</span><span>CI · 240天</span></div>
+        <div style="color:#888;padding-top:4px;">... 263 人更多</div>
+      </div>
+    </div>
+    <div style="padding:4px 0;">
+      <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e0e0e0;cursor:pointer;align-items:center;">
+        <span><span style="color:#e67e22;font-size:16px;">●</span> <strong>长期静默 30-90天</strong></span> <strong style="font-size:16px;color:#e67e22;">45</strong>
+      </div>
+      <div style="display:none;padding:8px 14px;background:#fef5e7;font-size:11px;border-bottom:1px solid #e0e0e0;">
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>1. Kofi Mensah</span><span>GH · 78天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>2. Amal Hassan</span><span>SD · 65天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>3. Peter O.</span><span>NG · 52天</span></div>
+        <div style="color:#888;padding-top:4px;">... 42 人更多</div>
+      </div>
+    </div>
+    <div style="padding:4px 0;">
+      <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e0e0e0;cursor:pointer;align-items:center;">
+        <span><span style="color:#f39c12;font-size:16px;">●</span> <strong>中期静默 14-30天</strong></span> <strong style="font-size:16px;color:#f39c12;">23</strong>
+      </div>
+      <div style="display:none;padding:8px 14px;background:#fef9e7;font-size:11px;border-bottom:1px solid #e0e0e0;">
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>1. David L.</span><span>US · 28天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>2. Marie F.</span><span>FR · 22天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>3. Youssef B.</span><span>MA · 18天</span></div>
+        <div style="color:#888;padding-top:4px;">... 20 人更多</div>
+      </div>
+    </div>
+    <div style="padding:4px 0;">
+      <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e0e0e0;cursor:pointer;align-items:center;">
+        <span><span style="color:#3498db;font-size:16px;">●</span> <strong>短期静默 7-14天</strong></span> <strong style="font-size:16px;color:#3498db;">18</strong>
+      </div>
+      <div style="display:none;padding:8px 14px;background:#eaf2f8;font-size:11px;border-bottom:1px solid #e0e0e0;">
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>1. Kwame A.</span><span>GH · 12天</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>2. Zainab M.</span><span>NG · 9天</span></div>
+        <div style="color:#888;padding-top:4px;">... 16 人更多</div>
+      </div>
+    </div>
+    <div style="padding:4px 0;">
+      <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="display:flex;justify-content:space-between;padding:10px 14px;cursor:pointer;align-items:center;">
+        <span><span style="color:#27ae60;font-size:16px;">●</span> <strong>近期活跃 3-7天</strong></span> <strong style="font-size:16px;color:#27ae60;">12</strong>
+      </div>
+      <div style="display:none;padding:8px 14px;background:#eafaf1;font-size:11px;">
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>1. Keinjol Tata</span><span>CD · 5天前活跃</span></div>
+        <div style="display:flex;justify-content:space-between;padding:2px 0;"><span>2. Maimouna Cisse</span><span>CI · 6天前活跃</span></div>
+        <div style="color:#888;padding-top:4px;">... 10 人更多</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 行动清单 -->
+<div style="border:1px solid #d0d0d0;border-radius:6px;overflow:hidden;margin:16px 0;">
+  <div style="background:#e8e8e8;padding:10px 14px;font-weight:bold;border-bottom:1px solid #d0d0d0;font-size:14px;">
+    今日行动清单（12人） <span style="font-weight:normal;font-size:11px;color:#666;">点击展开看卡点 + 时间窗口理由 + 话术</span>
+  </div>
+
+  <!-- 行动项 1 -->
+  <div style="border-bottom:1px solid #e0e0e0;">
+    <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;">
+      <span style="background:#c0392b;color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:bold;">紧急</span>
+      <strong style="font-size:14px;">Maimouna Cisse</strong>
+      <span style="color:#555;font-size:12px;">🇨🇮 科特迪瓦</span>
+      <span style="color:#555;font-size:12px;">报价已发 · S级</span>
+      <span style="color:#c0392b;font-size:12px;font-weight:bold;">静默5天</span>
+      <span style="color:#888;font-size:11px;margin-left:auto;">▶ 展开</span>
+    </div>
+    <div style="display:none;padding:12px 14px;background:#fafafa;font-size:12px;">
+      <div style="margin-bottom:8px;"><strong style="color:#333;">卡点：</strong>客户已收到报价但未确认，可能在与竞品比价。上次沟通停留在价格确认环节。</div>
+      <div style="margin-bottom:8px;"><strong style="color:#333;">时间窗口：</strong>报价后第5天是关键跟进节点——再等2天竞品可能抢先。</div>
+      <div style="background:#fff;padding:10px;border-left:3px solid #f39c12;border-radius:0 4px 4px 0;">
+        <strong style="color:#333;">话术：</strong><br>
+        <span style="color:#333;">Hi Maimouna, hope you've had time to review the quotation. I wanted to check if you have any questions about the pricing or specs — happy to adjust based on your target budget. Looking forward to your feedback.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行动项 2 -->
+  <div style="border-bottom:1px solid #e0e0e0;">
+    <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;">
+      <span style="background:#e67e22;color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:bold;">今日</span>
+      <strong style="font-size:14px;">Keinjol Tata</strong>
+      <span style="color:#555;font-size:12px;">🇨🇩 刚果民主</span>
+      <span style="color:#555;font-size:12px;">初询沟通 · S级</span>
+      <span style="color:#c0392b;font-size:12px;font-weight:bold;">待回复2天</span>
+      <span style="color:#888;font-size:11px;margin-left:auto;">▶ 展开</span>
+    </div>
+    <div style="display:none;padding:12px 14px;background:#fafafa;font-size:12px;">
+      <div style="margin-bottom:8px;"><strong style="color:#333;">卡点：</strong>新客户首次询盘后我方已回复报价+工厂资料，对方未读。可能障碍：被竞品吸引/对MOQ有顾虑/仅比价。</div>
+      <div style="margin-bottom:8px;"><strong style="color:#333;">时间窗口：</strong>首次回复后48小时是黄金二次触达期。再延迟可能被遗忘。</div>
+      <div style="background:#fff;padding:10px;border-left:3px solid #f39c12;border-radius:0 4px 4px 0;">
+        <strong style="color:#333;">话术：</strong><br>
+        <span style="color:#333;">Hi Keinjol, just following up on the quotation I sent. We also have some new baby blanket designs I think you'd like — would you be interested in seeing them? Let me know if MOQ is a concern, we can discuss flexible options.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 行动项 3 -->
+  <div>
+    <div onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='block'?'none':'block'" style="padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:14px;background:#fff;">
+      <span style="background:#3498db;color:#fff;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:bold;">48h内</span>
+      <strong style="font-size:14px;">Samia Guenad</strong>
+      <span style="color:#555;font-size:12px;">🇸🇩 苏丹</span>
+      <span style="color:#555;font-size:12px;">PI已发 · A级</span>
+      <span style="color:#e67e22;font-size:12px;font-weight:bold;">待付款4天</span>
+      <span style="color:#888;font-size:11px;margin-left:auto;">▶ 展开</span>
+    </div>
+    <div style="display:none;padding:12px 14px;background:#fafafa;font-size:12px;">
+      <div style="margin-bottom:8px;"><strong style="color:#333;">卡点：</strong>PI已发但付款未到。可能卡在银行流程/外汇审批/决策人变动。</div>
+      <div style="margin-bottom:8px;"><strong style="color:#333;">时间窗口：</strong>PI有效期通常7天，已过4天。建议在第6天前确认银行流程状态。</div>
+      <div style="background:#fff;padding:10px;border-left:3px solid #3498db;border-radius:0 4px 4px 0;">
+        <strong style="color:#333;">话术：</strong><br>
+        <span style="color:#333;">Hi Samia, hope you're well. Just checking if the payment is proceeding smoothly or if you need any documents from our side to help with the bank process. The PI is valid until [date], please let us know if any adjustments are needed.</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:10px 14px;font-size:12px;color:#888;text-align:center;border-top:1px solid #e0e0e0;background:#fafafa;">
+    ... 剩余 9 项折叠（48h内 × 4, 本周 × 5）
+  </div>
+</div>
+
+<!-- 市场 + 变动 -->
+<div style="display:flex;gap:16px;margin:16px 0;">
+
+  <div style="flex:1;border:1px solid #d0d0d0;border-radius:6px;overflow:hidden;">
+    <div style="background:#e8e8e8;padding:10px 14px;font-weight:bold;border-bottom:1px solid #d0d0d0;font-size:14px;">
+      核心市场管道密度
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <tr style="background:#f0f0f0;"><th style="padding:8px;border:1px solid #d0d0d0;text-align:left;">市场</th><th style="padding:8px;border:1px solid #d0d0d0;">客户数</th><th style="padding:8px;border:1px solid #d0d0d0;">S/A级</th><th style="padding:8px;border:1px solid #d0d0d0;">待行动</th></tr>
+      <tr><td style="padding:8px;border:1px solid #d0d0d0;font-weight:bold;">🇸🇩 苏丹</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">58</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">4</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;color:#c0392b;font-weight:bold;">3</td></tr>
+      <tr><td style="padding:8px;border:1px solid #d0d0d0;font-weight:bold;">🇪🇬 埃及</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">42</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">3</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">2</td></tr>
+      <tr><td style="padding:8px;border:1px solid #d0d0d0;font-weight:bold;">🇨🇩 刚果民主</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">31</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">5</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;color:#c0392b;font-weight:bold;">4</td></tr>
+      <tr><td style="padding:8px;border:1px solid #d0d0d0;font-weight:bold;">🇸🇦 沙特</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">27</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">2</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">1</td></tr>
+      <tr><td style="padding:8px;border:1px solid #d0d0d0;font-weight:bold;">🇦🇪 阿联酋</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">22</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">1</td><td style="text-align:center;padding:8px;border:1px solid #d0d0d0;">0</td></tr>
+    </table>
+  </div>
+
+  <div style="flex:1;border:1px solid #d0d0d0;border-radius:6px;overflow:hidden;">
+    <div style="background:#e8e8e8;padding:10px 14px;font-weight:bold;border-bottom:1px solid #d0d0d0;font-size:14px;">
+      本期变动（相较上次运行）
+    </div>
+    <div style="padding:10px 14px;font-size:13px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8e8e8;">
+        <span>📈 升级</span> <strong style="color:#27ae60;">8人</strong>
+        <span style="font-size:11px;color:#666;">C→B ×3, B→A ×3, A→S ×2</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8e8e8;">
+        <span>📉 降级</span> <strong style="color:#e74c3c;">5人</strong>
+        <span style="font-size:11px;color:#666;">A→B ×2, B→C ×2, S→A ×1</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8e8e8;">
+        <span>🆕 新进入</span> <strong style="color:#3498db;">4人</strong>
+        <span style="font-size:11px;color:#666;">本期新询盘</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;">
+        <span>⏸️ 流失</span> <strong style="color:#95a5a6;">3人</strong>
+        <span style="font-size:11px;color:#666;">超90天转沉淀</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>现在可以点了 — 试试折叠展开</h3>
+  <p>静默风险每行、行动清单每项、矩阵黄色/绿色数字都可以点击。确认交互方式 OK 后我们下一步讨论色彩和字体。</p>
+</div>

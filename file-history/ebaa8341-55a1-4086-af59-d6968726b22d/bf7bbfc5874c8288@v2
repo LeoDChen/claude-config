@@ -1,0 +1,30 @@
+# OB 归档同步操作
+
+## 日常同步
+
+**台式 → 笔记本**（台式做了修改后）：
+```bash
+cd "E:\道友的宝贝\道友的宝贝\对话归档\CC"
+git add -A && git commit -m "同步 YYYY-MM-DD" && git push
+```
+笔记本：
+```bash
+cd "E:\道友的宝贝\道友的宝贝\对话归档\CC"
+git pull
+```
+
+**笔记本 → 台式**（笔记本做了修改后）：
+```bash
+cd "E:\道友的宝贝\道友的宝贝\对话归档\CC"
+git add -A && git commit -m "同步 YYYY-MM-DD" && git push
+```
+台式：
+```bash
+cd "E:\道友的宝贝\道友的宝贝\对话归档\CC"
+git pull
+```
+
+## 仓库信息
+- 地址: `https://github.com/LeoDChen/ob-archive.git`
+- 分支: `main`
+- 需要翻墙访问

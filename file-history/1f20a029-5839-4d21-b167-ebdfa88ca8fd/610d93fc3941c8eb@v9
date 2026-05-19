@@ -1,0 +1,797 @@
+/** dashboard_v4: 修复6项 + 拖拽 + 护眼配色 + 冷冻层交互 */
+const fs = require("fs");
+const path = require("path");
+
+const SRC = path.join(__dirname, "dashboard.html");
+const DST = path.join(__dirname, "dashboard_v4.html");
+const srcHtml = fs.readFileSync(SRC, "utf8");
+
+const cardsMatch = srcHtml.match(/var CARDS\s*=\s*(\[[\s\S]*?\]);/);
+if (!cardsMatch) { console.error("CARDS not found"); process.exit(1); }
+const CARDS = JSON.parse(cardsMatch[1]);
+console.log(`Loaded ${CARDS.length} cards`);
+
+// 确保每个客户都有 tier
+CARDS.forEach(c => { if (!c.tier) c.tier = "C"; });
+
+// 统计
+const urgencyCounts = { red: 0, yellow: 0, grey: 0, frozen: 0 };
+const stageUrgency = {};
+const STAGES = ["需求探索","报价已发","谈判中","待付款","待发货","在途","已签收","售后/返单"];
+STAGES.forEach(s => { stageUrgency[s] = {red:0,yellow:0,grey:0}; });
+
+CARDS.forEach(c => {
+  const u = c.urgencyKey || "grey";
+  urgencyCounts[u] = (urgencyCounts[u] || 0) + 1;
+  let s = c.stage === "已发货/在途" ? "在途" : (c.stage || "需求探索");
+  if (!STAGES.includes(s)) s = "需求探索";
+  if (u !== "frozen" && stageUrgency[s]) stageUrgency[s][u] = (stageUrgency[s][u] || 0) + 1;
+});
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Tier badge
+const tierColors = {
+  S: {bg:"#ffd700",color:"#5d4037",label:"S"},
+  A: {bg:"#c8e6c9",color:"#2e7d32",label:"A"},
+  B: {bg:"#e3f2fd",color:"#1565c0",label:"B"},
+  C: {bg:"#f3e5f5",color:"#7b1fa2",label:"C"},
+  D: {bg:"#fce4ec",color:"#c62828",label:"D"}
+};
+
+function tierBadgeHTML(t) {
+  const tc = tierColors[t] || tierColors["C"];
+  return `<span class="chip-tier" style="background:${tc.bg};color:${tc.color};">${tc.label}</span>`;
+}
+
+// 构建矩阵 chip HTML
+const matrixData = {}; // stage -> urgency -> [{cid, name, tier, statusBadge}]
+STAGES.forEach(s => { matrixData[s] = { red:[], yellow:[], grey:[] }; });
+
+CARDS.forEach(c => {
+  let s = c.stage === "已发货/在途" ? "在途" : (c.stage || "需求探索");
+  if (!STAGES.includes(s)) s = "需求探索";
+  const u = c.urgencyKey || "grey";
+  if (u === "frozen") return;
+  if (!matrixData[s]) matrixData[s] = { red:[], yellow:[], grey:[] };
+  if (!matrixData[s][u]) matrixData[s][u] = [];
+  matrixData[s][u].push({
+    cid: c.cid,
+    name: c.name || "?",
+    tier: c.tier || "C",
+    statusBadge: c.statusBadge || ""
+  });
+});
+
+// 构建所有 frozen 数据（供冷冻层展开用）
+const frozenClients = CARDS.filter(c => (c.urgencyKey || "grey") === "frozen")
+  .map(c => ({
+    cid: c.cid,
+    name: c.name || "?",
+    tier: c.tier || "C",
+    country: c.countryCN || c.country || "",
+    daysSince: c.daysSince,
+    stage: c.stage || "",
+    statusBadge: c.statusBadge || "",
+    lastReason: c.lastReason || ""
+  }));
+
+const FROZEN_JSON = JSON.stringify(frozenClients);
+
+function chipHTML(d) {
+  const tb = tierBadgeHTML(d.tier);
+  const sb = d.statusBadge ? '<span class="chip-badge">'+esc(d.statusBadge)+'</span>' : "";
+  const cidSafe = d.cid.replace(/'/g, "\\'");
+  return '<span class="customer-chip chip-'+d.urgency+'" draggable="true" data-cid="'+d.cid+'" data-urgency="'+d.urgency+'" data-stage="'+d.stage+'" onclick="openModal(\''+cidSafe+'\')"><span class="chip-dot chip-dot-'+d.urgency+'"></span>'+esc(d.name)+tb+sb+'</span>';
+}
+
+// 热度图数据
+const heatmapData = [];
+STAGES.forEach((s, si) => {
+  ["red","yellow","grey"].forEach((u, ui) => {
+    const cnt = stageUrgency[s][u] || 0;
+    if (cnt > 0) heatmapData.push([ui, si, cnt]);
+  });
+});
+const maxHeatVal = Math.max(1, ...Object.values(stageUrgency).flatMap(o => Object.values(o)));
+const barData = STAGES.map(s => (stageUrgency[s].red||0)+(stageUrgency[s].yellow||0)+(stageUrgency[s].grey||0));
+
+const CARDS_JSON = JSON.stringify(CARDS);
+
+const output = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OKKI 客户状态看板 — 2026-05-19</title>
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.6.0/echarts.min.js"><\/script>
+<style>
+  :root {
+    /* Light - 暖色调低对比 */
+    --bg: #f7f5f1;
+    --surface: #fefdfb;
+    --surface-hover: #f5f3ee;
+    --border: #e6e2db;
+    --text: #4a4640;
+    --text-secondary: #8c8880;
+    --text-tertiary: #b5b0a8;
+    --shadow: 0 1px 4px rgba(0,0,0,.04);
+    --overlay: rgba(0,0,0,.35);
+    --grid-bg: #e8e4dd;
+    --cell-bg: #fefdfb;
+    --header-bg: #f3f0ea;
+    --header-text: #8c8880;
+    --fm-bg: #f5f3ee;
+    --fm-label: #8c8880;
+    --chat-bg: #f5f3ee;
+    --key-num-bg: #f3f0ea;
+    --info-note-bg: #fef9e7;
+    --info-note-text: #6b6658;
+    --btn-border: #d5d0c8;
+    --btn-hover: #f0ece5;
+    --modal-border: #ebe6de;
+    --dot-grey: #c5c0b8;
+    --chip-grey-bg: #f2f0eb;
+    --chip-grey-border: #e6e2db;
+    --chip-grey-text: #8c8880;
+    /* Chip colors - softened */
+    --chip-red-bg: #fef5f5;
+    --chip-red-border: #f5d5d5;
+    --chip-red-text: #9b3a3a;
+    --chip-yellow-bg: #fefcf5;
+    --chip-yellow-border: #f0e8c8;
+    --chip-yellow-text: #8b6914;
+    --chip-dot-red: #d35f5f;
+    --chip-dot-yellow: #c8942e;
+  }
+  [data-theme="dark"] {
+    --bg: #26242a;
+    --surface: #302e34;
+    --surface-hover: #38363c;
+    --border: #3e3c42;
+    --text: #d0cec8;
+    --text-secondary: #908e88;
+    --text-tertiary: #6a6864;
+    --shadow: 0 1px 4px rgba(0,0,0,.2);
+    --overlay: rgba(0,0,0,.6);
+    --grid-bg: #1e1c22;
+    --cell-bg: #302e34;
+    --header-bg: #28262c;
+    --header-text: #908e88;
+    --fm-bg: #28262c;
+    --fm-label: #908e88;
+    --chat-bg: #28262c;
+    --key-num-bg: #28262c;
+    --info-note-bg: #2e2c1e;
+    --info-note-text: #c0bca8;
+    --btn-border: #444248;
+    --btn-hover: #38363c;
+    --modal-border: #3e3c42;
+    --dot-grey: #5a5860;
+    --chip-grey-bg: #2e2c32;
+    --chip-grey-border: #3e3c42;
+    --chip-grey-text: #908e88;
+    --chip-red-bg: #3a2828;
+    --chip-red-border: #5a3838;
+    --chip-red-text: #f0a0a0;
+    --chip-yellow-bg: #3a3420;
+    --chip-yellow-border: #5a4a28;
+    --chip-yellow-text: #d4b050;
+    --chip-dot-red: #e07070;
+    --chip-dot-yellow: #d4a030;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg); color: var(--text); padding: 20px;
+    font-size: 14px; line-height: 1.55;
+    transition: background .3s, color .3s;
+  }
+  body.modal-open { overflow: hidden; }
+
+  .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  h1 { font-size: 1.1rem; font-weight: 700; }
+  .subtitle { color: var(--text-secondary); font-size: 0.75rem; margin-top: 1px; }
+  .theme-toggle {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary);
+    padding: 5px 14px; border-radius: 16px; font-size: 0.75rem; cursor: pointer;
+    transition: background .2s;
+  }
+  .theme-toggle:hover { background: var(--surface-hover); }
+
+  .overview-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .overview-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .overview-card h3 { font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px; }
+
+  .kpi-row2 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .kpi-card2 { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+  .kpi-card2:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .kpi-card2 .kpi-num { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+  .kpi-card2 .kpi-lbl { font-size: 0.73rem; color: var(--text-secondary); margin-top: 2px; }
+  .kpi-card2.red { border-left: 4px solid #d35f5f; }
+  .kpi-card2.yellow { border-left: 4px solid #c8942e; }
+  .kpi-card2.grey { border-left: 4px solid #908e88; }
+  .kpi-card2.frozen { border-left: 4px solid #8c8880; opacity: 0.7; }
+  [data-theme="dark"] .kpi-card2.red { border-left-color: #e07070; }
+  [data-theme="dark"] .kpi-card2.yellow { border-left-color: #d4a030; }
+  [data-theme="dark"] .kpi-card2.grey { border-left-color: #6a6864; }
+  [data-theme="dark"] .kpi-card2.frozen { border-left-color: #5a5850; }
+
+  /* Matrix */
+  .matrix-wrap { overflow-x: auto; margin-bottom: 12px; }
+  .matrix {
+    display: grid; gap: 1px; background: var(--grid-bg);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: var(--shadow); min-width: 1000px;
+  }
+  .cell {
+    background: var(--cell-bg); padding: 6px 8px; min-height: 44px;
+    display: flex; flex-wrap: wrap; gap: 3px; align-content: start; align-items: start;
+    transition: background .15s;
+  }
+  .cell.drag-over { background: #e8f0fe; box-shadow: inset 0 0 0 2px #1976d2; }
+  .cell-header {
+    background: var(--header-bg); padding: 7px 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 0.72rem; color: var(--header-text); text-align: center;
+  }
+  .row-label {
+    background: var(--header-bg); padding: 6px 8px;
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+    min-width: 0; overflow: hidden;
+  }
+
+  /* Chips */
+  .customer-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 12px; font-size: 0.7rem;
+    cursor: grab; border: 1px solid transparent; white-space: nowrap;
+    transition: transform .12s, box-shadow .12s; user-select: none;
+  }
+  .customer-chip:active { cursor: grabbing; }
+  .customer-chip:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .customer-chip.dragging { opacity: 0.4; transform: scale(0.95); }
+  .chip-red { background: var(--chip-red-bg); border-color: var(--chip-red-border); color: var(--chip-red-text); }
+  .chip-yellow { background: var(--chip-yellow-bg); border-color: var(--chip-yellow-border); color: var(--chip-yellow-text); }
+  .chip-grey { background: var(--chip-grey-bg); border-color: var(--chip-grey-border); color: var(--chip-grey-text); }
+  .chip-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .chip-dot-red { background: var(--chip-dot-red); }
+  .chip-dot-yellow { background: var(--chip-dot-yellow); }
+  .chip-dot-grey { background: var(--dot-grey); }
+  .chip-badge { font-size: 0.62rem; padding: 0px 5px; border-radius: 5px; background: rgba(0,0,0,.05); }
+  .chip-tier { font-size: 0.56rem; padding: 0 3px; border-radius: 3px; margin-left: 1px; font-weight: 600; }
+
+  /* Frozen section */
+  .frozen-section { margin-bottom: 14px; }
+  .frozen-toggle {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px; cursor: pointer; display: flex; justify-content: space-between;
+    align-items: center; font-size: 0.82rem; font-weight: 500;
+    transition: background .15s;
+  }
+  .frozen-toggle:hover { background: var(--surface-hover); }
+  .frozen-toggle .arrow { transition: transform .2s; font-size: 0.7rem; }
+  .frozen-toggle.open .arrow { transform: rotate(90deg); }
+  .frozen-panel {
+    display: none; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px; border-top: none; padding: 12px;
+  }
+  .frozen-panel.show { display: block; }
+  .frozen-search {
+    width: 100%; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg); color: var(--text); font-size: 0.78rem; margin-bottom: 10px;
+    outline: none;
+  }
+  .frozen-search:focus { border-color: #1976d2; }
+  .frozen-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px; max-height: 360px; overflow-y: auto;
+  }
+  .frozen-item {
+    display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+    border-radius: 6px; background: var(--fm-bg); font-size: 0.75rem;
+  }
+  .frozen-item .copy-btn {
+    background: none; border: none; cursor: pointer; color: var(--text-secondary);
+    font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; flex-shrink: 0;
+  }
+  .frozen-item .copy-btn:hover { background: var(--btn-hover); }
+  .frozen-item .copy-btn.copied { color: #27ae60; }
+  .frozen-item.frozen-s { background: #fff8e1; border: 1px solid #ffd700; }
+  [data-theme="dark"] .frozen-item.frozen-s { background: #3a3020; border: 1px solid #a08020; }
+
+  .legend { font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 12px; display: flex; gap: 16px; flex-wrap: wrap; }
+
+  /* Modal */
+  .overlay { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 1000; justify-content: center; align-items: center; }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 14px;
+    box-shadow: 0 8px 48px rgba(0,0,0,.2); width: 720px; max-width: 94vw; max-height: 85vh;
+    display: flex; flex-direction: column; overflow: hidden;
+    animation: modalIn .18s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-header { padding: 14px 20px; border-bottom: 1px solid var(--modal-border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-header h2 { font-size: 1rem; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-secondary); padding: 4px 8px; border-radius: 6px; line-height: 1; }
+  .modal-close:hover { background: var(--btn-hover); }
+  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; font-size: 0.84rem; line-height: 1.6; }
+  .modal-footer { padding: 10px 20px; border-top: 1px solid var(--modal-border); display: flex; gap: 8px; flex-shrink: 0; }
+
+  .fm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .fm-item { background: var(--fm-bg); border-radius: 8px; padding: 8px 12px; }
+  .fm-label { color: var(--fm-label); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.3px; }
+  .fm-value { font-weight: 600; font-size: 0.9rem; margin-top: 1px; }
+
+  .section { margin-bottom: 12px; }
+  .section-title { font-weight: 600; font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .driver-list { display: flex; flex-direction: column; gap: 5px; }
+  .driver-item { display: flex; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 0.86rem; align-items: flex-start; }
+  .driver-item-red { background: var(--chip-red-bg); border: 1px solid var(--chip-red-border); }
+  .driver-item-yellow { background: var(--chip-yellow-bg); border: 1px solid var(--chip-yellow-border); }
+  .driver-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .chat-snippet { background: var(--chat-bg); border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; }
+  .chat-line { padding: 2px 0; display: flex; gap: 8px; align-items: baseline; }
+  .chat-who { font-weight: 600; flex-shrink: 0; min-width: 18px; }
+  .chat-who-me { color: #5b8cbd; }
+  .chat-who-cust { color: #c07070; }
+  .chat-time { color: var(--text-tertiary); font-size: 0.74rem; flex-shrink: 0; min-width: 40px; }
+
+  .key-num { background: var(--key-num-bg); border-radius: 6px; padding: 6px 10px; margin-bottom: 3px; font-size: 0.81rem; }
+  .info-note { background: var(--info-note-bg); border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: var(--info-note-text); }
+
+  .btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--btn-border); font-size: 0.8rem; cursor: pointer; background: var(--surface); color: var(--text); transition: .12s; }
+  .btn:hover { background: var(--btn-hover); }
+  .btn-primary { background: #5b8cbd; color: #fff; border-color: #5b8cbd; }
+  .btn-primary:hover { background: #4a7dae; }
+
+  .copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 0.8rem; z-index: 2000; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .copy-toast.show { opacity: 1; }
+
+  @media (max-width: 768px) {
+    .overview-row { grid-template-columns: 1fr; }
+    .fm-grid { grid-template-columns: 1fr 1fr; }
+    .frozen-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div class="top-bar">
+  <div>
+    <h1>OKKI 客户状态看板</h1>
+    <p class="subtitle">横轴：生命周期阶段 → ｜ 纵轴：紧急度 ｜ 拖拽客户可改变分类 ｜ 2026-05-19</p>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 暗色模式</button>
+</div>
+
+<div class="overview-row">
+  <div class="overview-card"><h3>📊 各阶段客户分布</h3><div id="chart-bar" style="height:170px;"></div></div>
+  <div class="overview-card"><h3>🔥 紧急度 × 阶段</h3><div id="chart-heat" style="height:170px;"></div></div>
+</div>
+
+<div class="kpi-row2">
+  <div class="kpi-card2 red" onclick="openUrgencyModal('red')">
+    <div class="kpi-num" style="color:#d35f5f;">${urgencyCounts.red}</div>
+    <div class="kpi-lbl">🔴 需立即处理 · 我不动它就死</div>
+  </div>
+  <div class="kpi-card2 yellow" onclick="openUrgencyModal('yellow')">
+    <div class="kpi-num" style="color:#c8942e;">${urgencyCounts.yellow}</div>
+    <div class="kpi-lbl">🟡 需定时关注 · 业务推进需提醒</div>
+  </div>
+  <div class="kpi-card2 grey" onclick="openUrgencyModal('grey')">
+    <div class="kpi-num" style="color:#908e88;">${urgencyCounts.grey}</div>
+    <div class="kpi-lbl">⚪ 正常流转 · 暂无行动信号</div>
+  </div>
+  <div class="kpi-card2 frozen" onclick="openUrgencyModal('frozen')">
+    <div class="kpi-num" style="color:#8c8880;">${urgencyCounts.frozen}</div>
+    <div class="kpi-lbl">❄️ 冷冻 · >90天无互动</div>
+  </div>
+</div>
+
+<div class="matrix-wrap">
+<div class="matrix" style="grid-template-columns: 100px repeat(8, 1fr);">
+  <div class="cell-header"></div>
+  ${STAGES.map(s => `<div class="cell-header">${s}</div>`).join("")}
+
+  <div class="row-label"><span class="chip-dot chip-dot-red"></span>🔴 需立即处理</div>
+  ${STAGES.map(s => `<div class="cell" data-stage="${s}" data-urgency="red" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">${matrixData[s].red.map(d => chipHTML({...d, urgency:'red', stage:s})).join("")}</div>`).join("\n")}
+
+  <div class="row-label"><span class="chip-dot chip-dot-yellow"></span>🟡 需定时关注</div>
+  ${STAGES.map(s => `<div class="cell" data-stage="${s}" data-urgency="yellow" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">${matrixData[s].yellow.map(d => chipHTML({...d, urgency:'yellow', stage:s})).join("")}</div>`).join("\n")}
+
+  <div class="row-label"><span class="chip-dot chip-dot-grey"></span>⚪ 正常流转</div>
+  ${STAGES.map(s => `<div class="cell" data-stage="${s}" data-urgency="grey" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">${matrixData[s].grey.map(d => chipHTML({...d, urgency:'grey', stage:s})).join("")}</div>`).join("\n")}
+</div>
+</div>
+
+<!-- 冷冻层 -->
+<div class="frozen-section">
+  <div class="frozen-toggle" onclick="toggleFrozen()" id="frozen-toggle">
+    <span>❄️ 冷冻层 — ${urgencyCounts.frozen} 人 <span style="font-size:0.72rem;color:var(--text-secondary);">（>90天无互动，点击展开查看全部）</span></span>
+    <span class="arrow">▶</span>
+  </div>
+  <div class="frozen-panel" id="frozen-panel">
+    <input class="frozen-search" id="frozen-search" placeholder="搜索客户名或国家..." oninput="filterFrozen()">
+    <div class="frozen-grid" id="frozen-grid"></div>
+  </div>
+</div>
+
+<div style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:12px;">
+  💡 拖拽客户 chip 到其他格子 = 改变阶段/紧急度
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modal"></div>
+</div>
+
+<div class="copy-toast" id="copy-toast">✅ 已复制</div>
+
+<script>
+var CARDS = ${CARDS_JSON};
+var FROZEN = ${FROZEN_JSON};
+var currentDragCid = null;
+
+// ====== 主题切换 ======
+function toggleTheme() {
+  var body = document.body;
+  var btn = document.getElementById("theme-btn");
+  if (body.getAttribute("data-theme") === "dark") {
+    body.setAttribute("data-theme", "light");
+    btn.textContent = "🌙 暗色模式";
+  } else {
+    body.setAttribute("data-theme", "dark");
+    btn.textContent = "☀️ 亮色模式";
+  }
+}
+
+// ====== 拖拽 ======
+function handleDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add("drag-over");
+}
+function handleDragLeave(e) {
+  e.currentTarget.classList.remove("drag-over");
+}
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove("drag-over");
+  if (!currentDragCid) return;
+
+  var cell = e.currentTarget;
+  var newStage = cell.dataset.stage;
+  var newUrgency = cell.dataset.urgency;
+
+  // 更新 CARDS 数据
+  var card = CARDS.find(function(c) { return c.cid === currentDragCid; });
+  if (!card) return;
+
+  // Map stage back
+  var mappedStage = newStage === "在途" ? "已发货/在途" : newStage;
+  card.stage = mappedStage;
+  card.urgencyKey = newUrgency;
+
+  // 更新 statusBadge
+  if (newUrgency === "red" && !card.statusBadge) card.statusBadge = "刚拖入";
+  if (newUrgency === "grey") card.statusBadge = "";
+
+  // 移动 chip DOM
+  var chip = document.querySelector('[data-cid="' + currentDragCid + '"]');
+  if (chip) {
+    chip.classList.remove("chip-red", "chip-yellow", "chip-grey");
+    chip.classList.add("chip-" + newUrgency);
+    chip.dataset.urgency = newUrgency;
+    chip.dataset.stage = newStage;
+    var dot = chip.querySelector(".chip-dot");
+    if (dot) { dot.className = "chip-dot chip-dot-" + newUrgency; }
+    cell.appendChild(chip);
+  }
+
+  currentDragCid = null;
+  updateSummary();
+}
+
+document.addEventListener("dragstart", function(e) {
+  var chip = e.target.closest(".customer-chip");
+  if (!chip || chip.classList.contains("frozen-chip")) return;
+  currentDragCid = chip.dataset.cid;
+  chip.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", chip.dataset.cid);
+});
+
+document.addEventListener("dragend", function(e) {
+  var chip = e.target.closest(".customer-chip");
+  if (chip) chip.classList.remove("dragging");
+  currentDragCid = null;
+});
+
+function updateSummary() {
+  var counts = {red:0, yellow:0, grey:0, frozen:0};
+  CARDS.forEach(function(c) {
+    var u = c.urgencyKey || "grey";
+    counts[u] = (counts[u] || 0) + 1;
+  });
+  // Update summary bar (simplified - just update the strong tags)
+  var spans = document.querySelectorAll(".summary-bar span strong");
+  if (spans.length >= 4) {
+    spans[0].textContent = counts.red;
+    spans[1].textContent = counts.yellow;
+    spans[2].textContent = counts.grey;
+    spans[3].textContent = counts.frozen;
+  }
+}
+
+// ====== 冷冻层 ======
+function renderFrozen(filter) {
+  var grid = document.getElementById("frozen-grid");
+  var list = FROZEN;
+  if (filter) {
+    var q = filter.toLowerCase();
+    list = FROZEN.filter(function(f) {
+      return f.name.toLowerCase().includes(q) || f.country.toLowerCase().includes(q);
+    });
+  }
+  var html = "";
+  for (var i = 0; i < list.length; i++) {
+    var f = list[i];
+    var tb = ${JSON.stringify(tierColors)}[f.tier] || ${JSON.stringify(tierColors)}["C"];
+    var sClass = f.tier === 'S' ? ' frozen-s' : '';
+    html += '<div class="frozen-item' + sClass + '" onclick="openFrozenModal()" style="cursor:pointer;">' +
+      '<span class="chip-tier" style="background:' + tb.bg + ';color:' + tb.color + ';flex-shrink:0;">' + f.tier + '</span>' +
+      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(f.name) + '">' + (f.tier === 'S' ? '⭐' : '') + esc(f.name) + '</span>' +
+      '<span style="font-size:0.68rem;color:var(--text-tertiary);flex-shrink:0;">' + esc(f.country) + '</span>' +
+      '<span style="font-size:0.65rem;color:var(--text-secondary);flex-shrink:0;">' + (f.daysSince || "?") + 'd</span>' +
+      '<button class="copy-btn" onclick="event.stopPropagation();copyName(' + JSON.stringify(esc(f.name)) + ', this)" title="复制名字">📋</button>' +
+      '</div>';
+  }
+  if (list.length === 0) html = '<div style="padding:12px;color:var(--text-secondary);text-align:center;">无匹配结果</div>';
+  grid.innerHTML = html;
+}
+
+function toggleFrozen() {
+  var panel = document.getElementById("frozen-panel");
+  var toggle = document.getElementById("frozen-toggle");
+  var isOpen = panel.classList.contains("show");
+  if (isOpen) {
+    panel.classList.remove("show");
+    toggle.classList.remove("open");
+  } else {
+    panel.classList.add("show");
+    toggle.classList.add("open");
+    if (!panel.dataset.rendered) {
+      renderFrozen();
+      panel.dataset.rendered = "1";
+    }
+  }
+}
+
+function filterFrozen() {
+  var q = document.getElementById("frozen-search").value;
+  renderFrozen(q);
+}
+
+function copyName(name, btn) {
+  navigator.clipboard.writeText(name).then(function() {
+    if (btn) { btn.classList.add("copied"); btn.textContent = "✓"; setTimeout(function() { btn.classList.remove("copied"); btn.textContent = "📋"; }, 1500); }
+    var toast = document.getElementById("copy-toast");
+    toast.textContent = "✅ 已复制: " + name;
+    toast.classList.add("show");
+    setTimeout(function() { toast.classList.remove("show"); }, 1800);
+  });
+}
+
+// ====== Modal ======
+function esc(s) {
+  if (typeof s !== 'string') return String(s);
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function deriveNextStep(c) {
+  var steps = [];
+  if (c.richDrivers && c.richDrivers.length) {
+    for (var i=0; i<c.richDrivers.length; i++) {
+      var dr = c.richDrivers[i];
+      if (dr.level === 'red') steps.push('⚡ ' + dr.title + ' → 优先处理');
+      else steps.push('📌 ' + dr.title);
+    }
+  }
+  if (steps.length === 0) {
+    switch (c.stage) {
+      case '需求探索': steps.push('了解客户采购规模和目标市场，推送热卖款'); break;
+      case '报价已发': steps.push('温和跟进报价反馈，确认是否有其他尺寸/面料需求'); break;
+      case '谈判中': steps.push('推动下一步决策，确认打样/付款时间线'); break;
+      case '待付款': steps.push('确认付款方式，发送PI'); break;
+      case '待发货': steps.push('同步生产进度，拍照或视频给客户'); break;
+      case '已发货/在途': steps.push('跟踪物流状态，到港前提醒清关'); break;
+      case '已签收': steps.push('回访产品满意度，试探复购意向'); break;
+      case '待返单': steps.push('同步新品/热卖款，争取返单'); break;
+    }
+  }
+  if (c.daysSince !== null && c.daysSince > 30) {
+    steps.push('⚠️ 已沉默' + c.daysSince + '天，考虑WhatsApp/电话触达');
+  }
+  return steps.join('\\n');
+}
+
+function openModal(cid) {
+  var c = CARDS.find(function(x){ return x.cid === cid; });
+  if (!c) return;
+
+  // Lock body scroll
+  document.body.classList.add("modal-open");
+
+  var h = '';
+  h += '<div class="modal-header"><h2>' + esc(c.name) + '</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  h += '<div class="modal-body">';
+
+  h += '<div class="fm-grid">';
+  var fields = [
+    ['国家', c.countryCN || c.country],
+    ['阶段', c.stage],
+    ['等级', c.tier + '级'],
+    ['最后联系', c.daysSince !== null ? c.daysSince + '天前' : '?']
+  ];
+  for (var i=0; i<fields.length; i++) {
+    h += '<div class="fm-item"><div class="fm-label">' + fields[i][0] + '</div><div class="fm-value">' + esc(String(fields[i][1])) + '</div></div>';
+  }
+  if (c.firstContact) {
+    h += '<div class="fm-item"><div class="fm-label">首次联系</div><div class="fm-value">' + c.firstContact + '</div></div>';
+  }
+  h += '</div>';
+
+  if (c.richDrivers && c.richDrivers.length) {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="driver-list">';
+    for (var j=0; j<c.richDrivers.length; j++) {
+      var dr = c.richDrivers[j];
+      var cls = dr.level === 'red' ? 'driver-item-red' : 'driver-item-yellow';
+      var icon = dr.level === 'red' ? '🔴' : '🟡';
+      h += '<div class="driver-item ' + cls + '"><span class="driver-icon">' + icon + '</span><div><strong>' + esc(dr.title) + '</strong><div style="color:var(--text-secondary);font-size:0.83em;margin-top:2px;">' + esc(dr.detail) + '</div></div></div>';
+    }
+    h += '</div></div>';
+  } else if (c.urgencyKey === 'red') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">⚠️ 该客户标记为需立即处理，但未命中因子节奏天。</div></div>';
+  } else if (c.urgencyKey === 'yellow') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">📌 该客户标记为需关注，可能刚联系过或等待客户行动中。</div></div>';
+  } else if (c.urgencyKey !== 'frozen') {
+    h += '<div class="section"><div class="section-title">📋 驱动因子</div><div class="info-note">无活跃因子。该客户在正常流转中，暂无行动信号。</div></div>';
+  }
+
+  if (c.chatLinesCN && c.chatLinesCN.length) {
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var k=0; k<c.chatLinesCN.length; k++) {
+      var cl = c.chatLinesCN[k];
+      var whoClass = cl.who === '我方' ? 'chat-who-me' : 'chat-who-cust';
+      h += '<div class="chat-line"><span class="chat-who ' + whoClass + '">' + esc(cl.who) + '</span><span class="chat-time">' + esc(cl.time) + '</span>' + esc(cl.action) + '</div>';
+    }
+    h += '</div></div>';
+  } else if (c.chatLines && c.chatLines.length) {
+    h += '<div class="section"><div class="section-title">💬 聊到哪了</div><div class="chat-snippet">';
+    for (var kk=0; kk<c.chatLines.length; kk++) {
+      var cl2 = c.chatLines[kk];
+      var whoClass2 = cl2.who === 'me' ? 'chat-who-me' : 'chat-who-cust';
+      h += '<div class="chat-line"><span class="chat-who ' + whoClass2 + '">' + (cl2.who === 'me' ? '我' : '客') + '</span><span class="chat-time">' + cl2.time + '</span>' + esc(cl2.text) + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  if (c.keyNums && c.keyNums.length) {
+    h += '<div class="section"><div class="section-title">🔢 关键数字</div>';
+    for (var m=0; m<c.keyNums.length; m++) {
+      h += '<div class="key-num">' + esc(c.keyNums[m]) + '</div>';
+    }
+    h += '</div>';
+  }
+
+  if (c.nextStep) {
+    h += '<div class="section"><div class="section-title">→ 下一步</div><div style="font-size:0.9em;line-height:1.7;white-space:pre-line">' + esc(c.nextStep) + '</div></div>';
+  }
+
+  if (!c.hasBrief && c.urgencyKey !== 'frozen') {
+    var derivedStep = deriveNextStep(c);
+    if (derivedStep) {
+      h += '<div class="section"><div class="section-title">→ 建议动作</div><div style="font-size:0.9em;line-height:1.7;white-space:pre-line">' + derivedStep + '</div></div>';
+    }
+    h += '<div class="info-note" style="margin-top:12px;">📝 暂无深度状态卡。运行 /okki 深度分析获取完整聊天摘要和关键数字。</div>';
+  }
+
+  h += '</div>';
+  h += '<div class="modal-footer"><button class="btn btn-primary">✏️ 起草回复</button><button class="btn">🔍 深度分析</button><button class="btn">✅ 标记已处理</button></div>';
+
+  document.getElementById("modal").innerHTML = h;
+  document.getElementById("overlay").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("overlay").classList.remove("show");
+  document.body.classList.remove("modal-open");
+}
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeModal();
+});
+
+// ====== 紧急度汇总弹窗 ======
+function openUrgencyModal(urgency) {
+  var urgencyNames = {red:"需立即处理", yellow:"需定时关注", grey:"正常流转", frozen:"冷冻"};
+  var list = CARDS.filter(function(c) { return (c.urgencyKey || "grey") === urgency; });
+  var rows = "";
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
+    var tb = ${JSON.stringify(tierColors)}[c.tier] || ${JSON.stringify(tierColors)}["C"];
+    rows += '<tr><td><span class="chip-tier" style="background:' + tb.bg + ';color:' + tb.color + ';font-size:0.6rem;padding:0 3px;border-radius:3px;font-weight:600;">' + c.tier + '</span> <strong style="cursor:pointer;color:var(--text);" onclick="event.stopPropagation();openModal(' + JSON.stringify(c.cid) + ')">' + esc(c.name) + '</strong></td><td style="text-align:center;">' + esc(c.countryCN || c.country || "") + '</td><td>' + esc(c.stage || "") + '</td><td style="text-align:center;">' + (c.daysSince !== null ? c.daysSince + "d" : "?") + '</td></tr>';
+  }
+  var h = '<div class="modal-header"><h2 id="modal-title">' + esc(urgencyNames[urgency] || urgency) + ' — ' + list.length + '人</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  h += '<div class="modal-body"><table style="width:100%;font-size:0.82rem;"><tr><th style="width:180px;">客户</th><th style="text-align:center;width:90px;">国家</th><th>阶段</th><th style="text-align:center;width:60px;">静默</th></tr>' + rows + '</table></div>';
+  document.getElementById("modal").innerHTML = h;
+  document.getElementById("overlay").classList.add("show");
+  document.body.classList.add("modal-open");
+}
+
+// ====== 冷冻层全量弹窗 ======
+function openFrozenModal() {
+  var list = CARDS.filter(function(c) { return (c.urgencyKey || "grey") === "frozen"; });
+  var rows = "";
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
+    var tb = ${JSON.stringify(tierColors)}[c.tier] || ${JSON.stringify(tierColors)}["C"];
+    var star = c.tier === "S" ? "⭐" : "";
+    rows += '<tr><td><span class="chip-tier" style="background:' + tb.bg + ';color:' + tb.color + ';font-size:0.6rem;padding:0 3px;border-radius:3px;font-weight:600;">' + c.tier + '</span> ' + star + ' <strong style="cursor:pointer;color:var(--text);" onclick="event.stopPropagation();openModal(' + JSON.stringify(c.cid) + ')">' + esc(c.name) + '</strong></td><td style="text-align:center;">' + esc(c.countryCN || c.country || "") + '</td><td>' + esc(c.stage || "") + '</td><td style="text-align:center;">' + (c.daysSince !== null ? c.daysSince + "d" : "?") + '</td><td><button class="copy-btn" onclick="event.stopPropagation();copyName(' + JSON.stringify(esc(c.name)) + ', this)" title="复制名字">📋</button></td></tr>';
+  }
+  var h = '<div class="modal-header"><h2>❄️ 冷冻层 — ' + list.length + '人</h2><button class="modal-close" onclick="closeModal()">✕</button></div>';
+  h += '<div class="modal-body"><p style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:10px;">>90天无互动 | 点击客户名打开详情 | 点击 📋 复制名字</p><div style="max-height:60vh;overflow-y:auto;"><table style="width:100%;font-size:0.82rem;"><tr><th style="width:180px;">客户</th><th style="text-align:center;width:90px;">国家</th><th>最后阶段</th><th style="text-align:center;width:60px;">静默</th><th style="width:40px;"></th></tr>' + rows + '</table></div></div>';
+  document.getElementById("modal").innerHTML = h;
+  document.getElementById("overlay").classList.add("show");
+  document.body.classList.add("modal-open");
+}
+
+// ====== ECharts ======
+(function() {
+  function initCharts() {
+    var barEl = document.getElementById("chart-bar");
+    var heatEl = document.getElementById("chart-heat");
+    if (!barEl || !heatEl) return;
+    if (typeof echarts === "undefined") { setTimeout(initCharts, 200); return; }
+
+    var barChart = echarts.init(barEl);
+  barChart.setOption({
+    tooltip: { trigger: "axis" },
+    grid: { left: 90, right: 30, top: 8, bottom: 20 },
+    xAxis: { type: "value", axisLabel: { fontSize: 10 } },
+    yAxis: { type: "category", data: ${JSON.stringify(STAGES)}, axisLabel: { fontSize: 10 } },
+    series: [{
+      type: "bar",
+      data: ${JSON.stringify(barData)},
+      itemStyle: { borderRadius: [0, 4, 4, 0], color: new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:"#5b8cbd"},{offset:1,color:"#8ab4d8"}]) },
+      label: { show: true, position: "right", fontSize: 10 }
+    }]
+  });
+
+  var heatChart = echarts.init(document.getElementById("chart-heat"));
+  heatChart.setOption({
+    tooltip: { formatter: function(p) { return ["🔴紧急","🟡关注","⚪正常"][p.value[0]] + " × " + ${JSON.stringify(STAGES)}[p.value[1]] + "<br/>" + p.value[2] + "人"; } },
+    grid: { left: 8, right: 20, top: 20, bottom: 45 },
+    xAxis: { type: "category", data: ["🔴紧急","🟡关注","⚪正常"], position: "top", axisLabel: { fontSize: 10 } },
+    yAxis: { type: "category", data: ${JSON.stringify(STAGES)}, axisLabel: { fontSize: 10 } },
+    visualMap: { min: 0, max: ${maxHeatVal}, calculable: false, orient: "horizontal", left: "center", bottom: 2, inRange: { color: ["#f7f5f1","#f5e6c8","#e8a850","#c06040"] } },
+    series: [{ type: "heatmap", data: ${JSON.stringify(heatmapData)}, label: { show: true, fontSize: 9 }, emphasis: { itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,.3)" } } }]
+  });
+
+  window.addEventListener("resize", function() { barChart.resize(); heatChart.resize(); });
+}
+
+initCharts();
+})();
+</script>
+
+</body>
+</html>`;
+
+fs.writeFileSync(DST, output, "utf8");
+console.log(`OK -> dashboard_v4.html (${(fs.statSync(DST).size/1024).toFixed(1)} KB)`);

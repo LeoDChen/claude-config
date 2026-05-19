@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFQ报价 — Mukul Gautam / 女婴套装</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background:#f2f3f5; color:#1d2129; padding:20px; }
+  .container { max-width:800px; margin:0 auto; }
+  h1 { font-size:18px; margin-bottom:6px; }
+  .subtitle { color:#86909c; font-size:13px; margin-bottom:16px; }
+
+  .card { background:#fff; border-radius:8px; padding:20px; margin-bottom:12px; border:1px solid #e5e6eb; }
+
+  .section-title { font-size:14px; font-weight:700; color:#1d2129; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid #f2f3f5; }
+  .section-title .num { color:#165dff; margin-right:4px; }
+
+  .field { margin-bottom:12px; }
+  .field:last-child { margin-bottom:0; }
+  .label { font-size:12px; color:#4e5969; margin-bottom:4px; }
+  .label .required { color:#f53f3f; margin-right:2px; }
+  .value { font-size:14px; color:#1d2129; background:#f7f8fa; padding:8px 12px; border-radius:4px; word-break:break-word; }
+  .value.empty { color:#c9cdd4; font-style:italic; }
+  .value.price { background:#fff7e6; border:1px dashed #ff7d00; color:#ff7d00; font-weight:700; }
+
+  .row2 { display:flex; gap:12px; }
+  .row2 .field { flex:1; }
+  .row3 { display:flex; gap:12px; }
+  .row3 .field { flex:1; }
+
+  .radio-group { display:flex; gap:16px; }
+  .radio { font-size:13px; color:#86909c; }
+  .radio.active { color:#165dff; font-weight:700; }
+
+  .file-hint { font-size:11px; color:#86909c; margin-top:4px; }
+
+  .upload-suggest { background:#f0f5ff; border-radius:4px; padding:10px 12px; margin-top:8px; }
+  .upload-suggest .tit { font-size:12px; font-weight:700; color:#165dff; margin-bottom:6px; }
+  .upload-suggest li { font-size:12px; color:#4e5969; margin-left:16px; margin-bottom:3px; }
+
+  .buyer-card { display:flex; gap:12px; align-items:center; }
+  .buyer-avatar { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,#165dff,#4080ff); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; }
+  .buyer-info { flex:1; }
+  .buyer-name { font-size:15px; font-weight:700; }
+  .buyer-country { font-size:12px; color:#86909c; }
+  .buyer-tags { display:flex; gap:6px; margin-top:4px; flex-wrap:wrap; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:10px; background:#e8f3ff; color:#165dff; }
+  .tag.gold { background:#fff7e6; color:#ff7d00; }
+  .tag.warn { background:#ffece8; color:#f53f3f; }
+
+  .analysis { font-size:13px; color:#4e5969; line-height:1.7; }
+  .analysis strong { color:#1d2129; }
+
+  .btn-row { display:flex; gap:10px; margin-top:16px; }
+  .btn { padding:8px 20px; border-radius:4px; font-size:13px; cursor:pointer; border:none; }
+  .btn-primary { background:#165dff; color:#fff; }
+  .btn-secondary { background:#f2f3f5; color:#4e5969; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>RFQ 报价表单</h1>
+<p class="subtitle">客户：Mukul Gautam（印度） | 仅剩 <span style="color:#f53f3f;font-weight:700;">1</span> 个报价席位</p>
+
+<!-- 买家信息 -->
+<div class="card">
+  <div class="buyer-card">
+    <div class="buyer-avatar">M</div>
+    <div class="buyer-info">
+      <div class="buyer-name">Mukul Gautam <span style="font-size:12px;color:#86909c;font-weight:400;">· India</span></div>
+      <div class="buyer-tags">
+        <span class="tag gold">历史订单额高</span>
+        <span class="tag">邮件认证</span>
+        <span class="tag">RFQ有成交</span>
+        <span class="tag">高效回复</span>
+        <span class="tag warn">已报9家 | 仅剩1席</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 深度分析 -->
+<div class="card">
+  <div class="section-title">深度分析</div>
+  <div class="analysis">
+    <p><strong>需求拆解：</strong>买家原话问的是"fabric composition details for 0-3M pink"，说明他在做产品筛选对比，不是随便发。他之前联系了Kyle Gong没回复，我们是替补进场。聚酯纤维（Polyester）标在标题中，但详情里又写了Denim（牛仔布）——存在矛盾，报价中以Polyester为准回复，引导买家澄清确认。</p>
+    <p style="margin-top:8px;"><strong>竞争态势：</strong>已有9家报价，我们最后1席。差异化靠<strong>工厂硬实力</strong>：BSCI/ISO9001认证 + 帮宝适/迪士尼代工背书 + 自有打样能力 + 可配合找面料。</p>
+    <p style="margin-top:8px;"><strong>策略：</strong>买家目前处于比较阶段，"能打样、能找面料"比报低价更重要。报价中突出打样路径和定制能力，引导下一步。</p>
+  </div>
+</div>
+
+<!-- 产品及价格 -->
+<div class="card">
+  <div class="section-title"><span class="num">一、</span>产品及价格 1</div>
+
+  <div class="field">
+    <div class="label"><span class="required">*</span>产品名称</div>
+    <div class="value">2026 Summer Baby Girl Ruffled Short-Sleeve Romper with Floral Bow and Layered Skirt Set (2pcs) — 0-3 Months, Pink, Polyester</div>
+  </div>
+
+  <div class="field">
+    <div class="label">产品编号</div>
+    <div class="value">XS-BG-SS26-001</div>
+  </div>
+
+  <div class="field">
+    <div class="label"><span class="required">*</span>产品细节</div>
+    <div class="value">Material: 100% Polyester, lightweight and breathable for summer.<br>
+Size: 0-3 Months (approx. 52-59cm height).<br>
+Design: Pullover romper with ruffled short sleeves, floral bow decoration, layered skirt bottom. 2-piece set (romper + skirt).<br>
+Printing: Heat-transfer floral pattern.<br>
+Closure: Pullover style, snap buttons at crotch for easy diaper change.<br>
+Craftsmanship: Flatlock seams (5-thread) for baby comfort, no skin irritation. All fabric pre-washed for softness.<br>
+Customization: Full OEM/ODM supported — custom fabric, color, print, size range, label, and packaging.</div>
+  </div>
+
+  <div class="field">
+    <div class="label">产品图片/文件 <span class="file-hint">（最多5个附件，≤5MB，支持 jpg/png/pdf/doc/xlsx）</span></div>
+    <div class="upload-suggest">
+      <div class="tit">建议上传（见下方详细清单）</div>
+      <li>类似女婴套装产品实拍图 2-3张</li>
+      <li>工厂简介/资质一览（PDF 1页）</li>
+      <li>BSCI / ISO9001 证书</li>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid #f2f3f5; margin:14px 0; padding-top:14px;">
+    <div class="section-title" style="border-bottom:none; margin-bottom:10px;">价格详情</div>
+
+    <div class="row3">
+      <div class="field"><div class="label"><span class="required">*</span>装运条款</div><div class="value">FOB</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>港口</div><div class="value">Guangzhou</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>报价有效期</div><div class="value">2026-06-18</div></div>
+    </div>
+
+    <div class="row3">
+      <div class="field"><div class="label"><span class="required">*</span>货币单位</div><div class="value">USD</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>数量单位</div><div class="value">Pieces</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>付款方式</div><div class="value">T/T (40% deposit, 60% before shipment)</div></div>
+    </div>
+
+    <div class="row2">
+      <div class="field"><div class="label"><span class="required">*</span>订购数量</div><div class="value">500 — 10,000 Pieces</div></div>
+      <div class="field"><div class="label"><span class="required">*</span>产品单价</div><div class="value price">【待老板审核后填入】 USD / Piece</div></div>
+    </div>
+
+    <div style="font-size:11px; color:#86909c; margin-top:6px;">区间价格：1-499pcs（样品价）| 500-2999pcs | 3000-9999pcs | 10000+pcs — 待老板审核</div>
+  </div>
+</div>
+
+<!-- 报价补充信息 -->
+<div class="card">
+  <div class="section-title"><span class="num">二、</span>报价补充信息</div>
+
+  <div class="field">
+    <div class="label">提供样品</div>
+    <div class="radio-group">
+      <span class="radio active">是</span>
+      <span class="radio">否</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="label">提供免费样品</div>
+    <div class="radio-group">
+      <span class="radio">是</span>
+      <span class="radio active">否（收费）</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="label">样品运费支付方</div>
+    <div class="radio-group">
+      <span class="radio active">买家</span>
+      <span class="radio">卖家</span>
+      <span class="radio">协商</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="label">预计的寄样日期</div>
+    <div class="value">确认后 7-10 天</div>
+  </div>
+
+  <div class="field">
+    <div class="label">样品费说明</div>
+    <div class="value">样品费全额收取。大货订单确认后，样品费可从大货总金额中<strong>全额抵扣</strong>。</div>
+  </div>
+
+  <div class="field">
+    <div class="label"><span class="required">*</span>给买家的消息</div>
+    <div class="value" style="white-space:pre-wrap;">Hi Mukul,
+
+Thank you for your RFQ! I understand you reached out to Kyle earlier — apologies for the delayed response, I'm following up from our team.
+
+Regarding your question about fabric composition for the 0-3M pink baby girl outfit:
+
+The shell fabric is 100% Polyester — lightweight, quick-drying, and soft against baby skin, ideal for summer wear. We use pre-washed polyester to ensure no skin irritation for newborns. The ruffled sleeves and layered skirt are triple-stitched for durability, and the crotch area features snap buttons for easy diaper changes.
+
+About us — Yiyang Xiaoxingxing Garments:
+🏭 6,000+ sqm factory with 200+ workers (est. 2015)
+✅ BSCI & ISO9001 certified
+🏅 OEM partner for Pampers (2024 Olympic edition), Disney, Johnson's, Unicharm
+🧪 In-house 5A/7A antibacterial treatment facility
+✂️ Full customization: fabric, print, size, label, packaging
+
+Sample & Order Info:
+• Sample: Available, 7-10 days after order confirmation. Sample fee charged but <strong>fully deductible</strong> from bulk order.
+• Sample shipping: Buyer covers courier cost.
+• MOQ for bulk: 500 pcs/style/color/size.
+• Payment: T/T 40% deposit, 60% before shipment.
+
+We don't stock ready pink polyester for this exact item, but we work with a wide supplier network and can source the right fabric quickly. If you have a specific fabric swatch or Pantone color reference, we can match it precisely.
+
+Happy to send you photos of similar baby girl sets we've produced. What's the best way to share more details with you — email or WhatsApp?
+
+Best regards,
+[Your Name]
+Yiyang Xiaoxingxing Garments Co., Ltd.</div>
+  </div>
+
+  <div class="field">
+    <div class="label">文件上传 <span class="file-hint">（最多6个附件，≤5MB）</span></div>
+    <div class="upload-suggest">
+      <div class="tit">建议上传以下文件</div>
+      <li><strong>1. 工厂简介 PDF</strong> — 1页，含工厂大门/车间/样品间照片、核心数据（6000㎡/200+人/2015年成立）、认证标识（BSCI/ISO9001）、品牌合作logo墙（Pampers/Disney/Johnson's/Unicharm）</li>
+      <li><strong>2. 类似产品实拍图 2-3张</strong> — 已生产过的女婴套装/连衣裙，展示做工细节（平缝/暗扣/印花清晰度）</li>
+      <li><strong>3. BSCI 或 ISO9001 证书截图</strong> — 增强信任</li>
+      <li><strong>4. 面料色卡/样本册照片（如有）</strong> — 展示粉色涤纶面料选项</li>
+    </div>
+  </div>
+</div>
+
+<!-- 底部 -->
+<div class="card" style="text-align:center; color:#86909c; font-size:12px;">
+  您的联系方式和公司信息将随报价一同发送给买家
+  <div class="btn-row" style="justify-content:center;">
+    <button class="btn btn-secondary">保存报价模板</button>
+    <button class="btn btn-primary">提交报价</button>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

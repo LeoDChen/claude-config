@@ -1,0 +1,87 @@
+# OKKI Dashboard V2 修复计划
+
+## 背景
+
+用户预览 dashboard HTML 后提出 7 个问题。核心诉求：数据准确、交互便捷、行动指引具体。
+
+## 当前状态
+
+- `orders_latest.json` 为空 — `sync_orders.js` 选择器没匹配到 OKKI 订单页的实际 DOM 结构
+- 修复 1/2/3/5/7 不依赖订单数据，可立即改
+- 修复 4 依赖订单数据，需先修 `sync_orders.js`
+- 修复 6 需要改 `enhanced_classify.js` + 重新分类，工作量大，分步做
+
+## 分阶段执行
+
+### 第一阶段：5 项独立修复（generate_dashboard.js）
+
+**修复 1：只过滤 Assistant Eva**
+- 用户明确：只排除 Assistant Eva 这一个系统机器人，不按国家过滤
+- 在 merge 循环中加：`if (name === 'Assistant Eva') continue;`
+
+**修复 2：矩阵表头去重**
+- line 565: `${QUALITY_ORDER.map(q => `<th>S ${q}</th>`)}` → `${QUALITY_ORDER.map(q => `<th>${q}</th>`)}`
+
+**修复 3：弹窗改居中模态框**
+- 参照 `output/popup-demo.html` 方案 B
+- 全局一个 `<div class="modal-overlay">`，点击格子时动态填充内容 + 显示
+- CSS: `position:fixed;` 全屏遮罩，内容区居中 + max-height:70vh 可滚动
+- 关闭: 点遮罩 / X按钮 / ESC键
+
+**修复 5：静默排序反转 + 完整名单**
+- 渲染顺序：hot → active → short → mid → long → deep
+- 展开 `buildSilenceRows` 显示全部客户（去掉 limit=15 截断）
+
+**修复 7：国家代码 → 中文**
+- 已有 `countryNames` 映射表（line 298），扩展覆盖所有出现的国家
+- 矩阵弹窗和静默列表中用 `countryNames[code] || code` 显示
+
+### 第二阶段：订单数据抓取（修复 4）
+
+**根因诊断**（基于 probe 数据）：
+
+sync_orders.js v2 返回 0 条的原因有三：
+
+1. **多余 tab 点击破坏渲染**（line 69-78）：页面默认已在"全部"子 tab，脚本又 click "全部"，触发 Vue 重渲染。2s 后虚拟列表未完成渲染就去 query → 0 条。
+2. **选择器不够稳定**：`.row-item-level-*` 是 CSS module 类名，Vue 虚拟滚动自带类 `.vue-recycle-scroller__item-view` 更稳定（probe 的 `divsWithOrderNumber` 已确认）。
+3. **缺少订单号格式校验**：bodyText 含"总计（ USD  ）"等汇总行，单靠 `texts[1]` 非空不够。
+
+**修复方案（sync_orders.js v3）**：
+
+1. **删除 tab 点击块**（line 69-78 整块移除）— 默认 URL 已在"全部"
+2. **选择器改为** `.vue-recycle-scroller__item-view` — Vue 组件自带类，不依赖 CSS module hash
+3. **行内取** `.cell-inner` **直接获取字段值**
+4. **跳过标题行**：`row.querySelector('.row-item__title')` 存在则跳过
+5. **订单号格式校验**：`/^\d{10,}/.test(texts[1])` 过滤汇总行
+6. **等待策略改进**：翻页后用 `page.waitForSelector('.vue-recycle-scroller__item-view')` 替代固定 `setTimeout 3000`
+7. **翻页按钮用页码匹配**：bodyText 显示 `1 2`，用 `textContent.trim() === String(pgNum)` 精确匹配
+
+**字段映射**（probe bodyText 已验证）：
+cells[1]=订单号, cells[2]=更新日期, cells[3]=订单金额, cells[4]=客户, cells[5]=订单状态, cells[6]=ERP状态
+（cells[0] 是行号，跳过）
+
+**预期**：2 页共 39 条订单，其中 12 条"交易成功"
+
+### 第三阶段：行动目标具体化（修复 6）
+
+- 修改 `enhanced_classify.js`，为每个客户提取 `lastCustQuestion` / `ourResponseQuality` / `responseGapDays`
+- 重新跑分类生成新的 `s1_enhanced_full.json`
+- `generate_dashboard.js` 中在弹窗客户列表展示这些字段
+
+## 改动文件
+
+| 文件 | 阶段 | 说明 |
+|------|------|------|
+| `scripts/generate_dashboard.js` | 一 | 修复 1/2/3/5/7 |
+| `scripts/sync_orders.js` | 二 | 修正选择器，重新提取 |
+| `data/orders_latest.json` | 二 | sync_orders.js 输出 |
+| `scripts/enhanced_classify.js` | 三 | 增加信号字段 |
+| `data/s1_enhanced_full.json` | 三 | 重新分类生成 |
+
+## 验证
+
+1. 看板无 Assistant Eva
+2. 表头：S / A / B / C / D
+3. 弹窗居中，不超出屏幕
+4. 静默：hot 在上 deep 在下，展开全量
+5. 国家显示中文
