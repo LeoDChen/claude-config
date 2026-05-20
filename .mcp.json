@@ -13,7 +13,7 @@
   },
   "grsai-image": {
     "command": "node",
-    "args": ["C:\\Users\\Administrator\\.claude\\mcp-servers\\grsai\\server.mjs"],
+    "args": ["D:\\ClaudeWorkspace\\.claude\\mcp-servers\\grsai\\server.mjs"],
     "env": {
       "GRSAI_API_KEY": "sk-5d0b88ba7e0945d79213682dc06e0119",
       "GRSAI_API_BASE": "https://grsai.dakka.com.cn",

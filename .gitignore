@@ -10,6 +10,11 @@ ide/
 scheduled_tasks.lock
 .last-cleanup
 
+# 运行时
+sessions/
+history.jsonl
+projects/
+
 # MCP servers（笔记本重新安装即可）
 mcp-servers/
 
