@@ -40,4 +40,6 @@
 
 - [OB对话归档系统](ob_archive_system.md) — 231→223个对话已归档 OB，46客户档案，13主题索引，V2脚本+双链
 
+- [台式机同步 → 笔记本同步流程](desktop-sync-workflow.md) — 台式机 push 后笔记本三仓库 pull + OB 全量归档的完整步骤
+
 *记忆文件存储在 memory/ 目录中，此文件仅为索引*
