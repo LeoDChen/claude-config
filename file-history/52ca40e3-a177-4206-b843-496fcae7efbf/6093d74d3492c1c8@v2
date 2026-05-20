@@ -6,7 +6,6 @@
     "allowUnsandboxedCommands": true
   },
   "permissions": {
-    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(*)",
       "WebSearch",

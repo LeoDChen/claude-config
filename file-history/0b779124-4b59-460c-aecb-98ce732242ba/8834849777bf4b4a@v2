@@ -1,0 +1,6 @@
+{
+    "claudeCode.preferredLocation": "panel",
+    "claudeCode.allowDangerouslySkipPermissions": true,
+    "claudeCode.initialPermissionMode": "bypassPermissions",
+    "extensions.ignoreRecommendations": true
+}

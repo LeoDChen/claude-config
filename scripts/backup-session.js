@@ -5,9 +5,18 @@
 const fs = require('fs');
 const path = require('path');
 
-const OBSIDIAN_DIR = 'E:/道友的宝贝/道友的宝贝/对话归档/CC';
-const REGISTRY_FILE = 'D:/ClaudeWorkspace/.session_registry.json';
-const SESSION_NOTE = 'D:/ClaudeWorkspace/当前会话笔记.md';
+const OBSIDIAN_DIR = (() => {
+  for (const p of ['E:/道友的宝贝/道友的宝贝/对话归档/CC', 'D:/Obsidian仓库/对话归档/CC'])
+    if (fs.existsSync(p)) return p;
+  return 'D:/Obsidian仓库/对话归档/CC';
+})();
+const WORKSPACE_DIR = (() => {
+  for (const p of ['D:/ClaudeWorkspace', path.resolve(__dirname, '..', '..')])
+    if (fs.existsSync(p)) return p;
+  return 'D:/ClaudeWorkspace';
+})();
+const REGISTRY_FILE = path.join(WORKSPACE_DIR, '.session_registry.json');
+const SESSION_NOTE = path.join(WORKSPACE_DIR, '当前会话笔记.md');
 
 if (!fs.existsSync(OBSIDIAN_DIR)) {
   fs.mkdirSync(OBSIDIAN_DIR, { recursive: true });

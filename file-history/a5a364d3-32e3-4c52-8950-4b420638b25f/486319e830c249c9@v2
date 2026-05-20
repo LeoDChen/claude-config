@@ -1,0 +1,113 @@
+#Requires -RunAsAdministrator
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+$Host.UI.RawUI.WindowTitle = "Copilot Removal"
+
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  Microsoft Copilot Removal Tool" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+
+$removed = $false
+
+# ---- 1. Appx Packages ----
+Write-Host "[1/4] Removing Copilot Appx packages..." -ForegroundColor Yellow
+$copilotPkgs = Get-AppxPackage -AllUsers | Where-Object {
+    $_.Name -match 'copilot|Microsoft.Copilot'
+}
+if ($copilotPkgs) {
+    foreach ($pkg in $copilotPkgs) {
+        Write-Host "  Removing: $($pkg.Name)" -ForegroundColor Gray
+        try {
+            Remove-AppxPackage -Package $pkg.PackageFullName -AllUsers -ErrorAction Stop
+            Write-Host "    -> Removed." -ForegroundColor Green
+            $removed = $true
+        } catch {
+            Write-Host "    -> Failed: $_" -ForegroundColor Red
+        }
+    }
+
+    # Also try via provisioning
+    $provisioned = Get-AppxProvisionedPackage -Online | Where-Object {
+        $_.DisplayName -match 'copilot|Microsoft.Copilot'
+    }
+    foreach ($p in $provisioned) {
+        Write-Host "  Removing provisioned: $($p.DisplayName)" -ForegroundColor Gray
+        try {
+            Remove-AppxProvisionedPackage -Online -PackageName $p.PackageName -ErrorAction Stop
+            Write-Host "    -> Removed." -ForegroundColor Green
+            $removed = $true
+        } catch {
+            Write-Host "    -> Failed: $_" -ForegroundColor Red
+        }
+    }
+} else {
+    Write-Host "  No Copilot Appx packages found." -ForegroundColor Gray
+}
+
+# ---- 2. Windows Capability (Microsoft.Copilot) ----
+Write-Host ""
+Write-Host "[2/4] Removing Copilot Windows capability..." -ForegroundColor Yellow
+try {
+    $caps = Get-WindowsCapability -Online | Where-Object {
+        $_.Name -like '*Copilot*' -and $_.State -eq 'Installed'
+    }
+    foreach ($c in $caps) {
+        Write-Host "  Removing: $($c.Name)" -ForegroundColor Gray
+        Remove-WindowsCapability -Online -Name $c.Name
+        Write-Host "    -> Removed." -ForegroundColor Green
+        $removed = $true
+    }
+} catch {
+    Write-Host "  Not found or not removable via capability." -ForegroundColor Gray
+}
+
+# ---- 3. Registry tweaks to hide Copilot ----
+Write-Host ""
+Write-Host "[3/4] Disabling Copilot via registry..." -ForegroundColor Yellow
+
+# Disable taskbar Copilot button
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
+    -Name "ShowCopilotButton" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+Write-Host "  Taskbar Copilot button: DISABLED" -ForegroundColor Green
+$removed = $true
+
+# Disable Copilot via Edge sidebar integration
+$edgeCopilotPath = "HKCU:\Software\Policies\Microsoft\Edge"
+if (-not (Test-Path $edgeCopilotPath)) { New-Item -Path $edgeCopilotPath -Force | Out-Null }
+Set-ItemProperty -Path $edgeCopilotPath -Name "HubsSidebarEnabled" -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue
+Write-Host "  Edge Copilot sidebar: DISABLED" -ForegroundColor Green
+
+# Group Policy: Turn off Windows Copilot
+$gpPath = "HKLM:\Software\Policies\Microsoft\Windows\WindowsCopilot"
+if (-not (Test-Path $gpPath)) { New-Item -Path $gpPath -Force | Out-Null }
+Set-ItemProperty -Path $gpPath -Name "TurnOffWindowsCopilot" -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue
+Write-Host "  Windows Copilot (Group Policy): TURNED OFF" -ForegroundColor Green
+$removed = $true
+
+# ---- 4. Scheduled tasks ----
+Write-Host ""
+Write-Host "[4/4] Checking for Copilot scheduled tasks..." -ForegroundColor Yellow
+$tasks = Get-ScheduledTask | Where-Object { $_.TaskName -match 'copilot|Copilot' }
+if ($tasks) {
+    foreach ($t in $tasks) {
+        Write-Host "  Disabling: $($t.TaskName)" -ForegroundColor Gray
+        Disable-ScheduledTask -TaskName $t.TaskName -ErrorAction SilentlyContinue
+        $removed = $true
+    }
+} else {
+    Write-Host "  No Copilot scheduled tasks found." -ForegroundColor Gray
+}
+
+# ---- Summary ----
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+if ($removed) {
+    Write-Host "  Done. Restart Explorer to apply:" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "    taskkill /f /im explorer.exe & start explorer" -ForegroundColor White
+} else {
+    Write-Host "  No Copilot components were found on this system." -ForegroundColor Yellow
+    Write-Host "  Your system may already be clean."
+}
+Write-Host "========================================" -ForegroundColor Cyan
+Read-Host "`nPress Enter to exit"

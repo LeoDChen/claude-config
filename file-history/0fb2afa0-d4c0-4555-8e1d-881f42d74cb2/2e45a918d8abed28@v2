@@ -1,0 +1,12 @@
+[Console]::OutputEncoding = [Text.Encoding]::UTF8
+Write-Host "=== Copilot Appx packages ==="
+$pkgs = Get-AppxPackage | Where-Object { $_.Name -match 'copilot|Microsoft.Copilot' }
+if ($pkgs) { $pkgs | Format-Table Name } else { Write-Host "None found - OK" }
+
+Write-Host ""
+Write-Host "=== ShowCopilotButton ==="
+Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowCopilotButton" -ErrorAction SilentlyContinue
+
+Write-Host ""
+Write-Host "=== WindowsCopilot policy ==="
+Get-ItemProperty "HKLM:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ErrorAction SilentlyContinue

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/软件/WhatsApp/**)",
+      "Read(//d/ClaudeWorkspace/08_客户跟进/Okki/**)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

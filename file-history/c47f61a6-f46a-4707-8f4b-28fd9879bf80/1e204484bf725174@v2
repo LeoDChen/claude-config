@@ -1,0 +1,6 @@
+{
+  "env": {
+    "ANTHROPIC_API_KEY": "sk-911f70bf18a449c9ab801063f890b049",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com"
+  }
+}
