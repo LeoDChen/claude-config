@@ -33,6 +33,7 @@
 - [OB对话归档系统](ob_archive_system.md) — 231→223个对话已归档 OB，46客户档案，13主题索引，V2脚本+双链
 
 - [台式机同步 → 笔记本同步流程](desktop-sync-workflow.md) — 台式机 push 后笔记本三仓库 pull + OB 全量归档的完整步骤
+- [push=三仓库+OB全量归档](push_full_sync_rule.md) — push命令必须三仓库全推+当天对话归档OB+更新索引，缺一不可；2026-05-22只推一个仓库被纠正
 
 - [迭代哲学](iteration_philosophy.md) — AI时代的护城河不是工具，是"不将就"的迭代密度；能用的系统 vs 持续进化的系统
 
