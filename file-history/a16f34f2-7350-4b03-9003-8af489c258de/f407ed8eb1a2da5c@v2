@@ -1,0 +1,144 @@
+/**
+ * 生成手机端行动清单长图（微信查看）
+ *
+ * 从 s1_enhanced.json 筛选 urgent + soon 客户 → 移动端 HTML → Playwright 全页截图
+ *
+ * 用法：NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/gen_mobile_report.js
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { chromium } = require('playwright');
+
+const DATA_FILE = path.join(__dirname, '..', 'data', 's3_ai_judgments.json');
+const S2_FILE = path.join(__dirname, '..', 'data', 's2_ai_input.json');
+const OUTPUT_DIR = path.join(__dirname, '..', 'output');
+
+const GRADE_COLOR = { S: '#d4a017', A: '#2e7d32', B: '#1565c0', C: '#757575', D: '#c62828' };
+const GRADE_BG = { S: '#fff8e1', A: '#e8f5e9', B: '#e3f2fd', C: '#f5f5f5', D: '#ffebee' };
+const PRIO_ICON = { urgent: '🔴', soon: '🟡' };
+const STAGE_ICON = {
+  '需求探索': '💬', '报价已发': '💰', '谈判中': '🎯', '待付款': '📄',
+  '待发货': '🏭', '已发货/在途': '📦', '已签收': '✅', '售后': '⚠️',
+  '待返单': '🔄', '搁置': '⏸', '未成交': '❌'
+};
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// ── 加载数据（s3 为主，s2 补充 lastCustomerMsgDays / countryCN）──
+const s3data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+const s2data = JSON.parse(fs.readFileSync(S2_FILE, 'utf8'));
+const s2map = new Map();
+for (const s of s2data) s2map.set(s.cid || s.name, s);
+
+const all = s3data.map(d => {
+  const s2 = s2map.get(d.cid) || s2map.get(d.name);
+  return s2 ? { ...d, lastCustomerMsgDays: s2.lastCustomerMsgDays, countryCN: s2.countryCN || d.country } : d;
+});
+
+// ── 筛选 + 排序 ──
+const actionable = all
+  .filter(c => c.actionPriority === 'urgent' || c.actionPriority === 'soon')
+  .sort((a, b) => {
+    const p = { urgent: 0, soon: 1 };
+    const pd = (p[a.actionPriority] || 2) - (p[b.actionPriority] || 2);
+    if (pd !== 0) return pd;
+    return (a.lastCustomerMsgDays || 999) - (b.lastCustomerMsgDays || 999);
+  });
+
+const urgents = actionable.filter(c => c.actionPriority === 'urgent');
+const soons = actionable.filter(c => c.actionPriority === 'soon');
+
+// ── 生成 HTML ──
+const dateLabel = todayStr();
+
+function gradeBadge(g) {
+  return `<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:11px;font-weight:700;color:${GRADE_COLOR[g] || '#333'};background:${GRADE_BG[g] || '#eee'};margin-left:4px;vertical-align:middle;">${g}</span>`;
+}
+
+function renderCard(c) {
+  const icon = PRIO_ICON[c.actionPriority] || '';
+  const stageIcon = STAGE_ICON[c.stageLabel] || '';
+  const country = c.countryCN || c.country || '??';
+  const silDays = c.lastCustomerMsgDays != null ? c.lastCustomerMsgDays + 'd' : '?';
+  const grade = c.grade || '?';
+  const isHigh = grade === 'S' || grade === 'A';
+  const nameWeight = isHigh ? '700' : '500';
+
+  return `<div style="padding:10px 12px;border-bottom:1px solid #eee;${isHigh ? 'border-left:3px solid ' + GRADE_COLOR[grade] + ';padding-left:9px;' : ''}">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <span style="font-size:15px;font-weight:${nameWeight};color:#111;">${icon} ${c.name}${gradeBadge(grade)}</span>
+    <span style="font-size:12px;color:#888;white-space:nowrap;">${country} · ${silDays}</span>
+  </div>
+  <div style="font-size:12px;color:#555;margin-bottom:2px;">${stageIcon} ${c.stageLabel} → <span style="color:#222;">${c.actionStatus}</span></div>
+  <div style="font-size:13px;color:#1565c0;line-height:1.4;">${c.actionText}</div>
+</div>`;
+}
+
+const cardsHtml = actionable.map(renderCard).join('\n');
+
+const html = `<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { width: 375px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; color: #222; }
+.page { background: #fff; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a237e 0%, #283593 100%); color: #fff; padding: 16px 14px; }
+.header h1 { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+.header .date { font-size: 11px; opacity: 0.8; }
+.stats { display: flex; gap: 10px; margin-top: 10px; }
+.stat { flex: 1; background: rgba(255,255,255,0.15); border-radius: 6px; padding: 8px; text-align: center; }
+.stat .num { font-size: 22px; font-weight: 700; }
+.stat .label { font-size: 10px; opacity: 0.8; margin-top: 1px; }
+.section-header { font-size: 13px; font-weight: 600; color: #555; padding: 10px 12px 4px; background: #fafafa; border-top: 1px solid #eee; }
+.footer { padding: 12px; text-align: center; font-size: 10px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>OKKI 今日行动清单</h1>
+    <div class="date">${dateLabel}</div>
+    <div class="stats">
+      <div class="stat"><div class="num">${actionable.length}</div><div class="label">需行动</div></div>
+      <div class="stat"><div class="num">${urgents.length}</div><div class="label">🔴 紧急</div></div>
+      <div class="stat"><div class="num">${soons.length}</div><div class="label">🟡 尽快</div></div>
+    </div>
+  </div>
+  ${urgents.length > 0 ? '<div class="section-header">🔴 紧急行动 (' + urgents.length + ')</div>\n' + urgents.map(renderCard).join('\n') : ''}
+  ${soons.length > 0 ? '<div class="section-header">🟡 尽快处理 (' + soons.length + ')</div>\n' + soons.map(renderCard).join('\n') : ''}
+  <div class="footer">${dateLabel} · 小星星工厂 OKKI 看板</div>
+</div>
+</body>
+</html>`;
+
+// ── 截图 ──
+const TMP_PROFILE = path.join(__dirname, '..', '.tmp_chrome_profile');
+
+(async () => {
+  const browser = await chromium.launchPersistentContext(TMP_PROFILE, {
+    executablePath: 'C:/Users/Administrator/AppData/Local/Google/Chrome/Application/chrome.exe',
+    headless: true,
+    viewport: null
+  });
+  const page = await browser.newPage();
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.setContent(html, { waitUntil: 'networkidle' });
+
+  // 获取内容实际高度
+  const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+  await page.setViewportSize({ width: 375, height: Math.min(bodyHeight + 40, 16384) });
+
+  const outFile = path.join(OUTPUT_DIR, 'mobile_action_' + dateLabel + '.png');
+  await page.screenshot({ path: outFile, fullPage: true });
+  console.log('长图已生成: ' + outFile);
+  console.log('  行动客户: ' + actionable.length + ' (紧急 ' + urgents.length + ' / 尽快 ' + soons.length + ')');
+
+  await browser.close();
+})();

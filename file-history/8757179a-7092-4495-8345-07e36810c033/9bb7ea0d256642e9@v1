@@ -1,0 +1,48 @@
+# 记忆索引
+
+- [用户信息](user_profile.md) — 用户角色、偏好、知识背景
+- [项目背景](project_context.md) — 当前工作项目的背景信息
+- [使用反馈](usage_feedback.md) — 用户对AI助手的使用反馈和偏好
+- [工具权限](tool_permissions.md) — 常用工具权限配置记录
+- [工作流程](workflow_patterns.md) — 常用工作流程和模式
+- [配置双层架构](config-dual-layer.md) — 规则系统需要参考层(CLAUDE.md)+强制层(hooks)，单靠任一层不够；清单≤7条/动词不用原则
+
+- [P4P优化技能手册](p4p_optimization_skill.md) — 阿里巴巴国际站 P4P 两计划优化方法论（产品分层/地域调整/标题B2B/操作清单）
+- [GrsAI MCP + 主图合成](grsai_mcp_image_compositing.md) — GrsAI MCP 配置 / 产品特征坐标 / 合成脚本参数
+- [Claude Code 两个界面区分](cc_interface_distinction.md) — 终端面板（左/CLI）与 Chat 面板（右/扩展）的能力差异
+
+- [PI 生成规则](pi_generation_rules.md) — 地址填写/全英文/有效期计算/仅填用户提供信息
+- [看板报告格式](report_format.md) — 必须输出为格式美观的Word文档(.docx)，而非Markdown
+
+- [输出语言规则](output_language_rules.md) — 回复默认中文，公司/人名/地址/联系方式必须英文原文
+- [问题解决思维](problem_solving_approach.md) — 穷举所有可行路径，不因工具限制说"不行"；不盲信陈旧分析结论
+- [OKKI平台消息区分](okki_platform_notes.md) — OKKI系统提示≠客户消息，分类时须过滤平台自动推送
+- [货运报价规则](shipping_freight_rules.md) — 客户无地址只报产品价/有地址分两种场景/加价15-25%/绝不跟客户说运输自理
+- [MOQ 区分规则](moq_rules.md) — 定制订单MOQ=500，现货按链接起订量；回复数量/报价前必须先判断订单类型
+- [批量分析输出方式](feedback_batch_output.md) — 批量分析>3人直接写文件，不逐条输出到对话框
+- [上下文容量管理](context_management_rules.md) — 大任务分对话执行+主动评估容量+提前拆分
+- [OKKI订单同步](okki_order_sync.md) — OKKI 订单页 DOM 结构 / sync_orders.js 选择器/字段索引/滚动抓取策略
+- [手机报告偏好](mobile_report_preference.md) — 不主动生成手机端长图，用户明确说需要才生成
+
+- [OKKI 重设计方案讨论 2026-05-15](okki_redesign_may15.md) — 第五轮重构讨论：从分类系统改为跟进清单，核心矛盾待解决
+- [OKKI 客户看板和行动清单模板](okki_output_templates.md) — output/daily_*.xlsx 和 actions_*.md 的用途和格式
+- [OKKI分析分批工作流](okki_workflow_split.md) — 分类和深度分析分离：先批量出阶段+类型，用户挑人后独立对话深度分析
+- [OKKI分析经验教训](okki_analysis_lessons.md) — 9条用户反馈修正规则：样品查证/关系型不逼单/禁替用户决策/高价值不唯算法/沉默穷举根因/报价从源数据核对/已读不回心理分析/延迟回复须致歉/重复强调=焦虑点
+- [审计反馈不可盲信](feedback_audit_validation.md) — 外部审计结论需独立复算验证，审计方也可能算错
+- [Keinjol Tata 跟进状态](keinjol_tata_status.md) — DDP运费$365/包装盒$2/待确认事项/明天继续
+- [OKKI分类准确度重构](okki_classification_refactor.md) — 生命周期+urgency判定两段式重构，待在新对话继续
+- [OKKI可靠性交叉分析](okki_reliability_debate.md) — 两个AI对话对OKKI输出问题的独立分析与交叉验证，含gen_s3污染/累积丢失/三层防护
+- [S5b因子删除](s5b_factor_removal.md) — 2026-05-18 删除"该要地址了"因子：用户流程自然覆盖，系统不应提醒已做的事
+- [OKKI驱动因子模型](okki_driver_factors.md) — 废弃NOW/SOON/COLD单标签热度，转向驱动因子（未回复/承诺未兑现/该追问/该回访等）；双轴矩阵看板方案
+- [客户等级判定思路](okki_customer_tier_design.md) — 基于状态卡字段的等级判定方案（A+B组合：chip标记+筛选器），待状态卡数据准确后启动
+
+- [AI判定 × 脚本分工三层框架](ai_script_judgment_pattern.md) — AI批量判定客户阶段/状态时的三层规则框架（语义定义+边界判例+证据要求），脚本vsAI分工原则
+- [OKKI 阶段自动流转系统设计](okki_stage_transition_design.md) — 9阶段自动衰减/推进规则（第二轮，已分样品/大货/老客），3个数据缺口已识别，待新对话审查
+
+- [OB对话归档系统](ob_archive_system.md) — 231→223个对话已归档 OB，46客户档案，13主题索引，V2脚本+双链
+
+- [台式机同步 → 笔记本同步流程](desktop-sync-workflow.md) — 台式机 push 后笔记本三仓库 pull + OB 全量归档的完整步骤
+
+- [迭代哲学](iteration_philosophy.md) — AI时代的护城河不是工具，是"不将就"的迭代密度；能用的系统 vs 持续进化的系统
+
+*记忆文件存储在 memory/ 目录中，此文件仅为索引*

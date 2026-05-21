@@ -1,0 +1,9 @@
+# Obsidian 配置（每台机器独立）
+.obsidian/
+
+# 依赖
+node_modules/
+
+# 临时文件
+.DS_Store
+Thumbs.db

@@ -1,0 +1,107 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-14 16:25（数据断链修复 + 全量重分类）
+
+## 今日同步（2026-05-14 16:20 实测验证）
+
+| 指标 | 数值 |
+|------|------|
+| 总会话 | **490**（同步脚本）→ **489**（分类后） |
+| 变化会话 | **35**（含8个新客户） |
+| 增量消息 | **700+** 条 |
+| 订单 | **38** 条 |
+| 订单匹配 | **25** 人 |
+
+### 质量分布
+
+| 等级 | S | A | B | C | D |
+|------|:--:|:--:|:--:|:--:|:--:|
+| 人数 | 8 | 153 | 251 | 55 | 22 |
+| 占比 | 1.6% | 31.3% | 51.3% | 11.2% | 4.5% |
+
+> 修复数据断链后新增 24 人：S+1, A+6, B+15, D+2
+
+### 🚨 紧急跟进（23人）
+
+| 客户 | 等级 | 阶段 | 静默 | 行动方向 |
+|------|:---:|------|:---:|------|
+| **Samia Guenad** | **S** | 谈判中 | 4d | 🆕 推动决策 |
+| **WELE Mounia** | A | 谈判中 | 7d | 推动决策 |
+| **Sara Dibes** | A | 已发货/在途 | 11d | 跟踪物流 |
+| **Asma Noor** | A | 已发货/在途 | 12d | 跟踪物流 |
+| **Aloh Voma** | A | 谈判中 | 6d | 推动决策 |
+| **Aboulaye Rabiatou** | A | 已发货/在途 | 7d | 发物流更新 |
+| **TheodoraAdelaide Mahe** | A | 报价已发 | 15d | 换策略重联 |
+| **Cindy Nadal** | A | 报价已发 | 16d | 换策略重联 |
+| **Jemima Piema** | A | 报价已发 | 17d | 换策略重联 |
+| **AnneMarie Nsomp** | A | 报价已发 | 20d | 换策略重联 |
+| **Sifa Vano** | B | 待付款 | 13d | 催付款 |
+| **Ahmed Darrat** | B | 待付款 | 17d | 催付款 |
+
+（完整23人见看板）
+
+### 行动清单
+
+- 紧急 23 / 尽快 28（共 **51人** 需行动，修复前35人）
+- 看板：[output/dashboard_2026-05-14.html](08_客户跟进/Okki/output/dashboard_2026-05-14.html)
+
+## 本次框架变更（2026-05-14）
+
+### 数据断链修复 ⚡
+- **根因**：`enhanced_classify.js` 读的是 5月8日的 `s1_classification.json`（465条），sync_okki 产的 `tm_conversations_latest.json`（490条）没被用上
+- **修复**：`enhanced_classify.js` 改为直接读 `tm_conversations_latest.json` → 多出 24 个客户
+- **CID 文件名**：两边 sanitize 已验证一致，无需额外处理
+
+### sync_okki.js 加固
+- **归档基线**：每次成功同步后自动将 `tm_conversations_latest.json` 复制为 `tm_conversations_full.json`，下次 diff 基准保持最新
+- **LWP 失败硬退出**：onetalk iframe 不可访问时 `process.exit(1)`，不再静默跳过
+- **CDP 端口**：Playwright 启动 Chrome 时始终带 `--remote-debugging-port=9222`
+
+### sync_orders.js 修复（v4）
+- 订单号拆分字段：`texts[2]`+`texts[3]` 拼接 → 完整订单号
+- 表头跳过：`row-item__hidden_border_top` 替代 `row-item__title`
+- 分页器：`okki-pagination` 替代 `el-pagination`
+- 滚动容器：`.vue-recycle-scroller`
+
+### 两段式分类系统
+1. **脚本提取**：`enhanced_classify.js` 只做质量分级 + 文本提取 → `s2_ai_input.json`
+2. **AI规则引擎**：`gen_s3_rules.js` 从 s2 规则推断阶段/优先级/行动 → `s3_ai_judgments.json`
+3. **看板生成**：`enhanced_classify.js --dashboard-only` 从 s3 → HTML 看板
+
+### ⚠️ 已知限制
+- AI 判断为规则推断（非对话深度分析），高价值客户建议独立深度分析
+- 阶段分布：搁置 227 人占 48.8%，规则阈值可能偏激进
+
+## 待深度分析（历史遗留）
+
+| # | 客户 | 状态 |
+|---|------|:---:|
+| 1 | jonathan aston | ⏳ |
+| 2 | Asma Noor | ⏳ |
+| 3 | Sara Dibes | ⏳ |
+| 4 | Abdulrhman alal | ⏳ |
+| 5 | Aloh Voma | ⏳ |
+| 6 | Inderpreet kaur | ⏳ |
+
+## 一键同步+分类+看板
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js && node scripts/gen_s3_rules.js && node scripts/enhanced_classify.js --dashboard-only
+```
+
+> 不主动跑 gen_mobile_report.js，用户说才跑。
+
+## 关键文件
+
+| 文件 | 用途 |
+|------|------|
+| `scripts/sync_okki.js` | 同步脚本：CDP 抓取客户会话 |
+| `scripts/sync_orders.js` | v4 同步脚本：CDP 抓取销售订单（已验证38条） |
+| `scripts/enhanced_classify.js` | 质量分级 + 文本提取 → s2 |
+| `scripts/gen_s3_rules.js` | AI规则引擎：阶段/优先级/行动判定 → s3 |
+| `scripts/gen_mobile_report.js` | 手机端行动清单长图（PNG，不主动跑）|
+| `knowledge/classification-rules.md` | 双轴分类规则 |
+| `knowledge/analysis-framework.md` | 7问分析框架 |
+| `knowledge/business-rules.md` | 业务判断辅助 |
+| `output/dashboard_2026-05-14.html` | 今日看板 |
+| `output/mobile_action_2026-05-14.png` | 今日手机行动清单 |

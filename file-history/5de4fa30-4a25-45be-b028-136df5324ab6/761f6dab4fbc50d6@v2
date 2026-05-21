@@ -1,0 +1,19 @@
+---
+name: config-dual-layer
+description: 规则系统需要双层架构 — CLAUDE.md 是参考层，hook 是强制层，单靠任一层都不够
+metadata:
+  type: feedback
+---
+
+# 配置双层架构
+
+**规则：** 关键行为约束必须同时放在 CLAUDE.md（参考层）和 hook inject-rules.txt（强制层）中。
+
+**Why:** CLAUDE.md 在长对话中会被压缩/摘要化，规则跟着变模糊；模型专注任务时，散文式规则排在优先级末端。Hook 的 system-reminder 消息每次对话前强制插入，不被压缩，永远新鲜。但 hook 清单必须短（≤7条），否则注意力稀释。
+
+**How to apply:**
+- 需要"每次必做"的检查项 → 写进 hook inject-rules.txt（动词格式，每条一行）
+- 需要"详细查阅"的规则 → 写进 CLAUDE.md（散文格式，可以长）
+- 两者不互替——hook 负责提醒执行，CLAUDE.md 负责提供细节
+- 检查清单用动词不用原则："查源文件" 比 "注意验证" 有效
+- 保持 hook 清单 ≤7 条，超过会注意力稀释

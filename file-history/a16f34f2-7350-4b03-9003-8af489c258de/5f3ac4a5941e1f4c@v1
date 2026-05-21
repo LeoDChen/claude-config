@@ -1,0 +1,34 @@
+---
+name: okki-order-sync
+description: OKKI 订单页 DOM 结构和 sync_orders.js 抓取经验
+metadata: 
+  node_type: memory
+  type: reference
+  originSessionId: 4e5dc35f-ac1a-4b34-8339-d22517c6757c
+---
+
+# OKKI 订单同步
+
+## DOM 结构（crm.xiaoman.cn/order）
+
+- **不是** `<table>`，是 **Vue virtual scroller**：`vue-recycle-scroller__item-view` → `row-item` → `cell` → `cell-inner`
+- 每行 11 个 `.cell-inner`：texts[0]=空(复选框), texts[1]=空(收藏), texts[2]=行号, texts[3]=订单号, texts[4]=日期, texts[5]=金额, texts[6]=客户, texts[7]=状态, texts[8]=ERP状态, texts[9-10]=空
+- 页面加载后需 `waitForSelector('.vue-recycle-scroller__item-view')` 等虚拟列表渲染
+- **不要点"全部"tab** — 页面默认已在"全部"，重复点击触发不必要重渲染
+
+## 抓取策略（v3，已验证）
+
+1. 导航后等虚拟列表渲染：`waitForSelector` + 1s buffer
+2. 提取：querySelectorAll `.vue-recycle-scroller__item-view` → 每行取 `.cell-inner`
+3. 跳过 `row-item__title` 标题行，用 `/^\d{10,}/.test(texts[3])` 校验订单号
+4. 滚动加载更多：`page.mouse.wheel` 在 `.virtual-list-wrap` 上滚动，每次滚后 2s 等渲染
+5. 去重：用 Set 记录已有 orderNo
+6. 翻页 fallback：滚动耗尽后查翻页按钮，有就点击
+
+## 已踩坑
+
+- texts[1] 不是订单号！前 2 列是空复选框，数据从 texts[3] 开始
+- `page.evaluate` 设 `scrollTop` 不能触发虚拟列表重渲染，必须用 `page.mouse.wheel`
+- page_size=100 时所有数据一页，但虚拟列表只渲染 ~20 个 DOM 元素
+- page_size=20 时需结合翻页按钮
+- Chrome 不能 `taskkill` — 会关掉用户正在用的浏览器

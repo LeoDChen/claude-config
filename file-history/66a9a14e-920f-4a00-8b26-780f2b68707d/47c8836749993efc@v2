@@ -1,0 +1,65 @@
+# OKKI 快速同步计划
+
+## 问题
+
+上次数据抓取是 5/5 晚，OKKI 里 5/6-8 有 3 天新消息未收录。之前的 quick_sync 尝试失败了，因为：
+1. v1-v3: 停留在 OKKI 工作台首页，没进 TM 页面，且 HTTP API 不返回 TM 会话数据
+2. v4: 直接导航到 `onetalk.alibaba.com` → 触发阿里 SSO 登录（非小满登录态）
+
+## 根因分析
+
+TM 会话数据在 `onetalk.alibaba.com` 的 iframe 中，数据通过 WebSocket (LWP 协议) 传输，不走 HTTP API。上次成功路径是：
+
+```
+Chrome --remote-debugging-port=9222
+  → 用户手动登录 crm.xiaoman.cn
+  → 进入消息/TM 页面（OKKI 内部加载 onetalk iframe）
+  → onetalk iframe 建立 WebSocket 到 wss://wss-icbu.dingtalk.com/
+  → CDP 脚本注入 JS，从 window.__conversationListFullData__ 读会话列表
+  → 通过 WebSocket 发 LWP 请求逐会话拉消息
+```
+
+关键：**必须走 OKKI 内部的 iframe，不能直接访问 onetalk。** `window.__conversationListFullData__` 在 onetalk iframe 的 window 上，包含所有会话的 cid/name/latestMessage。
+
+## 方案
+
+分两步走：
+
+### Step A: 快速同步会话元数据（本次）
+
+1. 启动 Chrome（复用 Profile 4，用 Playwright `launchPersistentContext`）
+2. 导航到 `crm.xiaoman.cn` → 用户手动登录
+3. 登录后导航到 OKKI 的消息/TM 页面（`crm.xiaoman.cn/im/`）
+4. 等待 onetalk iframe 加载完成
+5. 通过 Playwright 的 `page.frames()` 找到 onetalk iframe
+6. 在 iframe 内执行 `window.__conversationListFullData__` 获取最新 453 会话元数据
+7. 另存为 `tm_conversations_latest.json`，与 5/5 的 `tm_conversations_full.json` 做 diff
+8. 识别：新消息客户、unread 变化、沉默客户有新回复
+
+### Step B: 深抓新增会话的聊天历史（后续）
+
+9. 对识别出的活跃客户，用 CDP 连接 → 劫持 WebSocket → 发 LWP 请求拉取完整对话
+10. 存储到 `data/chat_history/`（覆盖更新对应 cid 文件）
+
+## 需要修改的文件
+
+- **新建** `scripts/quick_sync.js`: 重写为 Playwright + iframe 提取方案
+  - 启动 Chrome（`launchPersistentContext`, Profile 4）
+  - 等待手动登录
+  - 导航到 `/im/` 页面
+  - 等待 onetalk iframe 出现
+  - 从 iframe 提取 `__conversationListFullData__`
+  - 保存并 diff
+
+## 不修改的文件
+
+- `lwp_scrape_all.js`: 保留，Step B 时用来深抓活跃会话
+- `launch_chrome.js`: 保留备用（CDP 启动 Chrome 的备选方案）
+
+## 验证方式
+
+1. 运行 `node scripts/quick_sync.js`
+2. 用户登录 OKKI
+3. 脚本自动导航 → 提取 → 保存
+4. 检查 `tm_conversations_latest.json` 中有 5/6-8 的新消息
+5. 打印近期活跃客户列表

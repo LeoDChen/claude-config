@@ -1,0 +1,451 @@
+// V3: 全量对话保留版 — 摘要+折叠全文
+// 用法: node convert_to_ob_v3.js [--force]
+//   --force: 覆盖已有的 OB 文件（默认跳过）
+const fs = require('fs');
+const path = require('path');
+const readline = require('readline');
+
+const PROJECTS_DIR = path.join(require('os').homedir(), '.claude/projects/D--ClaudeWorkspace');
+const OB_DIR = 'D:/Obsidian仓库/对话归档/CC';
+const META_PATH = path.join(PROJECTS_DIR, '_all_sessions_meta.json');
+
+const FORCE = process.argv.includes('--force');
+
+// === 54+ 客户名 ===
+const CUSTOMER_PATTERNS = [
+    { name: 'Patrick_Mbuyi_Lambert', kw: ['patrick', 'bébé chic', 'bebe chic', 'mbuyi', 'kinshasa', 'bébé'] },
+    { name: 'Keinjol_Tata', kw: ['keinjol', 'tata', 'kinjolluxe', 'amit saini', 'saini'] },
+    { name: 'Inderpreet_Kaur', kw: ['inderpreet', 'kaur'] },
+    { name: 'Jonathan_Aston', kw: ['jonathan aston', 'jonathan', 'aston'] },
+    { name: 'Sara_Dibes', kw: ['sara dibes', 'dibes'] },
+    { name: 'Mona_Almuharraqy', kw: ['mona almuharraqy', 'mona', 'almuharraqy', 'muharraqy'] },
+    { name: 'Arshavin_Amoah', kw: ['arshavin', 'amoah'] },
+    { name: 'Ali_Amjid', kw: ['ali amjid', 'amjid'] },
+    { name: 'Maimouna_Cisse', kw: ['maimouna', 'cisse'] },
+    { name: 'Christabel_Kanunsha', kw: ['christabel', 'kanunsha'] },
+    { name: 'Christine_Muwela', kw: ['christine muwela', 'muwela'] },
+    { name: 'Christelle_ITwite', kw: ['christelle', 'itwite'] },
+    { name: 'Ernestina_Afriyie', kw: ['ernestina', 'afriyie'] },
+    { name: 'Fernande_Pochette', kw: ['fernande', 'pochette'] },
+    { name: 'Krisgel_Igros', kw: ['krisgel', 'igros'] },
+    { name: 'Bester_Chandah', kw: ['bester', 'chandah'] },
+    { name: 'Umm_Aysha', kw: ['umm aysha', 'aysha'] },
+    { name: 'Rayan_Shafi', kw: ['rayan shafi', 'rayan', 'shafi'] },
+    { name: 'Loza_Bondok', kw: ['loza', 'bondok'] },
+    { name: 'Asselya_Marina', kw: ['asselya', 'marina'] },
+    { name: 'Dila_Cakir', kw: ['dila', 'cakir'] },
+    { name: 'Sifa_Vano', kw: ['sifa', 'vano'] },
+    { name: 'Aloh_Voma', kw: ['aloh', 'voma'] },
+    { name: 'Abdulrhman_Alal', kw: ['abdulrhman', 'alal'] },
+    { name: 'Asma_Noor', kw: ['asma noor', 'asma', 'noor'] },
+    { name: 'Marcos_Kuyu', kw: ['marcos', 'kuyu'] },
+    { name: 'Celeste_Albarracin', kw: ['celeste', 'albarracin'] },
+    { name: 'Brian_Robert_Ocholi', kw: ['brian robert', 'ocholi'] },
+    { name: 'Aka_Mwau_Esme', kw: ['aka mwau', 'esme'] },
+    { name: 'Hakim_Ezat', kw: ['hakim', 'ezat'] },
+    { name: 'Yoselyn_Rodriguez', kw: ['yoselyn', 'rodriguez'] },
+    { name: 'Sarah_Alnajar', kw: ['sarah alnajar', 'alnajar'] },
+    { name: 'Gabriela_Torrealba', kw: ['gabriela', 'torrealba'] },
+    { name: 'Tahar_Benmohamed', kw: ['tahar', 'benmohamed'] },
+    { name: 'Rosette_Ngoy', kw: ['rosette', 'ngoy'] },
+    { name: 'Esther_Chola', kw: ['esther', 'chola'] },
+    { name: 'Begimai_Akymbekova', kw: ['begimai', 'akymbekova'] },
+    { name: 'Mezna_Alawfi', kw: ['mezna', 'alawfi'] },
+    { name: 'Amenanchristine_Boua', kw: ['amenanchristine', 'boua'] },
+    { name: 'Alina_Svinchuk', kw: ['alina', 'svinchuk'] },
+    { name: 'Diego_Vargas', kw: ['diego', 'vargas'] },
+    { name: 'Israa_Fawzi', kw: ['israa', 'fawzi'] },
+    { name: 'Bamba_Ami', kw: ['bamba', 'ami'] },
+    { name: 'Ayh_Khyry', kw: ['ayh', 'khyry'] },
+    { name: 'Clara_ElAssaad', kw: ['clara', 'elassaad', 'assaad'] },
+    { name: 'MENTZEKO_Mathi', kw: ['mentzeko', 'mathi'] },
+    { name: 'Aboulaye_Rabiatou', kw: ['aboulaye', 'rabiatou'] },
+    { name: 'Amer_Ly', kw: ['amer ly', 'amer'] },
+    { name: 'WELE_Mounia', kw: ['wele', 'mounia'] },
+    { name: 'Angela_O', kw: ['angela o'] },
+    { name: 'Adriano', kw: ['adriano'] },
+    { name: 'Alnwd_Alnwd', kw: ['alnwd'] },
+    { name: 'Aula_Alsaad', kw: ['aula', 'alsaad'] },
+    { name: 'Hermes', kw: ['hermes'] },
+];
+
+// === 主题匹配 ===
+const TOPIC_PATTERNS = [
+    { topic: 'OKKI系统', kw: ['okki', '状态卡', '状态外脑', '驱动因子', 'classify', '小满', 'now层', 'soon层', 'brief'] },
+    { topic: 'P4P优化', kw: ['p4p', '直通车', '智投版', '日预算', '产品分层', '地域调整', '关键词出价', '曝光量'] },
+    { topic: '客户跟进', kw: ['报价', '询盘', 'inquiry', 'pi ', 'proforma', '样品', 'sampl', '定金', 'deposit', '货代', '物流', 'shipping', 'dhl', 'fedex'] },
+    { topic: '数据分析', kw: ['数据参谋', 'analytics', '点击率', '转化率', '复盘', '曝光', '月度报告'] },
+    { topic: '产品上架', kw: ['上架', '详情页', '产品发布', '类目', '标题公式', 'product listing'] },
+    { topic: '包装定制', kw: ['包装', 'packaging', '礼盒', '标签', 'label', 'oem', 'odm'] },
+    { topic: '工厂档案', kw: ['工厂', '产能', '认证', 'bsci', 'iso9001', '生产线', '车间'] },
+    { topic: 'Claude配置', kw: ['claude code', 'hook', 'skill', 'mcp', 'settings', '权限', 'memory', '记忆系统'] },
+    { topic: 'OB知识库', kw: ['obsidian', 'ob ', 'vault', '双链', 'wikilink', '对话归档'] },
+    { topic: 'Git同步', kw: ['git ', 'github', 'commit', 'push', '仓库', 'claude-config'] },
+    { topic: '合规风控', kw: ['合规', '红线', '平台规则', '违规', '刷单'] },
+    { topic: '脚本开发', kw: ['脚本', 'script', 'node.js', 'python', 'jsonl', '自动化', 'extract', 'convert'] },
+];
+
+const NOISE_PATTERNS = ['你好', '111', '222', 'test', '测试', '1', '2'];
+
+function isNoise(meta) {
+    if (meta.sizeKB >= 10) return false;
+    const msg = (meta.firstUserMsg || '').trim();
+    if (msg.length > 10) return false;
+    if (NOISE_PATTERNS.includes(msg)) return true;
+    if (msg.length <= 3) return true;
+    return false;
+}
+
+function extractText(content) {
+    if (!content) return '';
+    if (typeof content === 'string') return content;
+    if (Array.isArray(content)) {
+        return content
+            .filter(c => c.type === 'text' && c.text)
+            .map(c => c.text)
+            .join('\n');
+    }
+    return '';
+}
+
+function extractToolNames(content) {
+    if (!Array.isArray(content)) return [];
+    return content
+        .filter(c => c.type === 'tool_use')
+        .map(c => c.name || 'unknown');
+}
+
+// 提取全量消息（不截断）
+async function extractConversation(jsonlPath) {
+    const fileStream = fs.createReadStream(jsonlPath);
+    const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
+
+    const messages = [];  // {role:'user'|'assistant', text, time, tools:[]}
+    let title = '';
+    let sessionId = '';
+    let totalUserMsgs = 0;
+
+    for await (const line of rl) {
+        if (!line.trim()) continue;
+        try {
+            const entry = JSON.parse(line);
+            if (entry.sessionId && !sessionId) sessionId = entry.sessionId;
+            if (entry.type === 'custom-title' && entry.customTitle) title = entry.customTitle;
+            if (!title && entry.type === 'ai-title' && entry.aiTitle) title = entry.aiTitle;
+
+            const ts = entry.timestamp || '';
+
+            if (entry.type === 'user' && entry.message?.role === 'user') {
+                const text = extractText(entry.message.content);
+                if (text && text.length > 3) {
+                    messages.push({ role: 'user', text, time: ts });
+                    totalUserMsgs++;
+                }
+            }
+
+            if (entry.type === 'assistant' && entry.message?.content) {
+                const text = extractText(entry.message.content);
+                const tools = extractToolNames(entry.message.content);
+                if (text.length > 5 || tools.length > 0) {
+                    messages.push({ role: 'assistant', text, time: ts, tools });
+                }
+            }
+        } catch(e) {}
+    }
+
+    return { sessionId, title, messages, totalUserMsgs };
+}
+
+function classifyContent(allText, meta) {
+    const text = allText.toLowerCase();
+    const title = (meta.title || '').toLowerCase();
+
+    const customers = [];
+    for (const c of CUSTOMER_PATTERNS) {
+        if (c.kw.some(k => text.includes(k.toLowerCase()) || title.includes(k.toLowerCase()))) {
+            customers.push(c.name);
+        }
+    }
+
+    const topics = [];
+    for (const t of TOPIC_PATTERNS) {
+        const matches = t.kw.filter(k => text.includes(k.toLowerCase()) || title.includes(k.toLowerCase()));
+        if (matches.length >= 2) topics.push(t.topic);
+    }
+    if (topics.length === 0) topics.push('未分类');
+    if (topics.length > 4) topics.length = 4;
+
+    return { topics, customers };
+}
+
+function makeSafeTitle(meta) {
+    if (meta.title && meta.title.length > 3 && meta.title.length < 60) {
+        return meta.title.replace(/[\/\\:*?"<>|]/g, '-').substring(0, 50);
+    }
+    if (meta.firstUserMsg && meta.firstUserMsg.length > 5) {
+        return meta.firstUserMsg.replace(/[\/\\:*?"<>|\n\r]/g, ' ').substring(0, 50).trim();
+    }
+    return '(无标题)';
+}
+
+function formatTime(isoStr) {
+    if (!isoStr) return '';
+    try {
+        const d = new Date(isoStr);
+        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    } catch(e) { return ''; }
+}
+
+// 构建折叠全文 HTML
+function buildFullDialog(messages) {
+    let html = '<details>\n<summary>📜 完整对话 (' + messages.length + ' 条消息)</summary>\n\n';
+    let prevRole = '';
+
+    for (let i = 0; i < messages.length; i++) {
+        const m = messages[i];
+        const time = formatTime(m.time);
+
+        if (m.role === 'user') {
+            html += `**👤 用户** \`${time}\`:\n`;
+            html += `> ${m.text.replace(/\n/g, '\n> ')}\n\n`;
+        } else {
+            html += `**🤖 CC** \`${time}\`:\n`;
+            if (m.tools && m.tools.length > 0) {
+                html += `> 🔧 ${m.tools.map(t => '`' + t + '`').join(', ')}\n`;
+            }
+            if (m.text && m.text.length > 5) {
+                html += `> ${m.text.replace(/\n/g, '\n> ')}\n`;
+            }
+            html += '\n';
+        }
+
+        // 不同角色间加分隔（可选，长对话用）
+        if (i > 0 && i < messages.length - 1 && m.role !== messages[i+1].role) {
+            // 不强制加 --- ，保持简洁
+        }
+    }
+
+    html += '\n</details>';
+    return html;
+}
+
+// 构建顶部摘要
+function buildSummary(messages) {
+    const userMsgs = messages.filter(m => m.role === 'user');
+    const assistantMsgs = messages.filter(m => m.role === 'assistant');
+
+    let summary = '## 对话摘要\n\n';
+    const showCount = Math.min(userMsgs.length, 5);
+    for (let i = 0; i < showCount; i++) {
+        const text = userMsgs[i].text.length > 300
+            ? userMsgs[i].text.substring(0, 300) + '...'
+            : userMsgs[i].text;
+        summary += `> ${text.replace(/\n/g, ' ')}\n\n`;
+    }
+    if (userMsgs.length > showCount) {
+        summary += `*... 共 ${userMsgs.length} 条用户消息*\n\n`;
+    }
+
+    if (assistantMsgs.length > 0) {
+        summary += '## AI 回复要点\n\n';
+        const firstTextMsgs = assistantMsgs.filter(m => m.text.length > 30).slice(0, 3);
+        for (const m of firstTextMsgs) {
+            const text = m.text.length > 250
+                ? m.text.substring(0, 250) + '...'
+                : m.text;
+            summary += `- ${text.replace(/\n/g, ' ')}\n`;
+        }
+    }
+
+    return summary;
+}
+
+async function main() {
+    const allMeta = JSON.parse(fs.readFileSync(META_PATH, 'utf8'));
+
+    // 创建目录
+    const months = [...new Set(allMeta.map(m => m.date.substring(0, 7)))].sort();
+    for (const m of months) {
+        fs.mkdirSync(path.join(OB_DIR, m), { recursive: true });
+    }
+    fs.mkdirSync(path.join(OB_DIR, '客户档案'), { recursive: true });
+    fs.mkdirSync(path.join(OB_DIR, '主题索引'), { recursive: true });
+
+    const indexEntries = [];
+    const customerMap = {};
+    const topicMap = {};
+    let processed = 0;
+    let skipped = 0;
+    let overwritten = 0;
+
+    for (const m of allMeta) {
+        if (isNoise(m)) { skipped++; continue; }
+
+        const filePath = path.join(PROJECTS_DIR, m.file);
+        if (!fs.existsSync(filePath)) continue;
+
+        const safeTitle = makeSafeTitle(m);
+        const monthDir = m.date.substring(0, 7);
+        const obFilename = `${m.date}_${safeTitle}.md`.replace(/\s+/g, '_').substring(0, 80);
+        const obPath = path.join(OB_DIR, monthDir, obFilename);
+
+        // 文件已存在且非 --force → 只更新索引
+        if (fs.existsSync(obPath) && !FORCE) {
+            const existingContent = fs.readFileSync(obPath, 'utf8');
+            const allText = existingContent.replace(/<[^>]+>/g, ''); // strip HTML for classification
+            const { topics, customers } = classifyContent(allText, m);
+
+            indexEntries.push({ date: m.date, title: safeTitle, file: `${monthDir}/${obFilename}`, topics, customers, sessionId: m.sessionId });
+            for (const c of customers) {
+                if (!customerMap[c]) customerMap[c] = [];
+                customerMap[c].push({ date: m.date, title: safeTitle, file: `${monthDir}/${obFilename}` });
+            }
+            for (const t of topics) {
+                if (!topicMap[t]) topicMap[t] = [];
+                topicMap[t].push({ date: m.date, title: safeTitle, file: `${monthDir}/${obFilename}` });
+            }
+            processed++;
+            if (processed % 50 === 0) console.log(`  ${processed} (skip existing)...`);
+            continue;
+        }
+
+        if (fs.existsSync(obPath)) overwritten++;
+
+        // 提取全量对话
+        const conv = await extractConversation(filePath);
+        const allText = conv.messages.map(msg => msg.text).join('\n');
+        const { topics, customers } = classifyContent(allText, m);
+
+        // 构建 OB 文件内容
+        let content = `---
+date: ${m.date}
+session_id: ${m.sessionId}
+customers: [${customers.join(', ')}]
+topics: [${topics.join(', ')}]
+message_count: ${conv.messages.length}
+source: ${m.file}
+---
+
+# ${safeTitle}
+
+**日期**: ${m.date}
+**消息数**: ${conv.messages.length} | **用户发言**: ${conv.totalUserMsgs} 条
+**原始文件**: \`${m.file}\` | **大小**: ${m.sizeKB}KB
+
+`;
+
+        // 摘要
+        content += buildSummary(conv.messages);
+
+        // 折叠全文
+        content += '\n---\n\n';
+        content += buildFullDialog(conv.messages);
+
+        // 链接
+        if (customers.length > 0) {
+            content += '\n\n## 涉及客户\n';
+            for (const c of customers) content += `- [[客户档案/${c}]]\n`;
+        }
+        if (topics.length > 0 && topics[0] !== '未分类') {
+            content += '\n## 相关主题\n';
+            for (const t of topics) content += `- [[主题索引/${t}]]\n`;
+        }
+
+        fs.writeFileSync(obPath, content, 'utf8');
+
+        indexEntries.push({ date: m.date, title: safeTitle, file: `${monthDir}/${obFilename}`, topics, customers, sessionId: m.sessionId });
+        for (const c of customers) {
+            if (!customerMap[c]) customerMap[c] = [];
+            customerMap[c].push({ date: m.date, title: safeTitle, file: `${monthDir}/${obFilename}` });
+        }
+        for (const t of topics) {
+            if (!topicMap[t]) topicMap[t] = [];
+            topicMap[t].push({ date: m.date, title: safeTitle, file: `${monthDir}/${obFilename}` });
+        }
+
+        processed++;
+        if (processed % 20 === 0) console.log(`  ${processed}/${allMeta.length} conversations...`);
+    }
+
+    // === 写总索引 ===
+    let indexContent = `# 对话归档索引\n\n> V3 全量版 · 生成于 ${new Date().toISOString().substring(0, 10)}\n> 共 ${processed} 个对话 | 跳过噪音 ${skipped} 个\n> [[客户档案/]] | [[主题索引/]]\n\n## 按日期\n\n`;
+    let currentDate = '';
+    for (const e of indexEntries) {
+        if (e.date !== currentDate) {
+            currentDate = e.date;
+            indexContent += `\n### ${e.date}\n\n`;
+        }
+        const baseName = e.file.replace('.md', '');
+        indexContent += `- [[${baseName}|${e.title}]]`;
+        if (e.customers.length > 0) indexContent += `  👤 ${e.customers.join(', ')}`;
+        if (e.topics.length > 0 && e.topics[0] !== '未分类') indexContent += `  📂 ${e.topics.slice(0,2).join(', ')}`;
+        indexContent += '\n';
+    }
+
+    indexContent += `\n## 按主题\n\n`;
+    const sortedTopics = Object.entries(topicMap).sort((a,b) => b[1].length - a[1].length);
+    for (const [topic, entries] of sortedTopics) {
+        if (topic === '未分类') continue;
+        indexContent += `### [[主题索引/${topic}]] (${entries.length})\n\n`;
+        for (const e of entries.slice(0, 8)) {
+            indexContent += `- [[${e.file.replace('.md', '')}|${e.date} ${e.title}]]\n`;
+        }
+        if (entries.length > 8) indexContent += `- ... 等 ${entries.length} 个\n`;
+        indexContent += '\n';
+    }
+
+    indexContent += `\n## 按客户\n\n`;
+    const sortedCustomers = Object.entries(customerMap).sort((a,b) => b[1].length - a[1].length);
+    for (const [customer, entries] of sortedCustomers) {
+        indexContent += `### [[客户档案/${customer}]] (${entries.length})\n\n`;
+        for (const e of entries) {
+            indexContent += `- [[${e.file.replace('.md', '')}|${e.date} ${e.title}]]\n`;
+        }
+        indexContent += '\n';
+    }
+
+    fs.writeFileSync(path.join(OB_DIR, '对话归档索引.md'), indexContent, 'utf8');
+
+    // === 更新客户档案 ===
+    for (const [customer, entries] of Object.entries(customerMap)) {
+        const custPath = path.join(OB_DIR, '客户档案', `${customer}.md`);
+        let custContent = '';
+        if (fs.existsSync(custPath)) {
+            custContent = fs.readFileSync(custPath, 'utf8');
+            if (!custContent.includes('## 全部对话时间线')) {
+                custContent += '\n## 全部对话时间线\n\n';
+            }
+        } else {
+            custContent = `# ${customer.replace(/_/g, ' ')}\n\n> 自动汇总 | ${entries.length} 个相关对话\n\n`;
+        }
+        for (const e of entries) {
+            if (!custContent.includes(e.file.replace('.md', ''))) {
+                custContent += `- [[../${e.file.replace('.md', '')}|${e.date} ${e.title}]]\n`;
+            }
+        }
+        fs.writeFileSync(custPath, custContent, 'utf8');
+    }
+
+    // === 更新主题索引 ===
+    for (const [topic, entries] of Object.entries(topicMap)) {
+        if (topic === '未分类') continue;
+        const topicPath = path.join(OB_DIR, '主题索引', `${topic}.md`);
+        let topicContent = `# ${topic}\n\n> ${entries.length} 个相关对话\n\n`;
+        let lastDate = '';
+        for (const e of entries) {
+            if (e.date !== lastDate) {
+                topicContent += `\n### ${e.date}\n\n`;
+                lastDate = e.date;
+            }
+            topicContent += `- [[../${e.file.replace('.md', '')}|${e.title}]]\n`;
+        }
+        fs.writeFileSync(topicPath, topicContent, 'utf8');
+    }
+
+    console.log(`\n=== V3 完成 ===`);
+    console.log(`对话: ${processed} | 覆盖: ${overwritten} | 跳过噪音: ${skipped}`);
+    console.log(`客户档案: ${Object.keys(customerMap).length}`);
+    console.log(`主题索引: ${Object.keys(topicMap).length}`);
+}
+
+main().catch(console.error);

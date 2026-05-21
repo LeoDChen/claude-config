@@ -1,0 +1,107 @@
+# 双机如一 — 路径对齐方案
+
+## 核心原则
+
+两台机器 = 同一台机器在不同位置使用。日课：`坐下 pull → 工作 → 站起 push`。
+
+代码层面消除一切机器专属差异：`os.homedir()` + `%USERPROFILE%` 替代所有硬编码用户路径。
+
+## .gitignore 修正
+
+当前三个仓库缺少对运行时垃圾的忽略，需补充：
+
+| 仓库 | 需添加的 ignore |
+|------|----------------|
+| claude-config | `sessions/` `history.jsonl` |
+| ob-vault | `.obsidian/` `node_modules/` |
+| claude-workspace | 已有，检查确认 |
+
+## 同步成本
+
+一次 pull：OB 占 99%（新增几个对话归档 + 索引更新，几十 KB），claude-config 和 claude-workspace 偶尔几行配置改动。10 秒，0 token。
+
+## 目标状态
+
+| 资源 | 对齐后（两机一致） | 策略 |
+|------|-------------------|------|
+| OB Vault | `D:\Obsidian仓库\` | 台式机从 E 盘迁到 D 盘 |
+| CC 配置 | `%USERPROFILE%\.claude\` | 笔记本迁到标准位置 |
+| 项目工作区 | `D:\ClaudeWorkspace\` | 已一致 |
+| 用户路径引用 | `os.homedir()` / `%USERPROFILE%` | 代码自适配，不写死用户名 |
+
+## 笔记本侧（当前机器，不依赖台式机）
+
+### A. 前置
+1. 关闭 VS Code
+2. 提交 claude-workspace 未追踪文件 `08_客户跟进/Okki/reports/Mona_almuharraqy_深度分析_2026-05-20.md` 并 push
+
+### B. CC 配置迁到标准位置
+3. 备份 `C:\Users\67240\.claude\` → `C:\Users\67240\.claude_BACKUP\`
+4. 删空 `C:\Users\67240\.claude\` 内容
+5. `git clone https://github.com/LeoDChen/claude-config.git "$env:USERPROFILE\.claude"`
+6. 恢复运行时目录（sessions/telemetry/file-history/shell-snapshots/session-env/ide/plans）
+7. 重命名 `D:\ClaudeCode workspace` → `D:\ClaudeCode workspace_OLD`
+
+### C. 路径自适配改造
+
+8. **CLAUDE.md**（`%USERPROFILE%\.claude\CLAUDE.md`）：
+   - OB 路径检测：双路径 → 单路径 `D:\Obsidian仓库\对话归档\CC\`
+
+9. **D:\ClaudeWorkspace\.claude\CLAUDE.md**：
+   - line 52: `E:\道友的宝贝\` → `D:\Obsidian仓库\`
+
+10. **settings.local.json**（`%USERPROFILE%\.claude\settings.local.json`）：
+    - play_sound hook 路径 `C:\Users\67240\.claude\scripts\` → `%USERPROFILE%\.claude\scripts\`
+    - sync hook 路径保持 `d:/ClaudeWorkspace/.claude/hooks/sync-config-to-ob.js`（已在统一路径）
+
+11. **.mcp.json**（`%USERPROFILE%\.claude\.mcp.json`）：
+    - grsai 的 `C:\Users\Administrator\.claude\mcp-servers\grsai\server.mjs`
+    - → `D:/ClaudeWorkspace/.claude/mcp-servers/grsai/server.mjs`（实际位置，两机通用）
+
+12. **sync-config-to-ob.js**（`D:\ClaudeWorkspace\.claude\hooks\sync-config-to-ob.js`）：
+    - 删除双路径检测 `['E:/道友的宝贝/...', 'D:/Obsidian仓库/...']`
+    - → 单路径 `D:/Obsidian仓库/对话归档/CC/CC配置备份`
+
+13. **convert_to_ob.js / _v2.js / _v3.js**（`D:\ClaudeWorkspace\scripts\`）：
+    - PROJECTS_DIR：双路径 + Administrator → `path.join(require('os').homedir(), '.claude/projects/D--ClaudeWorkspace')`
+    - OB_DIR：双路径 → 单路径 `D:/Obsidian仓库/对话归档/CC`
+
+14. **D:\ClaudeWorkspace\.claude\settings.local.json**：
+    - `//c/Users/Administrator/.claude/**` → `%USERPROFILE%\.claude\**`（或等价通配）
+    - `C:/Users/Administrator/AppData/...` → `os.homedir()` 思路，或改为双路径检测
+
+### D. 提交推送
+15. claude-config repo commit + push
+16. claude-workspace repo commit + push
+
+## 台式机侧（用户手动执行）
+
+### E. 准备工作
+1. 三仓库 push 干净
+2. 检查 D 盘空间 ≥ OB vault 大小
+
+### F. OB Vault 迁移
+3. 关闭 Obsidian + CC
+4. `robocopy "E:\道友的宝贝\道友的宝贝" "D:\Obsidian仓库" /E /COPYALL`
+5. 文件数一致后，原路径改名 `道友的宝贝_BACKUP`
+6. 路径替换（OB vault 内 .md/.json/.js/.txt/.yaml）：
+   - `E:\道友的宝贝\道友的宝贝\` → `D:\Obsidian仓库\`
+   - `E:/道友的宝贝/道友的宝贝/` → `D:/Obsidian仓库/`
+7. commit + push
+8. Obsidian 切换 vault 验证
+
+### G. 拉取配置更新
+9. pull claude-config + claude-workspace
+10. 验证 CC：settings/hooks/CLAUDE.md 正常加载；hook 声音正常
+
+## 验证清单
+
+- [ ] 笔记本 CC 从标准位置加载（settings/CLAUDE.md/hooks）
+- [ ] Hook 通知声音正常（`%USERPROFILE%` 解析正确）
+- [ ] 文件修改自动同步到 OB（sync-config-to-ob.js）
+- [ ] OB vault 在 Obsidian 中正常打开，wikilink 正常
+- [ ] 三仓库 git status 洁净
+- [ ] MCP：playwright / siliconflow-image / replicate / chrome-devtools 正常工作
+- [ ] MCP：grsai 路径修正后正常（server.mjs 在 `D:\ClaudeWorkspace\.claude\mcp-servers\grsai\`）
+- [ ] 台式机上 %USERPROFILE% 解析为 `C:\Users\Administrator`，hook 正常工作
+- [ ] convert_to_ob 脚本在台式机上 `os.homedir()` 正确解析

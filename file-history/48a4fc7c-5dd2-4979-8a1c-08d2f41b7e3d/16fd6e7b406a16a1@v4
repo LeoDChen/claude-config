@@ -1,0 +1,25 @@
+# 缓存和临时文件
+cache/
+debug/
+telemetry/
+backups/
+session-env/
+shell-snapshots/
+plans/
+ide/
+scheduled_tasks.lock
+.last-cleanup
+
+# 运行时
+sessions/
+history.jsonl
+projects/
+
+# MCP servers（笔记本重新安装即可）
+mcp-servers/
+
+# 大文件
+*.log
+node_modules/
+*.zip
+*.tar.gz

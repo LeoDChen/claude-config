@@ -1,0 +1,69 @@
+---
+date: 2026-05-21
+session_id: path-alignment-execution
+customers: []
+topics: [Claude配置, Git同步, OB知识库]
+---
+
+# 双机如一 — 路径对齐方案执行
+
+**日期**: 2026-05-21
+
+## 背景
+
+台式机用户名 Administrator，笔记本 67240。原方案中多处硬编码用户路径，导致两台机器配置不通用。目标：`os.homedir()` + `%USERPROFILE%` 替代所有硬编码路径，两台机"坐下 pull → 工作 → 站起 push"。
+
+## 目录结构澄清
+
+| 目录 | 仓库 | 用途 |
+|------|------|------|
+| `%USERPROFILE%\.claude\` | claude-config | CC 配置（settings/agents/commands/CLAUDE.md） |
+| `D:\ClaudeWorkspace\` | claude-workspace | 项目文件（01-10业务目录/脚本/MCP服务） |
+| `D:\Obsidian仓库\` | ob-vault | Obsidian 知识库 |
+
+关键澄清：`D:\ClaudeCode workspace` 名字虽带"workspace"但装的是 claude-config，计划将其改名 `_OLD` 备份后废弃。
+
+## 执行结果
+
+### 笔记本侧（已完成）
+
+**A. 前置**
+- 提交 `Mona_almuharraqy_深度分析_2026-05-20.md` 到 claude-workspace → push ✅
+
+**B. CC 配置迁到标准位置**
+- 备份 `C:\Users\67240\.claude\` → `.claude_BACKUP\` ✅
+- Clone `claude-config` 到 `%USERPROFILE%\.claude` ✅
+- 恢复 7 个运行时目录（sessions/telemetry/file-history/shell-snapshots/session-env/ide/plans） ✅
+
+**C. 路径自适配改造（6个文件）**
+- `CLAUDE.md`（claude-config）：OB 双路径检测 → 单路径 `D:\Obsidian仓库\对话归档\CC\` ✅
+- `CLAUDE.md`（claude-workspace）：OB 归档路径 E 盘 → D 盘 ✅
+- `settings.local.json`（claude-config）：play_sound hook `C:\Users\67240\` → `%USERPROFILE%\` ✅
+- `.mcp.json`（claude-config）：grsai `C:\Users\Administrator\.claude\mcp-servers\` → `D:\ClaudeWorkspace\.claude\mcp-servers\` ✅
+- `sync-config-to-ob.js`：OB_BASE 双路径检测 → 单路径 `D:/Obsidian仓库/对话归档/CC/CC配置备份` ✅
+- `convert_to_ob.js / _v2.js / _v3.js`：PROJECTS_DIR + OB_DIR → `os.homedir()` 自适应 ✅
+- `D:\ClaudeWorkspace\.claude\settings.local.json`：权限加笔记本用户路径（双机覆盖） ✅
+
+**D. Git**
+- 三仓库 commit + push ✅
+- 新增 .gitignore：claude-config（sessions/history.jsonl/projects）、ob-vault（.obsidian/node_modules/）
+
+### 待处理
+
+1. **B.7** 重命名 `D:\ClaudeCode workspace` → `_OLD`（需关 VS Code 后手动执行）
+2. **台式机侧** 待用户到台式机后手动执行：
+   - OB vault E→D 迁移（robocopy + 路径替换）
+   - pull claude-config + claude-workspace
+   - 验证 CC 正常加载
+
+## 关键决策
+
+- CC 配置不放 OB vault 内（职责分离、同步浪费、CC 不认、运行时垃圾污染）
+- 运行时垃圾无需定期清理（CC 有自动清理机制）
+- 三仓库各司其职，不合并
+
+## 相关
+
+📂 [[主题索引/Claude配置]]
+📂 [[主题索引/Git同步]]
+📂 [[主题索引/OB知识库]]

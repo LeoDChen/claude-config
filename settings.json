@@ -11,5 +11,19 @@
     "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "1000000",
     "DISABLE_COMPACT": "1"
   },
-  "includeCoAuthoredBy": false
+  "includeCoAuthoredBy": false,
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.log(require('fs').readFileSync('d:/ClaudeConfig/hooks/inject-rules.txt','utf8'))\""
+          }
+        ]
+      }
+    ]
+  },
+  "model": "haiku"
 }

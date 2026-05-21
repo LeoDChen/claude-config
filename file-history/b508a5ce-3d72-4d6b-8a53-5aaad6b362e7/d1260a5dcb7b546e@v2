@@ -1,0 +1,51 @@
+---
+name: desktop-sync-workflow
+description: 双机 OB+CC 完全同步方法 — 三仓库 git + CC sessions robocopy
+metadata:
+  type: project
+---
+
+# 双机同步完全指南
+
+**Why:** 两台电脑通过 GitHub 三个仓库同步配置和知识，CC 会话历史（左侧面板）需额外 robocopy 同步（378MB，gitignored）。
+
+**完整文档：** OB `双机同步完全指南.md`
+
+## 架构
+
+| 内容 | 同步方式 | 仓库/路径 |
+|------|---------|----------|
+| CC 配置（hooks/skills/agents） | Git | `LeoDChen/claude-config` |
+| 项目文件（rules/知识库） | Git | `LeoDChen/claude-workspace` |
+| OB 笔记 + 对话归档 | Git | `LeoDChen/ob-vault` |
+| CC 左侧对话面板 | Robocopy | `D:\ClaudeConfig\projects\` |
+
+## 离开前（A 机）
+
+```bash
+# 三仓库 push
+cd D:/ClaudeConfig && git add -A && git commit -m "sync" && git push
+cd D:/ClaudeWorkspace && git add -A && git commit -m "sync" && git push
+cd D:/Obsidian仓库 && git add -A && git commit -m "auto: 对话归档" && git push
+
+# CC sessions 导出（到U盘/网络共享）
+robocopy "D:\ClaudeConfig\projects" "中转\projects" /MIR /R:3 /W:5
+```
+
+## 到达后（B 机）
+
+```bash
+# 三仓库 pull
+cd D:/ClaudeConfig && git pull
+cd D:/ClaudeWorkspace && git pull
+cd D:/Obsidian仓库 && git pull
+
+# CC sessions 导入
+robocopy "中转\projects" "D:\ClaudeConfig\projects" /MIR /R:3 /W:5
+```
+
+## 关键点
+- VPN 先开（GitHub 需翻墙，代理 127.0.0.1:57890）
+- sessions/projects 保持 gitignored，走 robocopy
+- 换机前必须三仓库 push + sessions 导出
+- OB 对话归档是跨机最终真相（即使 sessions 丢失也能从 OB 重建上下文）

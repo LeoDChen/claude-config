@@ -1,0 +1,15 @@
+# C盘→D盘交接方案
+
+## 背景
+CC 硬性要求配置在 `%USERPROFILE%\.claude`，但用户原则是 C 盘只装系统。用 NTFS Junction 实现：物理文件存 D 盘，C 盘只放交接指针。
+
+## 步骤
+1. 创建目标目录 `D:\ClaudeConfig\`
+2. robocopy 全量复制 `.claude` → `D:\ClaudeConfig\`（+ verify）
+3. 跳出当前目录，删除 `C:\Users\67240\.claude`
+4. `mklink /J "C:\Users\67240\.claude" "D:\ClaudeConfig"`
+5. 验证：CC 正常加载 settings/hooks/CLAUDE.md + git 正常
+
+## 风险
+- 步骤 3 需要在非 .claude 上下文中执行（cd 到 C:\Users\67240 再删）
+- 已在 .gitignore 排除 sessions/history.jsonl/projects，无垃圾同步风险

@@ -1,0 +1,206 @@
+# 双机同步完全指南 — OB + CC
+
+## 架构总览
+
+```
+台式机 ←→ GitHub (3 repos) ←→ 笔记本
+       ←→ CC sessions 直同步 ←→
+```
+
+三仓库管配置+知识，sessions 管对话历史。两层各自独立同步。
+
+---
+
+## 一、三个 Git 仓库
+
+| 仓库 | 本地路径 | GitHub |
+|------|---------|--------|
+| claude-config | `D:\ClaudeConfig\` | `LeoDChen/claude-config` |
+| claude-workspace | `D:\ClaudeWorkspace\` | `LeoDChen/claude-workspace` |
+| ob-vault | `D:\Obsidian仓库\` | `LeoDChen/ob-vault` |
+
+### 1. claude-config — CC 配置（hooks/agents/skills/CLAUDE.md/MCP/plugins）
+
+**已同步内容：**
+- `CLAUDE.md` — 全局指令
+- `hooks/` — 钩子脚本（UserPromptSubmit 等）
+- `agents/` — 自定义 agent 定义
+- `commands/` — 斜杠命令
+- `skills/` — 技能定义
+- `ecc/` — ECC 组件
+- `plugins/` — 插件配置
+- `mcp-configs/` — MCP 服务器配置
+- `settings.json` / `settings.local.json` — CC 设置
+- `.mcp.json` / `.gitignore` / `AGENTS.md`
+
+**不同步内容（gitignored）：**
+- `projects/`（~378MB）— **CC 左侧面板的对话历史数据**
+- `sessions/`（~21KB）— 会话元数据
+- `history.jsonl` — CLI 命令历史
+- `mcp-servers/` — MCP 服务器安装文件（每台机器需单独安装）
+- `session-env/` / `shell-snapshots/` / `plans/` / `ide/` / `telemetry/`
+
+### 2. claude-workspace — 项目工作区
+
+**包含：**
+- `.claude/CLAUDE.md` — 项目指令
+- `.claude/rules/` — 运营规则
+- `.claude/agents/` / `.claude/commands/` / `.claude/skills/`
+- `06_知识库/` — 工厂档案、产品信息
+- 脚本、看板、输出文件
+
+### 3. ob-vault — Obsidian 知识库
+
+**包含：**
+- `对话归档/CC/YYYY-MM/` — 每轮对话的归档文件
+- `对话归档索引.md` — 按日期的对话链接
+- `主题索引/` — 按主题分类的对话链接
+- `客户档案/` — 客户信息 + 关联对话链接
+- `自定义SKILL/` — 业务技能文档
+- 其他 OB 笔记（运营计划、FAQ、产品信息等）
+
+---
+
+## 二、CC 会话历史（左侧面板）
+
+### 数据在哪
+CC 左侧图标点开的对话列表，数据存储在：
+- `D:\ClaudeConfig\projects\` — 每个项目一个子目录，内有 `.jsonl` 对话文件
+
+### 为什么不在 git 里
+378MB 且每轮对话都写入，不适合 git（频繁变更 + 体积大）。
+
+### 如何跨机同步
+**方案：robocopy 镜像同步**
+
+两台电脑在同一局域网时，直接 robocopy 镜像 `projects/` 目录：
+
+```bash
+# 台式机 → 笔记本（在台式机执行）
+robocopy "D:\ClaudeConfig\projects" "\\笔记本IP\D$\ClaudeConfig\projects" /MIR /R:3 /W:5
+
+# 笔记本 → 台式机（在笔记本执行）
+robocopy "D:\ClaudeConfig\projects" "\\台式机IP\D$\ClaudeConfig\projects" /MIR /R:3 /W:5
+```
+
+不同局域网时，用移动硬盘/U盘中转：
+
+```bash
+# 源机器：复制到U盘
+robocopy "D:\ClaudeConfig\projects" "E:\CC-sessions\projects" /MIR /R:3 /W:5
+
+# 目标机器：从U盘复制
+robocopy "E:\CC-sessions\projects" "D:\ClaudeConfig\projects" /MIR /R:3 /W:5
+```
+
+**同步频率：** 换机前执行一次即可（保证换机后左侧面板能接着聊）。
+
+---
+
+## 二点五、首次初始化（仅新机一次）
+
+新笔记本/重装系统后，执行以下一次性步骤。之后换机只走第三章的 pull+导入流程。
+
+### 1. Clone 三仓库
+
+```bash
+cd D:/
+git clone git@github.com:LeoDChen/claude-config.git ClaudeConfig
+git clone git@github.com:LeoDChen/claude-workspace.git ClaudeWorkspace
+git clone git@github.com:LeoDChen/ob-vault.git Obsidian仓库
+```
+
+### 2. 创建 Junction（无需管理员）
+
+```bash
+# 先备份已有的 .claude（如有）
+ren C:\Users\67240\.claude .claude_BACKUP
+
+# 创建 junction 指向 D:\ClaudeConfig
+mklink /J "C:\Users\67240\.claude" "D:\ClaudeConfig"
+```
+
+**注意：** `mklink /J` 创建的是 Junction（tag 0xa0000003），不需要管理员权限。不要用 `mklink /D`（符号链接，需管理员）。
+
+### 3. 配置 Git 代理
+
+GitHub 需翻墙，Clash Verge 代理地址 `127.0.0.1:57890`：
+
+```bash
+git config --global http.proxy http://127.0.0.1:57890
+git config --global https.proxy http://127.0.0.1:57890
+```
+
+### 4. MCP 服务器安装
+
+```bash
+cd D:/ClaudeConfig
+npm install
+```
+
+---
+
+## 三、换机同步步骤（每次）
+
+### A 机（离开前）→ push + 导出
+
+```bash
+# 1. VPN 连上（GitHub 需翻墙，代理 127.0.0.1:57890）
+
+# 2. 三仓库 commit + push
+cd "D:/ClaudeConfig" && git add -A && git commit -m "sync: YYYY-MM-DD 同步" && git push
+cd "D:/ClaudeWorkspace" && git add -A && git commit -m "sync: YYYY-MM-DD 同步" && git push
+cd "D:/Obsidian仓库" && git add -A && git commit -m "auto: YYYY-MM-DD 对话归档" && git push
+
+# 3. 导出 CC sessions（如需在 B 机接着聊）
+robocopy "D:\ClaudeConfig\projects" "中转路径\projects" /MIR /R:3 /W:5
+robocopy "D:\ClaudeConfig\sessions" "中转路径\sessions" /MIR /R:3 /W:5
+```
+
+### B 机（到达后）→ pull + 导入
+
+```bash
+# 1. VPN 连上
+
+# 2. 三仓库 pull
+cd "D:/ClaudeConfig" && git pull
+cd "D:/ClaudeWorkspace" && git pull
+cd "D:/Obsidian仓库" && git pull
+
+# 3. 导入 CC sessions（从中转路径）
+robocopy "中转路径\projects" "D:\ClaudeConfig\projects" /MIR /R:3 /W:5
+robocopy "中转路径\sessions" "D:\ClaudeConfig\sessions" /MIR /R:3 /W:5
+
+# 4. MCP 服务器重装（如有新增）
+# cd "D:/ClaudeConfig" && npm install（在 mcp-servers/ 下）
+```
+
+---
+
+## 四、同步内容对照表
+
+| 内容 | Git | Sessions直拷 | 备注 |
+|------|-----|-------------|------|
+| CC 配置（hooks/skills/agents） | ✅ | — | claude-config |
+| CC 项目文件（rules/知识库） | ✅ | — | claude-workspace |
+| OB 笔记 + 对话归档 | ✅ | — | ob-vault |
+| CC 左侧对话面板 | — | ✅ | projects/ jsonl |
+| MCP 服务器 | — | — | 每机独立 npm install |
+
+---
+
+## 五、路径说明
+
+- `C:\Users\67240\.claude\` = junction → `D:\ClaudeConfig\`
+- 两台机器统一使用 `D:\` 路径（2026-05-21 路径自适配重构完成）
+- 台式机原 E 盘已迁至 D 盘，笔记本也是 D 盘，路径一致
+
+---
+
+## 六、注意事项
+
+1. **VPN 先开**：GitHub 需翻墙，Clash Verge 代理 `127.0.0.1:57890`
+2. **不要改 gitignore**：sessions/projects 太大且变更频繁，保持 gitignored，走 robocopy
+3. **换机前必须做**：三仓库 push + sessions 导出。少一步换机后就有缺口
+4. **OB 对话归档是最终真相**：即使 sessions 没同步，OB 归档文件已有完整对话记录
+5. **MCP 服务器**：每台机器独立安装，不跨机同步

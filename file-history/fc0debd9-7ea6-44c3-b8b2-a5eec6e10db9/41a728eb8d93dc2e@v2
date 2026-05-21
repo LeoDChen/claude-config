@@ -1,0 +1,210 @@
+const ExcelJS = require("exceljs");
+const path = require("path");
+
+async function main() {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("医院费用明细");
+
+  // -- color definitions --
+  const HEADER_BG = "4472C4"; // blue
+  const HEADER_FG = "FFFFFF";
+  const HOSPITAL_BG = "D6E4F0"; // light blue
+  const LIVING_BG = "E2EFDA"; // light green
+  const SUBTOTAL_BG = "D9D9D9"; // light gray
+  const SUMMARY_BG = "FFF2CC"; // light yellow
+  const BORDER = { style: "thin", color: { argb: "B0B0B0" } };
+  const FONT_DEFAULT = { name: "微软雅黑", size: 11 };
+  const FONT_BOLD = { name: "微软雅黑", size: 11, bold: true };
+  const FONT_TITLE = { name: "微软雅黑", size: 16, bold: true };
+  const FONT_HEADER = { name: "微软雅黑", size: 11, bold: true, color: { argb: HEADER_FG } };
+  const FONT_SUMMARY_LABEL = { name: "微软雅黑", size: 12, bold: true };
+  const FONT_SUMMARY_VALUE = { name: "微软雅黑", size: 12, bold: true, color: { argb: "C00000" } };
+  const ALIGN_CENTER = { vertical: "middle", horizontal: "center", wrapText: false };
+  const ALIGN_LEFT = { vertical: "middle", horizontal: "left", wrapText: true };
+  const ALIGN_RIGHT = { vertical: "middle", horizontal: "right" };
+
+  const borderAll = (cell) => {
+    cell.border = { top: BORDER, left: BORDER, bottom: BORDER, right: BORDER };
+  };
+
+  // -- column widths --
+  ws.getColumn(1).width = 14;
+  ws.getColumn(2).width = 14;
+  ws.getColumn(3).width = 36;
+  ws.getColumn(4).width = 14;
+  ws.getColumn(5).width = 22;
+
+  // -- data --
+  const hospital = [
+    { date: "2026-05-07", purpose: "门诊处方收费", amount: 69, note: "0001" },
+    { date: "2026-05-07", purpose: "住院预缴费", amount: 1000, note: "0002" },
+    { date: "2026-05-10", purpose: "出院缴费", amount: 1153.5, note: "0008" },
+  ];
+  const living = [
+    { date: "2026-05-08", purpose: "吃饭（与老板儿子共同消费）", amount: 84, note: "0003" },
+    { date: "2026-05-08", purpose: "水果（与老板儿子共同消费）", amount: 45, note: "0004" },
+    { date: "2026-05-09", purpose: "水果（与老板儿子共同消费）", amount: 87, note: "0005" },
+    { date: "2026-05-09", purpose: "吃饭（与老板儿子共同消费）", amount: 103, note: "0006" },
+    { date: "2026-05-09", purpose: "吃饭（与老板儿子共同消费）", amount: 79, note: "0007" },
+    { date: "2026-05-10", purpose: "出院购买水果和营养品（与老板儿子共同消费）", amount: 357.49, note: "0009" },
+  ];
+
+  const hospitalTotal = hospital.reduce((s, r) => s + r.amount, 0);
+  const livingTotal = living.reduce((s, r) => s + r.amount, 0);
+  const totalExpense = hospitalTotal + livingTotal;
+  const received = 10000;
+  const refund = received - totalExpense;
+
+  let row = 1;
+
+  // ---- TITLE ----
+  ws.mergeCells(row, 1, row, 5);
+  const titleCell = ws.getCell(row, 1);
+  titleCell.value = "医院费用明细表";
+  titleCell.font = FONT_TITLE;
+  titleCell.alignment = { vertical: "middle", horizontal: "center" };
+  ws.getRow(row).height = 36;
+  row++;
+
+  // subtitle
+  ws.mergeCells(row, 1, row, 5);
+  const subCell = ws.getCell(row, 1);
+  subCell.value = "老板儿子住院期间费用明细  |  收到：¥10,000.00";
+  subCell.font = { name: "微软雅黑", size: 10, color: { argb: "666666" } };
+  subCell.alignment = { vertical: "middle", horizontal: "center" };
+  ws.getRow(row).height = 22;
+  row += 2;
+
+  // ---- HEADER ----
+  const headers = ["日期", "项目类别", "具体用途", "金额（元）", "备注（截图编号）"];
+  const headerRow = ws.getRow(row);
+  headers.forEach((h, i) => {
+    const cell = headerRow.getCell(i + 1);
+    cell.value = h;
+    cell.font = FONT_HEADER;
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_BG } };
+    cell.alignment = ALIGN_CENTER;
+    borderAll(cell);
+    cell.protection = { locked: true };
+  });
+  headerRow.height = 28;
+  row++;
+
+  // ---- HOSPITAL SECTION ----
+  const writeSection = (data, bgColor, sectionLabel) => {
+    data.forEach((r) => {
+      const cells = [
+        { v: r.date, align: ALIGN_CENTER },
+        { v: sectionLabel, align: ALIGN_CENTER },
+        { v: r.purpose, align: ALIGN_LEFT },
+        { v: r.amount, align: ALIGN_RIGHT },
+        { v: r.note, align: ALIGN_CENTER },
+      ];
+      cells.forEach((c, i) => {
+        const cell = ws.getCell(row, i + 1);
+        cell.value = c.v;
+        cell.font = FONT_DEFAULT;
+        cell.alignment = c.align;
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: bgColor } };
+        borderAll(cell);
+      });
+      // number format for amount column
+      ws.getCell(row, 4).numFmt = "#,##0.00";
+      ws.getRow(row).height = 22;
+      row++;
+    });
+
+    // subtotal
+    const subVal = data.reduce((s, r) => s + r.amount, 0);
+    ws.mergeCells(row, 1, row, 3);
+    const subLabel = ws.getCell(row, 1);
+    subLabel.value = `${sectionLabel} 小计`;
+    subLabel.font = FONT_BOLD;
+    subLabel.alignment = { vertical: "middle", horizontal: "right" };
+    subLabel.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUBTOTAL_BG } };
+    [1, 2, 3, 4, 5].forEach((i) => {
+      const c = ws.getCell(row, i);
+      c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUBTOTAL_BG } };
+      c.font = FONT_BOLD;
+      borderAll(c);
+    });
+    const subAmt = ws.getCell(row, 4);
+    subAmt.value = subVal;
+    subAmt.numFmt = "#,##0.00";
+    subAmt.alignment = ALIGN_RIGHT;
+    ws.getCell(row, 5).value = "";
+    ws.getRow(row).height = 24;
+    row++;
+    row++; // blank row
+    return subVal;
+  };
+
+  writeSection(hospital, HOSPITAL_BG, "医院费用");
+  writeSection(living, LIVING_BG, "生活花销");
+
+  // ---- SUMMARY ----
+  const summaryStart = row;
+  const addSummaryRow = (label, value, valueColor) => {
+    ws.mergeCells(row, 1, row, 3);
+    const lbl = ws.getCell(row, 1);
+    lbl.value = label;
+    lbl.font = FONT_SUMMARY_LABEL;
+    lbl.alignment = { vertical: "middle", horizontal: "right" };
+    [1, 2, 3, 4, 5].forEach((i) => {
+      const c = ws.getCell(row, i);
+      c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: SUMMARY_BG } };
+      borderAll(c);
+    });
+    const val = ws.getCell(row, 4);
+    val.value = value;
+    val.numFmt = "#,##0.00";
+    val.font = valueColor || FONT_SUMMARY_VALUE;
+    val.alignment = ALIGN_RIGHT;
+    ws.getCell(row, 5).value = "";
+    ws.getRow(row).height = 26;
+    row++;
+  };
+
+  addSummaryRow("总支出", totalExpense, FONT_SUMMARY_VALUE);
+  addSummaryRow("收到金额", received, { name: "微软雅黑", size: 12, bold: true });
+  addSummaryRow("应退余额", refund, FONT_SUMMARY_VALUE);
+
+  // ---- FOOTER NOTE ----
+  row++;
+  ws.mergeCells(row, 1, row, 5);
+  const note = ws.getCell(row, 1);
+  note.value = "注：生活花销为与老板儿子的共同消费。金额基于微信支付截图，均已核实。";
+  note.font = { name: "微软雅黑", size: 9, italic: true, color: { argb: "888888" } };
+  note.alignment = { vertical: "middle", horizontal: "left" };
+  row++;
+  ws.mergeCells(row, 1, row, 5);
+  const note2 = ws.getCell(row, 1);
+  note2.value = `制表日期：2026-05-10`;
+  note2.font = { name: "微软雅黑", size: 9, color: { argb: "888888" } };
+  note2.alignment = { vertical: "middle", horizontal: "right" };
+
+  // -- page setup --
+  ws.pageSetup.orientation = "portrait";
+  ws.pageSetup.fitToWidth = 1;
+
+  const outPath = path.join(
+    process.env.USERPROFILE || "C:/Users/Administrator",
+    "Desktop",
+    "医院费用明细_老板儿子.xlsx"
+  );
+  await wb.xlsx.writeFile(outPath);
+  console.log("Done:", outPath);
+
+  // -- verify --
+  console.log(`\n--- 核对 ---`);
+  console.log(`医院费用: ${hospitalTotal.toFixed(2)}`);
+  console.log(`生活花销: ${livingTotal.toFixed(2)}`);
+  console.log(`总支出:   ${totalExpense.toFixed(2)}`);
+  console.log(`收到:     ${received.toFixed(2)}`);
+  console.log(`应退余额: ${refund.toFixed(2)}`);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

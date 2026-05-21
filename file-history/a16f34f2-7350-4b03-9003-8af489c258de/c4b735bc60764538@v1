@@ -1,0 +1,254 @@
+# OKKI 项目状态追踪
+
+> 最后更新：2026-05-14（每日同步 + 分类刷新）
+
+## 今日同步（2026-05-14 09:22）
+
+| 指标 | 数值 |
+|------|------|
+| 数据同步时间 | **2026-05-14 09:22** |
+| 总会话 | **466→465** |
+| 变化会话 | **15** |
+| 增量消息 | **729** 条 |
+| 订单 | **39** 条 |
+
+### 质量分布变化
+
+| 等级 | 5/13 | 5/14 | 变化 |
+|------|:---:|:---:|:---:|
+| S | 7 | 7 | - |
+| A | 160 | 160 | - |
+| B | 237 | 236 | -1 |
+| C | 41 | 42 | +1 |
+| D | 21 | 20 | -1 |
+
+### 看板更新（5/14）
+
+- **KPI 卡片可点击**：6 个卡片均可点击弹出客户名单，格式与矩阵弹窗一致
+- **"需行动"计算改为 actionPriority 驱动**：urgent+soon+watch = 111（旧规则 56）
+- 看板：[output/dashboard_2026-05-14.html](08_客户跟进/Okki/output/dashboard_2026-05-14.html)
+
+### 🚨 紧急跟进（4人）
+
+| 客户 | 等级 | 阶段 | 静默 | 行动方向 |
+|------|:---:|------|:---:|------|
+| **jonathan aston** | B | PI已发 | 1d | PI刚发2天，确认PI已收到 |
+| **maimouna cisse** | A | PI已发 | 16d | 500件+降价谈判，PI确认期 |
+| **Inderpreet kaur** | A | 谈判/样品 | 1d | ⚠提问未回 |
+| **ali Amjid** | A | 谈判/样品 | 2d | 269条新消息，南非客户 |
+
+### 行动清单
+
+- 紧急 4 / 尽快 30（共34人需行动）
+- 看板：`output/dashboard_2026-05-14.html`
+- 手机长图：`output/mobile_action_2026-05-14.png`
+
+## 历史记录（2026-05-13）
+
+| # | 模块 | 内容 |
+|---|------|------|
+| 1 | **弹窗 JS 语法修复** | `enhanced_classify.js` 生成 HTML 时 `\\\'` 错误输出为 `\'`，Node v24 不兼容，导致 openModal 整个不可用。改为 `\'` 输出纯 `'` |
+| 2 | **优先级阈值调整** | 谈判/样品 6-7d: idle→soon, 8-14d: idle→watch, 15-30d: idle→watch。解决 ⚪ 与有行动方向文本不匹配 |
+| 3 | **🟢 图标可见性** | 行动方向列 CSS `var(--success)` 绿色吞掉 🟢，改为 `var(--text-primary)` |
+| 4 | **静默风险排序** | 降序→升序（`db - da` → `da - db`），最早在前 |
+| 5 | **产品卡片识别** | `isSys()` 误将产品卡片（contentType:101）判为系统消息，导致客户消息数=0、静默天数=空。修复：custom 内容不判系统消息 + getText() 提取 searchableContent.summary |
+| 6 | **Assistant Eva 黑名单** | 产品卡片修复后其 94 条机器人消息被误识为客户 → 名字黑名单锁定 D 级 |
+| 7 | **质量判定V3** | 全量对话扫描（非仅最新消息）+ 多语言信号（法/西/阿）+ B级81%→57.5% |
+| 8 | **行动引擎** | `getAction()` — 8阶段×沉默天数→优先级+状态+行动方向，写入每个客户 |
+| 9 | **平台消息过滤** | isSys() 23条规则，覆盖12类平台消息（含RFQ/自动接待/翻译/撤回/进店/流失提醒等） |
+| 10 | **售后误判修正** | 4轮修正：去problem/wrong/issue等宽泛词 → 只扫客户消息 → 只打标不硬判(⚠疑似售后) |
+| 11 | **弹窗改造** | 旧：客户/国家/静默/关注观察 → 新：客户(等级标签)/国家·静默/当前状态/行动方向 |
+| 12 | **国家中文** | 70+国家代码→中文名映射 |
+| 13 | **7问分析框架** | `knowledge/analysis-framework.md` — 替代场景SOP，问题驱动判断 |
+| 14 | **看板优化** | 阶段列64px居中 / 优先级图标(🔴🟡🟢⚪) / gradeTag彩色标签 |
+
+### 当前分布
+
+| 等级 | S | A | B | C | D |
+|------|:--:|:--:|:--:|:--:|:--:|
+| 人数 | 7 | 160 | 237 | 41 | 21 |
+| 占比 | 1.5% | 34.3% | 50.9% | 8.8% | 4.5% |
+
+### 静默天数覆盖
+
+| 状态 | 修复前 | 修复后 |
+|------|:---:|:---:|
+| 已知静默天数 | 327 | **438** |
+| 未知（`?`） | 139 | **28** |
+
+> 剩余 28 个 `?` 为 RFQ 报价自动创建对话（客户从未回复）或进店自动建对话，属数据真实情况，无需修复。
+
+## 分类方案 v2（2026-05-11 确认）
+
+| 维度 | 内容 |
+|------|------|
+| 生命周期 | 8阶段（待回复→初询→报价已发→谈判/样品→PI已发→订单执行→已签收→售后）+ 沉默5级副状态 |
+| 质量 | S/A/B/C/D 五级，硬判定标准 |
+| 边缘情况 | 14条，遇则标注【需你决策】 |
+| 触发提醒 | 每次同步后输出"该跟进"清单 |
+| 线下同步 | `data/offline_chat_log.md` 手动维护 |
+| 进化机制 | 每次"分错了"→立即更新规则文件 |
+
+---
+## 历史同步记录
+
+> 上次同步：2026-05-11 09:11 | 最新：2026-05-12 11:42
+
+## 最新同步结果 (2026-05-13 09:05)
+
+| 指标 | 数值 |
+|------|------|
+| 数据同步时间 | **2026-05-13 09:05** |
+| 总会话 | **466** |
+| 分类覆盖 | **466** (全量) |
+| 变化会话 | **15** (增量拉取721条消息) |
+| P1/P2/P3/P4 | 0 / 17 / 27 / 66 / 356 |
+
+## 最新分析结果 (2026-05-13 产品卡片修复后)
+
+### 质量分布
+
+| 等级 | 人数 | 占比 | 判定逻辑 |
+|------|:---:|:---:|------|
+| **S** | 7 | 1.5% | 2+ S级信号（品牌ODM/分销渠道/大批量/公司资料/复购） |
+| **A** | 160 | 34.3% | 1个S级信号 或 2+个A级信号 |
+| **B** | 237 | 50.9% | 有实质互动但信号不足以升A/S |
+| **C** | 41 | 8.8% | 明确降级信号（个人自用/小量/问完消失/浅互动+长期沉默） |
+| **D** | 21 | 4.5% | 无关/废弃（仅系统消息/品类不匹配/非采购意图/平台机器人） |
+
+### 本次修复（2026-05-13）
+
+| # | 改动 | 效果 |
+|---|------|------|
+| 1 | 产品卡片识别：`isSys()` 不再误杀 `content.custom` 消息 | D级 79→21，A级 79→160，修复112人静默天数 |
+| 2 | 弹窗 JS 语法：`\\\'` → `\'` | openModal 恢复正常 |
+| 3 | 谈判/样品优先级：6-7d→soon, 8-30d→watch | ⚪ 与行动方向不再矛盾 |
+| 4 | 行动列 CSS：`var(--success)` → `var(--text-primary)` | 🟢 图标不再被绿色文字吞掉 |
+| 5 | 静默风险排序：降序→升序 | 时间从早到晚 |
+| 6 | Assistant Eva 黑名单 | 94条机器人消息误识别修复 |
+| 7 | V3 优化内容（同上次）：全量扫描/客户消息优先/S级收紧/多语言/C级"问完消失"/D级品类误判保护 | 见上表分布 |
+
+### 生命周期分布
+
+| 阶段 | 人数 |
+|------|:---:|
+| PI已发 | 197 |
+| 初询沟通 | 131 |
+| 订单执行中 | 65 |
+| 报价已发 | 35 |
+| 谈判/样品 | 23 |
+| 售后 | 9 |
+| 已签收 | 6 |
+| 待回复 | 0 |
+
+### 🚨 今日行动信号
+
+| 客户 | 质量 | 阶段 | 信号 |
+|------|:---:|------|------|
+| **Inderpreet kaur** | A | PI已发 | ⚠提问未回 |
+| **maimouna cisse** | A | PI已发 | 500件+降价, 上次联系16d前 |
+| **Keinjol Tata** | S | PI已发 | 品牌ODM+Amazon+2000件, 上次联系3d前 |
+| **Chloé St-Germain** | S | PI已发 | 品牌ODM+公司资料, 845条消息高互动 |
+
+> ✅ 已知误判四个全部修正：Keinjol B→S / Ernestina D→B / maimouna B→A / Inderpreet B→A
+
+## 看板输出
+
+| 文件 | 说明 |
+|------|------|
+| `output/dashboard_2026-05-13.html` | **最新** Apple风格管道看板 — KPI+双轴矩阵(可点击弹窗)+静默分级+市场管道 |
+| `output/dashboard_2026-05-12.html` | 上一版 Apple风格管道看板 |
+| `data/s1_enhanced_full.json` | 全量466客户双轴分类数据 |
+| `data/s1_enhanced.json` | 同上（脚本主输出） |
+
+## 一键同步+分类+长图
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js && node scripts/gen_mobile_report.js
+```
+
+## 仅输出今日行动清单（不重新同步）
+
+```bash
+cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/gen_mobile_report.js
+```
+
+## 下次分析启动指令
+
+> ⚠️ **必须先同步！** 不跑 `sync_okki.js` 直接分类 = 看旧数据，新客户/新消息全漏。
+>
+> **第一步（必须）**：同步 + 分类 + 长图
+> ```bash
+> cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/sync_okki.js && node scripts/sync_orders.js && node scripts/enhanced_classify.js && node scripts/gen_mobile_report.js
+> ```
+> 同步从 OKKI CDP 抓最新会话+订单 → 更新数据 → 全量重分类 → 生成看板 → 生成手机端行动清单长图。
+>
+> **仅要行动清单（数据已同步过）**：
+> ```bash
+> cd d:\ClaudeWorkspace\08_客户跟进\Okki && NODE_PATH="C:/Users/Administrator/AppData/Roaming/npm/node_modules" node scripts/gen_mobile_report.js
+> ```
+>
+> **第二步**：读 STATE.md + `knowledge/analysis-framework.md`
+>
+> **第三步**：报告变化（新客户、等级变化、需行动信号） + 发送 `output/mobile_action_YYYY-MM-DD.png` 到手机
+>
+> 看板：`output/dashboard_YYYY-MM-DD.html`
+> 行动清单（手机）：`output/mobile_action_YYYY-MM-DD.png`
+> 待深度分析：jonathan aston / Asma Noor / Sara Dibes / Abdulrhman alal / Aloh Voma / Inderpreet kaur
+
+## 关键文件
+
+| 文件 | 用途 |
+|------|------|
+| `scripts/sync_okki.js` | 同步脚本：CDP 抓取客户会话 → `data/s1_classification.json` |
+| `scripts/sync_orders.js` | 同步脚本：CDP 抓取销售订单 → `data/orders_latest.json` |
+| `scripts/enhanced_classify.js` | 主脚本：双轴分类+行动引擎+看板生成 |
+| `scripts/gen_mobile_report.js` | 手机端行动清单长图生成（PNG，发微信查看） |
+| `knowledge/classification-rules.md` | 分类规则（双轴+14边缘情况） |
+| `knowledge/analysis-framework.md` | 7问分析框架（替代场景SOP） |
+| `knowledge/business-rules.md` | 业务判断辅助 |
+| `output/dashboard_2026-05-13.html` | 最新看板 |
+
+## ⚠️ 待完成：订单数据集成
+
+**现状**：生命周期判定（PI已发/订单执行中/已签收/售后）**全靠对话文本正则推断**，未使用 OKKI 后台真实订单数据。
+
+**已有条件**：
+- `data/orders_latest.json` — 39 个真实订单，字段：`orderNo / orderDate / amount / customer / status / erpStatus`
+- `scripts/sync_orders.js` — 已接入同步链
+- 订单与客户可通过 `customer` 字段匹配会话客户名
+
+**待做**：
+1. `enhanced_classify.js` 加载 `orders_latest.json`
+2. 按客户名匹配订单 → 用 `status` 覆盖/修正生命周期阶段
+3. 状态映射：`待付款`→PI已发 / `已发货`→订单执行中 / `交易成功`→已签收 / `已关闭`→售后
+4. 订单金额可辅助质量判定（大额订单→S/A信号）
+
+## 质量判定V3技术要点
+
+- 信号源：`fullCustText`（客户消息全量）> `fullConvText`（全量对话）> `latestText`（最新消息）
+- S级必须2+信号，均从客户消息提取，避免我方模板干扰
+- 数量单位支持：pcs/pieces/units/unités/pce/sets/ensembles
+- 价格谈判支持：discount/réduction/remise/descuento/降价/折扣
+- MOQ接受支持：英/法双语模式
+- 品类误判保护：卡通/cartoon/童/婴/幼 → isBabyRelated豁免
+- **产品卡片**：contentType:101 不再被 isSys() 误杀，支持从 searchableContent.summary 提取文本
+
+---
+## 待修正项（历史）
+
+| # | 客户 | 问题 | 状态 |
+|---|------|------|:---:|
+| 1 | Mona | 样品5周未达+霍尔木兹海峡危机 | ✅ |
+| 2 | Aloh Voma | 运输标记确认 | ⏳ |
+| 3 | Inderpreet kaur | 替用户做了商业决策 | ⏳ |
+| 4 | Keinjol Tata | 等级偏低→应S/A | ✅ V3已修正→S |
+| 5 | jonathan aston | 报价后沉默原因分析 | ⏳ |
+| 6 | Asma Noor | 报价数据错误 | ⏳ |
+| 7 | Sara Dibes | PI已读未回心理分析 | ⏳ |
+| 8 | Abdulrhman alal | 延迟回复致歉 | ⏳ |
+| 9 | Ernestina Afriyie | D→卡通睡衣=母婴正品 | ✅ V3已修正→B |
+| 10 | Asselya Marina | S→A, 谈判/样品→沉默-已终止 | ✅ 2026-05-13 手动修正 |
+
+> 历史关键发现、报告文件、已完成事项 → `reports/archive.md`
+> 旧P0/P4详情已归档（被全量双轴分类替代）

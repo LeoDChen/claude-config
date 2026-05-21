@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Administrator/.claude/**)",
+      "Read(//c/Users/67240/.claude/**)",
+      "Bash(claude --version)",
+      "Bash(NODE_PATH=\"C:/Users/Administrator/AppData/Roaming/npm/node_modules\" node scripts/sync_okki.js)",
+      "Bash(NODE_PATH=\"C:/Users/67240/AppData/Roaming/npm/node_modules\" node scripts/sync_okki.js)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node d:/ClaudeWorkspace/.claude/hooks/sync-config-to-ob.js"
+          }
+        ]
+      }
+    ]
+  }
+}
