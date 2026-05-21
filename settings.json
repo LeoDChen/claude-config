@@ -19,11 +19,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"console.log(require('fs').readFileSync('d:/ClaudeConfig/hooks/inject-rules.txt','utf8'))\""
+            "command": "node -e \"const fs=require('fs');const p='d:/ClaudeConfig/hooks/inject-rules.txt';if(fs.existsSync(p))console.log(fs.readFileSync(p,'utf8'));else process.exit(0)\""
           }
         ]
       }
     ]
   },
-  "model": "haiku"
+  "model": "haiku",
+  "effortLevel": "max"
 }
