@@ -1,0 +1,81 @@
+# Session: 2026-05-21
+
+**Started:** ~13:00
+**Last Updated:** 14:30
+**Project:** D:\ClaudeWorkspace (claude-workspace)
+**Topic:** 双机同步—OB路径自适应+全量对话归档
+
+---
+
+## What We Are Building
+
+两台式机+笔记本通过三个Git仓库同步CC全量配置+OB对话归档的完整工作流。用户需求：「push/pull」指令后，自动同步三仓库+跑OB归档（摘要+折叠全文+双链），检索时 biu 命中。
+
+三仓库架构：
+1. **claude-workspace** → `D:\ClaudeWorkspace\` — 项目文件/脚本
+2. **ob-vault** → `D:\Obsidian仓库\` — OB 对话归档（台式机已从E盘迁到D盘）
+3. **claude-config** → `%USERPROFILE%\.claude\` — 全局配置(CLAUDE.md/hooks/skills/agents/settings/MCP)
+
+全量同步指南：`D:\Obsidian仓库\双机同步完全指南.md`
+
+---
+
+## What Was DONE This Session (14:24)
+
+- **convert_to_ob_v3.js --force 已跑** (bun) — 223 对话覆盖, 52 客户档案, 13 主题索引, 8 噪音跳过
+- **扫描范围** — 台式机 5/20 + 笔记本 5/21 的 session JSONL
+
+---
+
+## What WORKED (with evidence)
+
+- **三仓库pull完成** — claude-workspace ✅（用户自己pull的）、ob-vault ✅（fast-forward 0c898d4 → a1137f9）、claude-config ✅（fast-forward 9b0923c → 61bdf73）
+- **convert_to_ob_v3.js 第9行已改** — OB_DIR 添加 fs.existsSync('D:/Obsidian仓库') 自适应双盘 ✅
+- **笔记本5/21对话已通过ob-vault pull拉下来** — 是OB格式（frontmatter+摘要+折叠详情），确认在 `2026-05/` 目录下
+- **bun 运行 convert 脚本成功** — 223/231 对话覆盖（跳过8个噪音）
+
+---
+
+## What Did NOT Work (and why)
+
+- **OB stash pop冲突** — `.obsidian/workspace.json` 台式机本地与笔记本远程冲突，被stash挡住没pop成功。这只是Obsidian自己的工作区视图配置，不影响归档内容。
+- **claude-config stash未合并** — 台式机本地CLAUDE.md修改（删输出语言规则+加补读关联文件规则）stash后pull了笔记本版本，还没pop出来合并。笔记本版改动了大部分原则的措辞+加了框架自检/结论验证/自动保存系统。
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+| --- | --- | --- |
+| `D:\ClaudeWorkspace\scripts\convert_to_ob_v3.js:9` | PASS: 已修改 | 自适应D/E双盘OB_DIR |
+| `D:\Obsidian仓库\.obsidian\workspace.json` | IN PROGRESS | stash弹出冲突，需手动处理（取远程版即可） |
+| `C:\Users\Administrator\.claude\CLAUDE.md` | IN PROGRESS | stash@{0}未弹出，台式机本地修改vs笔记本版待合并 |
+
+---
+
+## Decisions Made
+
+- **只有历史对话进OB** — 其他配置(hook/脚本/MCP/rule)全部走默认路径，不放进OB仓库。笔记本已确认过这个方案。
+- **OB路径自适应** — 不改junction/不改CLAUDE.md/hook，只改convert_to_ob_v3.js用fs.existsSync判断D/E盘
+- **自动保存行为变更（待台式机确认）** — 笔记本把CLAUDE.md"询问用户→保存"改成了"自动保存不询问"，台式机用户是否同意未知
+
+---
+
+## 用户偏好/记忆笔记
+
+- 用户清晰区分：**ob-vault**只装历史对话，其他配置走各自默认路径
+- 流程是：离开push→到达pull→自动OB归档
+- 交互原则原版（用户手写）vs笔记本电脑改写版需要确认
+- 对抗审查标准：输出结论前必须源数据验证
+
+---
+
+## Exact Next Step (for new conversation)
+
+开新对话后说"继续之前的同步"，依次执行：
+
+1. ~~`cd D:\ClaudeWorkspace\scripts && node convert_to_ob_v3.js --force`~~ ✅ 已完成 (bun, 223对话)
+2. cd ob-vault: git add → commit → push
+3. cd claude-workspace: git add → commit → push
+4. cd claude-config: git stash pop → 合并CLAUDE.md冲突（笔记本版保留框架自检/结论验证/自动保存，台式机补读关联文件规则手工加进去）
+5. 验证对话归档索引.md 含全部对话
