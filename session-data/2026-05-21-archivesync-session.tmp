@@ -1,7 +1,7 @@
 # Session: 2026-05-21
 
 **Started:** ~13:00
-**Last Updated:** 14:30
+**Last Updated:** 15:00 — 全量同步完成
 **Project:** D:\ClaudeWorkspace (claude-workspace)
 **Topic:** 双机同步—OB路径自适应+全量对话归档
 
@@ -74,8 +74,8 @@
 
 开新对话后说"继续之前的同步"，依次执行：
 
-1. ~~`cd D:\ClaudeWorkspace\scripts && node convert_to_ob_v3.js --force`~~ ✅ 已完成 (bun, 223对话)
-2. cd ob-vault: git add → commit → push
-3. cd claude-workspace: git add → commit → push
-4. cd claude-config: git stash pop → 合并CLAUDE.md冲突（笔记本版保留框架自检/结论验证/自动保存，台式机补读关联文件规则手工加进去）
-5. 验证对话归档索引.md 含全部对话
+1. ~~`cd D:\ClaudeWorkspace\scripts && node convert_to_ob_v3.js --force`~~ ✅ 已完成 (256全量→248对话, 含25个补漏)
+2. ~~修复脚本：不再依赖 `_all_sessions_meta.json`，自动扫描未索引 JSONL~~ ✅ (377728e)
+3. 启动代理 → `git pull --rebase && git push` 三仓库
+4. claude-config: `git stash pop` → 合并 CLAUDE.md 冲突
+5. 验证对话归档索引.md 含全部 248 对话
