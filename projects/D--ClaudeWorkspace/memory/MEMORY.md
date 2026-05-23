@@ -15,6 +15,7 @@
 - [看板报告格式](report_format.md) — 必须输出为格式美观的Word文档(.docx)，而非Markdown
 
 - [输出语言规则](output_language_rules.md) — 回复默认中文，公司/人名/地址/联系方式必须英文原文
+- [知识检索强制协议](feedback_search_protocol.md) — 报告"没有"前搜 2 源×2 关键词；向用户提问前先检索 memory→OB→知识库，穷举后才问
 - [问题解决思维](problem_solving_approach.md) — 穷举所有可行路径，不因工具限制说"不行"；不盲信陈旧分析结论
 - [货运报价规则](shipping_freight_rules.md) — 客户无地址只报产品价/有地址分两种场景/加价15-25%/绝不跟客户说运输自理
 - [MOQ 区分规则](moq_rules.md) — 定制订单MOQ=500，现货按链接起订量；回复数量/报价前必须先判断订单类型
