@@ -1,0 +1,81 @@
+# Session: 2026-05-24
+
+**Started:** ~23:00
+**Last Updated:** 2026-05-24 ~01:00
+**Project:** D:\ClaudeWorkspace
+**Topic:** 国际站店铺方向调整 — 从现货零售转型中东批发B2B，方案审查准备工作
+
+---
+
+## What We Are Building
+
+母婴纺织品工厂（小星星）阿里巴巴国际站店铺方向调整方案。核心决策：放弃东南亚低价市场，从1688现货零售模式转型为中东批发商/分销商定制B2B走量模式。第一轮集中火力打中东（阿联酋/沙特/科威特）批发商，选品为吸汗巾多件装、围兜套装、基础布尿裤。
+
+本次会话目标是：综合前置两份文档 → 确定方向 → 让Codex做独立审查 → 产出终版方案。
+
+---
+
+## What WORKED (with evidence)
+
+- **找到两份前置文档** — 确认：OB `2026-05-20_4周方向测试冲刺计划.md` + workspace `04_方案输出/小星星_目标客户与店铺运营系统方案_V1.0.md`
+- **方向确认** — 用户确认放弃东南亚（"东南亚市场做的没什么意思"），主攻中东批发商
+- **Codex 中文 UI 修复** — `localeOverride = "zh-CN"` 需放在 config.toml 顶层而非 `[desktop]` 下面；`--lang=zh-CN` 命令行参数配合使用生效
+- **Codex 启动方式** — `codex:` 协议 URL 可正常启动 Codex 桌面端
+- **桌面快捷方式** — 在桌面创建了 Codex_CN.lnk，指向 `D:\软件\Codex\app\Codex.exe --lang=zh-CN`，图标指向 `D:\软件\Codex\app\resources\icon.ico`
+
+---
+
+## What Did NOT Work (and why)
+
+- **`[desktop] localeOverride = "zh-CN"` 单独不生效** — 需要同时放在 config.toml 顶层和 `[desktop]` 节
+- **`--lang=zh-CN` 单独不生效** — 需配合正确的 localeOverride 配置
+- **PowerShell 变量 `$s` 在 bash 中被吃掉** — 需要用 .ps1 脚本文件方式执行，不能在命令行直接写
+- **中文路径在 bash/PowerShell 混合调用时编码损坏** — 用 `cmd.exe //c` 或 `powershell -File` 各自执行可规避
+
+---
+
+## What Has NOT Been Tried Yet
+
+- Codex 独立审查方案（用户尚未在 Codex 中建项目并发审查指令）
+- 台式机到笔记本的 Codex 中文配置同步
+- 店铺数据导出（产品列表/P4P数据/询盘列表）
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `C:/Users/67240/.codex/config.toml` | Modified | localeOverride 移到顶层 + `[desktop]` 保留 |
+| `C:/Users/67240/.codex/fix_shortcut.ps1` | Created | 快捷方式创建脚本 |
+| `C:/Users/67240/.codex/create_cn_shortcut.ps1` | Created | 旧版脚本 |
+| `C:/Users/67240/.codex/codex_cn_launcher.bat` | Created | 废弃（编码问题） |
+| 桌面 `Codex_CN.lnk` | Created | Codex 中文版快捷方式 |
+
+---
+
+## Decisions Made
+
+- **第一优先级客户：中东批发商/分销商** — 理由：1）缺新款设计不是劣势 2）复购确定性强 3）产品匹配度最高（吸汗巾/围兜/布尿裤产线成熟）
+- **第二梯队客户：礼品采购商 + 品牌主** — 验证通过后再推
+- **放弃市场：东南亚** — 价格敏感、利润薄、"做的没什么意思"
+- **Codex 项目统一管理** — 所有项目放 `D:\CodexWorkspace\` 下
+- **方案审查走质量门流程** — 本对话(A)产出初版 → Codex(B)独立审查 → diff 收敛 → 终版
+
+---
+
+## Blockers & Open Questions
+
+- Codex 审查结果未出
+- 店铺实际数据（500+品中50自有品的具体构成）未知
+- P4P 中东数据未导出
+
+---
+
+## Exact Next Step
+
+用户在 Codex 桌面端中：
+1. 文件 → 新建项目 → 路径 `D:\CodexWorkspace\店铺方向调整`
+2. 把 `d:\ClaudeWorkspace\04_方案输出\小星星_目标客户与店铺运营系统方案_V1.0.md` 拖进项目
+3. 开新对话，发审查指令给 Codex（文案已提供）
+4. Codex 审完结果带回本对话（用 `/resume-session`）
