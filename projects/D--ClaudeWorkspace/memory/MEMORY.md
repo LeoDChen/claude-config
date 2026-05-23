@@ -34,7 +34,9 @@
 
 - [台式机同步 → 笔记本同步流程](desktop-sync-workflow.md) — 台式机 push 后笔记本三仓库 pull + OB 全量归档的完整步骤
 - [push=三仓库+OB全量归档](push_full_sync_rule.md) — push命令必须三仓库全推+当天对话归档OB+更新索引，缺一不可；2026-05-22只推一个仓库被纠正
-
+- [push = 三仓库全量同步](push-three-repos.md) — 用户说 push 时默认三仓库 (OB/Workspace/.claude) 全部 add+commit+pull+push，不是只推当前目录
 - [迭代哲学](iteration_philosophy.md) — AI时代的护城河不是工具，是"不将就"的迭代密度；能用的系统 vs 持续进化的系统
+- [货代询价模板与装箱数据](freight_inquiry_template.md) — 货代询价标准模板+箱规库+训练裤重量/装箱数据；客户分析后自动输出询价草稿
+- [产品参数自动存档](product_params_auto_save.md) — 深度分析客户后自动提取产品参数 → 更新 products.json → 跑脚本刷新桌面 Excel
 
 *记忆文件存储在 memory/ 目录中，此文件仅为索引*
