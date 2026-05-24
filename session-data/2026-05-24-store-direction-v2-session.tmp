@@ -1,0 +1,54 @@
+# Session: 2026-05-24 (续)
+
+**Started:** ~23:00 / 续 ~01:00
+**Last Updated:** ~01:15
+**Project:** D:\ClaudeWorkspace
+**Topic:** 国际站店铺方向调整 + Codex Desktop 首次配置
+
+---
+
+## What We Are Building
+
+母婴纺织品工厂国际站店铺方向调整方案。目标：从1688现货零售 → 中东批发B2B定制走量。
+
+---
+
+## Decisions Made
+
+- **放弃东南亚，主攻中东批发商/分销商**
+- **第一轮选品**：吸汗巾多件装、围兜套装、基础布尿裤
+- **第二梯队**（验证后）：礼品采购商、小型品牌主（礼盒/OEM睡袋）
+- **Codex项目统一放** `D:\CodexWorkspace\`
+- **用Claude Code code-reviewer agent做独立审查**（不用Codex）
+
+## Codex Desktop 配置完成项
+
+- 中文 UI：`localeOverride = "zh-CN"` 放在 config.toml 顶层（不在 `[desktop]` 内）
+- 模型映射：`codex-dashscope-bridge.js` 加了 MODEL_MAP，GPT-5.x → glm-5.1
+- 超时 120s，加了 uncaughtException/unhandledRejection 防崩溃
+- 启动方式：`cscript start-codex-bridge.vbs`
+
+## Codex 未解决
+
+- 大请求（带文件审查）触发 502，桥不稳定
+- Codex 桌面端模型列表只显示 GPT 系列，不显示自定义模型
+
+## What Did NOT Work
+
+- **Codex独立审查方案** — 失败原因：桥收到大请求后返回502，疑似DashScope API对超大请求不稳定
+- **`--lang=zh-CN` 启动参数** — 不单独生效，需配合localeOverride配置
+- **桌面快捷方式（PowerShell创建）** — 中文路径编码问题导致损坏
+
+## 文件变更
+
+| File | Status | Notes |
+|------|--------|-------|
+| `scripts/codex-dashscope-bridge.js` | Modified | +MODEL_MAP, +error handlers, timeout 120s |
+| `~/.codex/config.toml` | Modified | localeOverride顶层, 桥配置 |
+| `D:\CodexWorkspace\店铺方向调整\` | Created | Codex项目目录 |
+
+## Exact Next Step
+
+用 Claude Code 的 code-reviewer agent 做独立审查（不再等 Codex）。
+审查方案文件：`04_方案输出/小星星_目标客户与店铺运营系统方案_V1.0.md`
+审查问题：1）批发商第一优先级对不对？2）选品合理吗？3）遗漏了什么？
