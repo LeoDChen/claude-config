@@ -1,0 +1,72 @@
+# Session: 2026-05-25
+**Project:** OKKI 客户状态外脑 — R1-R10 全因子落地
+**Status:** B1-B4 已修 + 迭代方向 Bug 已修 + KNOWN_BOTS 过滤已补。管线验证通过。下一步：R1-R10 全部实现。
+
+---
+
+## 已完成
+
+### 第一轮：B1-B4 Bug 修复
+- B1: stage_transition.js — D10/D11 规则排序+显式 customerType（D10 限定大货，新增 D12 现货单）
+- B2: init_factor_baselines.js — S7 节奏按客户类型(样品60d/大货90d/老客120d)
+- B3: init_factor_baselines.js — S3 加入 TERMINAL_FACTORS（Day 30 严格截断）
+- B4: init_factor_baselines.js — 待发货首日检测（付款确认+预计交期提醒）
+
+### 第二轮：迭代方向 Bug + 配套修复
+根因：聊天记录 JSON 最新在前(index 0=newest)，但 init_factor_baselines.js 全部扫描函数反向迭代
+- A: 12 个循环头翻转 (i=msgs.length-1→0 → i=0→msgs.length)
+- B: 4 处 msgs[msgs.length-1]→msgs[0] (768/770/975/977)
+- C: gen_dashboard_528.js slice(-5)→slice(0,5) + slice(-15)→slice(0,15)
+- D: KNOWN_BOTS 过滤补齐 (gen_dashboard_528.js + batch_classify_heat.js)
+
+### 修复后数据
+| 指标 | 修复前 | 修复后 |
+|------|--------|--------|
+| R1 (red) | 162 | 1 |
+| S 因子 (yellow) | 2 | 46 |
+| 正常 (grey) | 9 | 126 |
+| SOON层 | 164 | 47 |
+| L2 衰减 | 2 | 46 |
+
+---
+
+## 下一步：R1-R10 全部实现
+
+### 原始方案（2026-05-16 brainstorming，见 memory/okki_driver_factors.md）
+| # | 因子 | 脚本可检测 | 需AI |
+|---|------|:--:|:--:|
+| R1 | 未回复——客户发消息我没回 | ✓ | - |
+| R2 | 承诺未兑现——说了要做但没做 | △ | ✓ |
+| R3 | 客户等我——付了款/给了信息，等我的下一步 | △ | ✓ |
+| R4 | 答非所问——回了但没解决客户问的问题 | ✗ | ✓ |
+| R5 | 待发PI/付款链接——客户要下单我没发 | △ | ✓ |
+| R6 | 待启动打样——客户发了设计/样品需求没开工 | △ | ✓ |
+| R7 | 待安排发货——客户给了地址/货代，我没动 | △ | ✓ |
+| R8 | 承诺日期超期——约了时间节点没兑现 | ✗ | ✓ |
+| R9 | 投诉未处理——客户投诉/质量问题没解决 | ✗ | ✓ |
+| R10 | 错误未修正——发错货/报错价未处理 | ✗ | ✓ |
+
+### 当前实现
+- R1: ✅ isLastMessageFromCustomer() 检测
+- R6(当前编号)=投诉: ✅ detectR6() 检测，对应原方案R9
+- 交叉抑制: R1 抑制全部S因子，R6 抑制 S8
+- R2-R5、R7-R10: 空号
+
+### 关键文件
+- scripts/init_factor_baselines.js — R因子检测 + 交叉抑制（主战场）
+- scripts/gen_dashboard_528.js — 看板渲染（R因子显示、颜色、筛选）
+- data/s3_ai_judgments.json — AI判定数据源（actionHint/reason字段含"我方有未兑现承诺"等标签）
+- data/chat_history/*.json — 聊天记录（关键词扫描数据源）
+- knowledge/soon-factor-automation-design.md — 设计文档（只定义了R1和R6）
+- memory/okki_driver_factors.md — 原始brainstorming（R1-R10完整清单）
+
+### 可行性分层
+- **脚本可直接做**: R1(已有), R9=投诉(已有, 当前误编号为R6, 需改名)
+- **脚本可初筛(关键词+s3标签)**: R2(s3 actionHint"我方有未兑现承诺"11人), R3(阶段+付款状态+关键词), R5(PI/付款链接关键词), R6(打样/样品/设计关键词), R7(地址/货代关键词)
+- **需AI**: R4(答非所问), R8(日期超期), R10(错误未修正)
+
+### 注意事项
+- 当前 R6 是投诉，原方案 R9 是投诉。需要重新编号对齐原方案。
+- s3 中 11 人标记"我方有未兑现承诺"→可接 R2
+- 新增检测函数必须遵循最新→最旧迭代方向(msgs[0]→msgs[N])
+- 交叉抑制表需要扩展（每个R因子需要定义抑制哪些S因子）

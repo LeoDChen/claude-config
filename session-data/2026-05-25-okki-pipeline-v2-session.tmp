@@ -1,0 +1,88 @@
+# Session: 2026-05-25 (续)
+**Time:** ~13:00-17:00
+**Project:** OKKI 客户状态外脑 — 管线全面落地
+**Status:** Phase 0-4 完成，4 个 Bug 待修
+
+---
+
+## What Was Built
+
+### Phase 0: init_factor_baselines.js 重写
+- 基线不再取 lastMsgTime，改为扫描 data/chat_history/*.json 找实际事件日期
+- CID→文件映射: `cid.replace(/[#@]/g, '_')`
+- R1: 2→162 (修复 sender 检测)
+- customer_type: 100%大货→99样品+19现货+1老客
+- transit_days: 0→196
+- R6检测、原子写入(.tmp+rename)、bot过滤、手动基线合并(40条)
+- meta字段: _last_sender_is_me, _last_customer_message_date, _order_count
+
+### Phase 1: stage_transition.js 新建
+- 17条流转规则: 11衰减+3推进+2特殊
+- L1自动(推进型)/L2审核(衰减型)
+- 首次运行: 4 L1自动, 2 L2待审
+
+### Phase 2: daily_pipeline.js 新建
+- 5步编排: 同步检查→事件检测→因子刷新→流转检查(+重算)→看板
+- 冷启动支持
+
+### Phase 4: gen_dashboard_528.js 增强
+- KPI改R1/S因子/正常/冷层
+- R1面板: "X位客户在等你回复"
+- escJs() 函数
+
+### SKILL.md 更新: Step2 → daily_pipeline.js
+
+---
+
+## 当前数据状态
+- R1: 162 | S因子: 2 | 正常: 9 | 冷层: 354
+- S3基线: 27/27 | S6基线: 6/6
+- L1流转: 4条 | L2待审: 2条
+- 看板: output/dashboard_528.html
+
+---
+
+## 4 Bugs To Fix (优先)
+
+### B1: D10/D11 规则排序错误 — stage_transition.js line 59-61
+D10(customerType:null,90d) 排在 D11(subtype:returning,120d) 前面。
+老客先匹配D10→90天就冻，应该120天。
+修复: D11移到D10前面，或D10加 customerType:'大货'
+
+### B2: S7 节奏不分客户类型 — init_factor_baselines.js line 38 + computeFactors
+所有客户用同一个S7数组到90d。
+设计: 样品60d/大货90d/老客120d。
+修复: computeFactors中根据customer_type选不同长度的终止数组
+
+### B3: S3 不在 TERMINAL_FACTORS — init_factor_baselines.js line 42
+S3设计Day30静默，但不在终止集合，+1天容差到Day31。
+修复: TERMINAL_FACTORS.add('S3')
+
+### B4: S5a 进待发货首日触发缺失 — init_factor_baselines.js lines 502-519
+设计: "进待发货首日额外触发付款确认+预计交期提醒"
+修复: 在待发货 case 加首日检测(bl.S5a_A === today)
+
+---
+
+## 验证命令
+cd "d:\ClaudeWorkspace\08_客户跟进\Okki"
+node scripts/batch_classify_heat.js && node scripts/init_factor_baselines.js && node scripts/stage_transition.js && node scripts/gen_dashboard_528.js
+start "" "d:\ClaudeWorkspace\08_客户跟进\Okki\output\dashboard_528.html"
+
+---
+
+## Phase 3 (另开会话)
+AI管线: R2-R5因子、committed_ship_date提取、transit_days精确提取、customer_type精确判定、S3/S4/S8高精度基线
+设计文档: knowledge/soon-factor-automation-design.md Section III Step 3
+
+---
+
+## 关键文件
+- scripts/init_factor_baselines.js (1100行)
+- scripts/stage_transition.js (300行)
+- scripts/daily_pipeline.js (250行)
+- scripts/gen_dashboard_528.js (1200行)
+- output/factor_baselines.json (527人)
+- output/dashboard_528.html
+- knowledge/soon-factor-automation-design.md
+- knowledge/stage-transition-system-v1.md

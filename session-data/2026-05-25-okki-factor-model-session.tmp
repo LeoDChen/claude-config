@@ -1,0 +1,108 @@
+# Session: 2026-05-25
+
+**Started:** ~09:50
+**Last Updated:** ~12:30
+**Project:** OKKI 客户状态外脑 (D:\ClaudeWorkspace\08_客户跟进\Okki)
+**Topic:** /okki 数据修复 + 驱动因子模型落地 — sync bug修复、新客户补齐、因子urgency替代NOW/SOON/COLD
+
+---
+
+## What We Are Building
+
+OKKI 客户状态外脑的驱动因子模型。5月16-19日已定稿的设计方案（废弃NOW/SOON/COLD单标签，改用R1-R6 + S1-S8驱动因子直接告诉人"该做什么"），今天发现管线上跑的还是旧的简单规则。本会话完成了：数据修复（sync bug → 545客户）、因子模型核心落地（R1+S1~S8 → urgency）、看板重建。
+
+---
+
+## What WORKED (with evidence)
+
+- **sync_okki.js 稳定化修复** — 加了被动轮询：每5秒检查 `__conversationListFullData__`，连续3次不变才提取。修复前528→修复后可捕获全部545
+- **17个新客户发现** — `__conversationListFullData__`=545 vs 之前提取的528，差额17人（Yanick prophete, THEKRA ALJUHANI等）。确认是sync脚本第2次尝试拿到528就break了，没等WebSocket推完
+- **batch_classify_heat.js 重跑** — 545会话全部分类：NOW 81, SOON 294, COLD 153, 跳过17
+- **batch_gen_briefs.js** — 生成57张新状态卡，总计98张
+- **s3_ai_judgments.json 补齐** — 496→545，49未分析+17新客户全部加入
+- **init_factor_baselines.js 修复** — 原代码计算了factors但丢弃了（只存到soonCustomers，没写入baselines输出）。修复：存储factors + 实现R1检测 + 计算urgency (red/yellow/grey/frozen) + 交叉抑制(R1→抑制全部S)
+- **gen_dashboard_528.js 更新** — urgency从heat_classification切换为factor_baselines驱动；richDrivers显示实际因子名和天数；nextStep由因子决定
+- **最终看板** — 545 cards: 🔴2 (真实R1未回复), 🟡38 (S因子在节奏内), ⚪149, ❄️356
+
+---
+
+## What Did NOT Work (and why)
+
+- **手工LWP拉取17个新客户聊天** — 失败：自定义脚本无法正确点击会话列表+CDP消息拦截未触发。改用空chat_history占位→后续sync补拉
+- **gen_dashboard.js (v2简化版)** — 所有baselines为null，urgency全unknown。因为读的是旧factor_baselines.json（没跑init）。此脚本已废弃，改用gen_dashboard_528.js
+- **init_factor_baselines.js原始版本** — factors计算了但只写入soon_layer_cards.json，没写入factor_baselines.json主输出。gen_dashboard无法读取
+
+---
+
+## What Has NOT Been Tried Yet
+
+**已有代码但管线未接：**
+- `enhanced_classify.js` (43KB) — 质量等级判定+数量提取+完整仪表盘。被模块化脚本替代但功能更全
+- `ai_classify.js` (10KB) — v3.1分类引擎，含订单驱动stage+投诉/RFQ/报价检测。管线上跑的是更简单的batch_classify_heat.js
+- `config/tier_rules.json` + `config/scoring.json` — 等级规则和排序权重，init_factor_baselines.js没读
+
+**设计定稿但未写代码：**
+- R2~R6因子 — 需要AI读上下文（承诺未兑现、投诉检测等），AI管线未建
+- 阶段流转脚本 — stage-transition-system-v1.md定了17条规则（衰减型+推进型），无执行脚本
+- AI两轨管线 — sync→事件检测→AI批量处理→写基线，全链路无代码
+- L1/L2/L3人工介入 — 设计定稿，无UI实现
+- S5a_B基线（承诺发货日）、transit_days提取、customer_type自动判定 — 都依赖AI管线
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `scripts/sync_okki.js` | PASS: Fixed | 加了被动稳定化轮询（~line 325-345），不会再提前break |
+| `scripts/init_factor_baselines.js` | PASS: Fixed | 存储factors + R1检测 + urgency计算 + 交叉抑制 |
+| `scripts/gen_dashboard_528.js` | PASS: Fixed | 读factor_baselines.json的urgency替代heat_classification |
+| `scripts/batch_classify_heat.js` | PASS: OK | 无改动，提供消息元数据给init_factor_baselines |
+| `scripts/batch_gen_briefs.js` | PASS: OK | 无改动，生成57张新卡 |
+| `scripts/enhanced_classify.js` |  Not Connected | 43KB，功能完整但未接入当前管线 |
+| `scripts/ai_classify.js` |  Not Connected | 10KB，v3.1引擎，比batch_classify_heat更智能 |
+| `config/tier_rules.json` |  Not Connected | P0-P4等级规则，未被读取 |
+| `output/factor_baselines.json` | PASS: Updated | 545条，含factors/urgency/rFactors字段 |
+| `output/dashboard_528.html` | PASS: Generated | 545 cards，因子驱动urgency |
+| `data/s3_ai_judgments.json` | PASS: Updated | 496→545，含auto_migrate_v1和auto_new_v1标记 |
+| `data/tm_conversations_master.json` | PASS: Updated | 528→545，含17个新客户 |
+| `data/tm_conversations_latest.json` | PASS: Updated | 545会话 |
+| `data/heat_classification.json` | PASS: Updated | 528→545，但urgency不再从此读取 |
+| `data/briefs/*.md` | PASS: Updated | 41→98张状态卡 |
+| `.claude/skills/okki/SKILL.md` | PASS: Updated | Step2改为三连跑：classify→init_factor→gen_dashboard_528 |
+
+---
+
+## Decisions Made
+
+- **因子驱动urgency，不再用heat_classification的NOW/SOON/COLD** — reason: 5月16日已定稿，heat_classification仅保留为消息元数据源
+- **gen_dashboard_528.js 替代 gen_dashboard.js** — reason: gen_dashboard_528.js有ECharts+弹窗+嵌入数据（597KB），gen_dashboard.js是简化版（244KB，baselines全null）
+- **R1=red, S因子=yellow, 无因子=grey, 冷层=frozen** — reason: 与设计文档一致。之前heat_classification的81个NOW中79个是"我方发言+对话有来回"，正确的做法是由S1~S3节奏管理，不是标红
+- **sync稳定化用被动轮询不用修改滚动逻辑** — reason: OKKI通过WebSocket推送数据，滚动无法触发加载，轮询等稳定是最简单可靠的方式
+
+---
+
+## Blockers & Open Questions
+
+- **AI管线是最大卡点** — R2~R6、S5a_B、transit_days提取、customer_type、S8边界判断全部依赖AI读消息，但AI管线（事件检测→AI批量→写基线）只有设计没有代码
+- **阶段流转脚本** — 17条规则定了但没写，这个不需要AI，可以下一步做
+- **enhanced_classify.js和ai_classify.js** — 里面有更智能的检测逻辑（投诉/RFQ/订单驱动stage），但和当前模块化管线不兼容，需要决定是整合还是重写
+
+---
+
+## Exact Next Step
+
+用户说"需要新开对话继续完善方案"。下一个对话应该：
+1. 先 `/resume-session` 加载本文件恢复上下文
+2. 确认优先级：阶段流转脚本（纯脚本，可立即做） vs AI管线（架构大，需要设计实现方案）
+3. 用户上次说"阶段流转先写"，可从此切入
+
+---
+
+## Environment & Setup Notes
+
+- OKKI Chrome browser保持在9222端口（sync后不关闭）
+- 工作目录: `D:\ClaudeWorkspace\08_客户跟进\Okki`
+- OB归档路径: `E:\道友的宝贝\道友的宝贝\对话归档\CC\`
+- 完整设计文档: `knowledge/soon-factor-automation-design.md` + `knowledge/stage-transition-system-v1.md` + `knowledge/方案讨论区.md`
+- 记忆文件: `C:\Users\Administrator\.claude\projects\d--ClaudeWorkspace\memory\okki_driver_factors.md`

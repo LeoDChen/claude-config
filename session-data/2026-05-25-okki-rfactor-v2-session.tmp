@@ -1,0 +1,108 @@
+# Session: 2026-05-25 (R因子 v2 — 脚本+AI分层)
+
+**Started:** 上午
+**Last Updated:** 下午
+**Project:** OKKI 客户状态外脑
+**Topic:** R1-R9 全因子实现 → 发现关键词误报 → 方案转向脚本+AI分层
+
+---
+
+## What We Are Building
+
+OKKI 客户跟进的驱动因子系统。目标：给每个活跃客户自动标记 R 因子（需立即处理的行动信号）和 S 因子（阶段节奏提醒）。
+
+R1-R9 定义：
+- R1 未回复 / R2 承诺未兑现 / R4 答非所问 / R5 待发PI / R6 待启动打样
+- R7 待安排发货 / R8 承诺日期超期 / R9 售后/投诉未处理
+- R3（客户等我）已移除——和阶段信息重叠
+- R10（错误未修正）已并入 R9
+
+---
+
+## What WORKED (with evidence)
+
+- **R1 和 R9 脚本检测管线正常** — 确认：init_factor_baselines.js 跑通，red=1 (R1)
+- **S1-S8 阶段因子正常** — 确认：yellow=20，grey=74，frozen=354
+- **交叉抑制系统正确** — 确认：R→S 抑制按表工作，无冲突
+- **gen_dashboard_528.js 适配完成** — 确认：KPI/Alert Panel/nextStep 全已更新为通用 R 因子展示
+- **s3Map actionHint 已补** — 确认：R2 s3 源可正确读取（11人"我方有未兑现承诺"）
+
+---
+
+## What Did NOT Work (and why)
+
+- **R2/R5/R6 关键词检测误报率极高** — 根因：关键字正则无法理解语义
+  - R2："I'll" 在日常商务对话中高频出现，"let me know" 是邀请不是承诺
+  - R5：`/PI/i` 无词边界，匹配了 "shipping" 中的 "pi" 子串
+  - R6："logo" 出现在"支持定制 logo"的列举中，≠ 客户要打样
+  - 证据：Ernestina Afriyie 被同时标 R2+R5+R6，实际对话正常进行中，无任何未兑现
+  - 修复后（加词边界、删 I'll/let me/logo）误报从 106→79，但仍不可接受
+- **R8 关键词检测同样不可靠** — 自然语言日期解析精度极低
+- **R4 无人命中** — 检测阈值太严（要求客户含?且回复<30字符），实际 B2B 聊天很少这种情况
+
+---
+
+## What Has NOT Been Tried Yet
+
+- **AI 多 agent 并行做 R2-R8 语义分析**（最关键的下一步）
+  - 首次全量：10 agent 并行，每个分析 ~17 人聊天记录
+  - 日常增量：单 agent 分析有新消息的客户（≤20人）
+  - 每 7 天全量兜底一次
+  - 使用 DeepSeek API（用户在用），成本极低
+  - 但审查指出：agent 并行不能同时写 factor_baselines.json，需各输出独立临时文件后主程序合并
+  - 另一个修正：首次先 pilot 3-5 人验证，再全量
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `scripts/init_factor_baselines.js` |  In Progress — 函数全在但需删调用 | R2-R8 的 6 个检测函数体存在，主循环在调用它们。**需要做**：只保留 R1+R9 调用，R2-R8 函数加上 @deprecated 注释保留作降级回退 |
+| `scripts/gen_dashboard_528.js` | PASS: Complete | KPI/AlertPanel/nextStep/richDrivers 已适配全 R1-R9 |
+| `scripts/ai_rfactors.js` |  Not Started | 待创建：多 agent 并行语义分析 |
+| `scripts/daily_pipeline.js` |  Not Started | 待加增量分析步骤 |
+| `data/s3_ai_judgments.json` | N/A | 11 人标记"我方有未兑现承诺"，可作 R2 s3 数据源 |
+| `output/factor_baselines.json` | 当前有噪音数据 | R2=27, R5=9, R6=63, R7=8, R8=6 — 都是关键词误报 |
+
+---
+
+## Decisions Made
+
+- **脚本只做机械活，AI 做语义理解** — 原则来自 `memory/ai_script_judgment_pattern.md`，本 session 已验证关键词方案的失败
+- **R3 移除** — 和阶段信息完全重叠（"待付款"本身就说明客户在等）
+- **R10 并入 R9** — 投诉和错误修正在聊天中无法区分
+- **R9 抑制范围扩大** — 从仅抑制 S8 → 抑制 S5a+S6+S7+S8
+- **AI 分析首次全量 + 日常增量 + 7天兜底** — 不是每次都会量跑
+- **agent 并行写入：独立临时文件 + 主程序合并** — 避免竞态条件
+- **保留脚本 R2-R8 函数作降级回退** — 加 @deprecated，不删函数体
+
+---
+
+## Blockers & Open Questions
+
+- 无阻塞。方案已和审查对齐，可以直接执行。
+- DeepSeek API 超时时间需确认（单 agent 处理 17 人可能需要 30-60 秒）
+- 状态卡增量标记用 `_ai_rfactor_version` + 消息时间戳 checksum
+
+---
+
+## Exact Next Step
+
+**第一步（脚本层）**：修改 `init_factor_baselines.js` —
+1. 删掉主循环中 R2/R4/R5/R6/R7/R8 的调用（行 1099-1113 附近），只保留 R1 和 R9
+2. 交叉抑制表 R_SUPPRESS 删掉 R2/R4/R5/R6/R7/R8 条目，只保留 R1 和 R9
+3. 合并流程同步修改
+4. 在 R2-R8 函数上方加 `/* @deprecated — AI语义分析替代，保留作降级回退 */` 注释
+5. 跑管线验证 red + yellow 总数合理
+
+**第二步（AI 层）**：创建 `scripts/ai_rfactors.js` — 多 agent 并行分析，先 pilot 5 人再全量。
+
+---
+
+## Environment & Setup
+
+- 项目根：`D:\ClaudeWorkspace\08_客户跟进\Okki\`
+- 管线：`node scripts/init_factor_baselines.js` → `node scripts/gen_dashboard_528.js`
+- 看板：`output/dashboard_528.html`
+- DeepSeek API 通过 Agent 工具调用（用户环境已有配置）
