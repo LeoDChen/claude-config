@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"%USERPROFILE%\\.claude\\scripts\\play_sound.ps1\" -sound \"Windows Ding\""
+            "command": "wscript.exe //B \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound_hidden.vbs\" \"Windows Ding\""
           }
         ]
       },
@@ -85,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"%USERPROFILE%\\.claude\\scripts\\play_sound.ps1\" -sound \"Windows Notify System Generic\""
+            "command": "wscript.exe //B \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound_hidden.vbs\" \"Windows Notify System Generic\""
           }
         ]
       },
@@ -94,7 +94,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"%USERPROFILE%\\.claude\\scripts\\play_sound.ps1\" -sound \"Windows Ding\""
+            "command": "wscript.exe //B \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound_hidden.vbs\" \"Windows Ding\""
           }
         ]
       }
@@ -116,7 +116,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"%USERPROFILE%\\.claude\\scripts\\play_sound.ps1\" -sound \"tada\""
+            "command": "wscript.exe //B \"C:\\Users\\Administrator\\.claude\\scripts\\play_sound_hidden.vbs\" \"tada\""
           }
         ]
       }

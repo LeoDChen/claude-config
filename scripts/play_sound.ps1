@@ -12,12 +12,4 @@ if (Test-Path $configPath) {
 $soundFile = "C:\Windows\Media\$sound.wav"
 if (-not (Test-Path $soundFile)) { exit 1 }
 
-$player = New-Object -ComObject WMPlayer.OCX
-$player.URL = $soundFile
-
-$timeout = 0
-while ($player.playState -ne 1 -and $timeout -lt 50) {
-    Start-Sleep -Milliseconds 100
-    $timeout++
-}
-$player.close()
+(New-Object System.Media.SoundPlayer $soundFile).PlaySync()
