@@ -1,5 +1,6 @@
 # 记忆索引
 
+- [Codex + DeepSeek 接入指南](codex_deepseek_setup.md) — Codex 桌面版接入 DeepSeek 的完整步骤（mimo2codex/配置/自启动/已知限制/故障排查）
 - [用户信息](user_profile.md) — 用户角色、偏好、知识背景
 - [项目背景](project_context.md) — 当前工作项目的背景信息
 - [使用反馈](usage_feedback.md) — 用户对AI助手的使用反馈和偏好

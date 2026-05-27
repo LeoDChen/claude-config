@@ -1,0 +1,82 @@
+# Session: 2026-05-28
+
+**Started:** ~morning
+**Last Updated:** ~11:05
+**Project:** d:\ClaudeWorkspace（全域）
+**Topic:** 工作区异步化审计 + 多项目拆分方案
+
+---
+
+## What We Are Building
+
+规划将 `d:\ClaudeWorkspace` 从单一大工作区拆分为多项目结构。目前根目录既是 VS Code 工作区根，又是母婴纺织品运营项目目录，导致每次开对话都加载母婴业务规则。
+
+核心讨论链路：
+1. 用户分享抖音群"异步工作区"概念 → 解释即知识库+自动加载+跨会话持久化
+2. 审计当前 memory 系统异步化程度 → 30+ 已异步，6 大缺口
+3. 讨论 context 占用量 → 实际只加载 ~230行/3700token，占 2%
+4. 澄清项目加载机制 → CLAUDE.md 按目录路径加载，非 VS Code 工作区概念
+5. 确认多项目方案 → 多个子文件夹，VS Code 打开子文件夹 = 不同项目
+6. 产出完整拆分方案（写在 plan 文件中）
+
+---
+
+## What WORKED (with evidence)
+
+- **异步工作区概念澄清** — 用户理解了"异步工作区 = 知识库 + 自动加载 + 跨会话持久化"，非神秘概念
+- **context 占用量澄清** — 计算出实际必加载仅 2% context，打消用户"太多信息"的担忧
+- **CLAUDE.md 加载机制澄清** — 明确了按工作目录路径加载，而非 VS Code 工作区设置
+- **拆目录方案A/B** — 完整写入 plan 文件
+
+---
+
+## What Did NOT Work (and why)
+
+- **最初绕到优化方案而非回答问题** — 用户问"如何知道我在哪个项目"，我先给优化建议没先直接回答问题。用户纠正"说清楚了再优化"。违反了 CLAUDE.md 第 2 条"直接执行，不废话"和先回答再建议的原则。
+
+---
+
+## What Has NOT Been Tried Yet
+
+- **实际执行拆分** — 等待用户确认选方案 A(拆目录) 还是 B(skill按需加载)
+- **CLAUDE.md 去重** — 全局和项目的 CLAUDE.md 有内容重叠，拆分时顺便去重
+- **memory 迁移** — 旧记忆在 `C:\Users\...\projects\d--ClaudeWorkspace\memory\`，拆目录后需要评估是否复制有用记忆到新项目
+- **hooks/settings 复制方案** — 子项目需要独立 hooks 和权限配置
+- **产品参数补全** — 用户 06_知识库 目录的工厂档案 V10 已存在，但具体产品参数表不确定是否独立存在
+
+---
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `C:\Users\67240\.claude\plans\fluffy-tickling-swan.md` |  Draft | 完整拆分方案已写，待用户确认方向 |
+
+---
+
+## Decisions Made
+
+- **工作区 = 子文件夹项目结构**：`d:\ClaudeWorkspace\baby-textile\` 等子目录各自独立 `.claude\CLAUDE.md`，VS Code 直接打开子文件夹
+- **A/B 两套方案待选**：A) 拆目录完全隔离 / B) skill按需加载简化版
+- **先规划再执行**：用户选择先看完整方案再决定
+
+---
+
+## Blockers & Open Questions
+
+- 用户选 A 还是 B？还是结合
+- 拆成哪几个项目？初步识别 4 个：baby-textile / image-translate / codex-bridge / scripts
+- Git 怎么处理？当前整个 workspace 是一个 repo，拆目录后子文件夹各自独立 repo 还是维持父级 repo
+- 迭代记录规则还没写入任何文件
+
+---
+
+## Exact Next Step
+
+用户确认选方案后，开始执行拆分：
+1. 清理全局 CLAUDE.md → 只保留跨项目通用的交互原则/审查思维
+2. 创建 baby-textile 子目录 + 迁移业务文件
+3. 创建 baby-textile 的 .claude + CLAUDE.md + skills + hooks + settings
+4. 处理其他项目（至少 image-translate）
+5. 根目录 .claude\CLAUDE.md 降级为通用方法论 + 爬坡层
+6. memory 迁移评估
