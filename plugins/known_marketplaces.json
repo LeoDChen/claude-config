@@ -5,7 +5,7 @@
       "repo": "anthropics/claude-plugins-official"
     },
     "installLocation": "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\claude-plugins-official",
-    "lastUpdated": "2026-05-28T11:06:24.169Z"
+    "lastUpdated": "2026-05-29T15:03:52.225Z"
   },
   "planning-with-files": {
     "source": {
@@ -21,6 +21,6 @@
       "repo": "thedotmack/claude-mem"
     },
     "installLocation": "C:\\Users\\Administrator\\.claude\\plugins\\marketplaces\\thedotmack",
-    "lastUpdated": "2026-05-21T16:26:08.468Z"
+    "lastUpdated": "2026-05-29T15:04:01.888Z"
   }
 }

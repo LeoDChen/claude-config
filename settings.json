@@ -1,8 +1,14 @@
 {
+  "effortLevel": "xhigh",
   "env": {
-    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
-    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED"
+    "ANTHROPIC_AUTH_TOKEN": "sk-170d3c8888f64a808cd2a5b9aca0d52b",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro[1M]",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "deepseek-v4-pro",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro[1M]",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "deepseek-v4-pro",
+    "ANTHROPIC_MODEL": "deepseek-v4-pro"
   },
-  "effortLevel": "max",
-  "model": "opus"
+  "includeCoAuthoredBy": false
 }
