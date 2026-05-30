@@ -1,14 +1,25 @@
 {
-  "effortLevel": "xhigh",
+  "effortLevel": "max",
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "sk-170d3c8888f64a808cd2a5b9aca0d52b",
-    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-flash",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro[1M]",
+    "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL_NAME": "deepseek-v4-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-7[1M]",
     "ANTHROPIC_DEFAULT_OPUS_MODEL_NAME": "deepseek-v4-pro",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro[1M]",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "deepseek-v4-pro",
-    "ANTHROPIC_MODEL": "deepseek-v4-pro"
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6[1M]",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL_NAME": "deepseek-v4-flash"
   },
-  "includeCoAuthoredBy": false
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:kemikeai.1688.com)",
+      "WebSearch",
+      "Bash(python3 -c \"import pandas as pd; print\\('pandas available'\\)\")",
+      "Bash(python3 -c \"import openpyxl; print\\('openpyxl available'\\)\")",
+      "Bash(python3 -c \"import xlrd; print\\('xlrd available'\\)\")",
+      "Bash(npm install *)"
+    ]
+  },
+  "model": "opus"
 }

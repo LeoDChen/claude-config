@@ -1,0 +1,67 @@
+# Session: 2026-05-30 — OKKI 看板详情弹窗优化
+
+**Started:** ~2026-05-30
+**Last Updated:** 2026-05-30
+**Project:** D:\ClaudeWorkspace\08_客户跟进\Okki
+**Topic:** 528 看板详情弹窗 bug 修复 + briefs 集成 + UI 优化待续
+
+---
+
+## What We Are Building
+
+优化 OKKI 528 全量客户看板（`output/dashboard_528.html`）的详情弹窗。修复了多个展示 bug，接入了 AI 生成的客户状态卡（briefs）数据，为 UI 设计优化打好了基础。
+
+## What WORKED (with evidence)
+
+- **sendTime→createAt** — confirmed: sendTime 在 557 个 JSON 中存在 0 条，createAt 100% 存在。生成后日期正常显示 MM-DD 格式。
+- **JSON 乱码修复** — confirmed: contentType:101→显示"[图片]"，空 contentType:1→跳过，不再出现 `{"custom":{"data":"eyJ...` 乱码。
+- **发送人识别修复** — confirmed: fromUserName 永远是 undefined，改为 sender.uid（2500000853693@icbu=我方，其他=客）。
+- **消息顺序反转** — confirmed: JSON 里最新在前，slice(0,5) 后 reverse() 显示为最早在上。
+- **MsgID 清理** — confirmed: 脚本生成和 brief 加载两处都清干净，HTML 中 MsgID 为 0。
+- **5 个完整 brief 加载** — confirmed: Inderpreet Kaur、Keinjol Tata、Sek Sopha、MENTZEKO Mathi、Arshavin Amoah。
+- **AI 摘要着色** — confirmed: renderSummary() 函数，我=蓝色(#5b8cbd)，客=红色(#c07070)，→=灰色箭头。
+- **CRLF 兼容** — confirmed: Keinjol Tata 是 Windows 换行，统一 normalize。
+- **Modal 宽度** — confirmed: 600→720px（对齐 v4），max-height 80→85vh。
+- **AI 摘要顺序反转** — confirmed: brief 里最新在前，展示时 `- ` 行反转为最早在上。
+
+## What Did NOT Work (and why)
+
+- **briefs 优先策略（初审）** — 失败原因：98 个 briefs 中仅 5 个完整（不含[初稿]），覆盖率 5%。改为纯脚本修复 + brief 作为增强。
+- **new RegExp() 字符串转义** — 失败原因：`\\n`/`\\s` 在 JS 字符串和 bash 双重转义下不可靠。改为 String.indexOf() 前缀匹配。
+- **章节精确匹配** — 失败原因：Keinjol Tata 的 `当前状态（2026-05-23）` 带日期后缀，精确匹配 `当前状态\n` 失败。改为前缀匹配。
+
+## What Has NOT Been Tried Yet
+
+- **前缀匹配修复后未生成验证** — gen_dashboard_528.js 中 extractSection 已改为前缀匹配，但用户中断了重新生成，Keinjol Tata 的 chatSummary 是否正常注入未确认。
+- **UI 设计系统性优化** — 用户反馈"文字堆在一起、不高级"，需要重新设计字体层次/间距/配色方案。
+- **数据同步** — 用户发现 Inderpreet Kaur 的聊天记录落后于 OKKI 实际数据（最新 3 条未出现），需先跑同步脚本。
+- **暗色模式下 sum-me/sum-cust 对比度** — 未检查。
+
+## Current State of Files
+
+| File | Status | Notes |
+|------|--------|-------|
+| `scripts/gen_dashboard_528.js` | In Progress | 所有 bug 修复和 brief 集成已完成编码，前缀匹配修复未生成验证 |
+| `output/dashboard_528.html` | In Progress | 上一次生成结果，前缀匹配修复未包含 |
+| `C:\Users\Administrator\.claude\plans\1-2-v4-hashed-pearl.md` | Complete | 终版 Plan（经两轮独立审查） |
+| `output/独立审视指令_第二轮.md` | Complete | 审查指令文件 |
+
+## Decisions Made
+
+- **不调 AI** — gen 脚本只做展示，AI 分析在 brief 工作流中完成。gen 不调任何 API。
+- **brief 降级策略** — 完整 brief→AI 摘要展开+原文折叠；无 brief→原文折叠+降级标记。
+- **章节名前缀匹配** — 抛弃精确匹配，改为 `indexOf(prefix)` 找 `\n## 章节名` 前缀，解决带日期后缀的章节名。
+- **关键信息 我/客 视觉区分** — 蓝左边框=我，红左边框=客（CSS `.key-num-me`/`.key-num-cust`）。
+- **下一步不重复显示** — 有 nextStep 时不显示 deriveNextStep，只有无 nextStep 时用 deriveNextStep 兜底。
+
+## Blockers & Open Questions
+
+- Keinjol Tata 的前缀匹配修复需要生成并打开浏览器验证。
+- UI 优化范围待定——用户说"不高级"，但具体要改到什么程度需要专门讨论。
+- 数据同步——聊天记录可能落后 OKKI 实际数据。
+
+## Exact Next Step
+
+1. 运行 `node scripts/gen_dashboard_528.js` 生成，打开浏览器验证 Keinjol Tata 的 AI 摘要是否正常显示
+2. 如正常，当前功能改动完成，开始 UI 优化讨论
+3. 如不正常，排查 extractSection 前缀匹配逻辑

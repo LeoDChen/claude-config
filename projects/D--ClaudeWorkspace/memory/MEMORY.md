@@ -25,6 +25,7 @@
 - [手机报告偏好](mobile_report_preference.md) — 不主动生成手机端长图，用户明确说需要才生成
 - [审计反馈不可盲信](feedback_audit_validation.md) — 外部审计结论需独立复算验证，审计方也可能算错
 
+- [OKKI客户分析标准流程](okki_analysis_standard_workflow.md) — 四步流程：拉数据→后台分析→输出简要+确认清单→用户确认后出完整分析+话术。禁止跳过确认步骤直接出话术。
 - [OKKI分析经验教训](okki_analysis_lessons.md) — 10条规则：平台消息区分+9条用户反馈修正（样品查证/关系型不逼单/禁替用户决策/高价值不唯算法/沉默穷举根因/报价从源数据核对/已读不回心理分析/延迟回复须致歉/重复强调=焦虑点）
 - [OKKI分析分批工作流](okki_workflow_split.md) — 分类和深度分析分离：先批量出阶段+类型，用户挑人后独立对话深度分析
 - [OKKI订单同步](okki_order_sync.md) — OKKI 订单页 DOM 结构 / sync_orders.js 选择器/字段索引/滚动抓取策略
@@ -39,6 +40,6 @@
 - [push = 三仓库全量同步](push-three-repos.md) — 用户说 push 时默认三仓库 (OB/Workspace/.claude) 全部 add+commit+pull+push，不是只推当前目录
 - [迭代哲学](iteration_philosophy.md) — AI时代的护城河不是工具，是"不将就"的迭代密度；能用的系统 vs 持续进化的系统
 - [货代询价模板与装箱数据](freight_inquiry_template.md) — 货代询价标准模板+箱规库+训练裤重量/装箱数据；客户分析后自动输出询价草稿
-- [产品参数自动存档](product_params_auto_save.md) — 深度分析客户后自动提取产品参数 → 更新 products.json → 跑脚本刷新桌面 Excel
+- [大白话解释技术问题](plain_language_no_jargon.md) — 用比喻和日常语言解释技术问题，不堆文件名/行号/字段名等黑话，让非技术用户听懂
 
 *记忆文件存储在 memory/ 目录中，此文件仅为索引*
