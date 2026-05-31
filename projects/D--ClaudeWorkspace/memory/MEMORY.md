@@ -41,5 +41,7 @@
 - [迭代哲学](iteration_philosophy.md) — AI时代的护城河不是工具，是"不将就"的迭代密度；能用的系统 vs 持续进化的系统
 - [货代询价模板与装箱数据](freight_inquiry_template.md) — 货代询价标准模板+箱规库+训练裤重量/装箱数据；客户分析后自动输出询价草稿
 - [大白话解释技术问题](plain_language_no_jargon.md) — 用比喻和日常语言解释技术问题，不堆文件名/行号/字段名等黑话，让非技术用户听懂
+- [产品参数自动存档](product_params_auto_save.md) — 深度分析客户后自动提取产品参数 → 更新 products.json → 跑脚本刷新桌面 Excel
+- [DS API 余额追踪](ds_api_balance_tracking.md) — DeepSeek API 余额 8.05 元，关机关窗期观察是否自动消耗
 
 *记忆文件存储在 memory/ 目录中，此文件仅为索引*
