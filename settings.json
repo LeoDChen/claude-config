@@ -1,5 +1,5 @@
 {
-  "effortLevel": "max",
+  "effortLevel": "xhigh",
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "PROXY_MANAGED",
     "ANTHROPIC_BASE_URL": "http://127.0.0.1:15721",
@@ -20,6 +20,5 @@
       "Bash(python3 -c \"import xlrd; print\\('xlrd available'\\)\")",
       "Bash(npm install *)"
     ]
-  },
-  "model": "opus"
+  }
 }
